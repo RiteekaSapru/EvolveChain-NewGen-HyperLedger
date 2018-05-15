@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+<!-- Header include -->
+<%include views/web/layouts/head.html %>
+<!-- END -->
+<body>
+    <!-- navigation include -->
+    <%include views/web/layouts/navigation.html %>
+    <!-- END -->
+    <!-- Main content -->
+    <div id="container" class="container">
+        <div class="container">
+            <form role="form" method="post">
+                <br>
+                <h3 class="padded">Know your customer (KYC)<br><small>Required on EvolveChain, MedikChain sites...</small></h3>
+                <hr>
+                <h5 class="alert alert-success">Basic Information <span class="float-right">Score: <%basic_socre%> Total: <%total_socre%></span></h5>
+                <div class="row">
+                    <div class="col-sm-5">
+                        <table class="table">
+                            <tr>
+                                <td>Name: </td>
+                                <td><%basic_document.first%> <%basic_document.middle%> <%basic_document.last%></td>
+                            </tr>
+                            <tr>
+                                <td>Mobile: </td>
+                                <td><%basic_document.mobile%></td>
+                            </tr>
+                            <tr>
+                                <td>Email: </td>
+                                <td><%basic_document.email%></td>
+                            </tr>
+                            <tr>
+                                <td>Date of Birth: </td>
+                                <td><%basic_document.dob%></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-sm-4">
+                        <table class="table">
+                            <tr>
+                                <td>Profile<br>
+                                    <a href="<%images.profile_img%>" target="_blank"><img src="<%images.profile_img%>" width="100%"></a>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-sm-3">
+                         <table class="table">
+                            <tr>
+                                <td>Document Uploaded?</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="radio" name="Verify[Basic][Uploaded]" value="<%qst_basic_upload[1]%>" <%basic_document.basic_upload_1%> > Yes 
+                                    <input type="radio" name="Verify[Basic][Uploaded]" value="<%qst_basic_upload[0]%>" <%basic_document.basic_upload_0%> > No 
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Information Correct?</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="radio" name="Verify[Correct][Uploaded]" value="<%qst_basic_correct[1]%>" <%basic_document.basic_upload_1%> > Yes 
+                                    <input type="radio" name="Verify[Correct][Uploaded]" value="<%qst_basic_correct[0]%>" <%basic_document.basic_upload_0%> > No 
+                                </td>
+                            </tr>
+                         </table>
+                     </div>
+                </div>
+                <hr>
+                <!-- <input type="submit" value="Save" class="btn btn-primary ">
+                <a href="/kyc/report/<?=$document['hash']?>" class="btn btn-success">Submit final report</a>
+                <a href="/" class="btn btn-success">Close</a> -->
+            </form>
+            </div>
+            <hr>
+        </div>  
+    </div>
+    <!-- END -->
+    <!-- footer include -->
+    <%include views/web/layouts/footer.html %>
+    <!-- END -->
+    <!-- scripts include -->
+    <%include views/web/layouts/scripts.html %>
+    <!-- END -->
+</body>
+</html>

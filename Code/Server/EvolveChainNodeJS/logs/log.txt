@@ -1,0 +1,4 @@
+[2018-05-11T19:31:11.457] [INFO] default - test msg 5555
+[2018-05-11T20:09:10.607] [INFO] default - Logger Initiated
+[2018-05-14T11:57:43.566] [INFO] default - Logger Initiated
+[2018-05-14T11:58:06.500] [INFO] default - Initialize.....
