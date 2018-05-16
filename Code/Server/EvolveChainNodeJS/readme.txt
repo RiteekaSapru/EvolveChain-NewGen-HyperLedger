@@ -3,3 +3,5 @@ git add Code\
 got add Documents\
 git commit -m "first commit"
 git push -u origin master
+
+git clone https://github.com/EvolveChain/EvolveChain-NewGen-HyperLedger.git
