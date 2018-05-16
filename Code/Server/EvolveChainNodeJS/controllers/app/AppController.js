@@ -8,14 +8,18 @@ const messages = config.get('messages');
 var ObjectId = require('mongodb').ObjectID;
 var mongo = require('mongodb');
 const md5 = require('md5');
+const emailService = require('../../services/EmailService')
+const smsService = require('../../services/SMSService')
 const commonUtility = require('../../helpers/CommonUtility');
 const logManager = require('../../helpers/LogManager');
 const BaseController = require('../BaseController');
+const authenticator = require('authenticator');
 const App = require('../../models/apps');
 const Document = require('../../models/document');
 const File = require('../../models/files');
 const BASE_PATH = config.get('base_path');
 const PUBLIC_PATH = config.get('PUBLIC_PATH');
+const EmailTemplatesPath = path.join(__dirname + "/../../public/email_template");
 
 
 mongo.MongoClient.connect(config.get('MONGODB_URL'), function (err, db) {
@@ -57,14 +61,15 @@ class AppController extends BaseController {
             body.REMOTE_ADDR = md5(req.connection.remoteAddress);
 
             commonUtility.RemoveNull(params); // remove blank value from array
-            
+
             var newApp = new App(params);
 
             newApp.save().then((lastAddedApp) => {
                 return this.GetSuccessResponse("Initialize", lastAddedApp, res);
-                     }).catch(function (error) {
+            }).catch(function (error) {
                 return this.GetErrorResponse(error, res);
             });
+
             // //Newgen:check if vendor_uuid already exist then update the info else add new record
             // let conditions = {
             //     vendor_uuid: body.vendor_uuid
@@ -109,6 +114,279 @@ class AppController extends BaseController {
         }
     }
     //#endregion
+    async GenerateEmailOTP(req, res) {
+
+        req.checkBody("email", messages.req_email).notEmpty().isEmail();
+
+        try {
+            let result = await req.getValidationResult();
+
+            if (!result.isEmpty()) {
+                let error = this.GetErrors(result);
+                return this.GetErrorResponse(error, res);
+
+            }
+
+            let body = _.pick(req.body, ['email']);
+
+            let key = req.params.key;
+
+            var conditions = {
+                key: key
+            }
+
+            App.findOne(conditions, (error, app) => {
+
+                if (error) {
+                    console.log(`Error :: ${error}`);
+                    error = `Error :: ${error}`;
+                    return this.GetErrorResponse(error, res);
+                }
+
+                if (!app)
+                    return this.GetErrorResponse(messages.invalid_key, res);
+
+
+                // Authenticator
+                var secret = authenticator.generateKey();
+                secret = secret.replace(/\W/g, '').toLowerCase();
+                var otpToken = authenticator.generateToken(secret);
+
+                var email = body.email.toLowerCase();
+                var email_code = otpToken.substring(0, 6);
+
+                //send verification code email
+
+                var template = fs.readFileSync(EmailTemplatesPath + '/email_varified.html', {
+                    encoding: 'utf-8'
+                });
+
+                var emailBody = ejs.render(template, {
+                    email: email,
+                    kyc_id: email_code,
+                    SITE_IMAGE: config.get('SITE_IMAGE'),
+                    SITE_NAME: config.get('app_name'),
+                    CURRENT_YEAR: config.get('current_year')
+                });
+
+                const subject = 'EvolveChain KYC - Email Code';
+
+                emailService.SendEmail(email, subject, emailBody).then(function (success) {
+
+                    let md5EmailCode = md5(email_code);
+                    var params = {
+                        email: email,
+                        email_code: md5EmailCode,
+                        email_verified: 0
+                    }
+
+                    App.update(conditions, {
+                        $set: params
+                    }).then((success) => {
+                        return this.GetSuccessResponse("GenerateEmailOTP", null, res);
+
+                    }).catch(function (error) {
+                        return this.GetErrorResponse(error, res);
+                    });
+
+                }).catch(function (e) {
+                    let error = `Error :: ${e}`;
+                    return this.GetErrorResponse(error, res);
+                });
+            })
+        } catch (e) {
+            console.log(`Error :: ${e}`);
+            let error = `Error :: ${e}`;
+            return this.GetErrorResponse(error, res);
+        }
+    }
+
+    async VerifyEmail(req, res) {
+
+        req.checkBody("email", messages.req_email).notEmpty().isEmail();
+        req.checkBody("email_code", messages.req_email_code).notEmpty();
+        try {
+            let result = await req.getValidationResult();
+
+            if (!result.isEmpty()) {
+                let error = this.GetErrors(result);
+                return this.GetErrorResponse(error, res);
+
+            }
+
+            let body = _.pick(req.body, ['email', 'email_code']);
+
+            var email = body.email.toLowerCase();
+            var email_code = body.email_code.toLowerCase();
+            let key = req.params.key;
+
+            var conditions = {
+                key: key,
+                email: email,
+                email_code: email_code
+            }
+
+            App.findOne(conditions, (error, app) => {
+                if (error) {
+                    console.log(`Error :: ${error}`);
+                    error = `Error :: ${error}`;
+                    return this.GetErrorResponse(error, res);
+                }
+
+                if (!app) {
+                    let error = `Error:: Data mismatch, no application found for email:${email}`;
+                    return this.GetErrorResponse(error, res);
+                }
+
+                var params = {
+                    email_verified: 1
+                }
+
+                App.update(conditions, {
+                    $set: params
+                }).then((success) => {
+                    return this.GetSuccessResponse("VerifyEmail", null, res);
+                }).catch(function (error) {
+                    return this.GetErrorResponse(error, res);
+                });
+
+
+
+            });
+
+        } catch (e) {
+            console.log(`Error :: ${e}`);
+            let error = `Error :: ${e}`;
+            return this.GetErrorResponse(error, res);
+        }
+
+    }
+
+    async GenerateMobileOTP(req, res) {
+
+        req.checkBody("mobile", messages.req_mobile).notEmpty();
+        req.checkBody("country_code", messages.req_mobile).notEmpty();
+
+        try {
+
+            let result = await req.getValidationResult();
+
+            if (!result.isEmpty()) {
+                let error = this.GetErrors(result);
+                return this.GetErrorResponse(error, res);
+
+            }
+
+            let body = _.pick(req.body, ['mobile', 'country_code']);
+            let key = req.params.key;
+
+            var conditions = {
+                key: key
+            }
+
+            App.findOne(conditions, (error, app) => {
+
+                if (error) return this.GetErrorResponse(error, res);
+
+                if (!app) return this.GetErrorResponse(`Data Mismatch: No application found for phone:${phone}`, res);
+
+                // Authenticator
+                var secret = authenticator.generateKey();
+                secret = secret.replace(/\W/g, '').toLowerCase();
+                var phone_code = authenticator.generateToken(secret);
+
+
+                var phone = body.mobile.replace("+", "");
+                var countryCode = body.country_code.replace("+", "");
+                var msg = 'EvolveChain mobile verification code: ' + phone_code + '.';
+                let toPhone = "+" + countryCode + phone;
+
+                smsService.SendSMS(toPhone, msg).then(message => {
+                    console.log(message.sid);
+                    let md5MobileOTP = md5(phone_code);
+                    var params = {
+                        phone: phone,
+                        phone_code: md5MobileOTP,
+                        country_Code: countryCode,
+                        phone_verified: 0
+                    }
+
+                    App.update(conditions, {
+                        $set: params
+                    }).then((success) => {
+                        return this.GetSuccessResponse("GenerateMobileOTP", null, res);
+
+                    }).catch(function (error) {
+                        return this.GetErrorResponse(error, res);
+                    });
+                }).catch(function (e) {
+                    let error = `Error :: ${e}`;
+                    return this.GetErrorResponse(error, res);
+                });
+            })
+
+        } catch (e) {
+            console.log(`Error :: ${e}`);
+            let error = `Error :: ${e}`;
+            return this.GetErrorResponse(error, res);
+        }
+    }
+
+    async VerifyMobile(req, res) {
+
+        req.checkBody("mobile", messages.req_mobile).notEmpty();
+        req.checkBody("country_code", messages.req_mobile).notEmpty();
+        req.checkBody("phone_code", messages.req_mobile_code).notEmpty();
+
+        try {
+
+            let result = await req.getValidationResult();
+
+            if (!result.isEmpty()) {
+                let error = this.GetErrors(result);
+                return this.GetErrorResponse(error, res);
+
+            }
+
+            let body = _.pick(req.body, ['mobile', 'country_code', 'phone_code']);
+            let key = req.params.key;
+
+            var conditions = {
+                key: key,
+                phone: body.mobile,
+                phone_code: body.phone_code,
+                country_Code: body.country_Code
+            }
+
+            App.findOne(conditions, (error, app) => {
+
+                if (error) return this.GetErrorResponse(error, res);
+
+                if (!app) return this.GetErrorResponse(messages.invalid_key, res);
+
+                var params = {
+                    phone_verified: 1
+                }
+
+                App.update(conditions, {
+                    $set: params
+                }).then((success) => {
+                    return this.GetSuccessResponse("GenerateMobileOTP", null, res);
+
+                }).catch(function (error) {
+                    return this.GetErrorResponse(error, res);
+                });
+
+            })
+
+        } catch (e) {
+            console.log(`Error :: ${e}`);
+            let error = `Error :: ${e}`;
+            return this.GetErrorResponse(error, res);
+        }
+    }
+
+
 
     async SetPin(req, res) {
 
@@ -593,8 +871,7 @@ class AppController extends BaseController {
     }
 
 
-    //Common function for Success/Failure response
-
+    //Common function for Success response
     GetSuccessResponse(apiName, appEntity, res) {
         var response = {};
         switch (apiName) {
@@ -613,9 +890,36 @@ class AppController extends BaseController {
                     'success': 1,
                     'now': Date.now(),
                     'key': appEntity.key,
-                    'pin': appEntity.pin,
                     'Server': appEntity.Server,
                     'Refer': appEntity.Refer
+                }
+                break;
+            case "GenerateEmailOTP":
+                response = {
+                    'success': 1,
+                    'now': Date.now(),
+                    'result': messages.verify_email_code
+                }
+                break;
+            case "VerifyEmail":
+                response = {
+                    'success': 1,
+                    'now': Date.now(),
+                    'result': 'Email verified successfully'
+                }
+                break;
+            case "GenerateMobileOTP":
+                response = {
+                    'success': 1,
+                    'now': Date.now(),
+                    'result': messages.verify_phone_code
+                }
+                break;
+            case "VerifyMobile":
+                response = {
+                    'success': 1,
+                    'now': Date.now(),
+                    'result': 'Phone verified successfully'
                 }
                 break;
         }

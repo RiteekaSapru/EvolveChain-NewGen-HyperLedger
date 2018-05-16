@@ -1,5 +1,6 @@
 const config = require('config');
 const messages = config.get('messages');
+const status = config.get('status');
 
 class BaseController {
 
@@ -11,11 +12,8 @@ class BaseController {
     GetErrors(result) // common function for check errors
     {
         //Newgen: Parse result array and add all errors to the return string
-
-
         return result.array()[0].msg;
     }
-
 
 }
 

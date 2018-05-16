@@ -3,10 +3,12 @@ const KYCController = require("../controllers/kyc/KYCController");
 const UniqueEmailMiddleware = require("../middlewares/CheckUniqueEmail");
 const AuthMiddleware = require("../middlewares/CheckAuth");
 
-kyc.post("/generateEmailOtp/:key", KYCController.GenerateEmailOTP.bind(KYCController));
-kyc.post("/verifyemail/:key", KYCController.VerifyEmail.bind(KYCController));
+// kyc.post("/generateEmailOtp/:key", KYCController.GenerateEmailOTP.bind(KYCController));
+// kyc.post("/verifyemail/:key", KYCController.VerifyEmail.bind(KYCController));
 
-kyc.post("/verifymobile/:key", KYCController.VerifyMobile.bind(KYCController));
+// kyc.post("/generateMobileOtp/:key", KYCController.GenerateMobileOTP.bind(KYCController));
+// kyc.post("/verifymobile/:key", KYCController.VerifyMobile.bind(KYCController));
+
 kyc.post("/createupdatekyc/:key", KYCController.CreateUpdateKyc.bind(KYCController));
 kyc.post("/getStepStatus/:key", KYCController.GetStepStatus.bind(KYCController));
 kyc.post("/getKycDocument/:key", KYCController.GetKycDocument.bind(KYCController));

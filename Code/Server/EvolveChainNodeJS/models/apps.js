@@ -23,6 +23,7 @@ const App = new Schema({
     os_version: { type: String },
     phone: { type: String },
     country_code: { type: String },
+    phone_verified:{ type: Boolean },
     pin: { type: String },
     profile: { type: String },
     Refer: { type: String },
@@ -30,7 +31,7 @@ const App = new Schema({
     vendor_uuid: { type: String },
     chkemail: { type: String },
     email_code: { type: String },
-    chkphone: { type: String },
+    // chkphone: { type: String },
     phone_code: { type: String },
     DateTime: {
         type: Date,
