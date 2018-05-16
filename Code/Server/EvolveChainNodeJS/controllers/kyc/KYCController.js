@@ -59,6 +59,70 @@ class KYCController extends BaseController {
     async VerifyEmail(req, res) {
 
         req.checkBody("email", messages.req_email).notEmpty().isEmail();
+        req.checkBody("email_code", messages.req_email_code).notEmpty();
+        try {
+            let result = await req.getValidationResult();
+
+            if (!result.isEmpty()) {
+                let error = this.GetErrors(result);
+                return this.GetErrorResponse(error, res);
+
+            }
+
+            let body = _.pick(req.body, ['email','email_code']);
+
+            var email = body.email.toLowerCase();
+            var email_code = body.email_code.toLowerCase();    
+            let key = req.params.key;
+
+            var conditions = {
+                key: key,
+                email:email,
+                email_code: email_code
+            }
+
+            App.findOne(conditions, (error, app) => {
+                if (error) {
+                    console.log(`Error :: ${error}`);
+                    error = `Error :: ${error}`;
+                    return this.GetErrorResponse(error, res);
+                }
+
+                if (!app)
+                    return this.GetErrorResponse(`Data Mismatch: No application found for email:${email}`, res);
+
+                    var params = {
+                       email_verified:1
+                    }
+
+                    App.update(conditions, {
+                            $set: params
+                        }).then((success) => {
+                            var response = {
+                                'success': 1,
+                                'result':  'Email verified successfully'                                
+                            }
+                            return res.status(status.OK).jsonp(response);
+
+                        }).catch(function (error) {
+                            return this.GetErrorResponse(error, res);
+                        });
+                       
+                             
+                
+            });
+
+        } catch (e) {
+            console.log(`Error :: ${e}`);
+            let error = `Error :: ${e}`;
+            return this.GetErrorResponse(error, res);
+        }
+
+    }
+    
+    async GenerateEmailOTP(req, res) {
+
+        req.checkBody("email", messages.req_email).notEmpty().isEmail();
 
         try {
             let result = await req.getValidationResult();
@@ -94,7 +158,6 @@ class KYCController extends BaseController {
                 secret = secret.replace(/\W/g, '').toLowerCase();
                 var otpToken = authenticator.generateToken(secret);
 
-
                 var email = body.email.toLowerCase();
                 var email_code = otpToken.substring(0, 6);
 
@@ -113,33 +176,23 @@ class KYCController extends BaseController {
                 });
 
                 const subject = 'EvolveChain KYC - Email Code';
-                // var mailOption = {
-                //     from: config.get('FROM_EMAIL'),
-                //     to: email, // list of receivers
-                //     subject: 'KYCGlobal - Email Code', // Subject line
-                //     html: emailBody
-                // }
 
-                // var appUser = new App(); 
-                // appUser.sendEmail(mailOption).then(function (success) {                
                 emailService.SendEmail(email, subject, emailBody).then(function (success) {
 
                     let md5EmailCode = md5(email_code);
                     var params = {
                         email: email,
-                        email_code: md5EmailCode
+                        email_code: md5EmailCode,
+                        email_verified:0
                     }
 
-                    App.update({
-                        key: key
-                    }, {
+                    App.update(conditions, {
                             $set: params
                         }).then((success) => {
 
                             var response = {
                                 'success': 1,
-                                'result': messages.verify_email_code,
-                                'email_code': md5EmailCode,
+                                'result': messages.verify_email_code,                               
                                 'email': email
                             }
                             return res.status(status.OK).jsonp(response);
@@ -1512,7 +1565,7 @@ class KYCController extends BaseController {
         }
     }
 
-    async GetkycidDeveloperUse(req, res) {
+    async GetKycidDeveloperUse(req, res) {
 
         if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
             return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
