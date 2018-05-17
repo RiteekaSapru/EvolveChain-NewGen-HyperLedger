@@ -47,8 +47,6 @@ app.use("/api/*", (req, res) => {
     res.status(status.NotFound).json({message: "Page not Found."});
 });
 
-
-
 // 404 Page for Web 
 app.use("*", (req, res) => {
     let data = {
@@ -71,7 +69,7 @@ mongoose.connection.openUri(config.get('MONGODB_URL'), function(err, db) {
 mongoose.Promise = global.Promise;
 
 const server = app.listen(PORT, () => {
-    console.log(`Server Started @ ${base_url}`);
+    console.log(`EvolveChain Node Server Started @ ${base_url}`);
 });
 
 server.timeout = 300000; //5 minutes time out

@@ -13,10 +13,6 @@ const commonUtility = require('../../helpers/CommonUtility');
 const logManager = require('../../helpers/LogManager');
 const BaseController = require('../BaseController');
 
-const mongoose = require('mongoose');
-var ObjectId = require('mongodb').ObjectID;
-var mongo = require('mongodb');
-
 const md5 = require('md5');
 const multer = require('multer');
 const authenticator = require('authenticator');
@@ -30,15 +26,6 @@ const PUBLIC_PATH = config.get('PUBLIC_PATH');
 var im = require('imagemagick');
 const EmailTemplatesPath = path.join(__dirname + "/../../public/email_template");
 var bucket;
-mongo.MongoClient.connect(config.get('MONGODB_URL'), function (err, db) {
-    if (err) {
-        console.log("Database....." + err);
-    }
-    else {
-        database = db.db(config.get('DB_NAME'));
-        bucket = new mongo.GridFSBucket(database);
-    }
-});
 
 let storage = multer.diskStorage({
     destination: function (req, file, callback) {

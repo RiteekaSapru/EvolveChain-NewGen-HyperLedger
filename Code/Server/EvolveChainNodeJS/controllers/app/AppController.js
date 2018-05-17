@@ -5,8 +5,7 @@ const _ = require('lodash');
 const config = require('config');
 const status = config.get('status');
 const messages = config.get('messages');
-var ObjectId = require('mongodb').ObjectID;
-var mongo = require('mongodb');
+
 const md5 = require('md5');
 const emailService = require('../../services/EmailService')
 const smsService = require('../../services/SMSService')
@@ -21,16 +20,7 @@ const BASE_PATH = config.get('base_path');
 const PUBLIC_PATH = config.get('PUBLIC_PATH');
 const EmailTemplatesPath = path.join(__dirname + "/../../public/email_template");
 
-
-mongo.MongoClient.connect(config.get('MONGODB_URL'), function (err, db) {
-    if (err) {
-        // logManager.Write("Database....." + err);
-    }
-    else {
-        database = db.db(config.get('DB_NAME'));
-        bucket = new mongo.GridFSBucket(database);
-    }
-});
+var bucket;
 
 class AppController extends BaseController {
 
