@@ -213,6 +213,7 @@ class AppController extends BaseController {
 
         req.checkBody("email", messages.req_email).notEmpty().isEmail();
         req.checkBody("email_code", messages.req_email_code).notEmpty();
+        
         try {
             let result = await req.getValidationResult();
 
@@ -222,16 +223,13 @@ class AppController extends BaseController {
 
             }
 
-            let body = _.pick(req.body, ['email', 'email_code']);
-
-            var email = body.email.toLowerCase();
-            var email_code = body.email_code.toLowerCase();
+            let body = _.pick(req.body, ['email', 'email_code']);          
             let key = req.params.key;
 
             var conditions = {
                 key: key,
-                email: email,
-                email_code: email_code
+                email: body.email.toLowerCase(),
+                email_code: body.email_code.toLowerCase()
             }
             var setParams = {
                 $set: { email_verified: 1 }
