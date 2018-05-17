@@ -388,15 +388,18 @@ class AppController extends BaseController {
 
 
 
+
+
+    
     async SetPin(req, res) {
 
         if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
             return this.GetErrorResponse('Key missing!', res);
         }
 
+        req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
+        req.checkBody("otp", messages.req_otp).notEmpty();
         req.checkBody("pin", messages.req_pin).notEmpty();
-        req.checkBody("pin", messages.req_pin_numeric).isNumeric();
-        req.checkBody("pin", messages.req_pin_length).isLength({ min: 4, max: 4 });
 
         try {
 
@@ -407,24 +410,25 @@ class AppController extends BaseController {
 
             }
 
-            let body = _.pick(req.body, ['pin']);
-            body.key = req.params.key;
-            let targetPin = md5(body.pin);
+            let body = _.pick(req.body, ['pin','otp','ekyc_id']);
+            let targetPin = body.pin;
             let conditions = {
-                key: body.key
+                ekyc_id : body.ekyc_id,
+                otp: body.otp
             }
 
             App.findOne(conditions, (error, app) => {
 
-                if (error) return this.GetErrorResponse(error, res);
+//               if (error) return this.GetErrorResponse(error, res);
+//                if (!app)
+//                   this.GetErrorResponse(messages.invalid_ekycid_otp, res);
 
-                if (!app)
-                    this.GetErrorResponse(messages.invalid_key, res);
+                if (error) return res.status(status.OK).jsonp({ "success": 0, "error": error });
 
-                // return res.status(status.OK).jsonp({
-                //     "success": 0,
-                //     "error": messages.invalid_key
-                // });
+                if (!app) return res.status(status.OK).jsonp({
+                    "success": 0,
+                    "error": messages.invalid_ekycid_otp
+                });
 
                 var params = {
                     pin: targetPin
@@ -497,10 +501,9 @@ class AppController extends BaseController {
             return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
         }
 
+        req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
         req.checkBody("pin", messages.req_pin).notEmpty();
         req.checkBody("new_pin", messages.req_new_pin).notEmpty();
-        req.checkBody("new_pin", messages.req_new_pin_numeric).isNumeric();
-        req.checkBody("new_pin", messages.req_new_pin_length).isLength({ min: 4, max: 4 });
 
         try {
             let result = await req.getValidationResult();
@@ -510,18 +513,17 @@ class AppController extends BaseController {
                 return this.GetErrorResponse(error, res);
             }
 
-            let body = _.pick(req.body, ['pin', 'new_pin']);
+            let body = _.pick(req.body, ['pin', 'new_pin','ekyc_id']);
 
             if (body.pin == body.new_pin) {
                 return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': messages.same_pin });
             }
 
-            body.key = req.params.key;
+//            body.key = req.params.key;
 
             let conditions = {
-                key: body.key,
-                pin: md5(body.pin)
-            }
+                ekyc_id: body.ekyc_id,
+                pin: body.pin          }
 
             App.findOne(conditions, (error, app) => {
 
@@ -533,7 +535,7 @@ class AppController extends BaseController {
                 });
 
                 var params = {
-                    pin: md5(body.new_pin)
+                    pin: body.new_pin
                 }
 
                 App.update({
