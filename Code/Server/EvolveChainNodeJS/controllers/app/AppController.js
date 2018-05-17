@@ -34,6 +34,14 @@ mongo.MongoClient.connect(config.get('MONGODB_URL'), function (err, db) {
 
 class AppController extends BaseController {
 
+    FindAndModifyQuery(queryCondition, setParams) {
+        const options = {
+            upsert: false,
+            returnNewDocument: true
+        }
+        return App.findOneAndUpdate(queryCondition, setParams, options);
+    }
+
     //#region Initialize
     async Initialize(req, res) {
 
@@ -173,21 +181,21 @@ class AppController extends BaseController {
 
                 emailService.SendEmail(email, subject, emailBody).then(function (success) {
 
-                    let md5EmailCode = md5(email_code);
-                    var params = {
-                        email: email,
-                        email_code: md5EmailCode,
-                        email_verified: 0
+                    let md5EmailCode = md5(email_code);                  
+
+                    var setParams = {
+                        $set: {
+                            email: email,
+                            email_code: md5EmailCode,
+                            email_verified: 0
+                        }
                     }
 
-                    App.update(conditions, {
-                        $set: params
-                    }).then((success) => {
-                        return this.GetSuccessResponse("GenerateEmailOTP", null, res);
-
-                    }).catch(function (error) {
-                        return this.GetErrorResponse(error, res);
-                    });
+                    this.FindAndModifyQuery(conditions, setParams).exec(
+                        (error, updatedApp) => {
+                            return this.SendResponse("GenerateEmailOTP", error, updatedApp, res);
+                        }
+                    );   
 
                 }).catch(function (e) {
                     let error = `Error :: ${e}`;
@@ -225,42 +233,24 @@ class AppController extends BaseController {
                 email: email,
                 email_code: email_code
             }
+            var setParams = {
+                $set: { email_verified: 1 }
+            }
 
-            App.findOne(conditions, (error, app) => {
-                if (error) {
-                    console.log(`Error :: ${error}`);
-                    error = `Error :: ${error}`;
-                    return this.GetErrorResponse(error, res);
+            this.FindAndModifyQuery(conditions, setParams).exec(
+                (error, updatedApp) => {
+                    return this.SendResponse("VerifyEmail", error, updatedApp, res);
                 }
-
-                if (!app) {
-                    let error = `Error:: Data mismatch, no application found for email:${email}`;
-                    return this.GetErrorResponse(error, res);
-                }
-
-                var params = {
-                    email_verified: 1
-                }
-
-                App.update(conditions, {
-                    $set: params
-                }).then((success) => {
-                    return this.GetSuccessResponse("VerifyEmail", null, res);
-                }).catch(function (error) {
-                    return this.GetErrorResponse(error, res);
-                });
-
-
-
-            });
+            );
 
         } catch (e) {
-            console.log(`Error :: ${e}`);
             let error = `Error :: ${e}`;
             return this.GetErrorResponse(error, res);
         }
 
     }
+
+   
 
     async GenerateMobileOTP(req, res) {
 
@@ -302,23 +292,23 @@ class AppController extends BaseController {
                 let toPhone = "+" + countryCode + phone;
 
                 smsService.SendSMS(toPhone, msg).then(message => {
-                    console.log(message.sid);
-                    let md5MobileOTP = md5(phone_code);
-                    var params = {
-                        phone: phone,
-                        phone_code: md5MobileOTP,
-                        country_Code: countryCode,
-                        phone_verified: 0
+
+                    let md5MobileOTP = md5(phone_code); 
+                    var setParams = {
+                        $set: {
+                            phone: phone,
+                            phone_code: md5MobileOTP,
+                            country_Code: countryCode,
+                            phone_verified: 0
+                        }
                     }
 
-                    App.update(conditions, {
-                        $set: params
-                    }).then((success) => {
-                        return this.GetSuccessResponse("GenerateMobileOTP", null, res);
+                    this.FindAndModifyQuery(conditions, setParams).exec(
+                        (error, updatedApp) => {
+                            return this.SendResponse("GenerateMobileOTP", error, updatedApp, res);
+                        }
+                    );   
 
-                    }).catch(function (error) {
-                        return this.GetErrorResponse(error, res);
-                    });
                 }).catch(function (e) {
                     let error = `Error :: ${e}`;
                     return this.GetErrorResponse(error, res);
@@ -358,26 +348,15 @@ class AppController extends BaseController {
                 country_Code: body.country_Code
             }
 
-            App.findOne(conditions, (error, app) => {
+            var setParams = {
+                $set: { phone_verified: 1 }
+            }
 
-                if (error) return this.GetErrorResponse(error, res);
-
-                if (!app) return this.GetErrorResponse(messages.invalid_key, res);
-
-                var params = {
-                    phone_verified: 1
+            this.FindAndModifyQuery(conditions, setParams).exec(
+                (error, updatedApp) => {
+                    return this.SendResponse("VerifyMobile", error, updatedApp, res);
                 }
-
-                App.update(conditions, {
-                    $set: params
-                }).then((success) => {
-                    return this.GetSuccessResponse("GenerateMobileOTP", null, res);
-
-                }).catch(function (error) {
-                    return this.GetErrorResponse(error, res);
-                });
-
-            })
+            );         
 
         } catch (e) {
             console.log(`Error :: ${e}`);
@@ -385,11 +364,6 @@ class AppController extends BaseController {
             return this.GetErrorResponse(error, res);
         }
     }
-
-
-
-
-
     
     async SetPin(req, res) {
 
@@ -872,6 +846,16 @@ class AppController extends BaseController {
         }
     }
 
+    SendResponse(apiName, error, updatedApp, res) {
+        if (error) {
+            return this.GetErrorResponse(error, res);
+        }
+        else if (!updatedApp)
+        {
+            return this.GetErrorResponse("Invalid Request: No application found", res);            
+        }
+        return this.GetSuccessResponse(apiName, updatedApp, res);
+    }
 
     //Common function for Success response
     GetSuccessResponse(apiName, appEntity, res) {
