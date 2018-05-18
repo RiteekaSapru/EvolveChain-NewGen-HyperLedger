@@ -25,7 +25,7 @@ const DocInfo = new Schema({
 });
 
 const KYCDocument = new Schema({
-    appId : {type: String},
+    app_key : {type: String},
     isDelete : {type:Boolean},
     docInfo : {type : [DocInfo]}
 });
