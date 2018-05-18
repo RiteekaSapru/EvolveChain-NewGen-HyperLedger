@@ -58,6 +58,18 @@ class AppController extends BaseController {
             body.SERVER_ADDR = md5(req.connection.localAddress);
             body.REMOTE_ADDR = md5(req.connection.remoteAddress);
 
+            var params = {
+                IP: body.ip,
+                device_type: body.device_type,
+                device_name: body.device_name,
+                os_version: body.os_version,
+                vendor_uuid: body.vendor_uuid,
+                key: body.key,
+                isdelete: '0',
+                Server: body.SERVER_ADDR,
+                Refer: body.REMOTE_ADDR
+            }
+            
             commonUtility.RemoveNull(params); // remove blank value from array
 
             var newApp = new App(params);
@@ -171,7 +183,7 @@ class AppController extends BaseController {
 
                 emailService.SendEmail(email, subject, emailBody).then(function (success) {
 
-                    let md5EmailCode = md5(email_code);                  
+                    let md5EmailCode = md5(email_code);
 
                     var setParams = {
                         $set: {
@@ -185,7 +197,7 @@ class AppController extends BaseController {
                         (error, updatedApp) => {
                             return this.SendResponse("GenerateEmailOTP", error, updatedApp, res);
                         }
-                    );   
+                    );
 
                 }).catch(function (e) {
                     let error = `Error :: ${e}`;
@@ -203,7 +215,7 @@ class AppController extends BaseController {
 
         req.checkBody("email", messages.req_email).notEmpty().isEmail();
         req.checkBody("email_code", messages.req_email_code).notEmpty();
-        
+
         try {
             let result = await req.getValidationResult();
 
@@ -213,7 +225,7 @@ class AppController extends BaseController {
 
             }
 
-            let body = _.pick(req.body, ['email', 'email_code']);          
+            let body = _.pick(req.body, ['email', 'email_code']);
             let key = req.params.key;
 
             var conditions = {
@@ -237,8 +249,6 @@ class AppController extends BaseController {
         }
 
     }
-
-   
 
     async GenerateMobileOTP(req, res) {
 
@@ -281,7 +291,7 @@ class AppController extends BaseController {
 
                 smsService.SendSMS(toPhone, msg).then(message => {
 
-                    let md5MobileOTP = md5(phone_code); 
+                    let md5MobileOTP = md5(phone_code);
                     var setParams = {
                         $set: {
                             phone: phone,
@@ -295,7 +305,7 @@ class AppController extends BaseController {
                         (error, updatedApp) => {
                             return this.SendResponse("GenerateMobileOTP", error, updatedApp, res);
                         }
-                    );   
+                    );
 
                 }).catch(function (e) {
                     let error = `Error :: ${e}`;
@@ -344,7 +354,7 @@ class AppController extends BaseController {
                 (error, updatedApp) => {
                     return this.SendResponse("VerifyMobile", error, updatedApp, res);
                 }
-            );         
+            );
 
         } catch (e) {
             console.log(`Error :: ${e}`);
@@ -352,7 +362,7 @@ class AppController extends BaseController {
             return this.GetErrorResponse(error, res);
         }
     }
-    
+
     async SetPin(req, res) {
 
         if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
@@ -360,7 +370,7 @@ class AppController extends BaseController {
         }
 
         req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
-        req.checkBody("otp", messages.req_otp).notEmpty();
+        req.checkBody("pin_otp", messages.req_otp).notEmpty();
         req.checkBody("pin", messages.req_pin).notEmpty();
 
         try {
@@ -372,18 +382,18 @@ class AppController extends BaseController {
 
             }
 
-            let body = _.pick(req.body, ['pin','otp','ekyc_id']);
+            let body = _.pick(req.body, ['pin', 'pin_otp', 'ekyc_id']);
             let targetPin = body.pin;
             let conditions = {
-                ekyc_id : body.ekyc_id,
-                otp: body.otp
+                ekyc_id: body.ekyc_id,
+                pin_otp: body.pin_otp
             }
 
             App.findOne(conditions, (error, app) => {
 
-//               if (error) return this.GetErrorResponse(error, res);
-//                if (!app)
-//                   this.GetErrorResponse(messages.invalid_ekycid_otp, res);
+                //               if (error) return this.GetErrorResponse(error, res);
+                //                if (!app)
+                //                   this.GetErrorResponse(messages.invalid_ekycid_otp, res);
 
                 if (error) return res.status(status.OK).jsonp({ "success": 0, "error": error });
 
@@ -475,17 +485,18 @@ class AppController extends BaseController {
                 return this.GetErrorResponse(error, res);
             }
 
-            let body = _.pick(req.body, ['pin', 'new_pin','ekyc_id']);
+            let body = _.pick(req.body, ['pin', 'new_pin', 'ekyc_id']);
 
             if (body.pin == body.new_pin) {
                 return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': messages.same_pin });
             }
 
-//            body.key = req.params.key;
+            //            body.key = req.params.key;
 
             let conditions = {
                 ekyc_id: body.ekyc_id,
-                pin: body.pin          }
+                pin: body.pin
+            }
 
             App.findOne(conditions, (error, app) => {
 
@@ -838,9 +849,8 @@ class AppController extends BaseController {
         if (error) {
             return this.GetErrorResponse(error, res);
         }
-        else if (!updatedApp)
-        {
-            return this.GetErrorResponse("Invalid Request: No application found", res);            
+        else if (!updatedApp) {
+            return this.GetErrorResponse("Invalid Request: No application found", res);
         }
         return this.GetSuccessResponse(apiName, updatedApp, res);
     }
@@ -900,19 +910,6 @@ class AppController extends BaseController {
 
         return res.status(status.OK).jsonp(response);
     }
-
-
-
-    // async getErrors(result,callback) // common function for check errors
-    // {
-
-    //     let resultArray = {
-    //         "success": 0,
-    //         "now": Date.now(),
-    //         "error": result.array()[0].msg
-    //     }
-    //     callback(resultArray);
-    // }
 
     // common for update App
     async UpdateApp(conditions, params = [], callback) // common function for update App
