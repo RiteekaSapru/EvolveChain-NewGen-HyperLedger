@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context="com.newgen.evolvechain.activities.CountrySelectionActivity">
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:id="@+id/radioButtonIndia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onCountrySelectionClicked"
+            android:text="@string/india" />
+
+        <RadioButton
+            android:id="@+id/radioButtonOthers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onCountrySelectionClicked"
+            android:text="@string/other_countries" />
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/btn_proceed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:background="@color/colorDarkGray"
+        android:onClick="onProceedButtonClicked"
+        android:text="@string/proceed"
+        android:textAllCaps="false"
+        android:textColor="@color/colorButtonText" />
+
+</LinearLayout>

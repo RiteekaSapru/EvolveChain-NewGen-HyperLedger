@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context="com.newgen.evolvechain.activities.PhoneActivity">
+
+
+    <TextView
+        android:id="@+id/isd_code"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/mobile_number"
+        android:layout_alignTop="@id/mobile_number"
+        android:gravity="center"
+        android:onClick="onISDCodeClick"
+        android:text="@string/india_code"
+        android:textAppearance="?android:textAppearanceLarge" />
+
+    <EditText
+        android:id="@+id/mobile_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_toEndOf="@id/isd_code"
+        android:hint="@string/enter_mobile_number"
+        android:inputType="phone" />
+
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/mobile_number"
+        android:layout_marginTop="15dp"
+        android:background="@color/colorDarkGray"
+        android:onClick="onGetOtpClick"
+        android:text="@string/get_otp"
+        android:textAllCaps="false"
+        android:textColor="@color/colorButtonText" />
+
+
+</RelativeLayout>

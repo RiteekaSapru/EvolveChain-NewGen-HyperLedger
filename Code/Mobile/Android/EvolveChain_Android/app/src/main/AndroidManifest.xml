@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.newgen.evolvechain">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".activities.SplashActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".activities.CountrySelectionActivity"
+            android:label="Select Country"
+            android:parentActivityName=".activities.SplashActivity" />
+        <activity
+            android:name=".activities.SignInActivity"
+            android:label=" "
+            android:parentActivityName=".activities.SplashActivity" />
+        <activity
+            android:name=".activities.GeneratePinActivity"
+            android:label=" "
+            android:parentActivityName=".activities.SplashActivity" />
+        <activity
+            android:name=".activities.OthersRegistrationActivity"
+            android:label="North America / Canada"
+            android:parentActivityName=".activities.CountrySelectionActivity" />
+        <activity
+            android:name=".activities.BasicDetailsActivity"
+            android:label="Basic Details"
+            android:parentActivityName=".activities.OthersRegistrationActivity" />
+        <activity
+            android:name=".activities.EmailActivity"
+            android:label="Add Email"
+            android:noHistory="true"
+            android:parentActivityName=".activities.BasicDetailsActivity" />
+        <activity
+            android:name=".activities.OTPActivity"
+            android:label="OTP Verification"
+            android:noHistory="true" />
+        <activity android:name=".activities.PhoneActivity" />
+        <activity
+            android:name=".activities.IdentityActivity"
+            android:label="Identity Proof"
+            android:parentActivityName=".activities.OthersRegistrationActivity" />
+        <activity
+            android:name=".activities.AddressActivity"
+            android:label="Address Proof"
+            android:parentActivityName=".activities.OthersRegistrationActivity"/>
+    </application>
+
+</manifest>
