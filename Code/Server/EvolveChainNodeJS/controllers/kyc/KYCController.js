@@ -43,8 +43,6 @@ let storage = multer.diskStorage({
 
 class KYCController extends BaseController {
 
-   
-
     async CreateUpdateKyc(req, res) {
 
         req.checkBody("email", messages.req_email).notEmpty().isEmail();
@@ -241,11 +239,6 @@ class KYCController extends BaseController {
     }
 
     async GetStepStatus(req, res) {
-
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
-
         try {
             // var obj = new KYCController();
             let key = req.params.key;
@@ -321,10 +314,6 @@ class KYCController extends BaseController {
     }
 
     async GetKycDocument(req, res) {
-
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
 
         req.checkBody("step", messages.req_step).notEmpty();
         req.checkBody("step", messages.req_valid_step).isIn(['basic', 'address', 'passport', 'identity', 'taxation', 'drivinglicense', 'holdimg']);
@@ -403,10 +392,7 @@ class KYCController extends BaseController {
 
         upload(req, res, async function (err) {
             if (err) console.log(err);
-            if (!err) {
-                if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-                    return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-                }
+            if (!err) {              
                 req.checkBody("step", messages.req_step).notEmpty();
                 req.checkBody("step", messages.req_valid_step).isIn(['basic', 'address', 'passport', 'identity', 'taxation', 'drivinglicense', 'holdimg']);
 
@@ -644,11 +630,7 @@ class KYCController extends BaseController {
     }
 
     async SubmitKycDocument(req, res) {
-
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
-
+       
         try {
             // var obj = new KYCController();
             let key = req.params.key;
@@ -857,10 +839,6 @@ class KYCController extends BaseController {
 
     async UnlinkKycImg(req, res) {
 
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
-
         try {
             // var obj = new KYCController();
             let body = _.pick(req.body, ['type']);
@@ -945,9 +923,6 @@ class KYCController extends BaseController {
 
     async RemoveImage(req, res) {
 
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
         req.checkBody("step", messages.req_step).notEmpty();
         req.checkBody("type", messages.req_type).notEmpty();
 
@@ -1048,9 +1023,6 @@ class KYCController extends BaseController {
 
     async GenerateRandomKYC(req, res) {
 
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
         req.checkBody("companyname", messages.req_companyname).notEmpty();
         req.checkBody("comment", messages.req_comment).notEmpty();
         req.checkBody("sharedoc", messages.req_sharedoc).notEmpty();
@@ -1159,9 +1131,7 @@ class KYCController extends BaseController {
 
     async RevokeDocument(req, res) {
 
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
+       
         req.checkBody("code", messages.req_code).notEmpty();
 
         try {
@@ -1247,10 +1217,7 @@ class KYCController extends BaseController {
 
     async GetShareHistory(req, res) {
 
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
-
+      
         try {
             // var obj = new KYCController();
 
@@ -1319,10 +1286,6 @@ class KYCController extends BaseController {
     }
 
     async GetKycidDeveloperUse(req, res) {
-
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
 
         try {
             // var obj = new KYCController();

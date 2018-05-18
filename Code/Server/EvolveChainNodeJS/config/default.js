@@ -63,5 +63,6 @@ module.exports = {
   MAIL_3: MAIL_3,
   MAIL_4: MAIL_4,
   web_site: web_site,
-  DB_NAME: DB_NAME
+  DB_NAME: DB_NAME,
+  OTP_EXPIRY_MINS:30
 };

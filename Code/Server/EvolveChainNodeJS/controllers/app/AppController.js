@@ -14,12 +14,13 @@ const logManager = require('../../helpers/LogManager');
 const BaseController = require('../BaseController');
 const authenticator = require('authenticator');
 const App = require('../../models/apps');
+const KycDocument = require('../../models/kycdocument');
 const Document = require('../../models/document');
 const File = require('../../models/files');
 const BASE_PATH = config.get('base_path');
 const PUBLIC_PATH = config.get('PUBLIC_PATH');
 const EmailTemplatesPath = path.join(__dirname + "/../../public/email_template");
-
+const OTP_EXPIRY_MINS = config.get('OTP_EXPIRY_MINS');
 var bucket;
 
 class AppController extends BaseController {
@@ -47,13 +48,12 @@ class AppController extends BaseController {
 
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
-                logManager.Log(`Initialize:Error- ${error}`);
-
+                logManager.Log(`Initialize:Invalid Request- ${error}`);
                 return this.GetErrorResponse(error, res);
             }
 
             let body = _.pick(req.body, ['ip', 'device_type', 'device_name', 'os_version', 'vendor_uuid']);
-            logManager.Log(`Initialize:${body.ip}`);
+
             body.key = md5(Date.now());
             body.SERVER_ADDR = md5(req.connection.localAddress);
             body.REMOTE_ADDR = md5(req.connection.remoteAddress);
@@ -69,13 +69,24 @@ class AppController extends BaseController {
                 Server: body.SERVER_ADDR,
                 Refer: body.REMOTE_ADDR
             }
-            
+
             commonUtility.RemoveNull(params); // remove blank value from array
 
-            var newApp = new App(params);
+            var app = new App(params);
 
-            newApp.save().then((lastAddedApp) => {
-                return this.GetSuccessResponse("Initialize", lastAddedApp, res);
+            app.save().then((newApp) => {
+                var kycDocParam = {
+                    app_key: newApp.key,
+                    isDelete: 0,
+                    docInfo: {}
+                }
+                var kycDoc = new KycDocument(kycDocParam);
+                kycDoc.save().then((newKycDoc) => {
+                    return this.GetSuccessResponse("Initialize", newApp, res);
+                }).catch(function (error) {
+                    return this.GetErrorResponse(error, res);
+                });
+
             }).catch(function (error) {
                 return this.GetErrorResponse(error, res);
             });
@@ -118,8 +129,8 @@ class AppController extends BaseController {
             // });
 
         } catch (e) {
-            console.log(`Error :: ${e}`);
             let error = `Error :: ${e}`;
+            logManager.Log(`Initialize:Exception- ${error}`);
             return this.GetErrorResponse(error, res);
         }
     }
@@ -184,12 +195,13 @@ class AppController extends BaseController {
                 emailService.SendEmail(email, subject, emailBody).then(function (success) {
 
                     let md5EmailCode = md5(email_code);
-
+                    var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
                     var setParams = {
                         $set: {
                             email: email,
                             email_code: md5EmailCode,
-                            email_verified: 0
+                            email_verified: 0,
+                            email_code_expire_time: expireTime
                         }
                     }
 
@@ -245,6 +257,7 @@ class AppController extends BaseController {
 
         } catch (e) {
             let error = `Error :: ${e}`;
+            logManager.Log(`VerifyEmail:Exception-${error}`);
             return this.GetErrorResponse(error, res);
         }
 
@@ -292,12 +305,14 @@ class AppController extends BaseController {
                 smsService.SendSMS(toPhone, msg).then(message => {
 
                     let md5MobileOTP = md5(phone_code);
+                    var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
                     var setParams = {
                         $set: {
                             phone: phone,
                             phone_code: md5MobileOTP,
                             country_Code: countryCode,
-                            phone_verified: 0
+                            phone_verified: 0,
+                            phone_code_expire_time: expireTime
                         }
                     }
 
@@ -339,11 +354,14 @@ class AppController extends BaseController {
             let body = _.pick(req.body, ['mobile', 'country_code', 'phone_code']);
             let key = req.params.key;
 
+            var expireTime = new Date(Date.now() - (OTP_EXPIRY_MINS * 60000));
+
             var conditions = {
                 key: key,
                 phone: body.mobile,
                 phone_code: body.phone_code,
-                country_Code: body.country_Code
+                country_Code: body.country_Code,
+                phone_code_expire_time: { $gte: expireTime }
             }
 
             var setParams = {
@@ -559,11 +577,6 @@ class AppController extends BaseController {
     }
 
     async CheckPin(req, res) {
-
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
-
         try {
 
             let key = req.params.key;
@@ -600,10 +613,6 @@ class AppController extends BaseController {
     }
 
     async ChangePin(req, res) {
-
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
 
         req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
         req.checkBody("pin", messages.req_pin).notEmpty();
@@ -685,11 +694,6 @@ class AppController extends BaseController {
     }
 
     async GetProfile(req, res) {
-
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
-
         try {
             let key = req.params.key;
 
@@ -756,11 +760,7 @@ class AppController extends BaseController {
     }
 
     async Logout(req, res) {
-
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
-
+       
         try {
 
             let key = req.params.key;
@@ -795,10 +795,6 @@ class AppController extends BaseController {
     }
 
     async Login(req, res) {
-
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
 
         req.checkBody("kycid", messages.req_kycid).notEmpty();
         req.checkBody("number", messages.req_number).notEmpty();
