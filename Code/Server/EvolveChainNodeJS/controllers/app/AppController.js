@@ -495,6 +495,7 @@ class AppController extends BaseController {
         req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
         req.checkBody("pin_otp", messages.req_otp).notEmpty();
         req.checkBody("pin", messages.req_pin).notEmpty();
+        req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
 
         try {
 
@@ -505,7 +506,7 @@ class AppController extends BaseController {
 
             }
 
-            let body = _.pick(req.body, ['pin', 'pin_otp', 'ekyc_id']);
+            let body = _.pick(req.body, ['ekyc_id','pin_otp','pin','vendor_uuid']);
             let targetPin = body.pin;
             let conditions = {
                 ekyc_id: body.ekyc_id,
@@ -514,7 +515,8 @@ class AppController extends BaseController {
 
             var setParams = {
                 $set: {
-                    pin: targetPin
+                    pin: targetPin,
+                    vendor_uuid: body.vendor_uuid
                 }
             }
 
@@ -710,206 +712,12 @@ class AppController extends BaseController {
         }
     }
 
-/*    async Login(req, res) {
 
-        req.checkBody("kycid", messages.req_kycid).notEmpty();
-        req.checkBody("number", messages.req_number).notEmpty();
-        req.checkBody("Ip", messages.req_IP).notEmpty();
-
-        try {
-            let result = await req.getValidationResult();
-
-            if (!result.isEmpty()) {
-
-                let error = this.GetErrors(result);
-                return this.GetErrorResponse(error, res);
-
-            }
-
-            let body = _.pick(req.body, ['kycid', 'number', 'Ip']);
-
-            body.key = req.params.key;
-
-            var conditions = {
-                key: body.key,
-                isdelete: '0'
-            }
-
-            App.findOne(conditions, (error, app) => {
-
-                if (error) return res.status(status.OK).jsonp({ "success": 0, "error": error });
-
-                if (!app) return res.status(status.OK).jsonp({
-                    "success": 0,
-                    "error": messages.invalid_key
-                });
-
-                var conditions = {
-                    kyc_id: body.kycid,
-                    "$or": [{
-                        "details.Identity.no": body.number
-                    }, {
-                        "details.Tax.id": body.number
-                    }]
-                }
-
-                Document.findOne(conditions, (error, doc) => {
-
-                    if (error) return res.status(status.OK).jsonp({ "success": 0, "error": error });
-
-                    if (!doc) return res.status(status.OK).jsonp({
-                        "success": 0,
-                        "error": messages.document_not_found
-                    });
-                    //doc.Verify.Score = 70;
-                    if (doc.Verify.Score >= 70) { // check for verify score
-                        var conditions = {
-                            hash: doc.hash
-                        }
-
-                        var params = {
-                            isdelete: '1'
-                        }
-
-                        this.UpdateApp(conditions, params, function (response) {
-                            if (response.error == true) {
-                                return res.status(status.OK).jsonp({
-                                    "success": 0,
-                                    "error": response.message
-                                });
-                            }
-                            else {
-                                var conditions = {
-                                    key: body.key
-                                }
-
-                                var params = {
-                                    email: doc.email,
-                                    hash: doc.hash,
-                                    phone: doc.phone,
-                                    IP: body.Ip,
-                                    isdelete: '0'
-                                }
-
-                                this.UpdateApp(conditions, params, function (response) {
-                                    if (response.error == true) {
-                                        return res.status(status.OK).jsonp({
-                                            "success": 0,
-                                            "error": response.message
-                                        });
-                                    }
-                                    else {
-                                        if (_.isUndefined(doc.profile) || _.isEmpty(doc.profile)) {
-                                            // below code not verified -> need to confirm
-                                            this.GetImage(doc.hash, 'profile_img', function (response) {
-                                                if (response.error == true) {
-                                                    return res.status(status.OK).jsonp({
-                                                        "success": 0,
-                                                        "error": response.message
-                                                    });
-                                                }
-                                                else {
-
-                                                    var path = response.data.path;
-
-                                                    var path = path
-                                                    var save = path
-
-                                                    commonUtility.ImageResize(path, save, 300, function (response) {
-                                                        if (response.error == true) {
-                                                            return res.status(status.OK).jsonp({
-                                                                "success": 0,
-                                                                "error": messages.something_wentwrong
-                                                            });
-                                                        }
-                                                        else {
-                                                            var profile = response.data;
-
-                                                            var conditions = {
-                                                                hash: doc.hash
-                                                            }
-
-                                                            var params = {
-                                                                profile: profile
-                                                            }
-
-                                                            this.UpdateDocument(conditions, params, function (response) {
-                                                                if (response.error == true) {
-                                                                    return res.status(status.OK).jsonp({
-                                                                        "success": 0,
-                                                                        "error": messages.something_wentwrong
-                                                                    });
-                                                                }
-                                                                else {
-                                                                    var doc_updated = response.data;
-                                                                    var response = {
-                                                                        'success': 1,
-                                                                        'now': Date.now(),
-                                                                        'result': messages.login_success,
-                                                                        'kyc_id': doc_updated.kyc_id,
-                                                                        'email': doc_updated.email,
-                                                                        'name': doc_updated.details.Name,
-                                                                        'phone': doc_updated.phone,
-                                                                        'address': doc_updated.details.Address,
-                                                                        'passport': doc_updated.details.Passport,
-                                                                        'tax': doc_updated.details.Tax,
-                                                                        'identity': doc_updated.details.Identity,
-                                                                        'driving': doc_updated.details.Driving,
-                                                                        'profile': config.get('base_url') + "/" + doc_updated.profile,
-                                                                    }
-                                                                    return res.status(status.OK).jsonp(response);
-                                                                }
-                                                            });
-                                                        }
-                                                    });
-                                                }
-                                            });
-
-                                        }
-                                        else {
-                                            var response = {
-                                                'success': 1,
-                                                'now': Date.now(),
-                                                'result': messages.login_success,
-                                                'kyc_id': doc.kyc_id,
-                                                'email': doc.email,
-                                                'name': doc.details.Name,
-                                                'phone': doc.phone,
-                                                'address': doc.details.Address,
-                                                'passport': doc.details.Passport,
-                                                'tax': doc.details.Tax,
-                                                'identity': doc.details.Identity,
-                                                'driving': doc.details.Driving,
-                                                'profile': config.get('base_url') + "/" + doc.profile,
-                                            }
-                                            return res.status(status.OK).jsonp(response);
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                    } else {
-                        return res.status(status.OK).jsonp({
-                            "success": 0,
-                            "error": messages.KYC_not_veryfied
-                        });
-                    }
-                })
-            })
-
-        } catch (e) {
-            console.log(`Error :: ${e}`);
-            let err = `Error :: ${e}`;
-            return res.status(status.OK).json({ 'success': 0, "error": err });
-        }
-    }
-*/
-
-
-async Login(req, res) {
+/*async Login(req, res) {
 
 	req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
 	req.checkBody("pin", messages.req_pin).notEmpty();
+    req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
 
         try {
             let result = await req.getValidationResult();
@@ -919,7 +727,7 @@ async Login(req, res) {
                 return this.GetErrorResponse(error, res);
             }
 
-            let body = _.pick(req.body, ['ekyc_id', 'pin']);
+            let body = _.pick(req.body, ['ekyc_id', 'pin','vendor_uuid']);
             let key = req.params.key;
 
             var conditions = {
@@ -944,6 +752,90 @@ async Login(req, res) {
         }
 
     }
+*/
+
+
+
+async Login(req, res) {
+
+	req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
+	req.checkBody("pin", messages.req_pin).notEmpty();
+    req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
+
+        try {
+            let result = await req.getValidationResult();
+            if (!result.isEmpty()) {
+                let error = this.GetErrors(result);
+                return this.GetErrorResponse(error, res);
+            }
+
+            let body = _.pick(req.body, ['ekyc_id', 'pin','vendor_uuid']);
+            let key = req.params.key;
+
+            var conditions = {
+                isdelete: '0',
+                ekyc_id: body.ekyc_id,
+            }
+
+            App.findOne(conditions,(error, app) =>{
+
+                if (error) return res.status(status.OK).jsonp({"success": 0, "error": error});
+                if (!app) return res.status(status.OK).jsonp({
+                    "success": 0,
+                    "error": messages.invalid_ekycid
+                });
+
+                if(app.vendor_uuid==body.vendor_uuid)
+                {
+                    if(app.pin==body.pin)
+                    {   var params = {
+                            $set: { last_login_time: Date.now() }
+                        }
+
+                        App.update({
+                             _id: app._id
+                        }, {
+                            $set: params
+                        }).then((success) => {
+                            var response = {
+                                'success': 1,
+                                'now': Date.now(),
+                                'key': app.key,
+                                'pin': body.pin,
+                                'Server': app.Server,
+                                'Refer': app.Refer,
+                                'result': 'Login successful!'
+                            }
+                            return res.status(status.OK).jsonp(response);
+
+                            }).catch(function(error){
+                                return res.status(status.OK).jsonp({'success': 0,"error": error});
+                            });
+                    }
+                    else
+                    {
+                        return res.status(status.OK).jsonp({
+                            "success": 0,
+                            "error": "Pin doesnot match"
+                        });
+                    }
+                }
+                else
+                {
+                    return res.status(status.OK).jsonp({
+                        "success": 0,
+                        "error": "Device mismatch"
+                    });
+                }
+            })
+
+            }catch(e){
+            console.log(`Error :: ${e}`);
+            let err = `Error :: ${e}`;
+            return res.status(status.OK).json({ 'success': 0, "error": err });
+            }
+}
+
 
     SendResponse(apiName, error, updatedApp, res) {
         if (error) {
