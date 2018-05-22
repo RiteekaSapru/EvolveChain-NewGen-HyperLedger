@@ -384,9 +384,9 @@ class AppController extends BaseController {
 
 
 
- /*   async GeneratePin(req, res) {
+   async GeneratePin(req, res) {
 
-        let current_ref= this;
+ //       let current_ref= this;
         req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
 
         try {
@@ -407,15 +407,14 @@ class AppController extends BaseController {
 
                 if (error) return this.GetErrorResponse(error, res);
 
-                if (!app)
-                return this.GetErrorResponse(messages.invalid_ekycid, res);
+                if (!app) return this.GetErrorResponse(`Data Mismatch: No application found for phone:${phone}`, res);
 
                 // Authenticator
                 var secret = authenticator.generateKey();
                 secret = secret.replace(/\W/g, '').toLowerCase();
                 var otpToken = authenticator.generateToken(secret);
 
-//Email verification
+                //Email verification
                 var email = app.email.toLowerCase();
                 var ver_code = otpToken.substring(0, 6);
 
@@ -432,68 +431,54 @@ class AppController extends BaseController {
                 });
 
                 const subject = 'EvolveChain KYC - Email Code';
-                emailService.SendEmail(email, subject, emailBody).then(function (success)
-                {
-
-                    let md5EmailCode = md5(ver_code);
-                    var setParams = {
-                        otp: md5EmailCode
-                    }
-
-  //                  App.update(conditions, {
-   //                     $set: params
-   //                 }).then((success) => {
-   //                     return this.GetSuccessResponse("GenerateEmailOTP", null, res);
-   //                 }).catch(function (error) {
-   //                         return current_ref.GetErrorResponse(error, res);
-   //                     });
-
-                    this.FindAndModifyQuery(conditions, setParams).exec(
-                        (error, updatedApp) => {
-                            return this.SendResponse("GenerateEmailOTP", error, updatedApp, res);
-                        }
-                    );
-
-                }).catch(function (e) {
-                    let error = `Error :: ${e}`;
-                    return this.GetErrorResponse(error, res);
-                });
-
-//Mobile verification
-
+                
+                //Mobile Verification
                 var phone = app.phone.replace("+", "");
                 var countryCode = app.country_code.replace("+", "");
                 var msg = 'EvolveChain mobile verification code: ' + ver_code + '.';
                 let toPhone = "+" + countryCode + phone;
-              
-                smsService.SendSMS(toPhone, msg).then(message => {
+                              
+                smsService.SendSMS(toPhone, msg)
+                .then(message => {
 
-                    let md5MobileOTP = md5(otpToken);
+                    let md5MobileOTP = md5(ver_code);
+                    var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
 
                     var setParams = {
-                        otp: md5MobileOTP,
+                        $set: {
+                            otp: md5MobileOTP
+                        }
                     }
 
- //                   App.update(conditions, {
-    //                    $set: params
-   //                 }).then((success) => {
-   //                     return current_ref.GetSuccessResponse("GenerateMobileOTP", null, res);                      
-    //                    }).catch(function (error) {
-    //                        return this.GetErrorResponse(error, res);
-    //                    });
-           
-                    this.FindAndModifyQuery(conditions, setParams).exec(
-                        (error, updatedApp) => {
-                            return this.SendResponse("GenerateMobileOTP", error, updatedApp, res);
-                        }
-                    );
+                    return this.FindAndModifyQuery(conditions, setParams).exec();
 
-                }).catch(function (e) {
+                })
+                .then( (error, updatedApp) => {
+
+                    return emailService.SendEmail(email, subject, emailBody);
+                })
+                .then( (success) => {
+
+                    let md5EmailCode = md5(ver_code);
+                    var setParams = {$set: {
+                        otp: md5EmailCode
+                        }
+                    }
+
+                    return this.FindAndModifyQuery(conditions, setParams).exec();
+
+                })
+                .then( (updatedApp, error) => {
+
+                    return this.SendResponse("GeneratePin", error, updatedApp, res);
+
+                })
+                .catch(function (e) {
                     let error = `Error :: ${e}`;
                     return this.GetErrorResponse(error, res);
-                });           
+                });
 
-            })
+            });
         
         } catch (e) {
             console.log(`Error :: ${e}`);
@@ -502,10 +487,6 @@ class AppController extends BaseController {
         }
     
     }
-*/
-
-
-
 
 
     async SetPin(req, res) {
@@ -531,43 +512,17 @@ class AppController extends BaseController {
                 pin_otp: body.pin_otp
             }
 
-            App.findOne(conditions, (error, app) => {
-
-                if (error) return this.GetErrorResponse(error, res);
-                if (!app)
-                    return this.GetErrorResponse(messages.invalid_ekycid_otp, res);
-
- //               if (error) return res.status(status.OK).jsonp({ "success": 0, "error": error });
- //               if (!app) return res.status(status.OK).jsonp({
- //                  "success": 0,
- //                  "error": messages.invalid_ekycid_otp
- //              });
-
-                var setParams = {
+            var setParams = {
+                $set: {
                     pin: targetPin
                 }
+            }
 
-/*                App.update({
-                    _id: app._id
-                }, {
-                        $set: params
-                    }).then((success) => {
-                        app.pin = targetPin;
-                        return this.GetSuccessResponse("SetPin", app, res);
-                    }).catch(function (error) {
-                        this.GetErrorResponse(error, res);
-                        // return res.status(status.OK).jsonp({'success': 0,"error": error});
-                    });
-*/             
-
-
-                    this.FindAndModifyQuery(conditions, setParams).exec(
-                        (error, updatedApp) => {
-                            return this.SendResponse("SetPin", error, updatedApp, res);
-                        }
-                    );
-
-            })
+            this.FindAndModifyQuery(conditions, setParams).exec(
+                (error, updatedApp) => {
+                    return this.SendResponse("SetPin", error, updatedApp, res);
+                }
+            );
 
         } catch (e) {
             console.log(`Error :: ${e}`);
@@ -632,59 +587,20 @@ class AppController extends BaseController {
                 return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': messages.same_pin });
             }
 
-            //            body.key = req.params.key;
-
             let conditions = {
                 ekyc_id: body.ekyc_id,
                 pin: body.pin
             }
 
-            App.findOne(conditions, (error, app) => {
+            var setParams = {
+                pin: body.new_pin
+            }
 
-/*                if (error) return res.status(status.OK).jsonp({ "success": 0, "error": error });
-
-                if (!app) return res.status(status.OK).jsonp({
-                    "success": 0,
-                    "error": messages.mismatch_old_pin
-                });
-*/
-
-                
-                if (error) return this.GetErrorResponse(error, res);
-                if (!app)
-                    return this.GetErrorResponse(messages.mismatch_old_pin, res);
-
-
-
-                var setParams = {
-                    pin: body.new_pin
-                }
-
-/*                App.update({
-                    _id: app._id
-                }, {
-                        $set: params
-                    }).then((success) => {
-                        var response = {
-                            'success': 1,
-                            'now': Date.now(),
-                            'result': 'New Pin updated',
-                            'pin': body.new_pin
-                        }
-                        return res.status(status.OK).jsonp(response);
-
-                    }).catch(function (error) {
-                        return res.status(status.OK).jsonp({ 'success': 0, "error": error });
-                    });
-                */        
-                                this.FindAndModifyQuery(conditions, setParams).exec(
-                        (error, updatedApp) => {
-                            return this.SendResponse("SetPin", error, updatedApp, res);
+            this.FindAndModifyQuery(conditions, setParams).exec(
+                (error, updatedApp) => {
+                            return this.SendResponse("ChangePin", error, updatedApp, res);
                         }
                     );
-            
-
-            })
 
         } catch (e) {
             console.log(`Error :: ${e}`);
@@ -794,7 +710,7 @@ class AppController extends BaseController {
         }
     }
 
-    async Login(req, res) {
+/*    async Login(req, res) {
 
         req.checkBody("kycid", messages.req_kycid).notEmpty();
         req.checkBody("number", messages.req_number).notEmpty();
@@ -987,6 +903,47 @@ class AppController extends BaseController {
             return res.status(status.OK).json({ 'success': 0, "error": err });
         }
     }
+*/
+
+
+async Login(req, res) {
+
+	req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
+	req.checkBody("pin", messages.req_pin).notEmpty();
+
+        try {
+            let result = await req.getValidationResult();
+
+            if (!result.isEmpty()) {
+                let error = this.GetErrors(result);
+                return this.GetErrorResponse(error, res);
+            }
+
+            let body = _.pick(req.body, ['ekyc_id', 'pin']);
+            let key = req.params.key;
+
+            var conditions = {
+                isdelete: '0',
+                ekyc_id: body.ekyc_id,
+                pin: body.pin
+            }
+            
+            var setParams = {
+                $set: { last_login_time: Date.now() }
+            }
+
+            this.FindAndModifyQuery(conditions, setParams).exec(
+                (error, updatedApp) => {
+                    return this.SendResponse("Login", error, updatedApp, res);
+                }
+            );
+
+        } catch (e) {
+            let error = `Error :: ${e}`;
+            return this.GetErrorResponse(error, res);
+        }
+
+    }
 
     SendResponse(apiName, error, updatedApp, res) {
         if (error) {
@@ -1018,7 +975,8 @@ class AppController extends BaseController {
                     'now': Date.now(),
                     'key': appEntity.key,
                     'Server': appEntity.Server,
-                    'Refer': appEntity.Refer
+                    'Refer': appEntity.Refer,
+                    'result': messages.verify_email_phone_code
                 }
                 break;
             case "SetPin":
@@ -1027,7 +985,8 @@ class AppController extends BaseController {
                     'now': Date.now(),
                     'key': appEntity.key,
                     'Server': appEntity.Server,
-                    'Refer': appEntity.Refer
+                    'Refer': appEntity.Refer,
+                    'result': 'Pin has been set successfully!'
                 }
                 break;
             case "ChangePin":
@@ -1037,7 +996,8 @@ class AppController extends BaseController {
                     'key': appEntity.key,
                     'Server': appEntity.Server,
                     'Refer': appEntity.Refer,
-                    'pin': appEntity.pin
+                    'pin': appEntity.pin,
+                    'result': 'Pin has been changed successfully!'
                 }
                 break;
             case "GenerateEmailOTP":
@@ -1051,7 +1011,7 @@ class AppController extends BaseController {
                 response = {
                     'success': 1,
                     'now': Date.now(),
-                    'result': 'Email verified successfully'
+                    'result': 'Email verified successfully!'
                 }
                 break;
             case "GenerateMobileOTP":
@@ -1065,7 +1025,18 @@ class AppController extends BaseController {
                 response = {
                     'success': 1,
                     'now': Date.now(),
-                    'result': 'Phone verified successfully'
+                    'result': 'Phone verified successfully!'
+                }
+                break;
+            case "Login":
+                response = {
+                    'success': 1,
+                    'now': Date.now(),
+                    'name': appEntity.name,
+                    'email': appEntity.email,
+                    'phone': appEntity.phone,
+//                   'profile': ,
+                    'result': 'Login successful!'
                 }
                 break;
         }
