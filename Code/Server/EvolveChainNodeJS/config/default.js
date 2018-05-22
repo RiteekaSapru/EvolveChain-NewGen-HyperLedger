@@ -1,6 +1,7 @@
 require("./main").config("configEnv.env");
 const path = require("path");
 const status = require('./status');
+const document_status = require('./document_status');
 const messages = require('./messages');
 const admin_messages = require('./admin_messages');
 const merchant_messages = require('./merchant_messages');
@@ -47,6 +48,7 @@ module.exports = {
   USER_IMAGE: USER_IMAGE,
   current_year: current_year,
   status: status,
+  document_status:document_status,
   messages: messages,
   FTP_URL: FTP_URL,
   admin_messages: admin_messages,

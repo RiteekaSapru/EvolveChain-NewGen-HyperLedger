@@ -60,6 +60,7 @@
     "invalid_date"          : "Date of birth not valid yyyy-mm-dd",
     "req_profile_image"     : "Profile Image Required!",
     "save_basic_info"       : "Basic Information save success",
+    "save_info"             : "Information save success",
     "req_street"            : "Address Street Required!",
     "req_city"              : "City Required!",
     "req_zip"               : "Zip Required!",

@@ -6,6 +6,7 @@ const async = require('async');
 const config = require('config');
 const status = config.get('status');
 const messages = config.get('messages');
+const documentStatus = config.get('document_status');
 const utility = require('../../config/utility');
 const emailService = require('../../services/EmailService')
 const smsService = require('../../services/SMSService')
@@ -452,7 +453,8 @@ class KYCController extends BaseController {
                         break;
                 }
 
-                try {
+                try 
+                {
                     let result = await req.getValidationResult();
 
                     if (!result.isEmpty()) {
@@ -510,7 +512,7 @@ class KYCController extends BaseController {
                             KYCDocument.findOne(document_query, (error, docData) => {
 
                                 if (error) {
-                                    console.log(`Error :: ${error}`);
+                                    logManager.Log(`SaveKYCDocumnet:Error - ${error}`);
                                     error = `Error :: ${error}`;
                                     return kycController.GetErrorResponse(error, res);
                                 }
@@ -519,166 +521,93 @@ class KYCController extends BaseController {
                                 //var doc = docData.toJSON();
                                 //let step = body.step;
 
-                                var docInfoForSameStep = _.map(docData.docInfo, function (docInfo) {
-                                    if (docInfo.docType == body.step) 
-                                    return docInfo;
-                                });
+                                // var docInfoForSameStep = _.map(docData.docInfo, function (docInfo) {
+                                //     if (docInfo.docType == body.step) 
+                                //     return docInfo;
+                                // });
+                                var savedDocInfo = docData.docInfo;
+                                var docInfoForSameStep = _.filter(savedDocInfo, x => x.docType === body.step)
+                                if (docInfoForSameStep && docInfoForSameStep.length > 0) return kycController.GetErrorResponse("Uploaded information is already available", res);
 
-                                //if (docInfoForSameStep && docInfoForSameStep.length > 0) return kycController.GetErrorResponse("Uploaded information is already available", res);
+                                if(savedDocInfo.length == 3) return kycController.GetErrorResponse("Information for all the uploads is already present", res);
+                                
+                                //Saving Document Object
+                                kycController.SaveDocumentObject(docData, body, imageArrayForDoc).then((updatedDoc) => {
 
-                                kycController.GetDocumentObject(docData, body, imageArrayForDoc).then((updatedDoc) => {
-                                    var response = {
-                                        'success': 1,
-                                        'result': messages.success,
-                                        // 'Server': md5(body.SERVER_ADDR),
-                                        // 'Refer': md5(body.REMOTE_ADDR),
-                                        //'file': file,
-                                        //'file' : req.files
-                                    }
+                                    var docInfo = _.filter(updatedDoc.docInfo, x => x.docType === body.step)
+                                    //let image = docInfo[0].images[0];
 
+                                    kycController.SaveDocumentImages(body.step, docInfo[0].images, filesBufferObject, function (response) {
+
+                                        if (response.error == true) {
+                                            logManager.Log(`SaveKYCDocumnet:Error - ${error}`);
+                                            error = `Error :: ${error}`;
+                                            return kycController.GetErrorResponse(error, response.message);
+                                        }
+                                        else {
+                                            return res.status(status.OK).jsonp(response.data);
+                                        }
+                                    });
 
                                 }).catch(function (error) {
                                     return res.status(status.OK).jsonp({ 'success': 0, "error": error });
                                 });
-                                //obj.appId = "4354334";
-
-                                switch ("tesst") {
-                                    case 'basi':
-                                        // this.kycBasicInfo(key, doc, body, function (response) {
-                                        //     console.log(response);
-                                        //     if (response.error == true) {
-                                        //         return res.status(status.OK).jsonp({
-                                        //             "success": 0,
-                                        //             "now": Date.now(),
-                                        //             "error": response.message
-                                        //         });
-                                        //     }
-                                        //     else { 
-                                        //         return res.status(status.OK).jsonp(response.data);
-                                        //     }
-                                        //})
-                                        break;
-                                    default:
-                                        // return res.status(status.OK).jsonp({
-                                        //     "success": 0,
-                                        //     "now": Date.now(),
-                                        //     "error": 'step name missing!'
-                                        // });
-                                        break;
-                                }
-
                             })
                         })
-
-                        // var newDoc = new KYCDocument(obj);
-                        // newDoc.save().then((lastAddedDoc) => {
-                        //     var response = {
-                        //         // 'success': 1,
-                        //         // 'result': messages.success,
-                        //         // 'Server': md5(body.SERVER_ADDR),
-                        //         // 'Refer': md5(body.REMOTE_ADDR),
-                        //         'LastAddedDoc': lastAddedDoc,
-                        //         //'file' : req.files
-                        //     }
-
-                        //     var docInfo = _.map(lastAddedDoc.docInfo, function (docInfo) {
-                        //         if (docInfo.docType == req.body.step) return docInfo;
-                        //     });
-
-                        //     let image = docInfo[0].images[0];
-
-                        //     var file;
-                        //     try {
-                        //         file = {
-                        //             data: filesArrayObject[image.name],
-                        //             contentType: image.contentType,
-                        //             key: image._id.toString()
-                        //         };
-
-                        //     }
-                        //     catch (err) {
-                        //         console.log(err);
-                        //     }
-
-                        //     var newfile = new File(file)
-                        //     newfile.save().then((file) => {
-                        //         var response = {
-                        //             'success': 1,
-                        //             'result': messages.success,
-                        //             // 'Server': md5(body.SERVER_ADDR),
-                        //             // 'Refer': md5(body.REMOTE_ADDR),
-                        //             //'file': file,
-                        //             //'file' : req.files
-                        //         }
-                        //     }).catch(function (error) {
-                        //         return res.status(status.OK).jsonp({ 'success': 0, "error": error });
-                        //     });
-
-
-                        //     //return res.status(status.OK).jsonp(response);
-
-                        // }).catch(function (error) {
-                        //     return res.status(status.OK).jsonp({ 'success': 0, "error": error });
-                        // });
-
                     });
-
                 }
                 catch (e) {
                     console.log(`Error :: ${e}`);
                     let err = `Error :: ${e}`;
                     return res.status(status.OK).json({ 'success': 0, "error": err });
                 }
-
             }
-
         })
-
     }
 
-    SaveDocumentImages(step, imageCollection, filesBufferObject,lastAddedDoc){
+    SaveDocumentImages(step, imageCollection, filesBufferObject, callback) {
+
+        let response = {
+            'error': true,
+            'data': [],
+            'message': messages.something_wentwrong,
+        }
 
         async.eachSeries(imageCollection, function (image, outerSubCallback) {
 
-            var docInfo = _.map(lastAddedDoc.docInfo, function (docInfo) {
-                        if (docInfo.docType == step) return docInfo;
-                    });
+            var file;
+            file = {
+                data: filesBufferObject[image.name],
+                contentType: image.contentType,
+                key: image._id.toString()
+            };
 
-                    var file;
-                    try {
-                        file = {
-                            data: filesBufferObject[image.name],
-                            contentType: image.contentType,
-                            key: image._id.toString()
-                        };
+            var newfile = new File(file)
+            newfile.save().then((file) => {
 
-                    }
-                    catch (err) {
-                        console.log(err);
-                    }
+                outerSubCallback();
 
-                    var newfile = new File(file)
-                    newfile.save().then((file) => {
-                        var response = {
-                            'success': 1,
-                            'result': messages.success,
-                            // 'Server': md5(body.SERVER_ADDR),
-                            // 'Refer': md5(body.REMOTE_ADDR),
-                            //'file': file,
-                            //'file' : req.files
-                        }
-                        outerSubCallback();
-                    }).catch(function (error) {
-                        outerSubCallback(error);                        
-                        //return res.status(status.OK).jsonp({ 'success': 0, "error": error });
-                    });
+            }).catch(function (error) {
+                response.message = error;
+                outerSubCallback(response);
+                //return res.status(status.OK).jsonp({ 'success': 0, "error": error });
+            });
         }, function () {
 
-        });
+            ///Find way to check error here...
 
+            response.error = false;
+            response.data = {
+                'success': 1,
+                'now': Date.now(),
+                'result': messages.save_basic_info
+            }
+            response.message = messages.save_basic_info;
+            callback(response);
+        });
     }
 
-    GetDocumentObject(docData, body, imgArr) {
+    SaveDocumentObject(docData, body, imgArr) {
 
         // var obj = {
         //     app_key: null,
@@ -738,12 +667,15 @@ class KYCController extends BaseController {
             })
         }
 
-        //return KYCDocument.findOneAndUpdate({age: 17}, {$set:{name:"Naomi"}}, {new: true},
-
-
-        return KYCDocument.findByIdAndUpdate(obj._id.toString(), { $set: { docInfo: obj.docInfo } }, { new: true });
-
-
+        return KYCDocument.findByIdAndUpdate(obj._id.toString(),
+            {
+                $set: {
+                    docInfo: obj.docInfo,
+                    status: documentStatus.InProcess,
+                    last_modified: new Date(Date.now())
+                }
+            }
+            , { new: true });
     }
 
     checkRequestValidationForEachstep(body) {

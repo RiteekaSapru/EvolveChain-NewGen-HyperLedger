@@ -5,6 +5,7 @@ const _ = require('lodash');
 const config = require('config');
 const status = config.get('status');
 const messages = config.get('messages');
+const documentStatus = config.get('document_status');
 
 const md5 = require('md5');
 const emailService = require('../../services/EmailService')
@@ -78,7 +79,9 @@ class AppController extends BaseController {
                 var kycDocParam = {
                     app_key: newApp.key,
                     isDelete: 0,
-                    docInfo: {}
+                    //docInfo: {},
+                    status : documentStatus.Pending,
+                    last_modified : new Date(Date.now())
                 }
                 var kycDoc = new KycDocument(kycDocParam);
                 kycDoc.save().then((newKycDoc) => {

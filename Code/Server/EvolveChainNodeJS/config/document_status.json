@@ -1,0 +1,6 @@
+{
+    "Pending": "Pending",
+    "InProcess": "InProcess",
+    "Accepted": "Accepted",
+    "Rejected": "Rejected"
+}

@@ -1,6 +1,6 @@
 
 /*
- * Country model schema
+ * KYC Document model schema
  *
  */
 
@@ -13,24 +13,28 @@ const config = require('config');
 // });
 
 const ImageInfo = new Schema({
-    name: String, 
+    name: String,
     contentType: String,
-    encoding : String
+    encoding: String
 });
 
 const DocInfo = new Schema({
-    details : {type : Schema.Types.Mixed},
-    images : {type: [ImageInfo]},
-    docType :{type: String}
+    details: { type: Schema.Types.Mixed },
+    images: { type: [ImageInfo] },
+    docType: { type: String },
+    is_verified: { type: Boolean, default: false }
 });
 
 const KYCDocument = new Schema({
-    app_key : {type: String},
-    isDelete : {type:Boolean},
-    docInfo : {type : [DocInfo]}
+    app_key: { type: String },
+    isDelete: { type: Boolean },
+    docInfo: { type: [DocInfo] },
+    last_modified: { type: Date },
+    status: { type: String },
+    hash: { type: String }
 });
 
-KYCDocument.pre('save', function(next) {
+KYCDocument.pre('save', function (next) {
     var KYCDocument = this;
     next();
 });
