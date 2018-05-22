@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<!-- Header include -->
+<%include layouts/head.html %>
+    <!-- END -->
+
+    <body>
+        <!-- navigation include -->
+        <%include layouts/navigation.html %>
+            <!-- END -->
+            <!-- Main content -->
+            <div id="container" class="container">
+                <div class="container">
+                    <form role="form" method="post">
+                        <br>
+                        <h3 class="padded">Know your customer (KYC)
+                            <br>
+                            <small>Required on EvolveChain</small>
+                        </h3>
+                        <hr>
+                        <% for(let i = 0; i < docInfo.length; i++) { %>
+                            <h5 class="alert alert-success"><%=docInfo[i].DocType%>
+                                <span class="float-right"></span>
+                            </h5>
+                            <div class="row">
+                                <div class="col-sm-5">
+                                    <table class="table">
+                                        <% for(let j = 0; j < docInfo[i].DocDetails.length; j++) { %>
+                                            <tr>
+                                                <td>
+                                                    <%=docInfo[i].DocDetails[j].name%>: </td>
+                                                <td>
+                                                    <%=docInfo[i].DocDetails[j].value%>
+                                                </td>
+                                            </tr>
+                                             <% } %>
+                                    </table>
+                                </div>
+                                <div class="col-sm-4">
+                                    <table class="table">
+                                        <% for(let k = 0; k < docInfo[i].DocImages.length; k++) { %>
+                                            <tr>                                           
+                                                <td>
+                                                    <img height="100" width="100" src="<%=docInfo[i].DocImages[k].url%>" width="100%">
+                                                </td>
+                                            </tr>
+                                            <% } %>                                               
+                                    </table>
+                                </div>
+                            </div>
+                            <% } %>
+                                <hr>
+                                <input type="text" value="Comments"/>
+                                <input type="submit" value="Verify" class="btn btn-primary ">
+                                <input type="submit" value="Reject" class="btn btn-primary ">
+                    </form>
+                </div>
+                <hr>
+            </div>
+            </div>
+            <!-- END -->
+            <!-- footer include -->
+            <%include layouts/footer.html %>
+                <!-- END -->
+                <!-- scripts include -->
+                <%include layouts/scripts.html %>
+                    <!-- END -->
+    </body>
+
+</html>

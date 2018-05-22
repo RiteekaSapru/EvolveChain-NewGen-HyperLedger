@@ -51,6 +51,19 @@ class CommonUtility {
         });
     }
 
+    GetKycDocumentMetaDataInfo(docType) {
+        var metaDataInfo;
+        switch (docType) { //set to UPPER case
+            case 'BASIC':
+                metaDataInfo = { 'firstname': 'First Name', 'lastname': 'Last Name', 'middlename': 'Middle Name', 'dob': 'Date Of Birth' };
+                break;
+            default:
+                metaDataInfo = { 'firstname': 'First Name', 'lastname': 'Last Name', 'middlename': 'Middle Name', 'dob': 'Date Of Birth' };
+                break;
+        }
+        return metaDataInfo;
+    }
+
 
 
 }
