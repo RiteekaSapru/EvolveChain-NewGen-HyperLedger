@@ -19,7 +19,7 @@ app.post("/verifyemail/:key",keyMiddleware, AppController.VerifyEmail.bind(AppCo
 app.post("/generateMobileOtp/:key",keyMiddleware, AppController.GenerateMobileOTP.bind(AppController));
 app.post("/verifymobile/:key", keyMiddleware,AppController.VerifyMobile.bind(AppController));
 
-//app.post("/GeneratePin/:key", AppController.GeneratePin.bind(AppController));
+app.post("/GeneratePin/:key", keyMiddleware, AppController.GeneratePin.bind(AppController));
 app.post("/setpin/:key", keyMiddleware,AppController.SetPin.bind(AppController));
 app.post("/checkpin/:key", keyMiddleware, AppController.CheckPin.bind(AppController));
 app.post("/changepin/:key", keyMiddleware, AppController.ChangePin.bind(AppController));

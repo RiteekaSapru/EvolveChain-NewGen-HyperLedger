@@ -38,6 +38,7 @@
     "image_data"            : "Image data get successfully!",
     "resize_image"          : "Image resized!",
     "verify_email_code"     : "Please check your email to get the code",
+    "verify_email_phone_code"     : "Please check your email and phone to get the code",
     "req_mobile"            : "Mobile missing!",
     "verify_phone_code"     : "Mobile verification OTP sent",
     "req_mobile_code"       : "Mobile Code missing!",
