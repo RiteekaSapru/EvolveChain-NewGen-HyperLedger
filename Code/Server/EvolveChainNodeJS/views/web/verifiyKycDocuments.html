@@ -1,5 +1,12 @@
 <!doctype html>
 <html>
+
+<style>
+    .header {
+        color: white;
+        background-color: #0f75bd;
+    }
+</style>
 <!-- Header include -->
 <%include layouts/head.html %>
     <!-- END -->
@@ -11,48 +18,66 @@
             <!-- Main content -->
             <div id="container" class="container">
                 <div class="container">
-                    <form role="form" method="post">
+                    <form role="form" action="/verifyKyc/<%=kycData.app_key%>" method="post">
                         <br>
                         <h3 class="padded">Know your customer (KYC)
                             <br>
                             <small>Required on EvolveChain</small>
                         </h3>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                App Id:  <b><%=kycData.app_key%></b>
+                            </div>                                                    
+                            <div class="col-md-6">
+                                    eKycId:  <b><%=kycData.eKycId%></b>
+                            </div>  
+                        </div>
+
                         <hr>
-                        <% for(let i = 0; i < docInfo.length; i++) { %>
-                            <h5 class="alert alert-success"><%=docInfo[i].DocType%>
-                                <span class="float-right"></span>
+                        <% for(let i = 0; i < kycData.docInfo.length; i++) { %>
+                            <h5 class="alert header">
+                                <%=kycData.docInfo[i].DocType%>
+                                    <span class="float-right"></span>
                             </h5>
                             <div class="row">
                                 <div class="col-sm-5">
                                     <table class="table">
-                                        <% for(let j = 0; j < docInfo[i].DocDetails.length; j++) { %>
+                                        <% for(let j = 0; j < kycData.docInfo[i].DocDetails.length; j++) { %>
                                             <tr>
                                                 <td>
-                                                    <%=docInfo[i].DocDetails[j].name%>: </td>
+                                                    <%=kycData.docInfo[i].DocDetails[j].name%>: </td>
                                                 <td>
-                                                    <%=docInfo[i].DocDetails[j].value%>
+                                                    <%=kycData.docInfo[i].DocDetails[j].value%>
                                                 </td>
                                             </tr>
-                                             <% } %>
+                                            <% } %>
                                     </table>
                                 </div>
                                 <div class="col-sm-4">
                                     <table class="table">
-                                        <% for(let k = 0; k < docInfo[i].DocImages.length; k++) { %>
-                                            <tr>                                           
+                                        <tr>
+                                            <% for(let k = 0; k < kycData.docInfo[i].DocImages.length; k++) { %>
+
                                                 <td>
-                                                    <img height="100" width="100" src="<%=docInfo[i].DocImages[k].url%>" width="100%">
+                                                    <img height="100" width="100" src="<%=kycData.docInfo[i].DocImages[k].url%>" width="100%">
                                                 </td>
-                                            </tr>
-                                            <% } %>                                               
+
+                                                <% } %>
+                                        </tr>
                                     </table>
                                 </div>
                             </div>
                             <% } %>
                                 <hr>
-                                <input type="text" value="Comments"/>
-                                <input type="submit" value="Verify" class="btn btn-primary ">
-                                <input type="submit" value="Reject" class="btn btn-primary ">
+                                <label class="btn btn-success"><input value="1" type="radio" name="radioButtonVerify"> Verify</label> 
+                                <label class="btn btn-danger"> <input value="0" type="radio" name="radioButtonVerify"> Reject</label>
+                                <input type="text" value="<%=kycData.verification_comment%>" class="form-control input-lg" placeholder="Comments" name="textBoxComment"
+                                />
+                                <hr>
+                                <% if(!kycData.is_verified) {%>
+                                    <input type="submit" value="Submit" class="btn btn-primary">
+                                    <%}%>
                     </form>
                 </div>
                 <hr>

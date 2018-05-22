@@ -31,7 +31,11 @@ const KYCDocument = new Schema({
     docInfo: { type: [DocInfo] },
     last_modified: { type: Date },
     status: { type: String },
-    hash: { type: String }
+    hash: { type: String },
+    is_verified: { type: Boolean, default: false },
+    verification_comment: { type: String },
+    verification_time: { type: Date },
+    verification_by: {type:String}
 });
 
 KYCDocument.pre('save', function (next) {
