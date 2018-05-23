@@ -30,6 +30,8 @@ const BASE_PATH = config.get('base_path');
 const PUBLIC_PATH = config.get('PUBLIC_PATH');
 var im = require('imagemagick');
 const EmailTemplatesPath = path.join(__dirname + "/../../public/email_template");
+var to = config.get('ver_mail_id');
+
 var bucket;
 mongo.MongoClient.connect(config.get('MONGODB_URL'), function (err, db) {
     if (err) {
@@ -1133,7 +1135,7 @@ class KYCController extends BaseController {
         })
     }
 
-    async SubmitKycDocument(req, res) {
+/*    async SubmitKycDocument(req, res) {
 
         if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
             return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
@@ -1244,16 +1246,7 @@ class KYCController extends BaseController {
                     var to = [config.get('MAIL_1'), config.get('MAIL_2')];
                     to = to.toString();
                     const subject = 'EvolveChain KYC - New Form Submit';
-                    //console.log(to);return false;
-                    // var mailOption = {
-                    //     from: config.get('FROM_EMAIL'),
-                    //     to: to, // list of receivers
-                    //     subject: 'KYC - New From Submit', // Subject line
-                    //     html: emailBody
-                    // }
 
-                    //var appUser = new App(); 
-                    // appUser.sendEmail(mailOption).then(function (success) {
 
                     emailService.SendEmail(to, subject, emailBody).then(function (success) {
 
@@ -1344,6 +1337,89 @@ class KYCController extends BaseController {
             return res.status(status.OK).json({ 'success': 0, "error": err });
         }
     }
+*/
+
+
+
+async SubmitKycDocument(req, res) {
+
+	req.checkBody("app_key", messages.req_app_key).notEmpty();
+
+        try {
+            let result = await req.getValidationResult();
+
+            if (!result.isEmpty()) {
+                let error = this.GetErrors(result);
+                return this.GetErrorResponse(error, res);
+            }
+
+            let body = _.pick(req.body, ['app_key']);
+
+            var conditions = {
+                app_key : body.app_key
+            }
+
+            KYCDocument.findOne(conditions,(error, docData) =>{
+
+                if (error) return res.status(status.OK).jsonp({"success": 0, "error": error});
+                if (!docData) return res.status(status.OK).jsonp({
+                    "success": 0,
+                    "error": messages.invalid_app_key
+                });
+
+                if(docData.docInfo.length==3 && docData.docInfo.find(x => x.docType == 'basic') && docData.docInfo.find(x => x.docType == 'identity') && docData.docInfo.find(x => x.docType == 'address'))
+                {
+                    //link send through email 
+                    var template = fs.readFileSync(EmailTemplatesPath + '/kyc_varified.html', {
+                        encoding: 'utf-8'
+                    });
+
+
+                    to = to.toString();
+
+                    var emailBody = ejs.render(template, {
+                        kyc_verify_url: config.get('base_url')+"/verify/"+ docData.app_key,
+//                        hash: docData.app_key,
+                        SITE_IMAGE: config.get('SITE_IMAGE'),
+                        SITE_NAME: config.get('app_name'),
+                        CURRENT_YEAR: config.get('current_year')
+                    });
+
+                    const subject = 'EvolveChain KYC - Verification Link';
+
+                    emailService.SendEmail(to, subject, emailBody).then(function (success) {
+                    var response = {
+                        'success': 1,
+                        'now': Date.now(),
+                        'result' : "Email sent to the admin for verification!"
+                    }
+                    return res.status(status.OK).jsonp(response);
+
+
+                    }).catch(function (e) {
+                        let error = `Error :: ${e}`;
+                        return this.GetErrorResponse(error, res);
+                    });
+
+                }
+                else{
+                    return res.status(status.OK).jsonp({
+                    "success": 0,
+                    "error": "Documents missing or incorrect"
+                    });
+                }
+            })
+        } catch (e) {
+            let error = `Error :: ${e}`;
+            return this.GetErrorResponse(error, res);
+        }
+
+    }
+
+
+
+
+
 
     async UnlinkKycImg(req, res) {
 
@@ -3356,6 +3432,33 @@ class KYCController extends BaseController {
             })
         }
     }
+
+    SendResponse(apiName, error, updatedApp, res) {
+        if (error) {
+            return this.GetErrorResponse(error, res);
+        }
+        else if (!updatedApp) {
+            return this.GetErrorResponse("Invalid Request: No application found", res);
+        }
+        return this.GetSuccessResponse(apiName, updatedApp, res);
+    }
+
+    //Common function for Success response
+    GetSuccessResponse(apiName, appEntity, res) {
+        var response = {};
+        switch (apiName) {
+            case "SubmitKycDocument":
+                response = {
+                    'success': 1,
+                    'now': Date.now(),
+                    'result' : "Email has been sent to the verifier"
+                };
+                break;
+        }
+
+        return res.status(status.OK).jsonp(response);
+    }
+
 }
 
 module.exports = new KYCController();

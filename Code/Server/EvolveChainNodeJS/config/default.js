@@ -34,6 +34,8 @@ const MAIL_4 = 'admin@'+process.env.COMPANY_DOMAIN;
 // const MAIL_1 = 'gordhan@yudiz.com';
 // const MAIL_2 = 'gordhan.c@yudiz.in';
 
+const ver_mail_id = 'riteeka.sapru@newgen.co.in';
+
 const web_site = BASE_URL+'/public/web'
 
 
@@ -62,7 +64,8 @@ module.exports = {
   MAIL_2: MAIL_2,
   MAIL_3: MAIL_3,
   MAIL_4: MAIL_4,
+  ver_mail_id :ver_mail_id,
   web_site: web_site,
   DB_NAME: DB_NAME,
-  OTP_EXPIRY_MINS:30
+  OTP_EXPIRY_MINS:30,
 };
