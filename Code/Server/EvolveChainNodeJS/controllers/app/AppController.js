@@ -12,7 +12,6 @@ const smsService = require('../../services/SMSService')
 const commonUtility = require('../../helpers/CommonUtility');
 const logManager = require('../../helpers/LogManager');
 const BaseController = require('../BaseController');
-const authenticator = require('authenticator');
 const App = require('../../models/apps');
 const KycDocument = require('../../models/kycdocument');
 
@@ -42,7 +41,7 @@ class AppController extends BaseController {
 
             let body = _.pick(req.body, ['ip', 'device_type', 'device_name', 'os_version', 'vendor_uuid']);
 
-            body.key = md5(Date.now());
+            body.key = commonUtility.GenerateUniqueToken();
             body.SERVER_ADDR = md5(req.connection.localAddress);
             body.REMOTE_ADDR = md5(req.connection.remoteAddress);
 
@@ -118,14 +117,9 @@ class AppController extends BaseController {
                 if (!app)
                     return this.GetErrorResponse(messages.invalid_key, res);
 
-
-                // Authenticator
-                var secret = authenticator.generateKey();
-                secret = secret.replace(/\W/g, '').toLowerCase();
-                var otpToken = authenticator.generateToken(secret);
-
+               
                 var email = body.email.toLowerCase();
-                var email_code = otpToken.substring(0, 6);
+                var email_code = commonUtility.GenerateOTP(6);
 
                 //send verification code email
 
@@ -241,11 +235,8 @@ class AppController extends BaseController {
                 if (error) return this.GetErrorResponse(error, res);
 
                 if (!app) return this.GetErrorResponse(`Data Mismatch: No application found for phone:${phone}`, res);
-
-                // Authenticator
-                var secret = authenticator.generateKey();
-                secret = secret.replace(/\W/g, '').toLowerCase();
-                var phone_code = authenticator.generateToken(secret);
+                
+                var phone_code = commonUtility.GenerateOTP(6);
 
 
                 var phone = body.mobile.replace("+", "");
@@ -357,14 +348,9 @@ class AppController extends BaseController {
 
                 if (!app) return this.GetErrorResponse(`Data Mismatch: No application found for phone:${phone}`, res);
 
-                // Authenticator
-                var secret = authenticator.generateKey();
-                secret = secret.replace(/\W/g, '').toLowerCase();
-                var otpToken = authenticator.generateToken(secret);
-
                 //Email verification
                 var email = app.email.toLowerCase();
-                var ver_code = otpToken.substring(0, 6);
+                var ver_code = commonUtility.GenerateOTP(6);
 
                 var template = fs.readFileSync(EmailTemplatesPath + '/email_varified.html', {
                     encoding: 'utf-8'

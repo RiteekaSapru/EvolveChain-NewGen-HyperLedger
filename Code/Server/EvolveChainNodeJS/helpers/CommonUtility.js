@@ -2,6 +2,8 @@ const config = require('config');
 var im = require('imagemagick');
 const messages = config.get('messages');
 var dateFormat = require('dateformat');
+const md5 = require('md5');
+const authenticator = require('authenticator');
 
 class CommonUtility {
     NowDate() {
@@ -69,6 +71,40 @@ class CommonUtility {
                 break;
         }
         return metaDataInfo;
+    }
+
+    GenerateUniqueToken()
+    {
+         var token = md5(Date.now());
+         return token;
+    }
+
+    GenerateOTP(noOfDigits)
+    {
+            // Authenticator
+          var secret = authenticator.generateKey();
+          secret = secret.replace(/\W/g, '').toLowerCase();
+          var otpToken = authenticator.generateToken(secret);          
+          var code = otpToken.substring(0, noOfDigits);
+          return code;
+    }
+
+    GenerateKYCId()
+    {
+        var secret1 = authenticator.generateKey();
+        secret1 = secret1.replace(/\W/g, '').toLowerCase();
+        var secret1_code = authenticator.generateToken(secret1);
+
+        var secret2 = authenticator.generateKey();
+        secret2 = secret2.replace(/\W/g, '').toLowerCase();
+        var secret2_code = authenticator.generateToken(secret2);
+
+        var secret3 = authenticator.generateKey();
+        secret3 = secret3.replace(/\W/g, '').toLowerCase();
+        var secret3_code = authenticator.generateToken(secret3);
+
+        var kycId = secret1_code + '-' + secret2_code + '-' + secret3_code;
+        return kycId;
     }
 
 

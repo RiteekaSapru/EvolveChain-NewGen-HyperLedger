@@ -99,6 +99,7 @@ class VerifyController extends BaseController {
                 KycDocument.update(document_query, setParams).then((success) => {
 
                     //generate eKycId if successfully updated
+                    const eKycId = commonUtility.GenerateKYCId();
                     //update app status to verified
                     //send email to user
                     return res.redirect(req.baseUrl + "/verify/" + docData.app_key);
@@ -125,7 +126,9 @@ class VerifyController extends BaseController {
 
             let metaDataInfo = commonUtility.GetKycDocumentMetaDataInfo("BASIC");
             Object.keys(details).forEach(function (key) {
-                summaryInfo.DocDetails.push({ 'name': metaDataInfo[key], 'value': details[key] });
+                if(metaDataInfo.hasOwnProperty(key)){
+                    summaryInfo.DocDetails.push({ 'name': metaDataInfo[key], 'value': details[key] });
+                }
             });
 
             for (var j = 0; j < images.length; j++) {

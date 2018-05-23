@@ -49,7 +49,7 @@
                                         <% for(let k = 0; k <  kycData.BasicInfo.DocImages.length; k++) { %>
 
                                             <td>
-                                                <img height="200" width="200" src="<%=kycData.BasicInfo.DocImages[k].url%>" width="100%">
+                                                <img height="60" width="60" src="<%=kycData.BasicInfo.DocImages[k].url%>" width="100%">
                                             </td>
 
                                             <% } %>
@@ -73,11 +73,57 @@
                                     <h5 class="alert header"> Identity
                                         <span class="float-right"></span>
                                     </h5>
+                                    <table class="table">
+                                            <tr>
+                                                <% for(let k = 0; k <  kycData.IdentityInfo.DocImages.length; k++) { %>
+        
+                                                    <td>
+                                                        <img height="200" width="200" src="<%=kycData.IdentityInfo.DocImages[k].url%>" width="100%">
+                                                    </td>
+        
+                                                    <% } %>
+                                            </tr>
+                                        </table>
+                                        <table class="table">
+                                            <% for(let j = 0; j < kycData.IdentityInfo.DocDetails.length; j++) { %>
+                                                <tr>
+                                                    <td>
+                                                        <%=kycData.IdentityInfo.DocDetails[j].name%>:
+                                                    </td>
+                                                    <td>
+                                                        <%=kycData.IdentityInfo.DocDetails[j].value%>
+                                                    </td>
+                                                </tr>
+                                                <% } %>
+                                        </table>
                                 </div>
                                 <div class="row">
                                     <h5 class="alert header"> Address
                                         <span class="float-right"></span>
                                     </h5>
+                                    <table class="table">
+                                            <tr>
+                                                <% for(let k = 0; k <  kycData.AddressInfo.DocImages.length; k++) { %>
+        
+                                                    <td>
+                                                        <img height="200" width="200" src="<%=kycData.AddressInfo.DocImages[k].url%>" width="100%">
+                                                    </td>
+        
+                                                    <% } %>
+                                            </tr>
+                                        </table>
+                                        <table class="table">
+                                            <% for(let j = 0; j < kycData.AddressInfo.DocDetails.length; j++) { %>
+                                                <tr>
+                                                    <td>
+                                                        <%=kycData.AddressInfo.DocDetails[j].name%>:
+                                                    </td>
+                                                    <td>
+                                                        <%=kycData.AddressInfo.DocDetails[j].value%>
+                                                    </td>
+                                                </tr>
+                                                <% } %>
+                                        </table>
                                 </div>
                             </div>
 
