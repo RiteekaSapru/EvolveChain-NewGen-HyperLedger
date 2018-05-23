@@ -1,6 +1,25 @@
 {
-    "Pending": "Pending",
-    "InProcess": "InProcess",
-    "Accepted": "Accepted",
-    "Rejected": "Rejected"
+
+        "APP_STATUS":
+        {
+            "Pending": "Pending",
+            "InProcess": "InProcess",
+            "Accepted": "Accepted",
+            "Rejected": "Rejected"
+        },
+        "USA_UTILITY_BILL_TYPES":
+        {
+            "Pending": "Pending",
+            "InProcess": "InProcess",
+            "Accepted": "Accepted",
+            "Rejected": "Rejected"
+        }        ,
+        "ERROR_CODES":
+        {
+            "Pending": "Pending",
+            "InProcess": "InProcess",
+            "Accepted": "Accepted",
+            "Rejected": "Rejected"
+        }
+
 }

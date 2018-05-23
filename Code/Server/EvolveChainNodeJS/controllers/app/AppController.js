@@ -5,7 +5,6 @@ const _ = require('lodash');
 const config = require('config');
 const status = config.get('status');
 const messages = config.get('messages');
-const documentStatus = config.get('document_status');
 
 const md5 = require('md5');
 const emailService = require('../../services/EmailService')
@@ -16,25 +15,13 @@ const BaseController = require('../BaseController');
 const authenticator = require('authenticator');
 const App = require('../../models/apps');
 const KycDocument = require('../../models/kycdocument');
-const Document = require('../../models/document');
-const File = require('../../models/files');
-const BASE_PATH = config.get('base_path');
+
 const PUBLIC_PATH = config.get('PUBLIC_PATH');
 const EmailTemplatesPath = path.join(__dirname + "/../../public/email_template");
 const OTP_EXPIRY_MINS = config.get('OTP_EXPIRY_MINS');
-var bucket;
 
 class AppController extends BaseController {
 
-    FindAndModifyQuery(queryCondition, setParams) {
-        const options = {
-            upsert: false,
-            returnNewDocument: true
-        }
-        return App.findOneAndUpdate(queryCondition, setParams, options);
-    }
-
-    //#region Initialize
     async Initialize(req, res) {
 
         req.checkBody("ip", messages.req_IP).notEmpty();
@@ -79,9 +66,8 @@ class AppController extends BaseController {
                 var kycDocParam = {
                     app_key: newApp.key,
                     isDelete: 0,
-                    //docInfo: {},
-                    status : documentStatus.Pending,
-                    last_modified : new Date(Date.now())
+                    status: config.APP_STATUSES.PENDING,
+                    last_modified: commonUtility.NowDate()
                 }
                 var kycDoc = new KycDocument(kycDocParam);
                 kycDoc.save().then((newKycDoc) => {
@@ -94,50 +80,12 @@ class AppController extends BaseController {
                 return this.GetErrorResponse(error, res);
             });
 
-            // //Newgen:check if vendor_uuid already exist then update the info else add new record
-            // let conditions = {
-            //     vendor_uuid: body.vendor_uuid
-            // }
-
-            // App.findOne(conditions, (error, app) => {
-
-            //     if (error) return this.GetErrorResponse(error, res);
-
-            //     if (!app) {
-            //         var params = {
-            //             IP: body.ip,
-            //             device_type: body.device_type,
-            //             device_name: body.device_name,
-            //             os_version: body.os_version,
-            //             vendor_uuid: body.vendor_uuid,
-            //             key: body.key,
-            //             isdelete: '0',
-            //             Server: body.SERVER_ADDR,
-            //             Refer: body.REMOTE_ADDR
-            //         }
-            //         commonUtility.RemoveNull(params); // remove blank value from array
-            //         var newApp = new App(params);
-
-            //         newApp.save().then((lastAddedApp) => {
-            //             return this.GetSuccessResponse("Initialize", lastAddedApp, res);
-            //             // return res.status(status.OK).jsonp(response);
-
-            //         }).catch(function (error) {
-            //             return this.GetErrorResponse(error, res);
-            //         });
-            //     }
-            //     else {
-            //         return this.GetSuccessResponse("Initialize", app, res);
-            //     }
-            // });
-
         } catch (e) {
-            let error = `Error :: ${e}`;
-            logManager.Log(`Initialize:Exception- ${error}`);
-            return this.GetErrorResponse(error, res);
+            logManager.Log(`Initialize:Exception- ${e}`);
+            return this.GetErrorResponse(e, res);
         }
     }
-    //#endregion
+
     async GenerateEmailOTP(req, res) {
 
         req.checkBody("email", messages.req_email).notEmpty().isEmail();
@@ -384,12 +332,9 @@ class AppController extends BaseController {
         }
     }
 
+    async GeneratePin(req, res) {
 
-
-
-   async GeneratePin(req, res) {
-
- //       let current_ref= this;
+        //       let current_ref= this;
         req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
 
         try {
@@ -403,7 +348,7 @@ class AppController extends BaseController {
             let body = _.pick(req.body, ['ekyc_id']);
 
             let conditions = {
-                ekyc_id : body.ekyc_id
+                ekyc_id: body.ekyc_id
             }
 
             App.findOne(conditions, (error, app) => {
@@ -434,63 +379,63 @@ class AppController extends BaseController {
                 });
 
                 const subject = 'EvolveChain KYC - Email Code';
-                
+
                 //Mobile Verification
                 var phone = app.phone.replace("+", "");
                 var countryCode = app.country_code.replace("+", "");
                 var msg = 'EvolveChain mobile verification code: ' + ver_code + '.';
                 let toPhone = "+" + countryCode + phone;
-                              
+
                 smsService.SendSMS(toPhone, msg)
-                .then(message => {
+                    .then(message => {
 
-                    let md5MobileOTP = md5(ver_code);
-                    var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
+                        let md5MobileOTP = md5(ver_code);
+                        var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
 
-                    var setParams = {
-                        $set: {
-                            otp: md5MobileOTP
+                        var setParams = {
+                            $set: {
+                                otp: md5MobileOTP
+                            }
                         }
-                    }
 
-                    return this.FindAndModifyQuery(conditions, setParams).exec();
+                        return this.FindAndModifyQuery(conditions, setParams).exec();
 
-                })
-                .then( (error, updatedApp) => {
+                    })
+                    .then((error, updatedApp) => {
 
-                    return emailService.SendEmail(email, subject, emailBody);
-                })
-                .then( (success) => {
+                        return emailService.SendEmail(email, subject, emailBody);
+                    })
+                    .then((success) => {
 
-                    let md5EmailCode = md5(ver_code);
-                    var setParams = {$set: {
-                        otp: md5EmailCode
+                        let md5EmailCode = md5(ver_code);
+                        var setParams = {
+                            $set: {
+                                otp: md5EmailCode
+                            }
                         }
-                    }
 
-                    return this.FindAndModifyQuery(conditions, setParams).exec();
+                        return this.FindAndModifyQuery(conditions, setParams).exec();
 
-                })
-                .then( (updatedApp, error) => {
+                    })
+                    .then((updatedApp, error) => {
 
-                    return this.SendResponse("GeneratePin", error, updatedApp, res);
+                        return this.SendResponse("GeneratePin", error, updatedApp, res);
 
-                })
-                .catch(function (e) {
-                    let error = `Error :: ${e}`;
-                    return this.GetErrorResponse(error, res);
-                });
+                    })
+                    .catch(function (e) {
+                        let error = `Error :: ${e}`;
+                        return this.GetErrorResponse(error, res);
+                    });
 
             });
-        
+
         } catch (e) {
             console.log(`Error :: ${e}`);
             let error = `Error :: ${e}`;
             return this.GetErrorResponse(error, res);
         }
-    
-    }
 
+    }
 
     async SetPin(req, res) {
 
@@ -509,7 +454,7 @@ class AppController extends BaseController {
 
             }
 
-            let body = _.pick(req.body, ['ekyc_id','pin_otp','pin','vendor_uuid']);
+            let body = _.pick(req.body, ['ekyc_id', 'pin_otp', 'pin', 'vendor_uuid']);
             let targetPin = body.pin;
             let conditions = {
                 ekyc_id: body.ekyc_id,
@@ -533,42 +478,6 @@ class AppController extends BaseController {
             console.log(`Error :: ${e}`);
             let error = `Error :: ${e}`;
             this.GetErrorResponse(error, res);
-        }
-    }
-
-    async CheckPin(req, res) {
-        try {
-
-            let key = req.params.key;
-
-            let conditions = {
-                key: key
-            }
-
-            App.findOne(conditions, (error, app) => {
-
-                if (error) return res.status(status.OK).jsonp({ "success": 0, "error": error });
-
-                if (!app) return res.status(status.OK).jsonp({
-                    "success": 0,
-                    "error": messages.invalid_key
-                });
-
-                var response = {
-                    'success': 1,
-                    'now': Date.now(),
-                    'key': app.key,
-                    'pin': app.pin,
-                    'Server': app.Server,
-                    'Refer': app.Refer
-                }
-                return res.status(status.OK).jsonp(response);
-            })
-
-        } catch (e) {
-            console.log(`Error :: ${e}`);
-            let err = `Error :: ${e}`;
-            return res.status(status.OK).json({ 'success': 0, "error": err });
         }
     }
 
@@ -603,75 +512,9 @@ class AppController extends BaseController {
 
             this.FindAndModifyQuery(conditions, setParams).exec(
                 (error, updatedApp) => {
-                            return this.SendResponse("ChangePin", error, updatedApp, res);
-                        }
-                    );
-
-        } catch (e) {
-            console.log(`Error :: ${e}`);
-            let err = `Error :: ${e}`;
-            return res.status(status.OK).json({ 'success': 0, "error": err });
-        }
-    }
-
-    async GetProfile(req, res) {
-        try {
-            let key = req.params.key;
-
-            let conditions = {
-                key: key
-            }
-
-            App.findOne(conditions, (error, app) => {
-
-                if (error) return res.status(status.OK).jsonp({ "success": 0, "error": error });
-
-                if (!app) return res.status(status.OK).jsonp({
-                    "success": 0,
-                    "error": messages.invalid_key
-                });
-
-                let document_query = {
-                    hash: app.hash
+                    return this.SendResponse("ChangePin", error, updatedApp, res);
                 }
-
-                Document.findOne(document_query, (error, doc) => {
-
-                    if (error) return res.status(status.OK).jsonp({ "success": 0, "error": error });
-
-                    if (!doc) return res.status(status.OK).jsonp({
-                        "success": 0,
-                        "error": messages.document_not_found
-                    });
-
-                    this.GetImage(doc.hash, 'profile_img', function (response) {
-                        if (response.error == true) {
-                            return res.status(status.OK).jsonp({
-                                "success": 0,
-                                "error": messages.something_wentwrong
-                            });
-                        }
-                        else {
-                            var response = {
-                                'success': 1,
-                                'now': Date.now(),
-                                'result': messages.get_profile,
-                                'kyc_id': doc.kyc_id,
-                                'email': doc.email,
-                                'name': doc.details.Name,
-                                'phone': doc.phone,
-                                'address': doc.details.Address,
-                                'passport': doc.details.Passport,
-                                'tax': doc.details.Tax,
-                                'identity': doc.details.Identity,
-                                'driving': doc.details.Driving,
-                                'profile': config.get('FTP_URL') + "/profiles/" + doc.profile,
-                            }
-                            return res.status(status.OK).jsonp(response);
-                        }
-                    });
-                })
-            })
+            );
 
         } catch (e) {
             console.log(`Error :: ${e}`);
@@ -681,7 +524,7 @@ class AppController extends BaseController {
     }
 
     async Logout(req, res) {
-       
+
         try {
 
             let key = req.params.key;
@@ -715,55 +558,11 @@ class AppController extends BaseController {
         }
     }
 
+    async Login(req, res) {
 
-/*async Login(req, res) {
-
-	req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
-	req.checkBody("pin", messages.req_pin).notEmpty();
-    req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
-
-        try {
-            let result = await req.getValidationResult();
-
-            if (!result.isEmpty()) {
-                let error = this.GetErrors(result);
-                return this.GetErrorResponse(error, res);
-            }
-
-            let body = _.pick(req.body, ['ekyc_id', 'pin','vendor_uuid']);
-            let key = req.params.key;
-
-            var conditions = {
-                isdelete: '0',
-                ekyc_id: body.ekyc_id,
-                pin: body.pin
-            }
-            
-            var setParams = {
-                $set: { last_login_time: Date.now() }
-            }
-
-            this.FindAndModifyQuery(conditions, setParams).exec(
-                (error, updatedApp) => {
-                    return this.SendResponse("Login", error, updatedApp, res);
-                }
-            );
-
-        } catch (e) {
-            let error = `Error :: ${e}`;
-            return this.GetErrorResponse(error, res);
-        }
-
-    }
-*/
-
-
-
-async Login(req, res) {
-
-	req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
-	req.checkBody("pin", messages.req_pin).notEmpty();
-    req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
+        req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
+        req.checkBody("pin", messages.req_pin).notEmpty();
+        req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
 
         try {
             let result = await req.getValidationResult();
@@ -772,63 +571,57 @@ async Login(req, res) {
                 return this.GetErrorResponse(error, res);
             }
 
-            let body = _.pick(req.body, ['ekyc_id', 'pin','vendor_uuid']);
+            let body = _.pick(req.body, ['ekyc_id', 'pin', 'vendor_uuid']);
             let key = req.params.key;
 
             var conditions = {
                 isdelete: '0',
                 ekyc_id: body.ekyc_id,
             }
-            App.findOne(conditions,(error, app) =>{
-          
+
+            App.findOne(conditions, (error, app) => {
+
                 if (error) {
                     return this.GetErrorResponse(error, res);
                 }
-                else if (!app) {
+
+                if (!app) {
                     return this.GetErrorResponse("Invalid ekyc_id", res);
                 }
 
-                if(app.vendor_uuid!=body.vendor_uuid)
-                {
-                    return res.status(status.OK).jsonp({
-                        "success": 0,
-                        "error": "Device mismatch"
-                    });
+                if (app.vendor_uuid != body.vendor_uuid) {
+                    return this.GetErrorResponse("Device mismatch", res);
                 }
-                else
-                {
-                    if(app.pin!=body.pin)
-                    {
-                        return res.status(status.OK).jsonp({
-                            "success": 0,
-                            "error": "Pin does not match"
-                        });
-                    }
-                    else
-                    {   var params = {
-                            $set: { last_login_time: Date.now() }
-                        }
 
-                        App.update({
-                             _id: app._id
-                        }, {
-                            $set: params
-                        }).then((success) => {
-                            this.GetSuccessResponse("Login", app, res);
-                        })
-                    }
+                if (app.pin != body.pin) {
+                    return this.GetErrorResponse("Pin does not match", res);
                 }
-            })
 
-        }catch(e){
-            console.log(`Error :: ${e}`);
+                var params = {
+                    $set: { last_login_time: Date.now() }
+                }
+
+                App.update({
+                    _id: app._id
+                }, params).then((success) => {
+                    this.GetSuccessResponse("Login", app, res);
+                })
+            });
+
+        } catch (e) {
             let err = `Error :: ${e}`;
-            return res.status(status.OK).json({ 'success': 0, "error": err });
-            }
-}
+            return this.GetErrorResponse(err, res);
+        }
+    }
 
 
-
+    FindAndModifyQuery(queryCondition, setParams) {
+        const options = {
+            upsert: false,
+            returnNewDocument: true
+        }
+        return App.findOneAndUpdate(queryCondition, setParams, options);
+    }
 
     SendResponse(apiName, error, updatedApp, res) {
         if (error) {
@@ -920,7 +713,7 @@ async Login(req, res) {
                     'name': appEntity.name,
                     'email': appEntity.email,
                     'phone': appEntity.phone,
-//                   'profile': ,
+                    //                   'profile': ,
                     'result': 'Login successful!'
                 }
                 break;
@@ -928,148 +721,6 @@ async Login(req, res) {
 
         return res.status(status.OK).jsonp(response);
     }
-
-    // common for update App
-    async UpdateApp(conditions, params = [], callback) // common function for update App
-    {
-        let response = {
-            'error': true,
-            'data': [],
-            'message': messages.something_wentwrong,
-        }
-
-        App.update(conditions,
-            {
-                $set: params
-            }).then((success) => {
-                App.findOne(conditions, (error, app) => {
-
-                    if (error) {
-
-                        let err = `Error :: ${error}`;
-                        response.message = err;
-
-                    } else if (!app) {
-
-                        response.message = messages.app_not_found;
-
-                    } else {
-                        response.error = false;
-                        response.message = messages.app_data;
-                        response.data = app;
-                    }
-
-                    callback(response);
-                })
-            }).catch(function (error) {
-                response.message = error;
-                callback(response);
-            });
-    }
-
-    // common for update document
-    async UpdateDocument(conditions, params = [], callback) // common function for update Document
-    {
-        let response = {
-            'error': true,
-            'data': [],
-            'message': messages.something_wentwrong,
-        }
-
-        Document.update(conditions,
-            {
-                $set: params
-            }).then((success) => {
-                Document.findOne(conditions, (error, doc) => {
-
-                    if (error) {
-
-                        let err = `Error :: ${error}`;
-                        response.message = err;
-
-                    } else if (!doc) {
-
-                        response.message = messages.doc_not_found;
-
-                    } else {
-                        response.error = false;
-                        response.message = messages.doc_data;
-                        response.data = doc;
-                    }
-
-                    callback(response);
-                })
-            }).catch(function (error) {
-                response.message = error;
-                callback(response);
-            });
-    }
-
-    // common for get image
-    async GetImage(id = null, type = null, callback) {
-        let response = {
-            'error': true,
-            'data': [],
-            'message': messages.something_wentwrong,
-        }
-        var file_field = 'details_' + type + '_id';
-
-        Document.findOne({ 'hash': id }, (error, doc) => {
-
-            if (error) {
-                response.message = error;
-                callback(response);
-            } else if (!doc) {
-                response.message = messages.app_not_found;
-                callback(response);
-            } else {
-                var conditions = {
-                    [file_field]: doc._id.toString()
-                }
-
-                File.findOne(conditions, (error, fileData) => {
-
-                    if (error) {
-
-                        let err = `Error :: ${error}`;
-                        response.message = err;
-                        callback(response);
-
-                    } else if (!fileData) {
-
-                        response.message = messages.app_not_found;
-                        callback(response);
-
-                    } else {
-                        //console.log(fileData);return false;
-                        var image_name_name = fileData._id + '_' + fileData.filename;
-                        var path = PUBLIC_PATH + '/webroot/documents/' + image_name_name;
-                        var return_path = config.get('COMPANY_URL') + '/documents/' + image_name_name;
-
-                        var image_name_name = fileData._id + '_' + fileData.filename;
-                        var path = 'public/webroot/documents/' + image_name_name;
-                        var return_path = config.get('COMPANY_URL') + '/documents/' + image_name_name;
-
-                        bucket.openDownloadStream(fileData._id)
-                            .pipe(fs.createWriteStream(path))
-                            .on('error', function (error) {
-                                assert.ifError(error);
-                                response.message = err;
-                            })
-                            .on('finish', function () {
-                                console.log('done!');
-                                response.error = false;
-                                response.message = messages.image_data;
-                                response.data = { "return_path": return_path, "path": path };
-                                callback(response);
-                            });
-
-                    }
-                });
-            }
-        })
-    }
-
 }
 
 module.exports = new AppController();

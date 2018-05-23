@@ -51,11 +51,18 @@ class CommonUtility {
         });
     }
 
-    GetKycDocumentMetaDataInfo(docType) {
+    GetKycDocumentMetaDataInfo(document_type) {
         var metaDataInfo;
-        switch (docType) { //set to UPPER case
+        switch (document_type) { //set to UPPER case
             case 'BASIC':
-                metaDataInfo = { 'firstname': 'First Name', 'lastname': 'Last Name', 'middlename': 'Middle Name', 'dob': 'Date Of Birth' };
+                metaDataInfo = { 'firstname': 'First Name', 'lastname': 'Last Name', 'middlename': 'Middle Name', 
+                                'dob': 'Date Of Birth',
+                                'city': 'City', 'address1':'Address 1', 'address2':'Address 2',
+                                'place_of_birth': 'Birth Place', 'zip': 'Zip', 'state':'State', 'country': 'Country' };
+                break;
+            case 'IDENTITY':
+            case 'ADDRESS':
+                metaDataInfo = { 'document_type':'Title', 'number': 'First Name', 'expiry_date': 'Last Name', 'country': 'Middle Name', 'dob': 'Date Of Birth' };
                 break;
             default:
                 metaDataInfo = { 'firstname': 'First Name', 'lastname': 'Last Name', 'middlename': 'Middle Name', 'dob': 'Date Of Birth' };

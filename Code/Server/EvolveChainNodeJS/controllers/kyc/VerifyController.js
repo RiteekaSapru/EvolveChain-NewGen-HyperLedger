@@ -1,24 +1,16 @@
-const fs = require("fs");
-const ejs = require('ejs');
-const path = require("path");
 const _ = require('lodash');
 const async = require('async');
 const config = require('config');
-const status = config.get('status');
-const messages = config.get('messages');
+const emailService = require('../../services/EmailService')
+const smsService = require('../../services/SMSService')
 const commonUtility = require('../../helpers/CommonUtility');
-var ObjectId = require('mongodb').ObjectID;
-var mongo = require('mongodb');
-const md5 = require('md5');
+const logManager = require('../../helpers/LogManager');
+const BaseController = require('../BaseController');
+
 const App = require('../../models/apps');
-const Document = require('../../models/document');
 const KycDocument = require('../../models/kycdocument');
-const Question = require('../../models/question');
-const File = require('../../models/files');
-var templatesjs = require('templatesjs');
 
-var bucket;
-
+const messages = config.messages;
 const list = {
     SITE_NAME: config.get('app_name'),
     web_site: config.get('web_site'),
@@ -28,70 +20,48 @@ const list = {
     }
 }
 
-class Verify {
+class VerifyController extends BaseController {
     async GetKYCVerificationInfo(req, res) {
         try {
 
+            // let test = config.ERROR_CODES.DEVICE_MISMATCH;
             let document_query = {
                 app_key: req.params.key,
-                isDelete:0
+                isDelete: 0
             }
 
             KycDocument.findOne(document_query, (error, docData) => {
-
                 if (error) {
-                    error = `Error :: ${error}`;
-                    return res.status(status.OK).json({ 'success': 0, "error": error });
-                }
-
-                if (!docData) return res.redirect(config.get('base_url'));
-
-
-                var kycDocInfoList = [];
-
-                let docInfoList = docData.docInfo;                
-                for (var i = 0; i < docInfoList.length; i++) {
-                    var DocInfo = {
-                        DocType: _.toUpper(docInfoList[i].docType),
-                        DocDetails: [],
-                        DocImages: []
-                    };
-                    let metaDataInfo = commonUtility.GetKycDocumentMetaDataInfo(DocInfo.DocType);
-                    Object.keys(docInfoList[i].details).forEach(function (key) {
-                        DocInfo.DocDetails.push({ 'name': metaDataInfo[key], 'value': docInfoList[i].details[key] });
-                    });
-
-                    let Images = docInfoList[i].images;
-
-                    for (var j = 0; j < Images.length; j++) {
-                        // DocInfo.DocImages.push({ 'url': Images[j].id });
-                        DocInfo.DocImages.push({ 'url': 'https://images.pexels.com/photos/346796/pexels-photo-346796.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260' });
-
-                    }
-
-                    kycDocInfoList.push(DocInfo);
+                    logManager.Log(`GetKYCVerificationInfo-Error: ${error}`);
+                    return res.redirect(config.base_url);
 
                 }
 
-               let kycData = {
-                   app_key: docData.app_key,
-                   eKycId: "", //get it from app if already verified
-                   is_verified: docData.is_verified,                   
-                   hash:docData.hash,
-                   verification_comment:  docData.verification_comment,
-                   docInfo: kycDocInfoList
-               }
+                if (!docData) {
+                    logManager.Log(`GetKYCVerificationInfo-Doc not found`);
+                    return res.redirect(config.base_url);
+                }
+
+                let kycData = {
+                    app_key: docData.app_key,
+                    eKycId: "", //get it from app if already verified
+                    is_verified: docData.is_verified,
+                    hash: docData.hash,
+                    verification_comment: docData.verification_comment,
+                    BasicInfo: this.GetDocumentInfo(docData.basic_info),
+                    IdentityInfo: this.GetDocumentInfo(docData.identity_info),
+                    AddressInfo: this.GetDocumentInfo(docData.address_info)
+                }
 
                 res.render('web/verifiyKycDocuments.html', { kycData: kycData });
 
-
-            })
-
-
+            }).catch(function (e) {
+                logManager.Log(`GetKYCVerificationInfo-Exception: ${e}`);
+                return res.redirect(config.base_url);
+            });
         } catch (e) {
-            console.log(`Error :: ${e}`);
-            let err = `Error :: ${e}`;
-            return res.status(status.OK).json({ 'success': 0, "error": err });
+            logManager.Log(`GetKYCVerificationInfo-Exception: ${e}`);
+            return res.redirect(config.base_url);
         }
     }
 
@@ -100,91 +70,74 @@ class Verify {
 
             let document_query = {
                 app_key: req.params.key,
-                isDelete:0
+                isDelete: 0
             }
 
             KycDocument.findOne(document_query, (error, docData) => {
 
                 if (error) {
-                    error = `Error :: ${error}`;
-                    return res.status(status.OK).json({ 'success': 0, "error": error });
+                    logManager.Log(`VerifyKyc-Error: ${e}`);
+                    res.render('web/contact.html', {});
                 }
 
-                if (!docData) return res.redirect(config.get('base_url'));
+                if (!docData) {
+                    logManager.Log(`VerifyKyc-Error: ${e}`);
+                    res.render('web/contact.html', {});
+                }
+
                 let isVerified = (req.body.radioButtonVerify == "0" ? 0 : 1);
                 var setParams = {
                     $set: {
-                        is_verified:isVerified ,
+                        is_verified: isVerified,
                         verification_comment: req.body.textBoxComment,
-                        verification_time: commonUtility.NowDate() ,
-                        last_modified: commonUtility.NowDate() ,
-                        verification_by:"Admin"//set the email of verifier
+                        verification_time: commonUtility.NowDate(),
+                        last_modified: commonUtility.NowDate(),
+                        verification_by: "Admin"//set the email of verifier
 
                     }
                 }
-                KycDocument.update(document_query, setParams).then((success)=>{
-                    
+                KycDocument.update(document_query, setParams).then((success) => {
+
                     //generate eKycId if successfully updated
                     //update app status to verified
                     //send email to user
-                    return res.redirect(config.get('base_url')+"/verify/"+ docData.app_key);
+                    return res.redirect(req.baseUrl + "/verify/" + docData.app_key);
                 });
 
             })
-          
+
         } catch (e) {
-            //develop an error page for the same           
-            let err = `Error :: ${e}`;
-            return res.status(status.OK).json({ 'success': 0, "error": err });
+            logManager.Log(`VerifyKyc-Exception: ${e}`);
+            res.render('web/contact.html', {});
         }
     }
 
-    // get KYC documents images
-    async getDocumentImage(id = null, type = null, callback) {
-        let response = {
-            'error': true,
-            'data': [],
-            'message': messages.something_wentwrong,
-        }
-        var file_field = 'details_' + type + '_id';
-        var conditions = {
-            [file_field]: id
-        }
-        File.findOne(conditions, (error, fileData) => {
 
-            if (error) {
+    GetDocumentInfo(docInfo) {
+        let summaryInfo = {
+            DocDetails: [],
+            DocImages: []
+        };
 
-                let err = `Error :: ${error}`;
-                response.message = err;
-                callback(response);
+        if (docInfo.details != undefined) {
+            var details = docInfo.details;
+            let images = docInfo.images;
 
-            } else if (!fileData) {
+            let metaDataInfo = commonUtility.GetKycDocumentMetaDataInfo("BASIC");
+            Object.keys(details).forEach(function (key) {
+                summaryInfo.DocDetails.push({ 'name': metaDataInfo[key], 'value': details[key] });
+            });
 
-                response.message = messages.app_not_found;
-                callback(response);
+            for (var j = 0; j < images.length; j++) {
+              let imgUrl = config.base_url + "/kyc/getdocumentimages/" + images[j]._id.toString();
+                // DocInfo.DocImages.push({ 'url': basicImages[j].id });
+                // summaryInfo.DocImages.push({ 'url': 'https://images.pexels.com/photos/346796/pexels-photo-346796.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260' });
+                summaryInfo.DocImages.push({ 'url': imgUrl});
 
-            } else {
-
-                var image_name_name = fileData._id + '_' + fileData.filename;
-                var path = 'public/webroot/documents/' + image_name_name;
-                var return_path = config.get('COMPANY_URL') + '/documents/' + image_name_name;
-
-                bucket.openDownloadStream(fileData._id)
-                    .pipe(fs.createWriteStream(path))
-                    .on('error', function (error) {
-                        assert.ifError(error);
-                        response.message = err;
-                    })
-                    .on('finish', function () {
-
-                        response.error = false;
-                        response.message = messages.image_data;
-                        response.data = return_path;
-                        callback(response);
-                    });
             }
-        });
+        }
+        return summaryInfo;
     }
 }
 
-module.exports = new Verify();
+module.exports = new VerifyController();

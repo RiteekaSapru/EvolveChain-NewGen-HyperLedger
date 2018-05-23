@@ -1,9 +1,6 @@
 /* App model schema */
-
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const nodemailer = require('nodemailer');
-const config = require('config');
 
 const App = new Schema({
 

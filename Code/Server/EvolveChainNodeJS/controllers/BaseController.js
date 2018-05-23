@@ -4,8 +4,15 @@ const status = config.get('status');
 
 class BaseController {
 
-    GetErrorResponse(error, res) {
-        var response = { 'success': 0, 'now': Date.now(), "error": error };
+    // GetErrorResponse(error_code, error, res) {
+        GetErrorResponse(error, res) {
+        var response =
+         {
+             'success': 0, 
+             'now': Date.now(),
+             "error_code": "E00",
+             "error": error 
+        };
         return res.status(status.OK).jsonp(response);;
     }
 

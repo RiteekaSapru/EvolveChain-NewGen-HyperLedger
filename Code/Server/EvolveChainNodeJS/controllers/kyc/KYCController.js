@@ -22,7 +22,6 @@ const md5 = require('md5');
 const multer = require('multer');
 const authenticator = require('authenticator');
 const App = require('../../models/apps');
-const Document = require('../../models/document');
 const KYCDocument = require('../../models/kycdocument');
 const File = require('../../models/files');
 const Share = require('../../models/shares');

@@ -21,10 +21,8 @@ app.post("/verifymobile/:key", keyMiddleware,AppController.VerifyMobile.bind(App
 
 app.post("/GeneratePin/:key", keyMiddleware, AppController.GeneratePin.bind(AppController));
 app.post("/setpin/:key", keyMiddleware,AppController.SetPin.bind(AppController));
-app.post("/checkpin/:key", keyMiddleware, AppController.CheckPin.bind(AppController));
 app.post("/changepin/:key", keyMiddleware, AppController.ChangePin.bind(AppController));
 app.post("/login/:key", keyMiddleware, AppController.Login.bind(AppController));
-app.post("/getprofile/:key", keyMiddleware, AppController.GetProfile.bind(AppController));
 app.post("/logout/:key", keyMiddleware, AppController.Logout.bind(AppController));
 
 // app.use(AuthMiddleware(["app"]));
