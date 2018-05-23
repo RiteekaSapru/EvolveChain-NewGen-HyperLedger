@@ -116,6 +116,7 @@
     "email_missing"         : "Email missing!",
     "not_found_email_wallet": "Email not registered with GreenCoinX!",
     "not_found_phone_wallet": "Phone not registered with GreenCoinX!",
-    "phone_missing"         : "Phone missing!"  
-    
+    "phone_missing"         : "Phone missing!", 
+    "req_verify_status"     : "Verify status missing!",
+    "file_not_found"         : "File not found"
 }

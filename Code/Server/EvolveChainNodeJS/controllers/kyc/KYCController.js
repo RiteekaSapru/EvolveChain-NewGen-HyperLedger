@@ -412,51 +412,85 @@ class KYCController extends BaseController {
         }
     }
 
+    async GetDocumentImages(req, res) {
+
+        var conditions = {
+            key: req.params.key
+        }
+
+        var kycController = this;
+
+        try {
+
+            File.findOne(conditions, (error, file) => {
+
+                if (error) {
+                    logManager.Log(`GetDocumentImages:Error - ${error}`);
+                    error = `Error :: ${error}`;
+                    return kycController.GetErrorResponse(error, res);
+                }
+                if (!file) return kycController.GetErrorResponse(messages.file_not_found, res);
+
+                var img = new Buffer(file.data, 'base64');
+
+                res.contentType(file.contentType);
+                res.status(status.OK).send(img);
+            })
+        }
+        catch (e) {
+            logManager.Log(`SaveKYCDocumnet:Error - ${error}`);
+            error = `Error :: ${error}`;
+            return kycController.GetErrorResponse(error, response.message);
+        }
+    }
+
     async SaveKycDocument(req, res) {
 
         var upload = multer({
             storage: storage
-        }).array('file[]', 5);
+        }).array('file[]', 2);
 
         upload(req, res, async function (err) {
 
             var kycController = new KYCController();
 
-            if (err) console.log(err);
+            if (err) {
+                logManager.Log(`SaveKYCDocumnet:Error - ${error}`);
+                error = `Error :: ${error}`;
+                return kycController.GetErrorResponse(error, res);
+            }
+
             if (!err) {
-
-                if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-                    return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-                }
                 req.checkBody("step", messages.req_step).notEmpty();
-                req.checkBody("step", messages.req_valid_step).isIn(['basic', 'address', 'passport', 'identity', 'taxation', 'drivinglicense', 'holdimg']);
+                req.checkBody("step", messages.req_valid_step).isIn(['basic', 'address', 'identity']);
+                req.checkBody("substep", messages.req_valid_step).isIn(['basic', 'passport', 'taxation', 'license', 'utility_bill']);
 
+                let substep = req.body.substep;
                 switch (req.body.step) {
-
                     case "basic":
                         req.checkBody("firstname", messages.req_firstname).notEmpty();
                         req.checkBody("lastname", messages.req_lastname).notEmpty();
                         req.checkBody("dob", messages.req_dob).notEmpty();
+                        req.checkBody("city", messages.req_city).notEmpty();
+                        req.checkBody("address1", messages.req_address).notEmpty();
+                        req.checkBody("zip", messages.req_zip).notEmpty();
+                        req.checkBody("state", messages.req_state).notEmpty();
+                        req.checkBody("country", messages.req_country).notEmpty();
                         break;
                     case "address":
-                        break;
-                    case "passport":
-                        break;
                     case "identity":
-                        break;
-                    case "taxation":
+                        //if (substep == "passport") { 
+                        req.checkBody("number", messages.req_firstname).notEmpty();
+                        req.checkBody("country", messages.req_lastname).notEmpty();
+                        //req.checkBody("expiry_date", messages.req_dob).notEmpty();
+                        //}
                         break;
                     default:
-                        return res.status(status.OK).jsonp({
-                            "success": 0,
-                            "now": Date.now(),
-                            "error": 'step name missing!'
-                        });
+                        return kycController.GetErrorResponse('step name missing!', res);
                         break;
                 }
 
-                try 
-                {
+                try {
                     let result = await req.getValidationResult();
 
                     if (!result.isEmpty()) {
@@ -484,9 +518,6 @@ class KYCController extends BaseController {
                     }, function () {
 
                         let body = req.body;
-                        //body.SERVER_ADDR = md5(req.connection.localAddress);
-                        //body.REMOTE_ADDR = md5(req.connection.remoteAddress);
-                        //body.files = filesArray;
 
                         let key = req.params.key;
                         var conditions = {
@@ -519,27 +550,23 @@ class KYCController extends BaseController {
                                     return kycController.GetErrorResponse(error, res);
                                 }
                                 if (!docData) return kycController.GetErrorResponse(messages.kyc_document_not_found, res);
-
-                                //var doc = docData.toJSON();
-                                //let step = body.step;
-
-                                // var docInfoForSameStep = _.map(docData.docInfo, function (docInfo) {
-                                //     if (docInfo.docType == body.step) 
-                                //     return docInfo;
-                                // });
-                                var savedDocInfo = docData.docInfo;
-                                var docInfoForSameStep = _.filter(savedDocInfo, x => x.docType === body.step)
-                                if (docInfoForSameStep && docInfoForSameStep.length > 0) return kycController.GetErrorResponse("Uploaded information is already available", res);
-
-                                if(savedDocInfo.length == 3) return kycController.GetErrorResponse("Information for all the uploads is already present", res);
                                 
-                                //Saving Document Object
-                                kycController.SaveDocumentObject(docData, body, imageArrayForDoc).then((updatedDoc) => {
+                                let infoType = body.step + "_info";
 
-                                    var docInfo = _.filter(updatedDoc.docInfo, x => x.docType === body.step)
+                                //Check if it is same step
+                                if (docData[infoType] != undefined && docData[infoType] != null && docData[infoType].details.document_type != undefined)
+                                    return kycController.GetErrorResponse("Uploaded information is already available", res);
+
+                                //if(docData.)
+                                //return kycController.GetErrorResponse("Information for all the uploads is already present", res);
+
+                                //Saving Document Object
+                                kycController.saveDocumentObject(docData, body, imageArrayForDoc).then((updatedDoc) => {
+
+                                    var docInfo = updatedDoc[infoType];
                                     //let image = docInfo[0].images[0];
 
-                                    kycController.SaveDocumentImages(body.step, docInfo[0].images, filesBufferObject, function (response) {
+                                    kycController.saveDocumentImages(body.step, docInfo.images, filesBufferObject, function (response) {
 
                                         if (response.error == true) {
                                             logManager.Log(`SaveKYCDocumnet:Error - ${error}`);
@@ -552,22 +579,24 @@ class KYCController extends BaseController {
                                     });
 
                                 }).catch(function (error) {
-                                    return res.status(status.OK).jsonp({ 'success': 0, "error": error });
+                                    logManager.Log(`SaveKYCDocumnet:Error - ${error}`);
+                                    error = `Error :: ${error}`;
+                                    return kycController.GetErrorResponse(error, response.message);
                                 });
                             })
                         })
                     });
                 }
                 catch (e) {
-                    console.log(`Error :: ${e}`);
-                    let err = `Error :: ${e}`;
-                    return res.status(status.OK).json({ 'success': 0, "error": err });
+                    logManager.Log(`SaveKYCDocumnet:Error - ${error}`);
+                    error = `Error :: ${error}`;
+                    return kycController.GetErrorResponse(error, response.message);
                 }
             }
         })
     }
 
-    SaveDocumentImages(step, imageCollection, filesBufferObject, callback) {
+    saveDocumentImages(step, imageCollection, filesBufferObject, callback) {
 
         let response = {
             'error': true,
@@ -594,9 +623,11 @@ class KYCController extends BaseController {
                 outerSubCallback(response);
                 //return res.status(status.OK).jsonp({ 'success': 0, "error": error });
             });
-        }, function () {
+        }, function (err, results) {
 
             ///Find way to check error here...
+            if (err)
+                callback(response);
 
             response.error = false;
             response.data = {
@@ -609,13 +640,7 @@ class KYCController extends BaseController {
         });
     }
 
-    SaveDocumentObject(docData, body, imgArr) {
-
-        // var obj = {
-        //     app_key: null,
-        //     isDelete: false,
-        //     docInfo: []
-        // }
+    saveDocumentObject(docData, body, imgArr) {
 
         var obj = docData;
 
@@ -624,6 +649,9 @@ class KYCController extends BaseController {
         var valid = true;
         var errorMsg = "Validation Failed";
         var docInfo = {};
+        var setParams = {
+            last_modified: new Date(Date.now())
+        };
 
         switch (body.step) {
 
@@ -632,27 +660,56 @@ class KYCController extends BaseController {
                     firstname: body.firstname,
                     middlename: body.middlename,
                     lastname: body.lastname,
-                    dob: body.dob
+                    dob: body.dob,
+                    city: body.city,
+                    address1: body.address1,
+                    address2: body.address2,
+                    place_of_birth: body.place_of_birth,
+                    zip: body.zip,
+                    state: body.state,
+                    country: body.country,
+                    document_type: "basic"
                 };
+                setParams.basic_info = {};
+                setParams.basic_info.details = details;
+                setParams.basic_info.images = imgArr;
+                break;
+
+            case "address":
+                details = {
+                    number: body.number,
+                    expiry_date: body.expiry_date,
+                    country: body.country,
+                    document_type: body.substep
+                };
+                setParams.address_info = {};
+                setParams.address_info.details = details;
+                setParams.address_info.images = imgArr;
+                break;
+
+            case "identity":
+                details = {
+                    number: body.number,
+                    expiry_date: body.expiry_date,
+                    country: body.country,
+                    document_type: body.substep
+                };
+                setParams.identity_info = {};
+                setParams.identity_info.details = details;
+                setParams.identity_info.images = imgArr;
                 break;
 
             default:
-                details = {
-                    firstname: body.firstname,
-                    middlename: body.middlename,
-                    lastname: body.lastname,
-                    dob: body.dob
-                };
                 break;
         }
 
-        docInfo = {
-            details: details,
-            images: imgArr,
-            docType: body.step
-        }
+        // docInfo = {
+        //     details: details,
+        //     images: imgArr,
+        //     docType: body.step
+        // }
 
-        obj.docInfo.push(docInfo);
+        // obj.docInfo.push(docInfo);
         //return obj;
 
         if (!valid) {
@@ -671,11 +728,12 @@ class KYCController extends BaseController {
 
         return KYCDocument.findByIdAndUpdate(obj._id.toString(),
             {
-                $set: {
-                    docInfo: obj.docInfo,
-                    status: documentStatus.InProcess,
-                    last_modified: new Date(Date.now())
-                }
+                // $set: {
+                //     docInfo: obj.docInfo,
+                //     //status: documentStatus.InProcess,
+                //     last_modified: new Date(Date.now())
+                // }
+                $set: setParams
             }
             , { new: true });
     }
@@ -721,350 +779,6 @@ class KYCController extends BaseController {
             let err = `Error :: ${e}`;
             return res.status(status.OK).json({ 'success': 0, "error": err });
         }
-    }
-
-    async SaveDocumentsInfoForEachStep(key, doc, body, callback) {
-        var step = body.step;
-        // var obj = new KYCController();
-        let response = {
-            'error': true,
-            'data': [],
-            'message': messages.something_wentwrong,
-        }
-
-        function isValidDate(dateString) {
-            var regEx = /^\d{4}-\d{2}-\d{2}$/;
-            if (!dateString.match(regEx)) return false;  // Invalid format
-            var d = new Date(dateString);
-            if (!d.getTime() && d.getTime() !== 0) return false; // Invalid date
-            return d.toISOString().slice(0, 10) === dateString;
-        }
-        if (!isValidDate(body.dob)) {
-            response.message = messages.invalid_date;
-            callback(response);
-            return false;
-        }
-
-        if (_.isUndefined(body.middlename) || body.middlename == '') {
-            body.middlename = '';
-        }
-
-
-        var cnt = 0;
-        async.eachSeries(body.files, function (file, outerCallback) { // for get all images
-
-            this.upload(kyc.hash, file, body.type[cnt], body.REMOTE_ADDR, function (image) {
-
-                cnt++;
-                outerCallback();
-            })
-        }, function () {
-
-            var conditions = {
-                key: key
-            }
-
-            var params = {
-                name: body.firstname + ' ' + body.lastname
-            }
-
-            this.updateApp(conditions, params, function (response) {
-                if (response.error == true) {
-                    response.message = messages.something_wentwrong;
-                }
-                else {
-
-                    var conditions = {
-                        key: kyc.key
-                    }
-                    var basic = {
-                        'first': body.firstname,
-                        'middle': body.middlename,
-                        'last': body.lastname
-                    };
-
-                    var birth = { 'date': body.dob }
-
-                    var params = {
-                        'details.Name': basic,
-                        'details.Birth': birth,
-                        'step.basic.status': 'completed'
-                    }
-                    this.updateDocument(conditions, params, function (response) {
-                        if (response.error == true) {
-                            response.message = messages.something_wentwrong;
-                            callback(response);
-                        }
-                        else {
-                            response.error = false;
-                            response.data = {
-                                'success': 1,
-                                'now': Date.now(),
-                                'result': messages.save_basic_info,
-                                'first': body.firstname,
-                                'middle': body.middlename,
-                                'last': body.lastname,
-                                'dob': body.dob,
-                                'key': key
-                            }
-                            response.message = messages.save_basic_info;
-                            callback(response);
-                        }
-                    });
-                }
-            });
-        })
-
-
-    }
-
-
-    async SaveKycForDocument(req, res) {
-
-        var upload = multer({
-            storage: storage
-        }).array('file[]', 5);
-
-        upload(req, res, async function (err) {
-            if (err) console.log(err);
-            if (!err) {
-                if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-                    return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-                }
-                req.checkBody("step", messages.req_step).notEmpty();
-                req.checkBody("step", messages.req_valid_step).isIn(['basic', 'address', 'passport', 'identity', 'taxation', 'drivinglicense', 'holdimg']);
-
-                // check particular step's require params
-                if (req.body.step == 'basic') {
-                    req.checkBody("firstname", messages.req_firstname).notEmpty();
-                    req.checkBody("lastname", messages.req_lastname).notEmpty();
-                    req.checkBody("dob", messages.req_dob).notEmpty();
-
-                } else if (req.body.step == 'address') {
-                    req.checkBody("address", messages.req_address).notEmpty();
-                    req.checkBody("street", messages.req_street).notEmpty();
-                    req.checkBody("city", messages.req_city).notEmpty();
-                    req.checkBody("zip", messages.req_zip).notEmpty();
-                    req.checkBody("state", messages.req_state).notEmpty();
-                    req.checkBody("country", messages.req_country).notEmpty();
-                } else if (req.body.step == 'passport') {
-                    req.checkBody("firstname", messages.req_firstname).notEmpty();
-                    req.checkBody("lastname", messages.req_lastname).notEmpty();
-                    req.checkBody("dob", messages.req_dob).notEmpty();
-                    req.checkBody("address", messages.req_address).notEmpty();
-                    req.checkBody("street", messages.req_street).notEmpty();
-                    req.checkBody("city", messages.req_city).notEmpty();
-                    req.checkBody("zip", messages.req_zip).notEmpty();
-                    req.checkBody("state", messages.req_state).notEmpty();
-                    req.checkBody("country", messages.req_country).notEmpty();
-                    req.checkBody("no", messages.req_pass_no).notEmpty();
-                    req.checkBody("expiry", messages.req_expiry).notEmpty();
-                    req.checkBody("pass_country", messages.req_pass_country).notEmpty();
-
-                } else if (req.body.step == 'identity') {
-                    req.checkBody("firstname", messages.req_firstname).notEmpty();
-                    req.checkBody("lastname", messages.req_lastname).notEmpty();
-                    req.checkBody("no", messages.req_identity_no).notEmpty();
-                    req.checkBody("no", messages.req_identity_no_numeric).isNumeric();
-                    req.checkBody("no", messages.req_identity_no_length).isLength({ min: 12, max: 12 });
-
-                } else if (req.body.step == 'taxation') {
-                    req.checkBody("firstname", messages.req_firstname).notEmpty();
-                    req.checkBody("lastname", messages.req_lastname).notEmpty();
-                    req.checkBody("dateofbirth", messages.req_dob).notEmpty();
-                    req.checkBody("id", messages.req_tax_id).notEmpty();
-
-                } else if (req.body.step == 'drivinglicense') {
-                    req.checkBody("firstname", messages.req_firstname).notEmpty();
-                    req.checkBody("lastname", messages.req_lastname).notEmpty();
-                    req.checkBody("dob", messages.req_dob).notEmpty();
-                    req.checkBody("address", messages.req_address).notEmpty();
-                    req.checkBody("street", messages.req_street).notEmpty();
-                    req.checkBody("city", messages.req_city).notEmpty();
-                    req.checkBody("zip", messages.req_zip).notEmpty();
-                    req.checkBody("state", messages.req_state).notEmpty();
-                    req.checkBody("country", messages.req_country).notEmpty();
-                    req.checkBody("no", messages.req_license_no).notEmpty();
-                    req.checkBody("expiry", messages.req_license_expiry).notEmpty();
-                    req.checkBody("license_country", messages.req_license_country).notEmpty();
-
-                }
-
-                try {
-                    // var obj = new KYCController();
-                    let result = await req.getValidationResult();
-
-                    if (!result.isEmpty()) {
-
-                        this.GetErrors(result, function (error) {
-                            return res.status(status.OK).json(error);
-                        });
-                        return false;
-                    }
-
-                    let filesArray = [];
-
-                    async.eachSeries(req.files, function (file, outerSubCallback) {
-                        console.log(file);
-                        filesArray.push(file);
-                        outerSubCallback();
-                    }, function () {
-
-                        let body = req.body;
-                        body.SERVER_ADDR = md5(req.connection.localAddress);
-                        body.REMOTE_ADDR = md5(req.connection.remoteAddress);
-                        body.files = filesArray;
-
-                        let key = req.params.key;
-
-                        var conditions = {
-                            key: key,
-                            isdelete: "0"
-                        }
-                        App.findOne(conditions, (error, app) => {
-
-                            if (error) return res.status(status.OK).jsonp({ "success": 0, "error": error });
-
-                            if (!app) return res.status(status.OK).jsonp({
-                                "success": 2,
-                                "error": messages.invalid_key
-                            });
-
-                            let document_query = {
-                                hash: app.hash
-                            }
-
-                            Document.findOne(document_query, (error, docData) => {
-
-                                if (error) return res.status(status.OK).jsonp({ "success": 0, "error": error });
-
-                                if (!docData) return res.status(status.OK).jsonp({
-                                    "success": 2,
-                                    "error": messages.kyc_document_not_found
-                                });
-
-                                var doc = docData.toJSON();
-                                let step = body.step;
-                                switch (step) {
-                                    case 'basic':
-                                        this.kycBasicInfo(key, doc, body, function (response) {
-                                            console.log(response);
-                                            if (response.error == true) {
-                                                return res.status(status.OK).jsonp({
-                                                    "success": 0,
-                                                    "now": Date.now(),
-                                                    "error": response.message
-                                                });
-                                            }
-                                            else {
-                                                return res.status(status.OK).jsonp(response.data);
-                                            }
-                                        })
-                                        break;
-                                    case 'address':
-                                        this.kycAddressInfo(key, doc, body, function (response) {
-                                            if (response.error == true) {
-                                                return res.status(status.OK).jsonp({
-                                                    "success": 0,
-                                                    "now": Date.now(),
-                                                    "error": response.message
-                                                });
-                                            }
-                                            else {
-                                                return res.status(status.OK).jsonp(response.data);
-                                            }
-                                        })
-                                        break;
-                                    case 'passport':
-                                        this.kycPassportInfo(key, doc, body, function (response) {
-                                            if (response.error == true) {
-                                                return res.status(status.OK).jsonp({
-                                                    "success": 0,
-                                                    "now": Date.now(),
-                                                    "error": response.message
-                                                });
-                                            }
-                                            else {
-                                                return res.status(status.OK).jsonp(response.data);
-                                            }
-                                        })
-                                        break;
-                                    case 'identity':
-                                        this.kycIdentityInfo(key, doc, body, function (response) {
-                                            if (response.error == true) {
-                                                return res.status(status.OK).jsonp({
-                                                    "success": 0,
-                                                    "now": Date.now(),
-                                                    "error": response.message
-                                                });
-                                            }
-                                            else {
-                                                return res.status(status.OK).jsonp(response.data);
-                                            }
-                                        })
-                                        break;
-                                    case 'taxation':
-                                        this.kycTaxationInfo(key, doc, body, function (response) {
-                                            if (response.error == true) {
-                                                return res.status(status.OK).jsonp({
-                                                    "success": 0,
-                                                    "now": Date.now(),
-                                                    "error": response.message
-                                                });
-                                            }
-                                            else {
-                                                return res.status(status.OK).jsonp(response.data);
-                                            }
-                                        })
-                                        break;
-                                    case 'drivinglicense':
-                                        this.kycDrivinglicenseInfo(key, doc, body, function (response) {
-                                            if (response.error == true) {
-                                                return res.status(status.OK).jsonp({
-                                                    "success": 0,
-                                                    "now": Date.now(),
-                                                    "error": response.message
-                                                });
-                                            }
-                                            else {
-                                                return res.status(status.OK).jsonp(response.data);
-                                            }
-                                        })
-                                        break;
-                                    case 'holdimg':
-                                        this.kycHoldingImgInfo(key, doc, body, function (response) {
-                                            if (response.error == true) {
-                                                return res.status(status.OK).jsonp({
-                                                    "success": 0,
-                                                    "now": Date.now(),
-                                                    "error": response.message
-                                                });
-                                            }
-                                            else {
-                                                return res.status(status.OK).jsonp(response.data);
-                                            }
-                                        })
-                                        break;
-                                    default:
-                                        return res.status(status.OK).jsonp({
-                                            "success": 0,
-                                            "now": Date.now(),
-                                            "error": 'step name missing!'
-                                        });
-                                        break;
-                                }
-
-                            })
-                        })
-                    });
-
-                } catch (e) {
-                    console.log(`Error :: ${e}`);
-                    let err = `Error :: ${e}`;
-                    return res.status(status.OK).json({ 'success': 0, "error": err });
-                }
-            }
-        })
     }
 
 /*    async SubmitKycDocument(req, res) {
@@ -2394,913 +2108,6 @@ async SubmitKycDocument(req, res) {
                 break;
         }
 
-    }
-
-    async kycBasicInfo(key, kyc, body, callback) {
-        var step = body.step;
-        // var obj = new KYCController();
-        let response = {
-            'error': true,
-            'data': [],
-            'message': messages.something_wentwrong,
-        }
-
-        function isValidDate(dateString) {
-            var regEx = /^\d{4}-\d{2}-\d{2}$/;
-            if (!dateString.match(regEx)) return false;  // Invalid format
-            var d = new Date(dateString);
-            if (!d.getTime() && d.getTime() !== 0) return false; // Invalid date
-            return d.toISOString().slice(0, 10) === dateString;
-        }
-        if (!isValidDate(body.dob)) {
-            response.message = messages.invalid_date;
-            callback(response);
-            return false;
-        }
-
-        if (_.isUndefined(body.middlename) || body.middlename == '') {
-            body.middlename = '';
-        }
-
-        if (body.files.length < 1) { // if not upload than check old image available or not
-            this.checkImageExits(kyc.hash, 'profile_img', function (imageData) {
-
-                if (imageData.error == true) {
-                    response.message = messages.req_profile_image;
-                    callback(response);
-                }
-                else {
-
-                    var conditions = {
-                        key: key
-                    }
-
-                    var params = {
-                        name: body.firstname + ' ' + body.lastname
-                    }
-
-                    this.updateApp(conditions, params, function (response) {
-                        if (response.error == true) {
-                            response.message = messages.something_wentwrong;
-                        }
-                        else {
-
-                            var conditions = {
-                                key: kyc.key
-                            }
-                            var basic = {
-                                'first': body.firstname,
-                                'middle': body.middlename,
-                                'last': body.lastname
-                            };
-
-                            var birth = { 'date': body.dob }
-
-                            var params = {
-                                'details.Name': basic,
-                                'details.Birth': birth,
-                                'step.basic.status': 'completed'
-                            }
-                            this.updateDocument(conditions, params, function (response) {
-                                if (response.error == true) {
-                                    response.message = messages.something_wentwrong;
-                                    callback(response);
-                                }
-                                else {
-                                    response.error = false;
-                                    response.data = {
-                                        'success': 1,
-                                        'now': Date.now(),
-                                        'result': messages.save_basic_info,
-                                        'first': body.firstname,
-                                        'middle': body.middlename,
-                                        'last': body.lastname,
-                                        'dob': body.dob,
-                                        'key': key
-                                    }
-                                    response.message = messages.save_basic_info;
-                                    callback(response);
-                                }
-                            });
-                        }
-                    });
-                }
-            })
-
-        } else {
-            var cnt = 0;
-            async.eachSeries(body.files, function (file, outerCallback) { // for get all images
-
-                this.upload(kyc.hash, file, body.type[cnt], body.REMOTE_ADDR, function (image) {
-
-                    cnt++;
-                    outerCallback();
-                })
-            }, function () {
-
-                var conditions = {
-                    key: key
-                }
-
-                var params = {
-                    name: body.firstname + ' ' + body.lastname
-                }
-
-                this.updateApp(conditions, params, function (response) {
-                    if (response.error == true) {
-                        response.message = messages.something_wentwrong;
-                    }
-                    else {
-
-                        var conditions = {
-                            key: kyc.key
-                        }
-                        var basic = {
-                            'first': body.firstname,
-                            'middle': body.middlename,
-                            'last': body.lastname
-                        };
-
-                        var birth = { 'date': body.dob }
-
-                        var params = {
-                            'details.Name': basic,
-                            'details.Birth': birth,
-                            'step.basic.status': 'completed'
-                        }
-                        this.updateDocument(conditions, params, function (response) {
-                            if (response.error == true) {
-                                response.message = messages.something_wentwrong;
-                                callback(response);
-                            }
-                            else {
-                                response.error = false;
-                                response.data = {
-                                    'success': 1,
-                                    'now': Date.now(),
-                                    'result': messages.save_basic_info,
-                                    'first': body.firstname,
-                                    'middle': body.middlename,
-                                    'last': body.lastname,
-                                    'dob': body.dob,
-                                    'key': key
-                                }
-                                response.message = messages.save_basic_info;
-                                callback(response);
-                            }
-                        });
-                    }
-                });
-            })
-        }
-
-    }
-
-    async kycAddressInfo(key, kyc, body, callback) {
-        var step = body.step;
-        // var obj = new KYCController();
-        let response = {
-            'error': true,
-            'data': [],
-            'message': messages.something_wentwrong,
-        }
-
-        if (body.files.length < 1) { // if not upload than check old image available or not
-            this.checkImageExits(kyc.hash, 'address_proof', function (imageData) {
-
-                if (imageData.error == true) {
-                    response.message = req_address_proof;
-                    callback(response);
-                }
-                else {
-
-                    var conditions = {
-                        key: kyc.key
-                    }
-                    var address_info = {
-                        'address': body.address,
-                        'street': body.street,
-                        'city': body.city,
-                        'zip': body.zip,
-                        'state': body.state,
-                        'country': body.country
-                    }
-
-                    var params = {
-                        'details.Address': address_info,
-                        'step.address.status': 'completed'
-                    }
-                    this.updateDocument(conditions, params, function (response) {
-                        if (response.error == true) {
-                            response.message = messages.something_wentwrong;
-                        }
-                        else {
-                            response.error = false;
-                            response.data = {
-                                'success': 1,
-                                'now': Date.now(),
-                                'result': messages.save_address_info,
-                                'address': body.address,
-                                'street': body.street,
-                                'city': body.city,
-                                'zip': body.zip,
-                                'state': body.state,
-                                'country': body.country,
-                                'key': key
-                            }
-                            response.message = messages.save_address_info;
-                            callback(response);
-                        }
-                    });
-                }
-            })
-
-        } else {
-            var cnt = 0;
-            async.eachSeries(body.files, function (file, outerCallback) { // for get all images
-
-                this.upload(kyc.hash, file, body.type[cnt], body.REMOTE_ADDR, function (image) {
-
-                    cnt++;
-                    outerCallback();
-                })
-            }, function () {
-
-                var conditions = {
-                    key: kyc.key
-                }
-                var address_info = {
-                    'address': body.address,
-                    'street': body.street,
-                    'city': body.city,
-                    'zip': body.zip,
-                    'state': body.state,
-                    'country': body.country
-                }
-
-                var params = {
-                    'details.Address': address_info,
-                    'step.address.status': 'completed'
-                }
-                this.updateDocument(conditions, params, function (response) {
-                    if (response.error == true) {
-                        response.message = messages.something_wentwrong;
-                        callback(response);
-                    }
-                    else {
-                        response.error = false;
-                        response.data = {
-                            'success': 1,
-                            'now': Date.now(),
-                            'result': messages.save_address_info,
-                            'address': body.address,
-                            'street': body.street,
-                            'city': body.city,
-                            'zip': body.zip,
-                            'state': body.state,
-                            'country': body.country,
-                            'key': key
-                        }
-                        response.message = messages.save_address_info;
-                        callback(response);
-                    }
-                });
-            })
-        }
-    }
-
-    async kycPassportInfo(key, kyc, body, callback) {
-        var step = body.step;
-        // var obj = new KYCController();
-        let response = {
-            'error': true,
-            'data': [],
-            'message': messages.something_wentwrong,
-        }
-
-        function isValidDate(dateString) {
-            var regEx = /^\d{4}-\d{2}-\d{2}$/;
-            if (!dateString.match(regEx)) return false;  // Invalid format
-            var d = new Date(dateString);
-            if (!d.getTime() && d.getTime() !== 0) return false; // Invalid date
-            return d.toISOString().slice(0, 10) === dateString;
-        }
-        if (!isValidDate(body.dob)) {
-            response.message = messages.invalid_date;
-            callback(response);
-            return false;
-        }
-
-        if (!isValidDate(body.expiry)) {
-            response.message = messages.invalid_passport_expiry_date;
-            callback(response);
-            return false;
-        }
-
-        if (_.isUndefined(body.middlename) || body.middlename == '') {
-            body.middlename = '';
-        }
-        var images = ['passport1', 'passport2'];
-        if (body.files.length < 1) { // if not upload than check old image available or not
-
-            async.eachSeries(images, function (image, outerCallback) { // for get all images
-
-                this.checkImageExits(kyc.hash, image, function (imageData) {
-
-                    if (imageData.error == true) {
-                        response.message = messages.req_passport_image;
-                        callback(response);
-                        return false;
-                    }
-                    else {
-                        outerCallback();
-                    }
-                })
-
-            }, function () {
-                var conditions = {
-                    key: key
-                }
-
-                var params = {
-                    name: body.firstname + ' ' + body.lastname
-                }
-
-                this.updateApp(conditions, params, function (response) {
-                    if (response.error == true) {
-                        response.message = messages.something_wentwrong;
-                    }
-                    else {
-
-                        var conditions = {
-                            key: kyc.key
-                        }
-                        var passport_info = {
-                            'firstname': body.firstname,
-                            'middlename': body.middlename,
-                            'lastname': body.lastname,
-                            'dob': body.dob,
-                            'address': body.address,
-                            'street': body.street,
-                            'city': body.city,
-                            'zip': body.zip,
-                            'state': body.state,
-                            'country': body.country,
-                            'no': body.no,
-                            'expiry': body.expiry,
-                            'pass_country': body.pass_country
-                        };
-
-
-                        var params = {
-                            'details.Passport': passport_info,
-                            'step.passport.status': 'completed'
-                        }
-                        this.updateDocument(conditions, params, function (response) {
-                            if (response.error == true) {
-                                response.message = messages.something_wentwrong;
-                                callback(response);
-                            }
-                            else {
-                                response.error = false;
-                                response.data = {
-                                    'success': 1,
-                                    'now': Date.now(),
-                                    'result': messages.save_passport_info,
-                                    'firstname': body.firstname,
-                                    'middlename': body.middlename,
-                                    'lastname': body.lastname,
-                                    'dob': body.dob,
-                                    'address': body.address,
-                                    'street': body.street,
-                                    'city': body.city,
-                                    'zip': body.zip,
-                                    'state': body.state,
-                                    'country': body.country,
-                                    'no': body.no,
-                                    'expiry': body.expiry,
-                                    'pass_country': body.pass_country,
-                                    'key': key
-                                }
-                                response.message = messages.save_passport_info;
-                                callback(response);
-                            }
-                        });
-                    }
-                });
-            });
-
-        } else {
-            var cnt = 0;
-            async.eachSeries(body.files, function (file, outerCallback) { // for get all images
-
-                this.upload(kyc.hash, file, body.type[cnt], body.REMOTE_ADDR, function (image) {
-
-                    cnt++;
-                    outerCallback();
-                })
-            }, function () {
-
-                var conditions = {
-                    key: kyc.key
-                }
-                var passport_info = {
-                    'firstname': body.firstname,
-                    'middlename': body.middlename,
-                    'lastname': body.lastname,
-                    'dob': body.dob,
-                    'address': body.address,
-                    'street': body.street,
-                    'city': body.city,
-                    'zip': body.zip,
-                    'state': body.state,
-                    'country': body.country,
-                    'no': body.no,
-                    'expiry': body.expiry,
-                    'pass_country': body.pass_country
-                };
-
-
-                var params = {
-                    'details.Passport': passport_info,
-                    'step.passport.status': 'completed'
-                }
-                this.updateDocument(conditions, params, function (response) {
-                    if (response.error == true) {
-                        response.message = messages.something_wentwrong;
-                        callback(response);
-                    }
-                    else {
-                        response.error = false;
-                        response.data = {
-                            'success': 1,
-                            'now': Date.now(),
-                            'result': messages.save_passport_info,
-                            'firstname': body.firstname,
-                            'middlename': body.middlename,
-                            'lastname': body.lastname,
-                            'dob': body.dob,
-                            'address': body.address,
-                            'street': body.street,
-                            'city': body.city,
-                            'zip': body.zip,
-                            'state': body.state,
-                            'country': body.country,
-                            'no': body.no,
-                            'expiry': body.expiry,
-                            'pass_country': body.pass_country,
-                            'key': key
-                        }
-                        response.message = messages.save_passport_info;
-                        callback(response);
-                    }
-                });
-            })
-        }
-    }
-
-    async kycIdentityInfo(key, kyc, body, callback) {
-
-        var step = body.step;
-        // var obj = new KYCController();
-        let response = {
-            'error': true,
-            'data': [],
-            'message': messages.something_wentwrong,
-        }
-
-        if (_.isUndefined(body.middlename) || body.middlename == '') {
-            body.middlename = '';
-        }
-        var images = ['identity1', 'identity2'];
-        if (body.files.length < 1) { // if not upload than check old image available or not
-
-            async.eachSeries(images, function (image, outerCallback) { // for get all images
-
-                this.checkImageExits(kyc.hash, image, function (imageData) {
-
-                    if (imageData.error == true) {
-                        response.message = messages.req_identity_image;
-                        callback(response);
-                        return false;
-                    }
-                    else {
-                        outerCallback();
-                    }
-                })
-
-            }, function () {
-                var conditions = {
-                    key: key
-                }
-
-                var params = {
-                    name: body.firstname + ' ' + body.lastname
-                }
-
-                this.updateApp(conditions, params, function (response) {
-                    if (response.error == true) {
-                        response.message = messages.something_wentwrong;
-                    }
-                    else {
-
-                        var conditions = {
-                            key: kyc.key
-                        }
-                        var Identity_info = {
-                            'firstname': body.firstname,
-                            'middlename': body.middlename,
-                            'lastname': body.lastname,
-                            'no': body.no
-                        };
-
-
-                        var params = {
-                            'details.Identity': Identity_info,
-                            'step.identity.status': 'completed'
-                        }
-                        this.updateDocument(conditions, params, function (response) {
-                            if (response.error == true) {
-                                response.message = messages.something_wentwrong;
-                                callback(response);
-                            }
-                            else {
-                                response.error = false;
-                                response.data = {
-                                    'success': 1,
-                                    'now': Date.now(),
-                                    'result': messages.save_identity_info,
-                                    'firstname': body.firstname,
-                                    'middlename': body.middlename,
-                                    'lastname': body.lastname,
-                                    'no': body.no,
-                                    'key': key
-                                }
-                                response.message = messages.save_identity_info;
-                                callback(response);
-                            }
-                        });
-                    }
-                });
-            });
-
-        } else {
-            var cnt = 0;
-            async.eachSeries(body.files, function (file, outerCallback) { // for get all images
-
-                this.upload(kyc.hash, file, body.type[cnt], body.REMOTE_ADDR, function (image) {
-
-                    cnt++;
-                    outerCallback();
-                })
-            }, function () {
-
-                var conditions = {
-                    key: kyc.key
-                }
-                var Identity_info = {
-                    'firstname': body.firstname,
-                    'middlename': body.middlename,
-                    'lastname': body.lastname,
-                    'no': body.no
-                };
-
-
-                var params = {
-                    'details.Identity': Identity_info,
-                    'step.identity.status': 'completed'
-                }
-                this.updateDocument(conditions, params, function (response) {
-                    if (response.error == true) {
-                        response.message = messages.something_wentwrong;
-                        callback(response);
-                    }
-                    else {
-                        response.error = false;
-                        response.data = {
-                            'success': 1,
-                            'now': Date.now(),
-                            'result': messages.save_identity_info,
-                            'firstname': body.firstname,
-                            'middlename': body.middlename,
-                            'lastname': body.lastname,
-                            'no': body.no,
-                            'key': key
-                        }
-                        response.message = messages.save_identity_info;
-                        callback(response);
-                    }
-                });
-            })
-        }
-    }
-
-    async kycTaxationInfo(key, kyc, body, callback) {
-        var step = body.step;
-        // var obj = new KYCController();
-        let response = {
-            'error': true,
-            'data': [],
-            'message': messages.something_wentwrong,
-        }
-
-        function isValidDate(dateString) {
-            var regEx = /^\d{4}-\d{2}-\d{2}$/;
-            if (!dateString.match(regEx)) return false;  // Invalid format
-            var d = new Date(dateString);
-            if (!d.getTime() && d.getTime() !== 0) return false; // Invalid date
-            return d.toISOString().slice(0, 10) === dateString;
-        }
-        if (!isValidDate(body.dateofbirth)) {
-            response.message = messages.invalid_date;
-            callback(response);
-            return false;
-        }
-
-        if (_.isUndefined(body.middlename) || body.middlename == '') {
-            body.middlename = '';
-        }
-
-        if (body.files.length < 1) { // if not upload than check old image available or not
-            this.checkImageExits(kyc.hash, 'tax1', function (imageData) {
-
-                if (imageData.error == true) {
-                    response.message = messages.req_tax_image;
-                    callback(response);
-                }
-                else {
-
-                    var conditions = {
-                        key: kyc.key
-                    }
-                    var tax = {
-                        'firstname': body.firstname,
-                        'middlename': body.middlename,
-                        'lastname': body.lastname,
-                        'dateofbirth': body.dateofbirth,
-                        'id': body.id
-                    };
-
-                    var params = {
-                        'details.Tax': tax,
-                        'step.taxation.status': 'completed'
-                    }
-                    this.updateDocument(conditions, params, function (response) {
-                        if (response.error == true) {
-                            response.message = messages.something_wentwrong;
-                            callback(response);
-                        }
-                        else {
-                            response.error = false;
-                            response.data = {
-                                'success': 1,
-                                'now': Date.now(),
-                                'result': messages.save_tax_info,
-                                'firstname': body.firstname,
-                                'middlename': body.middlename,
-                                'lastname': body.lastname,
-                                'dateofbirth': body.dateofbirth,
-                                'id': body.id,
-                                'key': key
-                            }
-                            response.message = messages.save_tax_info;
-                            callback(response);
-                        }
-                    });
-                }
-            })
-
-        } else {
-            var cnt = 0;
-            async.eachSeries(body.files, function (file, outerCallback) { // for get all images
-
-                this.upload(kyc.hash, file, body.type[cnt], body.REMOTE_ADDR, function (image) {
-
-                    cnt++;
-                    outerCallback();
-                })
-            }, function () {
-
-                var conditions = {
-                    key: key
-                }
-
-                var params = {
-                    name: body.firstname + ' ' + body.lastname
-                }
-
-                this.updateApp(conditions, params, function (response) {
-                    if (response.error == true) {
-                        response.message = messages.something_wentwrong;
-                        callback(response);
-                    }
-                    else {
-
-                        var conditions = {
-                            key: kyc.key
-                        }
-                        var tax = {
-                            'firstname': body.firstname,
-                            'middlename': body.middlename,
-                            'lastname': body.lastname,
-                            'dateofbirth': body.dateofbirth,
-                            'id': body.id
-                        };
-
-                        var params = {
-                            'details.Tax': tax,
-                            'step.taxation.status': 'completed'
-                        }
-                        this.updateDocument(conditions, params, function (response) {
-                            if (response.error == true) {
-                                response.message = messages.something_wentwrong;
-                            }
-                            else {
-                                response.error = false;
-                                response.data = {
-                                    'success': 1,
-                                    'now': Date.now(),
-                                    'result': messages.save_tax_info,
-                                    'firstname': body.firstname,
-                                    'middlename': body.middlename,
-                                    'lastname': body.lastname,
-                                    'dateofbirth': body.dateofbirth,
-                                    'id': body.id,
-                                    'key': key
-                                }
-                                response.message = messages.save_tax_info;
-                                callback(response);
-                            }
-                        });
-                    }
-                });
-            })
-        }
-    }
-
-    async kycDrivinglicenseInfo(key, kyc, body, callback) {
-        var step = body.step;
-        // var obj = new KYCController();
-        let response = {
-            'error': true,
-            'data': [],
-            'message': messages.something_wentwrong,
-        }
-
-        function isValidDate(dateString) {
-            var regEx = /^\d{4}-\d{2}-\d{2}$/;
-            if (!dateString.match(regEx)) return false;  // Invalid format
-            var d = new Date(dateString);
-            if (!d.getTime() && d.getTime() !== 0) return false; // Invalid date
-            return d.toISOString().slice(0, 10) === dateString;
-        }
-        if (!isValidDate(body.dob)) {
-            response.message = messages.invalid_date;
-            callback(response);
-            return false;
-        }
-
-        if (!isValidDate(body.expiry)) {
-            response.message = messages.invalid_license_expiry_date;
-            callback(response);
-            return false;
-        }
-
-        if (_.isUndefined(body.middlename) || body.middlename == '') {
-            body.middlename = '';
-        }
-
-        if (body.files.length < 1) { // if not upload than check old image available or not
-            this.checkImageExits(kyc.hash, 'drivinglicense1', function (imageData) {
-
-                if (imageData.error == true) {
-                    response.message = messages.req_license_image;
-                    callback(response);
-                }
-                else {
-
-                    var conditions = {
-                        key: kyc.key
-                    }
-                    var license = {
-                        'firstname': body.firstname,
-                        'middlename': body.middlename,
-                        'lastname': body.lastname,
-                        'dob': body.dob,
-                        'address': body.address,
-                        'street': body.street,
-                        'city': body.city,
-                        'zip': body.zip,
-                        'state': body.state,
-                        'country': body.country,
-                        'no': body.no,
-                        'expiry': body.expiry,
-                        'license_country': body.license_country
-                    };
-
-                    var params = {
-                        'details.Driving': license,
-                        'step.drivinglicense.status': 'completed'
-                    }
-                    this.updateDocument(conditions, params, function (response) {
-                        if (response.error == true) {
-                            response.message = messages.something_wentwrong;
-                            callback(response);
-                        }
-                        else {
-                            response.error = false;
-                            response.data = {
-                                'success': 1,
-                                'now': Date.now(),
-                                'result': messages.save_driving_license_info,
-                                'firstname': body.firstname,
-                                'middlename': body.middlename,
-                                'lastname': body.lastname,
-                                'dob': body.dob,
-                                'address': body.address,
-                                'street': body.street,
-                                'city': body.city,
-                                'zip': body.zip,
-                                'state': body.state,
-                                'country': body.country,
-                                'no': body.no,
-                                'expiry': body.expiry,
-                                'license_country': body.license_country,
-                                'key': key
-                            }
-                            response.message = messages.save_driving_license_info;
-                            callback(response);
-                        }
-                    });
-                }
-            })
-
-        } else {
-            var cnt = 0;
-            async.eachSeries(body.files, function (file, outerCallback) { // for get all images
-
-                this.upload(kyc.hash, file, body.type[cnt], body.REMOTE_ADDR, function (image) {
-
-                    cnt++;
-                    outerCallback();
-                })
-            }, function () {
-
-                var conditions = {
-                    key: kyc.key
-                }
-                var license = {
-                    'firstname': body.firstname,
-                    'middlename': body.middlename,
-                    'lastname': body.lastname,
-                    'dob': body.dob,
-                    'address': body.address,
-                    'street': body.street,
-                    'city': body.city,
-                    'zip': body.zip,
-                    'state': body.state,
-                    'country': body.country,
-                    'no': body.no,
-                    'expiry': body.expiry,
-                    'license_country': body.license_country
-                };
-
-                var params = {
-                    'details.Driving': license,
-                    'step.drivinglicense.status': 'completed'
-                }
-                this.updateDocument(conditions, params, function (response) {
-                    if (response.error == true) {
-                        response.message = messages.something_wentwrong;
-                        callback(response);
-                    }
-                    else {
-                        response.error = false;
-                        response.data = {
-                            'success': 1,
-                            'now': Date.now(),
-                            'result': messages.save_driving_license_info,
-                            'firstname': body.firstname,
-                            'middlename': body.middlename,
-                            'lastname': body.lastname,
-                            'dob': body.dob,
-                            'address': body.address,
-                            'street': body.street,
-                            'city': body.city,
-                            'zip': body.zip,
-                            'state': body.state,
-                            'country': body.country,
-                            'no': body.no,
-                            'expiry': body.expiry,
-                            'license_country': body.license_country,
-                            'key': key
-                        }
-                        response.message = messages.save_driving_license_info;
-                        callback(response);
-                    }
-                });
-            })
-        }
     }
 
     async kycHoldingImgInfo(key, kyc, body, callback) {
