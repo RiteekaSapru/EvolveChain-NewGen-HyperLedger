@@ -779,18 +779,32 @@ async Login(req, res) {
                 isdelete: '0',
                 ekyc_id: body.ekyc_id,
             }
-
             App.findOne(conditions,(error, app) =>{
+          
+                if (error) {
+                    return this.GetErrorResponse(error, res);
+                }
+                else if (!app) {
+                    return this.GetErrorResponse("Invalid ekyc_id", res);
+                }
 
-                if (error) return res.status(status.OK).jsonp({"success": 0, "error": error});
-                if (!app) return res.status(status.OK).jsonp({
-                    "success": 0,
-                    "error": messages.invalid_ekycid
-                });
-
-                if(app.vendor_uuid==body.vendor_uuid)
+                if(app.vendor_uuid!=body.vendor_uuid)
                 {
-                    if(app.pin==body.pin)
+                    return res.status(status.OK).jsonp({
+                        "success": 0,
+                        "error": "Device mismatch"
+                    });
+                }
+                else
+                {
+                    if(app.pin!=body.pin)
+                    {
+                        return res.status(status.OK).jsonp({
+                            "success": 0,
+                            "error": "Pin does not match"
+                        });
+                    }
+                    else
                     {   var params = {
                             $set: { last_login_time: Date.now() }
                         }
@@ -800,44 +814,20 @@ async Login(req, res) {
                         }, {
                             $set: params
                         }).then((success) => {
-                            var response = {
-                                'success': 1,
-                                'now': Date.now(),
-                                'key': app.key,
-                                'pin': body.pin,
-                                'Server': app.Server,
-                                'Refer': app.Refer,
-                                'result': 'Login successful!'
-                            }
-                            return res.status(status.OK).jsonp(response);
-
-                            }).catch(function(error){
-                                return res.status(status.OK).jsonp({'success': 0,"error": error});
-                            });
+                            this.GetSuccessResponse("Login", app, res);
+                        })
                     }
-                    else
-                    {
-                        return res.status(status.OK).jsonp({
-                            "success": 0,
-                            "error": "Pin doesnot match"
-                        });
-                    }
-                }
-                else
-                {
-                    return res.status(status.OK).jsonp({
-                        "success": 0,
-                        "error": "Device mismatch"
-                    });
                 }
             })
 
-            }catch(e){
+        }catch(e){
             console.log(`Error :: ${e}`);
             let err = `Error :: ${e}`;
             return res.status(status.OK).json({ 'success': 0, "error": err });
             }
 }
+
+
 
 
     SendResponse(apiName, error, updatedApp, res) {

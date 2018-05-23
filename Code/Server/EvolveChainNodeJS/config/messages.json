@@ -18,6 +18,8 @@
     "req_pin_length"        : "New pin must be 4 number!",
     "req_ekycid"            : "ekyc id missing!",
     "req_otp"               : "Otp id missing!",
+    "req_app_key"           : "app_key missing!",
+    "invalid_app_key"       : "Invalid app_key",
     "req_ekycid_numeric"    : "ekycid must be Number!",
     "req_otp_numeric"       : "OTP must be Number!",
     "same_pin"              : "New Pin same as current pin",
