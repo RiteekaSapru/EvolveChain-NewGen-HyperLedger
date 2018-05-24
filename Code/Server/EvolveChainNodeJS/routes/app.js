@@ -19,10 +19,10 @@ app.post("/verifyemail/:key",keyMiddleware, AppController.VerifyEmail.bind(AppCo
 app.post("/generateMobileOtp/:key",keyMiddleware, AppController.GenerateMobileOTP.bind(AppController));
 app.post("/verifymobile/:key", keyMiddleware,AppController.VerifyMobile.bind(AppController));
 
-app.post("/GeneratePin/:key", keyMiddleware, AppController.GeneratePin.bind(AppController));
-app.post("/setpin/:key", keyMiddleware,AppController.SetPin.bind(AppController));
-app.post("/changepin/:key", keyMiddleware, AppController.ChangePin.bind(AppController));
-app.post("/login/:key", keyMiddleware, AppController.Login.bind(AppController));
+app.post("/GeneratePin", AppController.GeneratePin.bind(AppController));
+app.post("/setpin", AppController.SetPin.bind(AppController));
+app.post("/changepin", AppController.ChangePin.bind(AppController));
+app.post("/login", AppController.Login.bind(AppController));
 app.post("/logout/:key", keyMiddleware, AppController.Logout.bind(AppController));
 
 // app.use(AuthMiddleware(["app"]));
