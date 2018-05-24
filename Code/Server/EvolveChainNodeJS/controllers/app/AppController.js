@@ -38,7 +38,7 @@ class AppController extends BaseController {
                 logManager.Log(`Initialize:Invalid Request- ${error}`);
                 return this.GetErrorResponse(error, res);
             }
-throw new Error('TEST');
+
             let body = _.pick(req.body, ['ip', 'device_type', 'device_name', 'os_version', 'vendor_uuid']);
 
             body.key = commonUtility.GenerateUniqueToken();
@@ -66,7 +66,7 @@ throw new Error('TEST');
                     app_key: newApp.key,
                     isDelete: 0,
                     status: config.APP_STATUSES.PENDING,
-                    last_modified: commonUtility.NowDate()
+                    last_modified: commonUtility.UtcNow()
                 }
                 var kycDoc = new KycDocument(kycDocParam);
                 kycDoc.save().then((newKycDoc) => {
@@ -117,7 +117,7 @@ throw new Error('TEST');
                 if (!app)
                     return this.GetErrorResponse(messages.invalid_key, res);
 
-               
+
                 var email = body.email.toLowerCase();
                 var email_code = commonUtility.GenerateOTP(6);
 
@@ -140,7 +140,9 @@ throw new Error('TEST');
                 emailService.SendEmail(email, subject, emailBody).then(function (success) {
 
                     let md5EmailCode = md5(email_code);
-                    var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
+                    // var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
+                    var expireTime = commonUtility.AddMinutesToUtcNow(OTP_EXPIRY_MINS);
+
                     var setParams = {
                         $set: {
                             email: email,
@@ -236,7 +238,7 @@ throw new Error('TEST');
                 if (error) return this.GetErrorResponse(error, res);
 
                 if (!app) return this.GetErrorResponse(`Data Mismatch: No application found for phone:${phone}`, res);
-                
+
                 var phone_code = commonUtility.GenerateOTP(6);
 
 
@@ -248,7 +250,9 @@ throw new Error('TEST');
                 smsService.SendSMS(toPhone, msg).then(message => {
 
                     let md5MobileOTP = md5(phone_code);
-                    var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
+                    // var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
+                    var expireTime = commonUtility.AddMinutesToUtcNow(OTP_EXPIRY_MINS);
+                    
                     var setParams = {
                         $set: {
                             phone: phone,
@@ -297,7 +301,8 @@ throw new Error('TEST');
             let body = _.pick(req.body, ['mobile', 'country_code', 'phone_code']);
             let key = req.params.key;
 
-            var expireTime = new Date(Date.now() - (OTP_EXPIRY_MINS * 60000));
+            // var expireTime = new Date(Date.now() - (OTP_EXPIRY_MINS * 60000));
+            var expireTime = commonUtility.AddMinutesToUtcNow(-OTP_EXPIRY_MINS);
 
             var conditions = {
                 key: key,
@@ -377,7 +382,8 @@ throw new Error('TEST');
                     .then(message => {
 
                         let md5MobileOTP = md5(ver_code);
-                        var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
+                        // var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
+                        // var expireTime = commonUtility.AddMinutesToUtcNow(OTP_EXPIRY_MINS);
 
                         var setParams = {
                             $set: {
@@ -508,16 +514,11 @@ throw new Error('TEST');
 
             var setParams = {
                 pin: body.new_pin,
-                ekyc: body.ekyc_id
             }
 
             this.FindAndModifyQuery(conditions, setParams).exec(
                 (error,updatedApp ) => {
-                    if(!error && !updatedApp)
-                    { 
-                        return this.GetErrorResponse("Invalid ekycId or pin", res);
-                    }
-                    else return this.SendResponse("ChangePin", error, updatedApp, res);
+                     return this.SendResponse("ChangePin", error, updatedApp, res);
                 }
             );
 
@@ -632,7 +633,7 @@ throw new Error('TEST');
         if (error) {
             return this.GetErrorResponse(error, res);
         }
-        else if (!updatedApp) {
+        if (!updatedApp) {
             return this.GetErrorResponse("Invalid Request: No application found", res);
         }
         return this.GetSuccessResponse(apiName, updatedApp, res);

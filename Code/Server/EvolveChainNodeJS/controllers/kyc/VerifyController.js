@@ -90,8 +90,8 @@ class VerifyController extends BaseController {
                     $set: {
                         is_verified: isVerified,
                         verification_comment: req.body.textBoxComment,
-                        verification_time: commonUtility.NowDate(),
-                        last_modified: commonUtility.NowDate(),
+                        verification_time: commonUtility.UtcNow(),
+                        last_modified: commonUtility.UtcNow(),
                         verification_by: "Admin"//set the email of verifier
 
                     }

@@ -74,4 +74,11 @@ KYCDocument.pre('save', function (next) {
     next();
 });
 
+KYCDocument.pre('update', function() {
+    this.update({},{ $set: { last_modified: commonUtility.UtcNow() } });
+  });
+  
+  KYCDocument.pre('findOneAndUpdate', function() {
+    this.findOneAndUpdate({},{ $set: { last_modified: commonUtility.UtcNow() } });
+  });
 module.exports = mongoose.model('kycdocuments', KYCDocument);

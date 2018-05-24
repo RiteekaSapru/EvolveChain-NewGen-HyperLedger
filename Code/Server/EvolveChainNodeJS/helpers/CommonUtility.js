@@ -9,6 +9,14 @@ class CommonUtility {
     NowDate() {
         return dateFormat(new Date(), "isoUtcDateTime");
     }
+    UtcNow() {
+        return dateFormat(new Date(), "isoUtcDateTime");
+    }
+    AddMinutesToUtcNow(minutes)
+    {
+        var newDate = new Date(Date.now() + minutes * 60000);        
+        return dateFormat(newDate, "isoUtcDateTime");
+    }
 
     ReplaceData(shortcodearr, strbody) {
         if (shortcodearr != null) {
