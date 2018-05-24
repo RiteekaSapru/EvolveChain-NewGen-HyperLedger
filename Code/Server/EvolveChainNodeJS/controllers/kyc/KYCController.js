@@ -988,14 +988,17 @@ class KYCController extends BaseController {
 
 async SubmitKycDocument(req, res) {
 
+    var kycController = new KYCController();
+
 	req.checkBody("app_key", messages.req_app_key).notEmpty();
 
         try {
             let result = await req.getValidationResult();
 
             if (!result.isEmpty()) {
-                let error = this.GetErrors(result);
-                return this.GetErrorResponse(error, res);
+                let error = kycController.GetErrors(result);
+                logManager.Log(`SubmitKycDocument:Error - ${error}`);
+                return kycController.GetErrorResponse(error, res);
             }
 
             let body = _.pick(req.body, ['app_key']);
@@ -1006,33 +1009,38 @@ async SubmitKycDocument(req, res) {
 
             KYCDocument.findOne(conditions,(error, docData) =>{
 
-                if (error) return res.status(status.OK).jsonp({"success": 0, "error": error});
-                if (!docData) return res.status(status.OK).jsonp({
+                if (error) {
+                    logManager.Log(`SubmitKycDocument:Error - ${error}`);
+                    error = `Error :: ${error}`;
+                    return kycController.GetErrorResponse(error, res);
+                }
+                if (!docData) return kycController.GetErrorResponse(messages.invalid_app_key, res);
+
+                if (docData.basic_info.details == undefined || docData.basic_info.details == null || docData.basic_info.details.document_type == undefined)
+                {    return res.status(status.OK).jsonp({
                     "success": 0,
-                    "error": messages.invalid_app_key
+                    "error": "Documents missing or incorrect"
+                    });
+                }
+
+                //link send through email 
+                var template = fs.readFileSync(EmailTemplatesPath + '/kyc_varified.html', {
+                    encoding: 'utf-8'
                 });
 
-                if(docData.docInfo.length==3 && docData.docInfo.find(x => x.docType == 'basic') && docData.docInfo.find(x => x.docType == 'identity') && docData.docInfo.find(x => x.docType == 'address'))
-                {
-                    //link send through email 
-                    var template = fs.readFileSync(EmailTemplatesPath + '/kyc_varified.html', {
-                        encoding: 'utf-8'
-                    });
+                to = to.toString();
 
-
-                    to = to.toString();
-
-                    var emailBody = ejs.render(template, {
-                        kyc_verify_url: config.get('base_url')+"/verify/"+ docData.app_key,
+                var emailBody = ejs.render(template, {
+                    kyc_verify_url: config.get('base_url')+"/verify/"+ docData.app_key,
 //                        hash: docData.app_key,
-                        SITE_IMAGE: config.get('SITE_IMAGE'),
-                        SITE_NAME: config.get('app_name'),
-                        CURRENT_YEAR: config.get('current_year')
-                    });
+                    SITE_IMAGE: config.get('SITE_IMAGE'),
+                    SITE_NAME: config.get('app_name'),
+                    CURRENT_YEAR: config.get('current_year')
+                });
 
-                    const subject = 'EvolveChain KYC - Verification Link';
+                const subject = 'EvolveChain KYC - Verification Link';
 
-                    emailService.SendEmail(to, subject, emailBody).then(function (success) {
+                emailService.SendEmail(to, subject, emailBody).then(function (success) {
                     var response = {
                         'success': 1,
                         'now': Date.now(),
@@ -1040,30 +1048,17 @@ async SubmitKycDocument(req, res) {
                     }
                     return res.status(status.OK).jsonp(response);
 
+                }).catch(function (e) {
+                    let error = `Error :: ${e}`;
+                    return this.GetErrorResponse(error, res);
+                });
 
-                    }).catch(function (e) {
-                        let error = `Error :: ${e}`;
-                        return this.GetErrorResponse(error, res);
-                    });
-
-                }
-                else{
-                    return res.status(status.OK).jsonp({
-                    "success": 0,
-                    "error": "Documents missing or incorrect"
-                    });
-                }
             })
         } catch (e) {
             let error = `Error :: ${e}`;
             return this.GetErrorResponse(error, res);
         }
-
     }
-
-
-
-
 
 
     async UnlinkKycImg(req, res) {
