@@ -64,11 +64,8 @@ class CommonUtility {
                 break;
             case 'IDENTITY':
             case 'ADDRESS':
-                metaDataInfo = { 'document_type':'Title', 'number': 'First Name', 'expiry_date': 'Last Name', 'country': 'Middle Name', 'dob': 'Date Of Birth' };
-                break;
-            default:
-                metaDataInfo = { 'firstname': 'First Name', 'lastname': 'Last Name', 'middlename': 'Middle Name', 'dob': 'Date Of Birth' };
-                break;
+                metaDataInfo = { 'document_type':'Title', 'number': 'Number', 'expiry_date': 'Expiry Date', 'country': 'Country' };
+                break;            
         }
         return metaDataInfo;
     }

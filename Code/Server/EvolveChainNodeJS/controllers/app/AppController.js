@@ -38,7 +38,7 @@ class AppController extends BaseController {
                 logManager.Log(`Initialize:Invalid Request- ${error}`);
                 return this.GetErrorResponse(error, res);
             }
-
+throw new Error('TEST');
             let body = _.pick(req.body, ['ip', 'device_type', 'device_name', 'os_version', 'vendor_uuid']);
 
             body.key = commonUtility.GenerateUniqueToken();

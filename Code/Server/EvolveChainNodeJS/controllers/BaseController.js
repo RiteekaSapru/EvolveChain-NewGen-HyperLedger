@@ -1,19 +1,24 @@
 const config = require('config');
 const messages = config.get('messages');
-const status = config.get('status');
+
 
 class BaseController {
 
     // GetErrorResponse(error_code, error, res) {
-        GetErrorResponse(error, res) {
+    GetErrorResponse(error, res) {
+        var error_message = error;
+        let errorType = (typeof error);
+        if (error != null && error != undefined && errorType == 'object')
+            error_message = error.message;
+
         var response =
-         {
-             'success': 0, 
-             'now': Date.now(),
-             "error_code": "E00",
-             "error": error 
-        };
-        return res.status(status.OK).jsonp(response);;
+            {
+                'success': 0,
+                'now': Date.now(),
+                "error_code": "E00",
+                "error": error_message
+            };
+        return res.status(config.HTTP_STATUSES.OK).jsonp(response);;
     }
 
     GetErrors(result) // common function for check errors

@@ -48,9 +48,9 @@ class VerifyController extends BaseController {
                     is_verified: docData.is_verified,
                     hash: docData.hash,
                     verification_comment: docData.verification_comment,
-                    BasicInfo: this.GetDocumentInfo(docData.basic_info),
-                    IdentityInfo: this.GetDocumentInfo(docData.identity_info),
-                    AddressInfo: this.GetDocumentInfo(docData.address_info)
+                    BasicInfo: this.GetDocumentInfo(docData.basic_info, "BASIC"),
+                    IdentityInfo: this.GetDocumentInfo(docData.identity_info, "IDENTITY"),
+                    AddressInfo: this.GetDocumentInfo(docData.address_info, "ADDRESS")
                 }
 
                 res.render('web/verifiyKycDocuments.html', { kycData: kycData });
@@ -114,7 +114,7 @@ class VerifyController extends BaseController {
     }
 
 
-    GetDocumentInfo(docInfo) {
+    GetDocumentInfo(docInfo, docType) {
         let summaryInfo = {
             DocDetails: [],
             DocImages: []
@@ -124,18 +124,22 @@ class VerifyController extends BaseController {
             var details = docInfo.details;
             let images = docInfo.images;
 
-            let metaDataInfo = commonUtility.GetKycDocumentMetaDataInfo("BASIC");
-            Object.keys(details).forEach(function (key) {
-                if(metaDataInfo.hasOwnProperty(key)){
+            let metaDataInfo = commonUtility.GetKycDocumentMetaDataInfo(docType);
+            let detailKeys = Object.keys(details);
+            Object.keys(metaDataInfo).forEach(function (key) {
+                //if(detailKeys.hasOwnProperty(key)){
                     summaryInfo.DocDetails.push({ 'name': metaDataInfo[key], 'value': details[key] });
-                }
+               // }
             });
+            // Object.keys(details).forEach(function (key) {
+            //     if(metaDataInfo.hasOwnProperty(key)){
+            //         summaryInfo.DocDetails.push({ 'name': metaDataInfo[key], 'value': details[key] });
+            //     }
+            // });
 
             for (var j = 0; j < images.length; j++) {
               let imgUrl = config.base_url + "/kyc/getdocumentimages/" + images[j]._id.toString();
-                // DocInfo.DocImages.push({ 'url': basicImages[j].id });
-                // summaryInfo.DocImages.push({ 'url': 'https://images.pexels.com/photos/346796/pexels-photo-346796.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260' });
-                summaryInfo.DocImages.push({ 'url': imgUrl});
+                 summaryInfo.DocImages.push({ 'url': imgUrl});
 
             }
         }
