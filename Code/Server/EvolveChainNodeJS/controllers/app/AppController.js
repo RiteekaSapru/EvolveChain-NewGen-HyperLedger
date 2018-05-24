@@ -152,6 +152,7 @@ class AppController extends BaseController {
 
                     this.FindAndModifyQuery(conditions, setParams).exec(
                         (error, updatedApp) => {
+
                             return this.SendResponse("GenerateEmailOTP", error, updatedApp, res);
                         }
                     );
@@ -389,7 +390,12 @@ class AppController extends BaseController {
                     })
                     .then((error, updatedApp) => {
 
-                        return emailService.SendEmail(email, subject, emailBody);
+                        if(!error && !updatedApp)
+                        {
+                            return this.GetErrorResponse("Could not update  otp in DB", res);
+                        }
+
+                        else return emailService.SendEmail(email, subject, emailBody);
                     })
                     .then((success) => {
 
@@ -405,7 +411,11 @@ class AppController extends BaseController {
                     })
                     .then((updatedApp, error) => {
 
-                        return this.SendResponse("GeneratePin", error, updatedApp, res);
+                        if(!error && !updatedApp)
+                        {
+                            return this.GetErrorResponse("Could not update otp in DB", res);
+                        }
+                        else return this.SendResponse("GeneratePin", error, updatedApp, res);
 
                     })
                     .catch(function (e) {
@@ -493,12 +503,17 @@ class AppController extends BaseController {
             }
 
             var setParams = {
-                pin: body.new_pin
+                pin: body.new_pin,
+                ekyc: body.ekyc_id
             }
 
             this.FindAndModifyQuery(conditions, setParams).exec(
-                (error, updatedApp) => {
-                    return this.SendResponse("ChangePin", error, updatedApp, res);
+                (error,updatedApp ) => {
+                    if(!error && !updatedApp)
+                    { 
+                        return this.GetErrorResponse("Invalid ekycId or pin", res);
+                    }
+                    else return this.SendResponse("ChangePin", error, updatedApp, res);
                 }
             );
 
@@ -558,7 +573,7 @@ class AppController extends BaseController {
             }
 
             let body = _.pick(req.body, ['ekyc_id', 'pin', 'vendor_uuid']);
-            let key = req.params.key;
+//            let key = req.params.key;
 
             var conditions = {
                 isdelete: '0',
