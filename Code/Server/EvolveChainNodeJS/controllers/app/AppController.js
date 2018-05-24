@@ -466,7 +466,11 @@ class AppController extends BaseController {
 
             this.FindAndModifyQuery(conditions, setParams).exec(
                 (error, updatedApp) => {
-                    return this.SendResponse("SetPin", error, updatedApp, res);
+                    if(!error && !updatedApp)
+                    { 
+                        return this.GetErrorResponse("Invalid ekycId or pin", res);
+                    }
+                    else return this.SendResponse("SetPin", error, updatedApp, res);
                 }
             );
 
