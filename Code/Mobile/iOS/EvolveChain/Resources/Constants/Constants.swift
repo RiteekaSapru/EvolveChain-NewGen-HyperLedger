@@ -51,11 +51,19 @@ let generateEmailOtpURL = "/app/generateEmailOtp/"
 let verifyEmailOtpURL = "/app/verifyemail/"
 let generateMobileOtpURL = "/app/generateMobileOTP/"
 let verifyMobileOtpURL = "/app/verifymobile/"
+let saveKYCDetails = "/kyc/saveKycDocument/"
+
+let generatePinURL = "/app/GeneratePin/"
+let setPinURL = "/app/SetPin/"
+
+let loginURL = "/app/Login/"
 
 
 // MARK : Colors
 
 let color_green = UIColor.init(red: 5.0/255.0, green: 104.0/255, blue: 57.0/255.0, alpha: 1.0)
+let color_blue = UIColor.init(red: 15.0/255.0, green: 117.0/255.0, blue: 189.0/255.0, alpha: 1.0)
+
 
 // MARK : Strings
 let stringAppName = "EvolveChain"
@@ -73,6 +81,19 @@ let stringOtpEmpty = "Please enter OTP."
 let stringFnameEmpty = "Please enter first name."
 let stringMnameEmpty = "Please enter middle name."
 let stringLnameEmpty = "Please enter last name."
+
+let stringFnameIncorrect = "Please enter correct first name."
+let stringLnameIncorrect = "Please enter correct last name."
+let stringMnameIncorrect = "Please enter correct middle name."
+
+
+let stringDOBEmpty = "Please enter your date of birth."
+let stringBirthStateEmpty = "Please enter your birth place."
+let stringBirthCountryEmpty = "Please enter your birth country."
+let stringAddStreetEmpty = "Please enter your street."
+let stringCityEmpty = "Please enter your city."
+
+
 let stringEmailNotVerified = "Please add your email."
 let stringPhoneNotVerified = "Please add your contact number."
 let stringUserPicEmpty = "Please add your picture."
@@ -82,12 +103,30 @@ let stringIdentityFrontPicEmpty = "Please select front picture."
 let stringIdentityBackPicEmpty = "Please select back picture."
 let stringDrivingNumberEmpty = "Please enter drinving license number."
 
-let stringAdd1Empty = "Please enter drinving license number."
-let stringAdd2Empty = "Please enter drinving license number."
-let stringStateEmpty = "Please enter drinving license number."
-let stringCountryEmpty = "Please enter drinving license number."
-let stringAreaCodeEmpty = "Please enter drinving license number."
-let stringUtilityEmpty = "Please enter drinving license number."
+let stringNumberEmpty = "Please enter document number."
+let stringBillTypeEmpty = "Please select bill type."
 
-let stringTaxationIDEmpty = "Please enter drinving license number."
 
+let stringAdd1Empty = "Please enter address."
+let stringAdd2Empty = "Please enter address."
+let stringStateEmpty = "Please enter state."
+let stringCountryEmpty = "Please enter country."
+let stringAreaCodeEmpty = "Please enter zip code."
+let stringUtilityEmpty = "Please select image."
+let stringSSNIDEmpty = "Please enter SSN ID."
+
+let stringTaxationIDEmpty = "Please enter taxation ID."
+
+let stringPayPalIDEmpty = "Please enter PayPal ID."
+let stringAccountNumberIDEmpty = "Please enter account number."
+let stringIFSCEmpty = "Please enter IFSC."
+let stringBankNameIDEmpty = "Please enter bank name."
+
+let stringKYCIDEmpty = "Please enter KYC Id."
+let stringPinEmpty = "Please enter pin."
+let stringRePinEmpty = "Please re-enter pin."
+let stringPinNotMatch = "Pin does not match."
+
+let stringBasicNotSaved = "Please complete and save Basic details first."
+let stringIdentityNotSaved = "Please complete and save Identity details first."
+let stringAddressNotSaved = "Please complete and save Address details first."

@@ -22,6 +22,30 @@ class FlowManager: NSObject {
         }
     }
 
+    func moveToLogin() -> Void {
+        GlobalMethods.sharedInstance.pushVC(getLoginStoryBoard().instantiateViewController(withIdentifier: "LoginVC"))
+    }
+    
+    func moveToHome() -> Void {
+        GlobalMethods.sharedInstance.pushVC(getHomeStoryBoard().instantiateViewController(withIdentifier: "ProfileVC"))
+    }
+    
+    func getLoginStoryBoard() -> UIStoryboard {
+       return UIStoryboard.init(name: "Login", bundle: nil)
+    }
+    
+    func getHomeStoryBoard() -> UIStoryboard {
+        return UIStoryboard.init(name: "Home", bundle: nil)
+    }
+    
+    func getBeforeLoginStoryboard() -> UIStoryboard {
+        return UIStoryboard.init(name: "Main", bundle: nil)
+
+    }
+    
+    func resetToSplash() {
+        _navigator.setViewControllers([ getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "EntryHomeVC")], animated: true)
+    }
 }
 
 extension AppDelegate {

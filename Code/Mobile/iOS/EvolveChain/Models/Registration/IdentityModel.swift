@@ -13,6 +13,7 @@ class IdentityModel: NSObject {
     
     var number: String = ""
     var expiry: Date = Date()
+    var country: String = ""
     var identityType : IdentityType = .PassportIdentityType
     var frontImage : UIImage = UIImage.init(named: "ic_img_placeholder")!
     var backImage : UIImage = UIImage.init(named: "ic_img_placeholder")!

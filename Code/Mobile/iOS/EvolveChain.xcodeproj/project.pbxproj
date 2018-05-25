@@ -21,6 +21,25 @@
 		BD345C9720AE99EE002388A9 /* UIScrollView+KeyboardPresentation.m in Sources */ = {isa = PBXBuildFile; fileRef = BD345C9420AE99ED002388A9 /* UIScrollView+KeyboardPresentation.m */; };
 		BD345C9A20AEAA6F002388A9 /* IdentityProofVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD345C9920AEAA6E002388A9 /* IdentityProofVC.swift */; };
 		BD345C9E20AED3A5002388A9 /* IdentityModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD345C9D20AED3A5002388A9 /* IdentityModel.swift */; };
+		BD3BE16720B6EDB700FED508 /* SuccessfullVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD3BE16620B6EDB700FED508 /* SuccessfullVC.swift */; };
+		BDB45E9E20B4042E008888CF /* BackSpaceTextfield.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB45E9D20B4042E008888CF /* BackSpaceTextfield.swift */; };
+		BDB45EA020B5428D008888CF /* PassportModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB45E9F20B5428D008888CF /* PassportModel.swift */; };
+		BDB45EA320B54308008888CF /* DrivingLicenseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB45EA220B54308008888CF /* DrivingLicenseModel.swift */; };
+		BDB45EA520B54325008888CF /* TaxationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB45EA420B54325008888CF /* TaxationModel.swift */; };
+		BDB45EA720B54346008888CF /* UtilityBillModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB45EA620B54346008888CF /* UtilityBillModel.swift */; };
+		BDB45EA920B543A5008888CF /* DocumentModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB45EA820B543A5008888CF /* DocumentModel.swift */; };
+		BDB45EAB20B547AB008888CF /* DocumentSelectionVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB45EAA20B547AB008888CF /* DocumentSelectionVC.swift */; };
+		BDB45EAE20B594DF008888CF /* OptionsCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB45EAC20B594DF008888CF /* OptionsCollectionViewCell.swift */; };
+		BDB45EAF20B594DF008888CF /* OptionsCollectionViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = BDB45EAD20B594DF008888CF /* OptionsCollectionViewCell.xib */; };
+		BDB53ADC20B28EE900C5122C /* BankDetailsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB53ADB20B28EE900C5122C /* BankDetailsVC.swift */; };
+		BDB53ADF20B296EE00C5122C /* BankDetailsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB53ADE20B296EE00C5122C /* BankDetailsModel.swift */; };
+		BDB53AE120B2995C00C5122C /* AddressProofModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB53AE020B2995C00C5122C /* AddressProofModel.swift */; };
+		BDB53AE320B29FB500C5122C /* Login.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BDB53AE220B29FB500C5122C /* Login.storyboard */; };
+		BDB53AE720B2A4C600C5122C /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB53AE620B2A4C600C5122C /* LoginVC.swift */; };
+		BDB53AEA20B2AEAF00C5122C /* GenerateOtpVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB53AE920B2AEAF00C5122C /* GenerateOtpVC.swift */; };
+		BDB53AED20B2B2DF00C5122C /* SetPinVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB53AEC20B2B2DF00C5122C /* SetPinVC.swift */; };
+		BDB53AEF20B2CCCC00C5122C /* Home.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BDB53AEE20B2CCCC00C5122C /* Home.storyboard */; };
+		BDB53AF220B2CDDC00C5122C /* ProfileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB53AF120B2CDDC00C5122C /* ProfileVC.swift */; };
 		BDD5599220AA9BCC006D8641 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD5599120AA9BCC006D8641 /* AppDelegate.swift */; };
 		BDD5599720AA9BCC006D8641 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BDD5599520AA9BCC006D8641 /* Main.storyboard */; };
 		BDD5599920AA9BDA006D8641 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BDD5599820AA9BDA006D8641 /* Assets.xcassets */; };
@@ -66,6 +85,25 @@
 		BD345C9420AE99ED002388A9 /* UIScrollView+KeyboardPresentation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIScrollView+KeyboardPresentation.m"; sourceTree = "<group>"; };
 		BD345C9920AEAA6E002388A9 /* IdentityProofVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityProofVC.swift; sourceTree = "<group>"; };
 		BD345C9D20AED3A5002388A9 /* IdentityModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityModel.swift; sourceTree = "<group>"; };
+		BD3BE16620B6EDB700FED508 /* SuccessfullVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuccessfullVC.swift; sourceTree = "<group>"; };
+		BDB45E9D20B4042E008888CF /* BackSpaceTextfield.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackSpaceTextfield.swift; sourceTree = "<group>"; };
+		BDB45E9F20B5428D008888CF /* PassportModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassportModel.swift; sourceTree = "<group>"; };
+		BDB45EA220B54308008888CF /* DrivingLicenseModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrivingLicenseModel.swift; sourceTree = "<group>"; };
+		BDB45EA420B54325008888CF /* TaxationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxationModel.swift; sourceTree = "<group>"; };
+		BDB45EA620B54346008888CF /* UtilityBillModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtilityBillModel.swift; sourceTree = "<group>"; };
+		BDB45EA820B543A5008888CF /* DocumentModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentModel.swift; sourceTree = "<group>"; };
+		BDB45EAA20B547AB008888CF /* DocumentSelectionVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentSelectionVC.swift; sourceTree = "<group>"; };
+		BDB45EAC20B594DF008888CF /* OptionsCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionsCollectionViewCell.swift; sourceTree = "<group>"; };
+		BDB45EAD20B594DF008888CF /* OptionsCollectionViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = OptionsCollectionViewCell.xib; sourceTree = "<group>"; };
+		BDB53ADB20B28EE900C5122C /* BankDetailsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankDetailsVC.swift; sourceTree = "<group>"; };
+		BDB53ADE20B296EE00C5122C /* BankDetailsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankDetailsModel.swift; sourceTree = "<group>"; };
+		BDB53AE020B2995C00C5122C /* AddressProofModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressProofModel.swift; sourceTree = "<group>"; };
+		BDB53AE220B29FB500C5122C /* Login.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Login.storyboard; sourceTree = "<group>"; };
+		BDB53AE620B2A4C600C5122C /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
+		BDB53AE920B2AEAF00C5122C /* GenerateOtpVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateOtpVC.swift; sourceTree = "<group>"; };
+		BDB53AEC20B2B2DF00C5122C /* SetPinVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetPinVC.swift; sourceTree = "<group>"; };
+		BDB53AEE20B2CCCC00C5122C /* Home.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Home.storyboard; sourceTree = "<group>"; };
+		BDB53AF120B2CDDC00C5122C /* ProfileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileVC.swift; sourceTree = "<group>"; };
 		BDD5598E20AA9BCC006D8641 /* EvolveChain.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EvolveChain.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BDD5599120AA9BCC006D8641 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BDD5599620AA9BCC006D8641 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -160,8 +198,99 @@
 			children = (
 				BD161CB720AD682B009BBE50 /* BasicDetailsModel.swift */,
 				BD345C9D20AED3A5002388A9 /* IdentityModel.swift */,
+				BDB53ADE20B296EE00C5122C /* BankDetailsModel.swift */,
+				BDB53AE020B2995C00C5122C /* AddressProofModel.swift */,
+				BDB45EA820B543A5008888CF /* DocumentModel.swift */,
+				BDB45EA120B54295008888CF /* DocumentModels */,
 			);
 			path = Registration;
+			sourceTree = "<group>";
+		};
+		BDB45EA120B54295008888CF /* DocumentModels */ = {
+			isa = PBXGroup;
+			children = (
+				BDB45E9F20B5428D008888CF /* PassportModel.swift */,
+				BDB45EA220B54308008888CF /* DrivingLicenseModel.swift */,
+				BDB45EA420B54325008888CF /* TaxationModel.swift */,
+				BDB45EA620B54346008888CF /* UtilityBillModel.swift */,
+			);
+			path = DocumentModels;
+			sourceTree = "<group>";
+		};
+		BDB45EB020B594ED008888CF /* OptionsCollectionViewCell */ = {
+			isa = PBXGroup;
+			children = (
+				BDB45EAC20B594DF008888CF /* OptionsCollectionViewCell.swift */,
+				BDB45EAD20B594DF008888CF /* OptionsCollectionViewCell.xib */,
+			);
+			path = OptionsCollectionViewCell;
+			sourceTree = "<group>";
+		};
+		BDB53ADD20B28EED00C5122C /* BankDetails */ = {
+			isa = PBXGroup;
+			children = (
+				BDB53ADB20B28EE900C5122C /* BankDetailsVC.swift */,
+			);
+			path = BankDetails;
+			sourceTree = "<group>";
+		};
+		BDB53AE420B29FB900C5122C /* Login */ = {
+			isa = PBXGroup;
+			children = (
+				BDB53AE220B29FB500C5122C /* Login.storyboard */,
+			);
+			path = Login;
+			sourceTree = "<group>";
+		};
+		BDB53AE520B2A49200C5122C /* Registration */ = {
+			isa = PBXGroup;
+			children = (
+				BDD559C320AAEC15006D8641 /* CountrySelectionVC.swift */,
+				BDD559DD20AD4E08006D8641 /* AmericaRegistration */,
+			);
+			path = Registration;
+			sourceTree = "<group>";
+		};
+		BDB53AE820B2A4C900C5122C /* Login */ = {
+			isa = PBXGroup;
+			children = (
+				BDB53AE620B2A4C600C5122C /* LoginVC.swift */,
+				BDB53AEB20B2AEB400C5122C /* GenerateOtp */,
+			);
+			path = Login;
+			sourceTree = "<group>";
+		};
+		BDB53AEB20B2AEB400C5122C /* GenerateOtp */ = {
+			isa = PBXGroup;
+			children = (
+				BDB53AE920B2AEAF00C5122C /* GenerateOtpVC.swift */,
+				BDB53AEC20B2B2DF00C5122C /* SetPinVC.swift */,
+			);
+			path = GenerateOtp;
+			sourceTree = "<group>";
+		};
+		BDB53AF020B2CCD100C5122C /* AfterLogin */ = {
+			isa = PBXGroup;
+			children = (
+				BDB53AEE20B2CCCC00C5122C /* Home.storyboard */,
+			);
+			path = AfterLogin;
+			sourceTree = "<group>";
+		};
+		BDB53AF320B2CDE200C5122C /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				BDB53AF120B2CDDC00C5122C /* ProfileVC.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+		BDB53AF420B2CDEB00C5122C /* AfterLogin */ = {
+			isa = PBXGroup;
+			children = (
+				BDB53AF320B2CDE200C5122C /* Profile */,
+			);
+			path = AfterLogin;
 			sourceTree = "<group>";
 		};
 		BDD5598520AA9BCC006D8641 = {
@@ -206,6 +335,8 @@
 			children = (
 				BDD5599A20AA9BDA006D8641 /* LaunchScreen.storyboard */,
 				BDD559AD20AA9CF3006D8641 /* BeforeLogin */,
+				BDB53AE420B29FB900C5122C /* Login */,
+				BDB53AF020B2CCD100C5122C /* AfterLogin */,
 			);
 			path = Storyboards;
 			sourceTree = "<group>";
@@ -222,6 +353,7 @@
 			isa = PBXGroup;
 			children = (
 				BDD559B920AAB8B0006D8641 /* BeforeLogin */,
+				BDB53AF420B2CDEB00C5122C /* AfterLogin */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -250,6 +382,7 @@
 			children = (
 				BDD559C220AAEA52006D8641 /* RadioSelectionCell */,
 				BDD559DC20AC5483006D8641 /* TickCell */,
+				BDB45EB020B594ED008888CF /* OptionsCollectionViewCell */,
 			);
 			path = Cells;
 			sourceTree = "<group>";
@@ -318,8 +451,8 @@
 			isa = PBXGroup;
 			children = (
 				BDD559BA20AABAB5006D8641 /* EntryHomeVC.swift */,
-				BDD559C320AAEC15006D8641 /* CountrySelectionVC.swift */,
-				BDD559DD20AD4E08006D8641 /* AmericaRegistration */,
+				BDB53AE520B2A49200C5122C /* Registration */,
+				BDB53AE820B2A4C900C5122C /* Login */,
 			);
 			path = BeforeLogin;
 			sourceTree = "<group>";
@@ -339,6 +472,7 @@
 				BDD559D420AC4B40006D8641 /* RawdataConverter.swift */,
 				BDD559C820ABEA2D006D8641 /* CustomBackButton.swift */,
 				BD161CB520AD544D009BBE50 /* GlobalMethods.swift */,
+				BDB45E9D20B4042E008888CF /* BackSpaceTextfield.swift */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -356,6 +490,9 @@
 			isa = PBXGroup;
 			children = (
 				BDD559C520AB0828006D8641 /* AmericaRegistrationVC.swift */,
+				BDB45EAA20B547AB008888CF /* DocumentSelectionVC.swift */,
+				BD3BE16620B6EDB700FED508 /* SuccessfullVC.swift */,
+				BDB53ADD20B28EED00C5122C /* BankDetails */,
 				BDE24C8B20AEE45300AAF7C5 /* AddressProofVC */,
 				BD345C9B20AEAA77002388A9 /* IdentityProof */,
 				BD345C9820AEA288002388A9 /* BasicDetails */,
@@ -429,7 +566,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BDB45EAF20B594DF008888CF /* OptionsCollectionViewCell.xib in Resources */,
 				BDD559DB20AC547E006D8641 /* TickCell.xib in Resources */,
+				BDB53AEF20B2CCCC00C5122C /* Home.storyboard in Resources */,
 				BD345C8C20ADA6FF002388A9 /* CustomPickerView.xib in Resources */,
 				BDD559B320AA9E0E006D8641 /* Settings.bundle in Resources */,
 				BDD5599C20AA9BDA006D8641 /* LaunchScreen.storyboard in Resources */,
@@ -437,6 +576,7 @@
 				BDD5599920AA9BDA006D8641 /* Assets.xcassets in Resources */,
 				BD345C8720AD84A3002388A9 /* countries.json in Resources */,
 				BDD5599720AA9BCC006D8641 /* Main.storyboard in Resources */,
+				BDB53AE320B29FB500C5122C /* Login.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -449,18 +589,29 @@
 			files = (
 				BDD559C020AAEA4B006D8641 /* RadioSelectionCell.swift in Sources */,
 				BDD559D720AC5325006D8641 /* DateExtension.swift in Sources */,
+				BDB45EAB20B547AB008888CF /* DocumentSelectionVC.swift in Sources */,
+				BDB53AF220B2CDDC00C5122C /* ProfileVC.swift in Sources */,
 				BDD559D320AC4735006D8641 /* UIDeviceExtension.swift in Sources */,
 				BDD559B620AAA5EE006D8641 /* FlowManager.swift in Sources */,
+				BDB53AE720B2A4C600C5122C /* LoginVC.swift in Sources */,
+				BDB53ADF20B296EE00C5122C /* BankDetailsModel.swift in Sources */,
 				BDD559DA20AC547E006D8641 /* TickCell.swift in Sources */,
 				BD161CBF20AD69FD009BBE50 /* AddPhoneVC.swift in Sources */,
+				BDB45EA720B54346008888CF /* UtilityBillModel.swift in Sources */,
+				BDB45E9E20B4042E008888CF /* BackSpaceTextfield.swift in Sources */,
 				BDD559D520AC4B40006D8641 /* RawdataConverter.swift in Sources */,
+				BDB45EA920B543A5008888CF /* DocumentModel.swift in Sources */,
 				BDD559CB20ABEE90006D8641 /* NetworkManager.swift in Sources */,
 				BDE24C8A20AEE42100AAF7C5 /* AddressProofVC.swift in Sources */,
 				BDD559CF20AC19F0006D8641 /* RequestManager.swift in Sources */,
 				BD345C9A20AEAA6F002388A9 /* IdentityProofVC.swift in Sources */,
+				BDB53AED20B2B2DF00C5122C /* SetPinVC.swift in Sources */,
+				BDB45EA020B5428D008888CF /* PassportModel.swift in Sources */,
 				BD345C9520AE99ED002388A9 /* ScrollviewKeyboard.m in Sources */,
+				BDB45EAE20B594DF008888CF /* OptionsCollectionViewCell.swift in Sources */,
 				BD345C8520AD848B002388A9 /* Country.swift in Sources */,
 				BDD559DF20AD4E49006D8641 /* BasicDetailsAmericaVC.swift in Sources */,
+				BDB45EA520B54325008888CF /* TaxationModel.swift in Sources */,
 				BD345C9620AE99EE002388A9 /* TableviewKeyboard.m in Sources */,
 				BDD559C420AAEC15006D8641 /* CountrySelectionVC.swift in Sources */,
 				BDD559BD20AABFA4006D8641 /* UIViewExtensions.swift in Sources */,
@@ -471,12 +622,17 @@
 				BDD559CD20ABEF7D006D8641 /* SettingsBundleHelper.swift in Sources */,
 				BD161CB620AD544D009BBE50 /* GlobalMethods.swift in Sources */,
 				BDD5599220AA9BCC006D8641 /* AppDelegate.swift in Sources */,
+				BD3BE16720B6EDB700FED508 /* SuccessfullVC.swift in Sources */,
+				BDB53AEA20B2AEAF00C5122C /* GenerateOtpVC.swift in Sources */,
 				BD161CB820AD682B009BBE50 /* BasicDetailsModel.swift in Sources */,
 				BD345C8B20ADA6FF002388A9 /* CustomPickerView.swift in Sources */,
 				BD345C9E20AED3A5002388A9 /* IdentityModel.swift in Sources */,
 				BD345C9720AE99EE002388A9 /* UIScrollView+KeyboardPresentation.m in Sources */,
+				BDB45EA320B54308008888CF /* DrivingLicenseModel.swift in Sources */,
 				BDD559B820AAAFB5006D8641 /* Constants.swift in Sources */,
 				BD161CBD20AD68A0009BBE50 /* VerifyOtpVC.swift in Sources */,
+				BDB53ADC20B28EE900C5122C /* BankDetailsVC.swift in Sources */,
+				BDB53AE120B2995C00C5122C /* AddressProofModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

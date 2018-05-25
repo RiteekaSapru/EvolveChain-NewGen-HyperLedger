@@ -42,7 +42,7 @@
                                 </constraints>
                             </view>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="yRV-3p-9gM" secondAttribute="trailing" id="2Xq-nP-MME"/>
                             <constraint firstItem="FFH-07-MQv" firstAttribute="leading" secondItem="gGW-pI-IeI" secondAttribute="leading" id="ESs-5k-CjR"/>
@@ -57,6 +57,7 @@
                         </constraints>
                     </view>
                 </subviews>
+                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
                     <constraint firstAttribute="bottom" secondItem="gGW-pI-IeI" secondAttribute="bottom" id="XZF-bP-0MV"/>
                     <constraint firstItem="gGW-pI-IeI" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="gjq-xM-IzM"/>
@@ -64,6 +65,7 @@
                     <constraint firstItem="gGW-pI-IeI" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="15" id="zBV-XP-fKc"/>
                 </constraints>
             </tableViewCellContentView>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
             <connections>
                 <outlet property="imgTick" destination="yRV-3p-9gM" id="5oS-oA-zyC"/>

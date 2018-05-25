@@ -100,7 +100,12 @@ class RequestManager: NSObject {
                                    
                                 }
                                 else{
-                                    failure(data , response , error as NSError?,RawdataConverter.optionalString(jsonDict["error"]))
+                                    var errorString = "Server Error"
+                                    if let val = RawdataConverter.optionalString(jsonDict["error"]) {
+                                        // now val is not nil and the Optional has been unwrapped, so use it
+                                        errorString = val
+                                    }
+                                    failure(data , response , error as NSError?,errorString)
                                 }
                             }
                             else{
@@ -127,7 +132,7 @@ class RequestManager: NSObject {
         
     }
     
-    func requestToUploadImagesWithParams(url: String,params: Dictionary<String, Any>?, images : [UIImage],fileNames : [String], method: HttpMethod, success:@escaping ( Data? ,HTTPURLResponse?  , NSError? ) -> Void, failure: @escaping ( Data? ,HTTPURLResponse?  , NSError?,String? )-> Void)
+    func requestToUploadImagesWithParams(url: String,params: Dictionary<String, Any>?, images : [UIImage],fileNames : [String], method: HttpMethod, success:@escaping ( Data? ,HTTPURLResponse?  , NSError? ,Dictionary<String,Any>) -> Void, failure: @escaping ( Data? ,HTTPURLResponse?  , NSError?,String? )-> Void)
     {
         if !isConnectedToNetwork() {
             failure(nil , nil , nil,stringNoInternet)
@@ -139,40 +144,46 @@ class RequestManager: NSObject {
         
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
         
-//        let imageData = UIImagePNGRepresentation(signatureImage)
-//        let fileString = imageData?.base64EncodedData(options: .endLineWithLineFeed)
-//
-//        let boundary = "-------------------------acebdf13572468"
-        let contentType = "multipart/form-data"
+        let boundary = "*****14737809831466499882746641449*****"
+
+        let contentType = "multipart/form-data; boundary=\(boundary)"
         
         request.addValue(contentType, forHTTPHeaderField: "Content-Type")
-        
-//        let contentLength = String.init(describing: imageData?.count)
-        
-//        request.setValue(contentLength, forHTTPHeaderField: "Content-Length")
-        
-//        let upperBoundary = NSMutableData()
-//        let lowerBoundary = NSMutableData()
+         request.addValue("Keep-Alive", forHTTPHeaderField: "Connection")
         let bodyData = NSMutableData()
-        let mimetype = "image/png"
-         let boundary = "---------------------------14737809831466499882746641449"
+        let mimetype = "image/jpg"
+        
+        if params != nil {
+            for (key, value) in params! {
+                bodyData.append("--\(boundary)\r\n".data(using: String.Encoding.utf8)!)
+                bodyData.append("Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n".data(using: String.Encoding.utf8)!)
+                bodyData.append("\(value)\r\n".data(using: String.Encoding.utf8)!)
+            }
+        }
+        
         if images.count > 0
         {
             for index in 1...images.count
             {
-                let image_data = UIImagePNGRepresentation(images[index-1])
+                var compression = 0.8
+                if images[index-1].size.height > 2500 || images[index-1].size.width > 2500 {
+                    compression = 0.4
+                }
+                let image_data = UIImageJPEGRepresentation(images[index-1], CGFloat(compression))
+                    
+//                let image_data = UIImageJPEGRepresentation(images[index-1], 0.5)
                 let fileName = fileNames[index-1] as String
                 
                 bodyData.append("--\(boundary)\r\n".data(using: String.Encoding.utf8)!)
-                bodyData.append(String("Content-Disposition: form-data; name=\"file\"; filename=\"\(fileName)\"").data(using: String.Encoding.utf8)!)
+                bodyData.append(String("Content-Disposition: form-data; name=\"\(fileName)\"; filename=\"\(fileName)\".jpg").data(using: String.Encoding.utf8)!)
                 bodyData.append(String("\r\n").data(using: String.Encoding.utf8)!)
                 bodyData.append(String("Content-Type: \(mimetype)").data(using: String.Encoding.utf8)!)
                 bodyData.append(String("\r\n").data(using: String.Encoding.utf8)!)
                 bodyData.append(String("\r\n").data(using: String.Encoding.utf8)!)
                 bodyData.append(image_data!)
                 bodyData.append(String("\r\n").data(using: String.Encoding.utf8)!)
-                bodyData.append("--\(boundary)\r\n".data(using: String.Encoding.utf8)!)
-                bodyData.append("--\(boundary)\r\n".data(using: String.Encoding.utf8)!)
+                bodyData.append("--\(boundary)--\r\n".data(using: String.Encoding.utf8)!)
+//                bodyData.append("--\(boundary)\r\n".data(using: String.Encoding.utf8)!)
             }
         }
         
@@ -181,30 +192,55 @@ class RequestManager: NSObject {
         request.httpBody = bodyData as Data
         request.httpMethod = "POST"
         
-        let uploadTask : URLSessionUploadTask = URLSession.shared.uploadTask(with: request as URLRequest, from: bodyData as Data, completionHandler: {
+       URLSession.shared.dataTask(with: request as URLRequest) { (data, response, error) -> Void in
             
-            data, response, error in
+           
             DispatchQueue.main.async(execute: {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
             })
             
+            let res = response as? HTTPURLResponse
+            
+            
             if let data = data {
-                
+
                 if let response = response as? HTTPURLResponse, 200...299 ~= response.statusCode {
-                    success(data , response , error as NSError?)
+                    do {
+                        if let jsonDict = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? Dictionary<String,Any>
+                        {
+                            print(jsonDict)
+                            if let status = jsonDict["success"] {
+
+                                if RawdataConverter.integer(status) == 1{
+                                    success(data , response , error as NSError?,jsonDict)
+
+                                }
+                                else{
+                                    failure(data , response , error as NSError?,RawdataConverter.optionalString(jsonDict["error"]))
+                                }
+                            }
+                            else{
+                                failure(data , response , error as NSError?,RawdataConverter.optionalString(jsonDict["error"]))
+                            }
+                        } else {
+                            print("bad json")
+                            failure(data , response , error as NSError?,"Unable to parse JSON.")
+                        }
+                    } catch let error as NSError {
+                        print(error)
+                        failure(data , response, error as NSError?,"Unable to parse JSON.")
+                    }
+                    
                 } else {
-                    failure(data , response as? HTTPURLResponse, error as NSError?,error.debugDescription)
+                    
+                    failure(data , response as? HTTPURLResponse, error as NSError?,HTTPURLResponse.localizedString(forStatusCode: (res?.statusCode)!))
                 }
             }else {
                 
-                failure(data , response as? HTTPURLResponse, error as NSError?,error.debugDescription)
+                failure(data , response as? HTTPURLResponse, error as NSError?,HTTPURLResponse.localizedString(forStatusCode: ((error as NSError?)?.code)!))
                 
             }
  
-        })
-        
-        uploadTask.resume()
-        
-        
+        }.resume()
     }
 }

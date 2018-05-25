@@ -50,12 +50,23 @@
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(scrollToActiveTextField:) name:UITextFieldTextDidBeginEditingNotification object:nil];
         
+        UITapGestureRecognizer *singleTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(singleTap:)];
+        singleTapGestureRecognizer.numberOfTapsRequired = 1;
+        singleTapGestureRecognizer.enabled = YES;
+        singleTapGestureRecognizer.cancelsTouchesInView = YES;
+        [self addGestureRecognizer:singleTapGestureRecognizer];
+        
     }
     
 }
 
 
 #pragma mark - Observers
+
+- (void)singleTap:(UITapGestureRecognizer *)gesture {
+    //handle taps
+    NSLog(@"tapped");
+}
 
 -(void)keyboardWillShow:(NSNotification*)notification
 {
