@@ -28,12 +28,9 @@ class EmailService{
             secure: true
         });
     
-    return transporter.sendMail(mailOption).then(function(success) {
+    return transporter.sendMail(mailOption).then((success)=> {
        // return success.messageId;
        transporter.close();
-    }).catch(function(err) {
-        //return err;
-        console.log(err);
     });
 };
 	

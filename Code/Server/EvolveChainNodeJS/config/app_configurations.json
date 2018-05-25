@@ -19,7 +19,10 @@
         "INCORRECT_KEY": "E04",
         "INCORRECT_EKYCID": "E05",
         "INVALID_REQUEST": "E06",
-        "APP_NOT_FOUND": "E10"
+        "APP_NOT_FOUND": "E07",
+        "DOCUMENT_NOT_FOUND": "E08",
+        "SAME_PIN":"E09",
+        "EXCEPTION": "E100"
     },
     "HTTP_STATUS":{
         "OK": 200,

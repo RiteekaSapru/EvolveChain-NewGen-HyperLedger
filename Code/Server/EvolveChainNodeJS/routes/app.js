@@ -23,7 +23,6 @@ app.post("/GeneratePin", AppController.GeneratePin.bind(AppController));
 app.post("/setpin", AppController.SetPin.bind(AppController));
 app.post("/changepin", AppController.ChangePin.bind(AppController));
 app.post("/login", AppController.Login.bind(AppController));
-app.post("/logout/:key", keyMiddleware, AppController.Logout.bind(AppController));
 
 // app.use(AuthMiddleware(["app"]));
 app.use("/*", (req, res) => {

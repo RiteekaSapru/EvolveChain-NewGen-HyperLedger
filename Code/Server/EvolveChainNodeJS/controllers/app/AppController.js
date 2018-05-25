@@ -34,9 +34,9 @@ class AppController extends BaseController {
             let result = await req.getValidationResult();
 
             if (!result.isEmpty()) {
-                let error = this.GetErrors(result);
+                let error = super.GetErrors(result);
                 logManager.Log(`Initialize:Invalid Request- ${error}`);
-                return this.GetErrorResponse(error, res);
+                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
             }
 
             let body = _.pick(req.body, ['ip', 'device_type', 'device_name', 'os_version', 'vendor_uuid']);
@@ -71,17 +71,17 @@ class AppController extends BaseController {
                 var kycDoc = new KycDocument(kycDocParam);
                 kycDoc.save().then((newKycDoc) => {
                     return this.GetSuccessResponse("Initialize", newApp, res);
-                }).catch(function (error) {
-                    return this.GetErrorResponse(error, res);
+                }).catch((ex) => {
+                    return this.SendExceptionResponse(error, res);
                 });
 
-            }).catch(function (error) {
-                return this.GetErrorResponse(error, res);
+            }).catch((ex) => {
+                return this.SendExceptionResponse(res, ex);
             });
 
-        } catch (e) {
-            logManager.Log(`Initialize:Exception- ${e}`);
-            return this.GetErrorResponse(e, res);
+        } catch (ex) {
+            logManager.Log(`Initialize:Exception- ${ex}`);
+            return this.SendExceptionResponse(res, ex);
         }
     }
 
@@ -94,7 +94,7 @@ class AppController extends BaseController {
 
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
-                return this.GetErrorResponse(error, res);
+                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
 
             }
 
@@ -109,13 +109,12 @@ class AppController extends BaseController {
             App.findOne(conditions, (error, app) => {
 
                 if (error) {
-                    console.log(`Error :: ${error}`);
                     error = `Error :: ${error}`;
-                    return this.GetErrorResponse(error, res);
+                    return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND, error);
                 }
 
                 if (!app)
-                    return this.GetErrorResponse(messages.invalid_key, res);
+                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_KEY);
 
 
                 var email = body.email.toLowerCase();
@@ -137,7 +136,7 @@ class AppController extends BaseController {
 
                 const subject = 'EvolveChain KYC - Email Code';
 
-                emailService.SendEmail(email, subject, emailBody).then(function (success) {
+                emailService.SendEmail(email, subject, emailBody).then((success) => {
 
                     let md5EmailCode = md5(email_code);
                     // var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
@@ -154,20 +153,16 @@ class AppController extends BaseController {
 
                     this.FindAndModifyQuery(conditions, setParams).exec(
                         (error, updatedApp) => {
-
                             return this.SendResponse("GenerateEmailOTP", error, updatedApp, res);
                         }
                     );
 
-                }).catch(function (e) {
-                    let error = `Error :: ${e}`;
-                    return this.GetErrorResponse(error, res);
+                }).catch((ex) => {
+                    return this.SendExceptionResponse(res, ex);
                 });
             })
-        } catch (e) {
-            console.log(`Error :: ${e}`);
-            let error = `Error :: ${e}`;
-            return this.GetErrorResponse(error, res);
+        } catch (ex) {
+            return this.SendExceptionResponse(res, ex);
         }
     }
 
@@ -181,7 +176,7 @@ class AppController extends BaseController {
 
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
-                return this.GetErrorResponse(error, res);
+                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
 
             }
 
@@ -203,10 +198,9 @@ class AppController extends BaseController {
                 }
             );
 
-        } catch (e) {
-            let error = `Error :: ${e}`;
-            logManager.Log(`VerifyEmail:Exception-${error}`);
-            return this.GetErrorResponse(error, res);
+        } catch (ex) {
+            // logManager.Log(`VerifyEmail:Exception-${ex}`);
+            return this.SendExceptionResponse(res, ex);
         }
 
     }
@@ -222,7 +216,7 @@ class AppController extends BaseController {
 
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
-                return this.GetErrorResponse(error, res);
+                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
 
             }
 
@@ -235,9 +229,9 @@ class AppController extends BaseController {
 
             App.findOne(conditions, (error, app) => {
 
-                if (error) return this.GetErrorResponse(error, res);
+                if (error) return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, error);
 
-                if (!app) return this.GetErrorResponse(`Data Mismatch: No application found for phone:${phone}`, res);
+                if (!app) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND, error);
 
                 var phone_code = commonUtility.GenerateOTP(6);
 
@@ -252,7 +246,7 @@ class AppController extends BaseController {
                     let md5MobileOTP = md5(phone_code);
                     // var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
                     var expireTime = commonUtility.AddMinutesToUtcNow(OTP_EXPIRY_MINS);
-                    
+
                     var setParams = {
                         $set: {
                             phone: phone,
@@ -269,16 +263,13 @@ class AppController extends BaseController {
                         }
                     );
 
-                }).catch(function (e) {
-                    let error = `Error :: ${e}`;
-                    return this.GetErrorResponse(error, res);
+                }).catch((ex) => {
+                    return this.SendExceptionResponse(res, ex);
                 });
             })
 
-        } catch (e) {
-            console.log(`Error :: ${e}`);
-            let error = `Error :: ${e}`;
-            return this.GetErrorResponse(error, res);
+        } catch (ex) {
+            return this.SendExceptionResponse(res, ex);
         }
     }
 
@@ -294,7 +285,7 @@ class AppController extends BaseController {
 
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
-                return this.GetErrorResponse(error, res);
+                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
 
             }
 
@@ -322,10 +313,8 @@ class AppController extends BaseController {
                 }
             );
 
-        } catch (e) {
-            console.log(`Error :: ${e}`);
-            let error = `Error :: ${e}`;
-            return this.GetErrorResponse(error, res);
+        } catch (ex) {
+            return this.SendExceptionResponse(res, ex);
         }
     }
 
@@ -339,7 +328,8 @@ class AppController extends BaseController {
             let result = await req.getValidationResult();
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
-                return this.GetErrorResponse(error, res);
+                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+
             }
 
             let body = _.pick(req.body, ['ekyc_id']);
@@ -350,9 +340,9 @@ class AppController extends BaseController {
 
             App.findOne(conditions, (error, app) => {
 
-                if (error) return this.GetErrorResponse(error, res);
+                if (error) return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, error);
 
-                if (!app) return this.GetErrorResponse(`Data Mismatch: No application found for phone:${phone}`, res);
+                if (!app) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND, error);
 
                 //Email verification
                 var email = app.email.toLowerCase();
@@ -380,7 +370,6 @@ class AppController extends BaseController {
 
                 smsService.SendSMS(toPhone, msg)
                     .then(message => {
-
                         let md5MobileOTP = md5(ver_code);
                         // var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
                         // var expireTime = commonUtility.AddMinutesToUtcNow(OTP_EXPIRY_MINS);
@@ -392,15 +381,12 @@ class AppController extends BaseController {
                         }
 
                         return this.FindAndModifyQuery(conditions, setParams).exec();
-
                     })
                     .then((error, updatedApp) => {
 
-                        if(!error && !updatedApp)
-                        {
-                            return this.GetErrorResponse("Could not update  otp in DB", res);
+                        if (!error && !updatedApp) {
+                            this.SendErrorResponse(res, config.ERROR_CODES.ERROR, error);
                         }
-
                         else return emailService.SendEmail(email, subject, emailBody);
                     })
                     .then((success) => {
@@ -416,25 +402,16 @@ class AppController extends BaseController {
 
                     })
                     .then((updatedApp, error) => {
-
-                        if(!error && !updatedApp)
-                        {
-                            return this.GetErrorResponse("Could not update otp in DB", res);
-                        }
-                        else return this.SendResponse("GeneratePin", error, updatedApp, res);
-
+                        return this.SendResponse("GeneratePin", error, updatedApp, res);
                     })
-                    .catch(function (e) {
-                        let error = `Error :: ${e}`;
-                        return this.GetErrorResponse(error, res);
+                    .catch((ex) => {
+                        return this.SendExceptionResponse(res, ex);
                     });
 
             });
 
-        } catch (e) {
-            console.log(`Error :: ${e}`);
-            let error = `Error :: ${e}`;
-            return this.GetErrorResponse(error, res);
+        } catch (ex) {
+            return this.SendExceptionResponse(res, ex);
         }
 
     }
@@ -452,8 +429,7 @@ class AppController extends BaseController {
             let result = await req.getValidationResult();
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
-                return this.GetErrorResponse(error, res);
-
+                this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
             }
 
             let body = _.pick(req.body, ['ekyc_id', 'pin_otp', 'pin', 'vendor_uuid']);
@@ -472,18 +448,12 @@ class AppController extends BaseController {
 
             this.FindAndModifyQuery(conditions, setParams).exec(
                 (error, updatedApp) => {
-                    if(!error && !updatedApp)
-                    { 
-                        return this.GetErrorResponse("Invalid ekycId or pin", res);
-                    }
-                    else return this.SendResponse("SetPin", error, updatedApp, res);
+                    return this.SendResponse("SetPin", error, updatedApp, res);
                 }
             );
 
-        } catch (e) {
-            console.log(`Error :: ${e}`);
-            let error = `Error :: ${e}`;
-            this.GetErrorResponse(error, res);
+        } catch (ex) {
+            return this.SendExceptionResponse(res, ex);
         }
     }
 
@@ -498,13 +468,13 @@ class AppController extends BaseController {
 
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
-                return this.GetErrorResponse(error, res);
+                this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
             }
 
             let body = _.pick(req.body, ['pin', 'new_pin', 'ekyc_id']);
 
             if (body.pin == body.new_pin) {
-                return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': messages.same_pin });
+                return this.SendErrorResponse(res, config.ERROR_CODES.SAME_PIN);
             }
 
             let conditions = {
@@ -517,50 +487,13 @@ class AppController extends BaseController {
             }
 
             this.FindAndModifyQuery(conditions, setParams).exec(
-                (error,updatedApp ) => {
-                     return this.SendResponse("ChangePin", error, updatedApp, res);
+                (error, updatedApp) => {
+                    return this.SendResponse("ChangePin", error, updatedApp, res);
                 }
             );
 
-        } catch (e) {
-            console.log(`Error :: ${e}`);
-            let err = `Error :: ${e}`;
-            return res.status(status.OK).json({ 'success': 0, "error": err });
-        }
-    }
-
-    async Logout(req, res) {
-
-        try {
-
-            let key = req.params.key;
-
-            let conditions = {
-                key: key,
-                isdelete: '0'
-            }
-
-            App.findOne(conditions, (error, app) => {
-
-                if (error) return res.status(status.OK).jsonp({ "success": 0, "error": error });
-
-                if (!app) return res.status(status.OK).jsonp({
-                    "success": 0,
-                    "error": messages.invalid_login
-                });
-
-                var response = {
-                    'success': 1,
-                    'now': Date.now(),
-                    'result': messages.success_logout
-                }
-                return res.status(status.OK).jsonp(response);
-            })
-
-        } catch (e) {
-            console.log(`Error :: ${e}`);
-            let err = `Error :: ${e}`;
-            return res.status(status.OK).json({ 'success': 0, "error": err });
+        } catch (ex) {
+            return this.SendExceptionResponse(res, ex);
         }
     }
 
@@ -574,7 +507,7 @@ class AppController extends BaseController {
             let result = await req.getValidationResult();
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
-                return this.GetErrorResponse(error, res);
+                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
             }
 
             let body = _.pick(req.body, ['ekyc_id', 'pin', 'vendor_uuid']);
@@ -587,16 +520,16 @@ class AppController extends BaseController {
             App.findOne(conditions, (error, app) => {
 
                 if (error) {
-                    return this.GetErrorResponse(error, res);
+                    return this.SendErrorResponse(res, config.ERROR_CODES.ERROR);
                 }
                 if (!app) {
-                    return this.GetErrorResponse("Invalid ekyc_id", res);
+                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_EKYCID);
                 }
                 if (app.vendor_uuid != body.vendor_uuid) {
-                    return this.GetErrorResponse("Device mismatch", res);
+                    return this.SendErrorResponse(res, config.ERROR_CODES.DEVICE_MISMATCH);
                 }
                 if (app.pin != body.pin) {
-                    return this.GetErrorResponse("Pin does not match", res);
+                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_PIN);
                 }
                 var params = {
                     $set: { last_login_time: Date.now() }
@@ -607,53 +540,22 @@ class AppController extends BaseController {
                     var con = {
                         app_key: app.key
                     }
-                    KycDocument.findOne(con,(error, docData) =>{
+                    KycDocument.findOne(con, (error, docData) => {
+                        if (error) return this.SendErrorResponse(res, config.ERROR_CODES.ERROR);
 
-                        if (error) {
-                            logManager.Log(`Login:Error - ${error}`);
-                            error = `Error :: ${error}`;
-                            return this.GetErrorResponse(error, res);
-                        }
-                        if (!docData) return this.GetErrorResponse(messages.invalid_app_key, res);
+                        if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
 
-                        return this.GetSuccessLoginResponse( app, docData, res);
+                        return this.GetSuccessLoginResponse(app, docData, res);
 
                     })
 
                 })
             });
 
-        } catch (e) {
-            let err = `Error :: ${e}`;
-            return this.GetErrorResponse(err, res);
+        } catch (ex) {
+            return this.SendExceptionResponse(res, ex);
         }
     }
-
-    GetSuccessLoginResponse(appEntity, docEntity, res) {
-        var response = {
-                    'success': 1,
-                    'now': Date.now(),
-                    'name': appEntity.name,
-                    'email': appEntity.email,
-                    'phone': appEntity.phone,
-//                    'basic_info' : docEntity.basic_info.details,
-                    "firstname": docEntity.basic_info.details.firstname,
-                    "middlename": docEntity.basic_info.details.middlename,
-                    "lastname": docEntity.basic_info.details.lastname,
-                    "dob": docEntity.basic_info.details.dob,
-                    "city": docEntity.basic_info.details.city,
-                    "address1": docEntity.basic_info.details.address1,
-                    "address2": docEntity.basic_info.details.address2,
-                    "place_of_birth":docEntity.basic_info.details.place_of_birth,
-                    "zip": docEntity.basic_info.details.zip,
-                    "state": docEntity.basic_info.details.state,
-                    "country": docEntity.basic_info.details.country,
-                    "profile_pic" : config.base_url + "/kyc/getdocumentimages/" + docEntity.basic_info.images[0]._id.toString(),
-                    'result': 'Login successful!'
-                }
-
-        return res.status(status.OK).jsonp(response);
-}
 
     FindAndModifyQuery(queryCondition, setParams) {
         const options = {
@@ -673,7 +575,7 @@ class AppController extends BaseController {
         return this.GetSuccessResponse(apiName, updatedApp, res);
     }
 
-    //Common function for Success response
+    //Common methods for Success response
     GetSuccessResponse(apiName, appEntity, res) {
         var response = {};
         switch (apiName) {
@@ -761,6 +663,33 @@ class AppController extends BaseController {
 
         return res.status(status.OK).jsonp(response);
     }
+
+    GetSuccessLoginResponse(appEntity, docEntity, res) {
+        var response = {
+            'success': 1,
+            'now': Date.now(),
+            'name': appEntity.name,
+            'email': appEntity.email,
+            'phone': appEntity.phone,
+            "firstname": docEntity.basic_info.details.firstname,
+            "middlename": docEntity.basic_info.details.middlename,
+            "lastname": docEntity.basic_info.details.lastname,
+            "dob": docEntity.basic_info.details.dob,
+            "city": docEntity.basic_info.details.city,
+            "address1": docEntity.basic_info.details.address1,
+            "address2": docEntity.basic_info.details.address2,
+            "place_of_birth": docEntity.basic_info.details.place_of_birth,
+            "zip": docEntity.basic_info.details.zip,
+            "state": docEntity.basic_info.details.state,
+            "country": docEntity.basic_info.details.country,
+            "profile_pic": config.base_url + "/kyc/getdocumentimages/" + docEntity.basic_info.images[0]._id.toString(),
+            'result': 'Login successful!'
+        }
+
+        return res.status(status.OK).jsonp(response);
+    }
+
+
 }
 
 module.exports = new AppController();
