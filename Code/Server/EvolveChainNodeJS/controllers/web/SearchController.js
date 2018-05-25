@@ -10,7 +10,6 @@ const utility = require('../../config/utility');
 var ObjectId = require('mongodb').ObjectID;
 const md5 = require('md5');
 const App = require('../../models/apps');
-const Document = require('../../models/document');
 const Wallet = require('../../models/wallet');
 
 class Search {

@@ -61,7 +61,8 @@ class EntryHomeVC: UIViewController {
     }
     
     @IBAction func actionLogin(_ sender: Any) {
-        GlobalMethods.sharedInstance.underDevelopmentAlert()
+
+         FlowManager.sharedInstance.moveToLogin()
     }
     
 

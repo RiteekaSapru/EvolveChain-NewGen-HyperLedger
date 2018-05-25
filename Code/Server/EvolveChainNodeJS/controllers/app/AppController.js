@@ -12,27 +12,15 @@ const smsService = require('../../services/SMSService')
 const commonUtility = require('../../helpers/CommonUtility');
 const logManager = require('../../helpers/LogManager');
 const BaseController = require('../BaseController');
-const authenticator = require('authenticator');
 const App = require('../../models/apps');
-const Document = require('../../models/document');
-const File = require('../../models/files');
-const BASE_PATH = config.get('base_path');
+const KycDocument = require('../../models/kycdocument');
+
 const PUBLIC_PATH = config.get('PUBLIC_PATH');
 const EmailTemplatesPath = path.join(__dirname + "/../../public/email_template");
-
-var bucket;
+const OTP_EXPIRY_MINS = config.get('OTP_EXPIRY_MINS');
 
 class AppController extends BaseController {
 
-    FindAndModifyQuery(queryCondition, setParams) {
-        const options = {
-            upsert: false,
-            returnNewDocument: true
-        }
-        return App.findOneAndUpdate(queryCondition, setParams, options);
-    }
-
-    //#region Initialize
     async Initialize(req, res) {
 
         req.checkBody("ip", messages.req_IP).notEmpty();
@@ -47,14 +35,13 @@ class AppController extends BaseController {
 
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
-                logManager.Log(`Initialize:Error- ${error}`);
-
+                logManager.Log(`Initialize:Invalid Request- ${error}`);
                 return this.GetErrorResponse(error, res);
             }
 
             let body = _.pick(req.body, ['ip', 'device_type', 'device_name', 'os_version', 'vendor_uuid']);
-            logManager.Log(`Initialize:${body.ip}`);
-            body.key = md5(Date.now());
+
+            body.key = commonUtility.GenerateUniqueToken();
             body.SERVER_ADDR = md5(req.connection.localAddress);
             body.REMOTE_ADDR = md5(req.connection.remoteAddress);
 
@@ -69,61 +56,35 @@ class AppController extends BaseController {
                 Server: body.SERVER_ADDR,
                 Refer: body.REMOTE_ADDR
             }
-            
+
             commonUtility.RemoveNull(params); // remove blank value from array
 
-            var newApp = new App(params);
+            var app = new App(params);
 
-            newApp.save().then((lastAddedApp) => {
-                return this.GetSuccessResponse("Initialize", lastAddedApp, res);
+            app.save().then((newApp) => {
+                var kycDocParam = {
+                    app_key: newApp.key,
+                    isDelete: 0,
+                    status: config.APP_STATUSES.PENDING,
+                    last_modified: commonUtility.UtcNow()
+                }
+                var kycDoc = new KycDocument(kycDocParam);
+                kycDoc.save().then((newKycDoc) => {
+                    return this.GetSuccessResponse("Initialize", newApp, res);
+                }).catch(function (error) {
+                    return this.GetErrorResponse(error, res);
+                });
+
             }).catch(function (error) {
                 return this.GetErrorResponse(error, res);
             });
 
-            // //Newgen:check if vendor_uuid already exist then update the info else add new record
-            // let conditions = {
-            //     vendor_uuid: body.vendor_uuid
-            // }
-
-            // App.findOne(conditions, (error, app) => {
-
-            //     if (error) return this.GetErrorResponse(error, res);
-
-            //     if (!app) {
-            //         var params = {
-            //             IP: body.ip,
-            //             device_type: body.device_type,
-            //             device_name: body.device_name,
-            //             os_version: body.os_version,
-            //             vendor_uuid: body.vendor_uuid,
-            //             key: body.key,
-            //             isdelete: '0',
-            //             Server: body.SERVER_ADDR,
-            //             Refer: body.REMOTE_ADDR
-            //         }
-            //         commonUtility.RemoveNull(params); // remove blank value from array
-            //         var newApp = new App(params);
-
-            //         newApp.save().then((lastAddedApp) => {
-            //             return this.GetSuccessResponse("Initialize", lastAddedApp, res);
-            //             // return res.status(status.OK).jsonp(response);
-
-            //         }).catch(function (error) {
-            //             return this.GetErrorResponse(error, res);
-            //         });
-            //     }
-            //     else {
-            //         return this.GetSuccessResponse("Initialize", app, res);
-            //     }
-            // });
-
         } catch (e) {
-            console.log(`Error :: ${e}`);
-            let error = `Error :: ${e}`;
-            return this.GetErrorResponse(error, res);
+            logManager.Log(`Initialize:Exception- ${e}`);
+            return this.GetErrorResponse(e, res);
         }
     }
-    //#endregion
+
     async GenerateEmailOTP(req, res) {
 
         req.checkBody("email", messages.req_email).notEmpty().isEmail();
@@ -157,13 +118,8 @@ class AppController extends BaseController {
                     return this.GetErrorResponse(messages.invalid_key, res);
 
 
-                // Authenticator
-                var secret = authenticator.generateKey();
-                secret = secret.replace(/\W/g, '').toLowerCase();
-                var otpToken = authenticator.generateToken(secret);
-
                 var email = body.email.toLowerCase();
-                var email_code = otpToken.substring(0, 6);
+                var email_code = commonUtility.GenerateOTP(6);
 
                 //send verification code email
 
@@ -184,17 +140,21 @@ class AppController extends BaseController {
                 emailService.SendEmail(email, subject, emailBody).then(function (success) {
 
                     let md5EmailCode = md5(email_code);
+                    // var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
+                    var expireTime = commonUtility.AddMinutesToUtcNow(OTP_EXPIRY_MINS);
 
                     var setParams = {
                         $set: {
                             email: email,
                             email_code: md5EmailCode,
-                            email_verified: 0
+                            email_verified: 0,
+                            email_code_expire_time: expireTime
                         }
                     }
 
                     this.FindAndModifyQuery(conditions, setParams).exec(
                         (error, updatedApp) => {
+
                             return this.SendResponse("GenerateEmailOTP", error, updatedApp, res);
                         }
                     );
@@ -245,6 +205,7 @@ class AppController extends BaseController {
 
         } catch (e) {
             let error = `Error :: ${e}`;
+            logManager.Log(`VerifyEmail:Exception-${error}`);
             return this.GetErrorResponse(error, res);
         }
 
@@ -278,10 +239,7 @@ class AppController extends BaseController {
 
                 if (!app) return this.GetErrorResponse(`Data Mismatch: No application found for phone:${phone}`, res);
 
-                // Authenticator
-                var secret = authenticator.generateKey();
-                secret = secret.replace(/\W/g, '').toLowerCase();
-                var phone_code = authenticator.generateToken(secret);
+                var phone_code = commonUtility.GenerateOTP(6);
 
 
                 var phone = body.mobile.replace("+", "");
@@ -292,12 +250,16 @@ class AppController extends BaseController {
                 smsService.SendSMS(toPhone, msg).then(message => {
 
                     let md5MobileOTP = md5(phone_code);
+                    // var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
+                    var expireTime = commonUtility.AddMinutesToUtcNow(OTP_EXPIRY_MINS);
+                    
                     var setParams = {
                         $set: {
                             phone: phone,
                             phone_code: md5MobileOTP,
                             country_Code: countryCode,
-                            phone_verified: 0
+                            phone_verified: 0,
+                            phone_code_expire_time: expireTime
                         }
                     }
 
@@ -339,11 +301,15 @@ class AppController extends BaseController {
             let body = _.pick(req.body, ['mobile', 'country_code', 'phone_code']);
             let key = req.params.key;
 
+            // var expireTime = new Date(Date.now() - (OTP_EXPIRY_MINS * 60000));
+            var expireTime = commonUtility.AddMinutesToUtcNow(-OTP_EXPIRY_MINS);
+
             var conditions = {
                 key: key,
                 phone: body.mobile,
                 phone_code: body.phone_code,
-                country_Code: body.country_Code
+                country_Code: body.country_Code,
+                phone_code_expire_time: { $gte: expireTime }
             }
 
             var setParams = {
@@ -363,15 +329,123 @@ class AppController extends BaseController {
         }
     }
 
+    async GeneratePin(req, res) {
+
+        //       let current_ref= this;
+        req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
+
+        try {
+
+            let result = await req.getValidationResult();
+            if (!result.isEmpty()) {
+                let error = this.GetErrors(result);
+                return this.GetErrorResponse(error, res);
+            }
+
+            let body = _.pick(req.body, ['ekyc_id']);
+
+            let conditions = {
+                ekyc_id: body.ekyc_id
+            }
+
+            App.findOne(conditions, (error, app) => {
+
+                if (error) return this.GetErrorResponse(error, res);
+
+                if (!app) return this.GetErrorResponse(`Data Mismatch: No application found for phone:${phone}`, res);
+
+                //Email verification
+                var email = app.email.toLowerCase();
+                var ver_code = commonUtility.GenerateOTP(6);
+
+                var template = fs.readFileSync(EmailTemplatesPath + '/email_varified.html', {
+                    encoding: 'utf-8'
+                });
+
+                var emailBody = ejs.render(template, {
+                    email: email,
+                    kyc_id: ver_code,
+                    SITE_IMAGE: config.get('SITE_IMAGE'),
+                    SITE_NAME: config.get('app_name'),
+                    CURRENT_YEAR: config.get('current_year')
+                });
+
+                const subject = 'EvolveChain KYC - Email Code';
+
+                //Mobile Verification
+                var phone = app.phone.replace("+", "");
+                var countryCode = app.country_code.replace("+", "");
+                var msg = 'EvolveChain mobile verification code: ' + ver_code + '.';
+                let toPhone = "+" + countryCode + phone;
+
+                smsService.SendSMS(toPhone, msg)
+                    .then(message => {
+
+                        let md5MobileOTP = md5(ver_code);
+                        // var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
+                        // var expireTime = commonUtility.AddMinutesToUtcNow(OTP_EXPIRY_MINS);
+
+                        var setParams = {
+                            $set: {
+                                otp: md5MobileOTP
+                            }
+                        }
+
+                        return this.FindAndModifyQuery(conditions, setParams).exec();
+
+                    })
+                    .then((error, updatedApp) => {
+
+                        if(!error && !updatedApp)
+                        {
+                            return this.GetErrorResponse("Could not update  otp in DB", res);
+                        }
+
+                        else return emailService.SendEmail(email, subject, emailBody);
+                    })
+                    .then((success) => {
+
+                        let md5EmailCode = md5(ver_code);
+                        var setParams = {
+                            $set: {
+                                otp: md5EmailCode
+                            }
+                        }
+
+                        return this.FindAndModifyQuery(conditions, setParams).exec();
+
+                    })
+                    .then((updatedApp, error) => {
+
+                        if(!error && !updatedApp)
+                        {
+                            return this.GetErrorResponse("Could not update otp in DB", res);
+                        }
+                        else return this.SendResponse("GeneratePin", error, updatedApp, res);
+
+                    })
+                    .catch(function (e) {
+                        let error = `Error :: ${e}`;
+                        return this.GetErrorResponse(error, res);
+                    });
+
+            });
+
+        } catch (e) {
+            console.log(`Error :: ${e}`);
+            let error = `Error :: ${e}`;
+            return this.GetErrorResponse(error, res);
+        }
+
+    }
+
     async SetPin(req, res) {
 
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return this.GetErrorResponse('Key missing!', res);
-        }
 
         req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
         req.checkBody("pin_otp", messages.req_otp).notEmpty();
         req.checkBody("pin", messages.req_pin).notEmpty();
+        req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
 
         try {
 
@@ -382,42 +456,29 @@ class AppController extends BaseController {
 
             }
 
-            let body = _.pick(req.body, ['pin', 'pin_otp', 'ekyc_id']);
+            let body = _.pick(req.body, ['ekyc_id', 'pin_otp', 'pin', 'vendor_uuid']);
             let targetPin = body.pin;
             let conditions = {
                 ekyc_id: body.ekyc_id,
                 pin_otp: body.pin_otp
             }
 
-            App.findOne(conditions, (error, app) => {
-
-                //               if (error) return this.GetErrorResponse(error, res);
-                //                if (!app)
-                //                   this.GetErrorResponse(messages.invalid_ekycid_otp, res);
-
-                if (error) return res.status(status.OK).jsonp({ "success": 0, "error": error });
-
-                if (!app) return res.status(status.OK).jsonp({
-                    "success": 0,
-                    "error": messages.invalid_ekycid_otp
-                });
-
-                var params = {
-                    pin: targetPin
+            var setParams = {
+                $set: {
+                    pin: targetPin,
+                    vendor_uuid: body.vendor_uuid
                 }
+            }
 
-                App.update({
-                    _id: app._id
-                }, {
-                        $set: params
-                    }).then((success) => {
-                        app.pin = targetPin;
-                        return this.GetSuccessResponse("SetPin", app, res);
-                    }).catch(function (error) {
-                        this.GetErrorResponse(error, res);
-                        // return res.status(status.OK).jsonp({'success': 0,"error": error});
-                    });
-            })
+            this.FindAndModifyQuery(conditions, setParams).exec(
+                (error, updatedApp) => {
+                    if(!error && !updatedApp)
+                    { 
+                        return this.GetErrorResponse("Invalid ekycId or pin", res);
+                    }
+                    else return this.SendResponse("SetPin", error, updatedApp, res);
+                }
+            );
 
         } catch (e) {
             console.log(`Error :: ${e}`);
@@ -426,52 +487,7 @@ class AppController extends BaseController {
         }
     }
 
-    async CheckPin(req, res) {
-
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
-
-        try {
-
-            let key = req.params.key;
-
-            let conditions = {
-                key: key
-            }
-
-            App.findOne(conditions, (error, app) => {
-
-                if (error) return res.status(status.OK).jsonp({ "success": 0, "error": error });
-
-                if (!app) return res.status(status.OK).jsonp({
-                    "success": 0,
-                    "error": messages.invalid_key
-                });
-
-                var response = {
-                    'success': 1,
-                    'now': Date.now(),
-                    'key': app.key,
-                    'pin': app.pin,
-                    'Server': app.Server,
-                    'Refer': app.Refer
-                }
-                return res.status(status.OK).jsonp(response);
-            })
-
-        } catch (e) {
-            console.log(`Error :: ${e}`);
-            let err = `Error :: ${e}`;
-            return res.status(status.OK).json({ 'success': 0, "error": err });
-        }
-    }
-
     async ChangePin(req, res) {
-
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
 
         req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
         req.checkBody("pin", messages.req_pin).notEmpty();
@@ -491,115 +507,20 @@ class AppController extends BaseController {
                 return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': messages.same_pin });
             }
 
-            //            body.key = req.params.key;
-
             let conditions = {
                 ekyc_id: body.ekyc_id,
                 pin: body.pin
             }
 
-            App.findOne(conditions, (error, app) => {
-
-                if (error) return res.status(status.OK).jsonp({ "success": 0, "error": error });
-
-                if (!app) return res.status(status.OK).jsonp({
-                    "success": 0,
-                    "error": messages.mismatch_old_pin
-                });
-
-                var params = {
-                    pin: body.new_pin
-                }
-
-                App.update({
-                    _id: app._id
-                }, {
-                        $set: params
-                    }).then((success) => {
-
-                        var response = {
-                            'success': 1,
-                            'now': Date.now(),
-                            'result': 'New Pin updated',
-                            'pin': body.new_pin
-                        }
-                        return res.status(status.OK).jsonp(response);
-
-                    }).catch(function (error) {
-                        return res.status(status.OK).jsonp({ 'success': 0, "error": error });
-                    });
-            })
-
-        } catch (e) {
-            console.log(`Error :: ${e}`);
-            let err = `Error :: ${e}`;
-            return res.status(status.OK).json({ 'success': 0, "error": err });
-        }
-    }
-
-    async GetProfile(req, res) {
-
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
-
-        try {
-            let key = req.params.key;
-
-            let conditions = {
-                key: key
+            var setParams = {
+                pin: body.new_pin,
             }
 
-            App.findOne(conditions, (error, app) => {
-
-                if (error) return res.status(status.OK).jsonp({ "success": 0, "error": error });
-
-                if (!app) return res.status(status.OK).jsonp({
-                    "success": 0,
-                    "error": messages.invalid_key
-                });
-
-                let document_query = {
-                    hash: app.hash
+            this.FindAndModifyQuery(conditions, setParams).exec(
+                (error,updatedApp ) => {
+                     return this.SendResponse("ChangePin", error, updatedApp, res);
                 }
-
-                Document.findOne(document_query, (error, doc) => {
-
-                    if (error) return res.status(status.OK).jsonp({ "success": 0, "error": error });
-
-                    if (!doc) return res.status(status.OK).jsonp({
-                        "success": 0,
-                        "error": messages.document_not_found
-                    });
-
-                    this.GetImage(doc.hash, 'profile_img', function (response) {
-                        if (response.error == true) {
-                            return res.status(status.OK).jsonp({
-                                "success": 0,
-                                "error": messages.something_wentwrong
-                            });
-                        }
-                        else {
-                            var response = {
-                                'success': 1,
-                                'now': Date.now(),
-                                'result': messages.get_profile,
-                                'kyc_id': doc.kyc_id,
-                                'email': doc.email,
-                                'name': doc.details.Name,
-                                'phone': doc.phone,
-                                'address': doc.details.Address,
-                                'passport': doc.details.Passport,
-                                'tax': doc.details.Tax,
-                                'identity': doc.details.Identity,
-                                'driving': doc.details.Driving,
-                                'profile': config.get('FTP_URL') + "/profiles/" + doc.profile,
-                            }
-                            return res.status(status.OK).jsonp(response);
-                        }
-                    });
-                })
-            })
+            );
 
         } catch (e) {
             console.log(`Error :: ${e}`);
@@ -609,10 +530,6 @@ class AppController extends BaseController {
     }
 
     async Logout(req, res) {
-
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
 
         try {
 
@@ -649,207 +566,74 @@ class AppController extends BaseController {
 
     async Login(req, res) {
 
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
-
-        req.checkBody("kycid", messages.req_kycid).notEmpty();
-        req.checkBody("number", messages.req_number).notEmpty();
-        req.checkBody("Ip", messages.req_IP).notEmpty();
+        req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
+        req.checkBody("pin", messages.req_pin).notEmpty();
+        req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
 
         try {
             let result = await req.getValidationResult();
-
             if (!result.isEmpty()) {
-
                 let error = this.GetErrors(result);
                 return this.GetErrorResponse(error, res);
-
             }
 
-            let body = _.pick(req.body, ['kycid', 'number', 'Ip']);
-
-            body.key = req.params.key;
+            let body = _.pick(req.body, ['ekyc_id', 'pin', 'vendor_uuid']);
+//            let key = req.params.key;
 
             var conditions = {
-                key: body.key,
-                isdelete: '0'
+                isdelete: '0',
+                ekyc_id: body.ekyc_id,
             }
 
             App.findOne(conditions, (error, app) => {
 
-                if (error) return res.status(status.OK).jsonp({ "success": 0, "error": error });
-
-                if (!app) return res.status(status.OK).jsonp({
-                    "success": 0,
-                    "error": messages.invalid_key
-                });
-
-                var conditions = {
-                    kyc_id: body.kycid,
-                    "$or": [{
-                        "details.Identity.no": body.number
-                    }, {
-                        "details.Tax.id": body.number
-                    }]
+                if (error) {
+                    return this.GetErrorResponse(error, res);
                 }
 
-                Document.findOne(conditions, (error, doc) => {
+                if (!app) {
+                    return this.GetErrorResponse("Invalid ekyc_id", res);
+                }
 
-                    if (error) return res.status(status.OK).jsonp({ "success": 0, "error": error });
+                if (app.vendor_uuid != body.vendor_uuid) {
+                    return this.GetErrorResponse("Device mismatch", res);
+                }
 
-                    if (!doc) return res.status(status.OK).jsonp({
-                        "success": 0,
-                        "error": messages.document_not_found
-                    });
-                    //doc.Verify.Score = 70;
-                    if (doc.Verify.Score >= 70) { // check for verify score
-                        var conditions = {
-                            hash: doc.hash
-                        }
+                if (app.pin != body.pin) {
+                    return this.GetErrorResponse("Pin does not match", res);
+                }
 
-                        var params = {
-                            isdelete: '1'
-                        }
+                var params = {
+                    $set: { last_login_time: Date.now() }
+                }
 
-                        this.UpdateApp(conditions, params, function (response) {
-                            if (response.error == true) {
-                                return res.status(status.OK).jsonp({
-                                    "success": 0,
-                                    "error": response.message
-                                });
-                            }
-                            else {
-                                var conditions = {
-                                    key: body.key
-                                }
-
-                                var params = {
-                                    email: doc.email,
-                                    hash: doc.hash,
-                                    phone: doc.phone,
-                                    IP: body.Ip,
-                                    isdelete: '0'
-                                }
-
-                                this.UpdateApp(conditions, params, function (response) {
-                                    if (response.error == true) {
-                                        return res.status(status.OK).jsonp({
-                                            "success": 0,
-                                            "error": response.message
-                                        });
-                                    }
-                                    else {
-                                        if (_.isUndefined(doc.profile) || _.isEmpty(doc.profile)) {
-                                            // below code not verified -> need to confirm
-                                            this.GetImage(doc.hash, 'profile_img', function (response) {
-                                                if (response.error == true) {
-                                                    return res.status(status.OK).jsonp({
-                                                        "success": 0,
-                                                        "error": response.message
-                                                    });
-                                                }
-                                                else {
-
-                                                    var path = response.data.path;
-
-                                                    var path = path
-                                                    var save = path
-
-                                                    commonUtility.ImageResize(path, save, 300, function (response) {
-                                                        if (response.error == true) {
-                                                            return res.status(status.OK).jsonp({
-                                                                "success": 0,
-                                                                "error": messages.something_wentwrong
-                                                            });
-                                                        }
-                                                        else {
-                                                            var profile = response.data;
-
-                                                            var conditions = {
-                                                                hash: doc.hash
-                                                            }
-
-                                                            var params = {
-                                                                profile: profile
-                                                            }
-
-                                                            this.UpdateDocument(conditions, params, function (response) {
-                                                                if (response.error == true) {
-                                                                    return res.status(status.OK).jsonp({
-                                                                        "success": 0,
-                                                                        "error": messages.something_wentwrong
-                                                                    });
-                                                                }
-                                                                else {
-                                                                    var doc_updated = response.data;
-                                                                    var response = {
-                                                                        'success': 1,
-                                                                        'now': Date.now(),
-                                                                        'result': messages.login_success,
-                                                                        'kyc_id': doc_updated.kyc_id,
-                                                                        'email': doc_updated.email,
-                                                                        'name': doc_updated.details.Name,
-                                                                        'phone': doc_updated.phone,
-                                                                        'address': doc_updated.details.Address,
-                                                                        'passport': doc_updated.details.Passport,
-                                                                        'tax': doc_updated.details.Tax,
-                                                                        'identity': doc_updated.details.Identity,
-                                                                        'driving': doc_updated.details.Driving,
-                                                                        'profile': config.get('base_url') + "/" + doc_updated.profile,
-                                                                    }
-                                                                    return res.status(status.OK).jsonp(response);
-                                                                }
-                                                            });
-                                                        }
-                                                    });
-                                                }
-                                            });
-
-                                        }
-                                        else {
-                                            var response = {
-                                                'success': 1,
-                                                'now': Date.now(),
-                                                'result': messages.login_success,
-                                                'kyc_id': doc.kyc_id,
-                                                'email': doc.email,
-                                                'name': doc.details.Name,
-                                                'phone': doc.phone,
-                                                'address': doc.details.Address,
-                                                'passport': doc.details.Passport,
-                                                'tax': doc.details.Tax,
-                                                'identity': doc.details.Identity,
-                                                'driving': doc.details.Driving,
-                                                'profile': config.get('base_url') + "/" + doc.profile,
-                                            }
-                                            return res.status(status.OK).jsonp(response);
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                    } else {
-                        return res.status(status.OK).jsonp({
-                            "success": 0,
-                            "error": messages.KYC_not_veryfied
-                        });
-                    }
+                App.update({
+                    _id: app._id
+                }, params).then((success) => {
+                    this.GetSuccessResponse("Login", app, res);
                 })
-            })
+            });
 
         } catch (e) {
-            console.log(`Error :: ${e}`);
             let err = `Error :: ${e}`;
-            return res.status(status.OK).json({ 'success': 0, "error": err });
+            return this.GetErrorResponse(err, res);
         }
+    }
+
+
+    FindAndModifyQuery(queryCondition, setParams) {
+        const options = {
+            upsert: false,
+            returnNewDocument: true
+        }
+        return App.findOneAndUpdate(queryCondition, setParams, options);
     }
 
     SendResponse(apiName, error, updatedApp, res) {
         if (error) {
             return this.GetErrorResponse(error, res);
         }
-        else if (!updatedApp) {
+        if (!updatedApp) {
             return this.GetErrorResponse("Invalid Request: No application found", res);
         }
         return this.GetSuccessResponse(apiName, updatedApp, res);
@@ -869,13 +653,35 @@ class AppController extends BaseController {
                     'Refer': appEntity.Refer
                 };
                 break;
+            case "GeneratePin":
+                response = {
+                    'success': 1,
+                    'now': Date.now(),
+                    'key': appEntity.key,
+                    'Server': appEntity.Server,
+                    'Refer': appEntity.Refer,
+                    'result': messages.verify_email_phone_code
+                }
+                break;
             case "SetPin":
                 response = {
                     'success': 1,
                     'now': Date.now(),
                     'key': appEntity.key,
                     'Server': appEntity.Server,
-                    'Refer': appEntity.Refer
+                    'Refer': appEntity.Refer,
+                    'result': 'Pin has been set successfully!'
+                }
+                break;
+            case "ChangePin":
+                response = {
+                    'success': 1,
+                    'now': Date.now(),
+                    'key': appEntity.key,
+                    'Server': appEntity.Server,
+                    'Refer': appEntity.Refer,
+                    'pin': appEntity.pin,
+                    'result': 'Pin has been changed successfully!'
                 }
                 break;
             case "GenerateEmailOTP":
@@ -889,7 +695,7 @@ class AppController extends BaseController {
                 response = {
                     'success': 1,
                     'now': Date.now(),
-                    'result': 'Email verified successfully'
+                    'result': 'Email verified successfully!'
                 }
                 break;
             case "GenerateMobileOTP":
@@ -903,155 +709,24 @@ class AppController extends BaseController {
                 response = {
                     'success': 1,
                     'now': Date.now(),
-                    'result': 'Phone verified successfully'
+                    'result': 'Phone verified successfully!'
+                }
+                break;
+            case "Login":
+                response = {
+                    'success': 1,
+                    'now': Date.now(),
+                    'name': appEntity.name,
+                    'email': appEntity.email,
+                    'phone': appEntity.phone,
+                    //                   'profile': ,
+                    'result': 'Login successful!'
                 }
                 break;
         }
 
         return res.status(status.OK).jsonp(response);
     }
-
-    // common for update App
-    async UpdateApp(conditions, params = [], callback) // common function for update App
-    {
-        let response = {
-            'error': true,
-            'data': [],
-            'message': messages.something_wentwrong,
-        }
-
-        App.update(conditions,
-            {
-                $set: params
-            }).then((success) => {
-                App.findOne(conditions, (error, app) => {
-
-                    if (error) {
-
-                        let err = `Error :: ${error}`;
-                        response.message = err;
-
-                    } else if (!app) {
-
-                        response.message = messages.app_not_found;
-
-                    } else {
-                        response.error = false;
-                        response.message = messages.app_data;
-                        response.data = app;
-                    }
-
-                    callback(response);
-                })
-            }).catch(function (error) {
-                response.message = error;
-                callback(response);
-            });
-    }
-
-    // common for update document
-    async UpdateDocument(conditions, params = [], callback) // common function for update Document
-    {
-        let response = {
-            'error': true,
-            'data': [],
-            'message': messages.something_wentwrong,
-        }
-
-        Document.update(conditions,
-            {
-                $set: params
-            }).then((success) => {
-                Document.findOne(conditions, (error, doc) => {
-
-                    if (error) {
-
-                        let err = `Error :: ${error}`;
-                        response.message = err;
-
-                    } else if (!doc) {
-
-                        response.message = messages.doc_not_found;
-
-                    } else {
-                        response.error = false;
-                        response.message = messages.doc_data;
-                        response.data = doc;
-                    }
-
-                    callback(response);
-                })
-            }).catch(function (error) {
-                response.message = error;
-                callback(response);
-            });
-    }
-
-    // common for get image
-    async GetImage(id = null, type = null, callback) {
-        let response = {
-            'error': true,
-            'data': [],
-            'message': messages.something_wentwrong,
-        }
-        var file_field = 'details_' + type + '_id';
-
-        Document.findOne({ 'hash': id }, (error, doc) => {
-
-            if (error) {
-                response.message = error;
-                callback(response);
-            } else if (!doc) {
-                response.message = messages.app_not_found;
-                callback(response);
-            } else {
-                var conditions = {
-                    [file_field]: doc._id.toString()
-                }
-
-                File.findOne(conditions, (error, fileData) => {
-
-                    if (error) {
-
-                        let err = `Error :: ${error}`;
-                        response.message = err;
-                        callback(response);
-
-                    } else if (!fileData) {
-
-                        response.message = messages.app_not_found;
-                        callback(response);
-
-                    } else {
-                        //console.log(fileData);return false;
-                        var image_name_name = fileData._id + '_' + fileData.filename;
-                        var path = PUBLIC_PATH + '/webroot/documents/' + image_name_name;
-                        var return_path = config.get('COMPANY_URL') + '/documents/' + image_name_name;
-
-                        var image_name_name = fileData._id + '_' + fileData.filename;
-                        var path = 'public/webroot/documents/' + image_name_name;
-                        var return_path = config.get('COMPANY_URL') + '/documents/' + image_name_name;
-
-                        bucket.openDownloadStream(fileData._id)
-                            .pipe(fs.createWriteStream(path))
-                            .on('error', function (error) {
-                                assert.ifError(error);
-                                response.message = err;
-                            })
-                            .on('finish', function () {
-                                console.log('done!');
-                                response.error = false;
-                                response.message = messages.image_data;
-                                response.data = { "return_path": return_path, "path": path };
-                                callback(response);
-                            });
-
-                    }
-                });
-            }
-        })
-    }
-
 }
 
 module.exports = new AppController();

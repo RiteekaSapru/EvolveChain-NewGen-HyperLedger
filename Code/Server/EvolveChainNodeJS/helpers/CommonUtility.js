@@ -2,10 +2,20 @@ const config = require('config');
 var im = require('imagemagick');
 const messages = config.get('messages');
 var dateFormat = require('dateformat');
+const md5 = require('md5');
+const authenticator = require('authenticator');
 
 class CommonUtility {
     NowDate() {
         return dateFormat(new Date(), "isoUtcDateTime");
+    }
+    UtcNow() {
+        return dateFormat(new Date(), "isoUtcDateTime");
+    }
+    AddMinutesToUtcNow(minutes)
+    {
+        var newDate = new Date(Date.now() + minutes * 60000);        
+        return dateFormat(newDate, "isoUtcDateTime");
     }
 
     ReplaceData(shortcodearr, strbody) {
@@ -49,6 +59,57 @@ class CommonUtility {
             console.log(response);
             callback(response);
         });
+    }
+
+    GetKycDocumentMetaDataInfo(document_type) {
+        var metaDataInfo;
+        switch (document_type) { //set to UPPER case
+            case 'BASIC':
+                metaDataInfo = { 'firstname': 'First Name', 'lastname': 'Last Name', 'middlename': 'Middle Name', 
+                                'dob': 'Date Of Birth',
+                                'city': 'City', 'address1':'Address 1', 'address2':'Address 2',
+                                'place_of_birth': 'Birth Place', 'zip': 'Zip', 'state':'State', 'country': 'Country' };
+                break;
+            case 'IDENTITY':
+            case 'ADDRESS':
+                metaDataInfo = { 'document_type':'Title', 'number': 'Number', 'expiry_date': 'Expiry Date', 'country': 'Country' };
+                break;            
+        }
+        return metaDataInfo;
+    }
+
+    GenerateUniqueToken()
+    {
+         var token = md5(Date.now());
+         return token;
+    }
+
+    GenerateOTP(noOfDigits)
+    {
+            // Authenticator
+          var secret = authenticator.generateKey();
+          secret = secret.replace(/\W/g, '').toLowerCase();
+          var otpToken = authenticator.generateToken(secret);          
+          var code = otpToken.substring(0, noOfDigits);
+          return code;
+    }
+
+    GenerateKYCId()
+    {
+        var secret1 = authenticator.generateKey();
+        secret1 = secret1.replace(/\W/g, '').toLowerCase();
+        var secret1_code = authenticator.generateToken(secret1);
+
+        var secret2 = authenticator.generateKey();
+        secret2 = secret2.replace(/\W/g, '').toLowerCase();
+        var secret2_code = authenticator.generateToken(secret2);
+
+        var secret3 = authenticator.generateKey();
+        secret3 = secret3.replace(/\W/g, '').toLowerCase();
+        var secret3_code = authenticator.generateToken(secret3);
+
+        var kycId = secret1_code + '-' + secret2_code + '-' + secret3_code;
+        return kycId;
     }
 
 

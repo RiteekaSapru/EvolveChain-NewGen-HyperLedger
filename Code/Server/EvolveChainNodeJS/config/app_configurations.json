@@ -1,0 +1,35 @@
+{
+    "APP_STATUS": {
+        "PENDING": "Pending",
+        "IN_PROCESS": "InProcess",
+        "VERIFIED": "Verified",
+        "REJECTED": "Rejected"
+    },
+    "USA_UTILITY_BILL_TYPE": {
+        "ELECTRICITY_BILL": "Electricity Bill",
+        "MOBILE_BILL": "Mobile Bill",
+        "INTERNET_BILL": "Internet Bill",
+        "OTHER": "Other"
+    },
+    "ERROR_CODE": {
+        "ERROR": "E00",
+        "DEVICE_MISMATCH": "E01",
+        "INCORRECT_PIN": "E02",
+        "INCORRECT_OTP": "E03",
+        "INCORRECT_KEY": "E04",
+        "INCORRECT_EKYCID": "E05",
+        "INVALID_REQUEST": "E06",
+        "APP_NOT_FOUND": "E10"
+    },
+    "HTTP_STATUS":{
+        "OK": 200,
+        "NotFound": 404,
+        "BadRequest": 400,
+        "InternalServerError": 500,
+        "Locked": 423,
+        "ExpectationFailed": 417,
+        "NotAcceptable": 406,
+        "Unauthorized": 401,
+        "Forbidden": 403
+    }
+}

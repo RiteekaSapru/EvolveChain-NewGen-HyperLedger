@@ -34,7 +34,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstItem="F6y-JD-v5c" firstAttribute="leading" secondItem="MkM-m4-dfm" secondAttribute="leading" id="53C-YE-tnW"/>
                             <constraint firstAttribute="bottom" secondItem="YDv-3M-qT7" secondAttribute="bottom" constant="10" id="D0i-Ro-rfu"/>
@@ -46,6 +46,7 @@
                         </constraints>
                     </view>
                 </subviews>
+                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
                     <constraint firstAttribute="bottom" secondItem="MkM-m4-dfm" secondAttribute="bottom" id="CDg-5a-75u"/>
                     <constraint firstItem="MkM-m4-dfm" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="15" id="MyS-et-tbC"/>
@@ -53,6 +54,7 @@
                     <constraint firstItem="MkM-m4-dfm" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="qfo-3F-yfc"/>
                 </constraints>
             </tableViewCellContentView>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
             <connections>
                 <outlet property="btnRadio" destination="F6y-JD-v5c" id="lyi-qE-g8G"/>

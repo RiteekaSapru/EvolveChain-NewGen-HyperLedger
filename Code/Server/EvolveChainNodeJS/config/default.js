@@ -2,6 +2,9 @@ require("./main").config("configEnv.env");
 const path = require("path");
 const status = require('./status');
 const messages = require('./messages');
+const document_status = require('./document_status');
+const appConfig = require('./app_configurations');
+
 const admin_messages = require('./admin_messages');
 const merchant_messages = require('./merchant_messages');
 
@@ -34,6 +37,8 @@ const MAIL_4 = 'admin@'+process.env.COMPANY_DOMAIN;
 // const MAIL_1 = 'gordhan@yudiz.com';
 // const MAIL_2 = 'gordhan.c@yudiz.in';
 
+const ver_mail_id = 'riteeka.sapru@newgen.co.in';
+
 const web_site = BASE_URL+'/public/web'
 
 
@@ -47,6 +52,11 @@ module.exports = {
   USER_IMAGE: USER_IMAGE,
   current_year: current_year,
   status: status,
+  document_status:document_status,
+  ERROR_CODES: appConfig.ERROR_CODE,
+  HTTP_STATUSES: appConfig.HTTP_STATUS,
+  APP_STATUSES: appConfig.APP_STATUS,
+  USA_UTILITY_BILL_TYPES:appConfig.USA_UTILITY_BILL_TYPE,
   messages: messages,
   FTP_URL: FTP_URL,
   admin_messages: admin_messages,
@@ -62,6 +72,8 @@ module.exports = {
   MAIL_2: MAIL_2,
   MAIL_3: MAIL_3,
   MAIL_4: MAIL_4,
+  ver_mail_id :ver_mail_id,
   web_site: web_site,
-  DB_NAME: DB_NAME
+  DB_NAME: DB_NAME,
+  OTP_EXPIRY_MINS:30,
 };

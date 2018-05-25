@@ -1,0 +1,170 @@
+<!doctype html>
+<html>
+
+<style>
+    .header {
+        color: white;
+        background-color: #0f75bd;
+    }
+</style>
+<!-- Header include -->
+<%include layouts/head.html %>
+    <!-- END -->
+
+    <body>
+        <!-- navigation include -->
+        <%include layouts/navigation.html %>
+            <!-- END -->
+            <!-- Main content -->
+            <div id="container" class="container">
+                <div class="container">
+                    <form role="form" action="/verifyKyc/<%=kycData.app_key%>" method="post">
+                        <br>
+                        <h4 class="padded">Know your customer (KYC)
+                        </h4>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                App Id:
+                                <b>
+                                    <%=kycData.app_key%>
+                                </b>
+                            </div>
+                            <div class="col-md-6">
+                                eKycId:
+                                <b>
+                                    <%=kycData.eKycId%>
+                                </b>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <h5 class="alert header"> Basic
+                                    <span class="float-right"></span>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <table>
+                                    <% for(let j = 0; j < kycData.BasicInfo.DocDetails.length; j++) { %>
+                                        <tr>
+                                            <td>
+                                                <%=kycData.BasicInfo.DocDetails[j].name%>:
+                                            </td>
+                                            <td>
+                                                <%=kycData.BasicInfo.DocDetails[j].value%>
+                                            </td>
+                                        </tr>
+                                        <% } %>
+                                </table>
+                            </div>
+                            <div class="col-sm-6">
+                                <table>
+                                    <tr>
+                                        <% for(let k = 0; k <  kycData.BasicInfo.DocImages.length; k++) { %>
+
+                                            <td>
+                                                <img height="200" width="200" src="<%=kycData.BasicInfo.DocImages[k].url%>" width="100%">
+                                            </td>
+
+                                            <% } %>
+                                    </tr>
+                                </table>
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <h5 class="alert header"> Identity
+                                    <span class="float-right"></span>
+                                </h5>
+                                <table class="table">
+                                    <tr>
+                                        <% for(let k = 0; k <  kycData.IdentityInfo.DocImages.length; k++) { %>
+
+                                            <td>
+                                                <img height="200" width="200" src="<%=kycData.IdentityInfo.DocImages[k].url%>" width="100%">
+                                            </td>
+
+                                            <% } %>
+                                    </tr>
+                                </table>
+                                <table class="table">
+                                    <% for(let j = 0; j < kycData.IdentityInfo.DocDetails.length; j++) { %>
+                                        <tr>
+                                            <td>
+                                                <%=kycData.IdentityInfo.DocDetails[j].name%>:
+                                            </td>
+                                            <td>
+                                                <%=kycData.IdentityInfo.DocDetails[j].value%>
+                                            </td>
+                                        </tr>
+                                        <% } %>
+                                </table>
+
+                            </div>
+                            <div class="col-sm-6">
+
+                                <h5 class="alert header"> Address
+                                    <span class="float-right"></span>
+                                </h5>
+                                <table class="table">
+                                    <tr>
+                                        <% for(let k = 0; k <  kycData.AddressInfo.DocImages.length; k++) { %>
+
+                                            <td>
+                                                <img height="200" width="200" src="<%=kycData.AddressInfo.DocImages[k].url%>" width="100%">
+                                            </td>
+
+                                            <% } %>
+                                    </tr>
+                                </table>
+                                <table class="table">
+                                    <% for(let j = 0; j < kycData.AddressInfo.DocDetails.length; j++) { %>
+                                        <tr>
+                                            <td>
+                                                <%=kycData.AddressInfo.DocDetails[j].name%>:
+                                            </td>
+                                            <td>
+                                                <%=kycData.AddressInfo.DocDetails[j].value%>
+                                            </td>
+                                        </tr>
+                                        <% } %>
+                                </table>
+                            </div>
+                        </div>
+                </div>
+
+                <hr>
+                <input type="text" value="<%=kycData.verification_comment%>" class="form-control input-lg" placeholder="Comments" name="textBoxComment"
+                />
+                <hr>
+                <% if(!kycData.is_verified) {%>
+                    <label class="btn btn-success">
+                        <input value="1" type="radio" name="radioButtonVerify"> Verify</label>
+                    <label class="btn btn-danger">
+                        <input value="0" type="radio" name="radioButtonVerify"> Reject</label>
+                    <hr>
+                    <input type="submit" value="Submit" class="btn btn-primary">
+                    <%}%>
+            </div>
+
+
+            </form>
+            </div>
+            <hr>
+            </div>
+            </div>
+            <!-- END -->
+            <!-- footer include -->
+            <%include layouts/footer.html %>
+                <!-- END -->
+                <!-- scripts include -->
+                <%include layouts/scripts.html %>
+                    <!-- END -->
+    </body>
+
+</html>

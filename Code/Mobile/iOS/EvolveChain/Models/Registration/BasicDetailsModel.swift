@@ -16,12 +16,26 @@ class BasicDetailsModel: NSObject {
     var fname: String = ""
     var mname: String = ""
     var lname: String = ""
+    
+    var dob: Date = Date()
+    
+     var placeOfBirth: String = ""
+    
+    var add1: String = ""
+    var add2: String = ""
+    var street: String = ""
+     var city: String = ""
+    var state: String = ""
+    var country: String = ""
+    var zipCode: String = ""
+    
     var userImage : UIImage = UIImage.init(named: "ic_profile_placeholder")!
     var contactNumber : String = ""
     var email : String = ""
     var isEmailVerified : Bool = false
     var isPhoneVerified : Bool = false
     var isBasicDetailsComplete : Bool = false
+    
     
     // MARK:- Init
     override init() {
@@ -30,6 +44,7 @@ class BasicDetailsModel: NSObject {
         fname            = ""
         mname         = ""
         lname       = ""
+        city       = ""
         contactNumber    = ""
         userImage       = UIImage.init(named: "ic_profile_placeholder")!
         email            = ""
@@ -39,5 +54,21 @@ class BasicDetailsModel: NSObject {
     }
     func getCompletePhoneNumber() -> String {
         return ("+"+countryCode+" "+contactNumber)
+    }
+    
+    func eraseData() {
+        countryCode             = ""
+        fname            = ""
+        mname         = ""
+        lname       = ""
+        city       = ""
+        contactNumber    = ""
+        userImage       = UIImage.init(named: "ic_profile_placeholder")!
+        email            = ""
+        isEmailVerified           = false
+        isPhoneVerified          =  false
+        isBasicDetailsComplete  = false
+         add1 = ""
+         add2 = ""
     }
 }

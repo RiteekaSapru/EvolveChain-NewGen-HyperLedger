@@ -35,6 +35,8 @@ static let sharedInstance = NetworkManager()
         }
     }
     
+    // MARK: - Verification
+    
     func generateEmailOTP(params:Dictionary<String,Any>,success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping (String? )-> Void) -> Void {
         
         let url = kLocalURL+generateEmailOtpURL+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
@@ -57,16 +59,16 @@ static let sharedInstance = NetworkManager()
         
         let url = kLocalURL+verifyEmailOtpURL+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
         
-        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+
         RequestManager.sharedInstance.makeAPICall(url: url, params: params, method: .POST, success: { (data, response, error, responseJSON) in
             GlobalMethods.sharedInstance.dismissLoader(complete: {
                 success(responseJSON)
             })
             
         }) { (data, response, error, errorMsg) in
-            GlobalMethods.sharedInstance.dismissLoader(complete: {
+
                 failure(errorMsg)
-            })
+
             
         }
     }
@@ -89,9 +91,119 @@ static let sharedInstance = NetworkManager()
         }
     }
     
+    
+    
     func verifyMobileOTP(params:Dictionary<String,Any>,success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping (String? )-> Void) -> Void {
         
         let url = kLocalURL+verifyMobileOtpURL+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
+        
+        RequestManager.sharedInstance.makeAPICall(url: url, params: params, method: .POST, success: { (data, response, error, responseJSON) in
+            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                success(responseJSON)
+            })
+            
+        }) { (data, response, error, errorMsg) in
+
+                failure(errorMsg)
+
+            
+        }
+    }
+    
+    // MARK: - Save KYC
+    
+    func POSTBasicDetails(params:Dictionary<String,Any>,fileArray:[UIImage],filenameArray:[String],success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping (String? )-> Void) -> Void {
+        
+        let url = kLocalURL+saveKYCDetails+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
+        
+         GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        
+        RequestManager.sharedInstance.requestToUploadImagesWithParams(url: url, params: params, images: fileArray, fileNames: filenameArray, method: .POST, success: { (data, response, error, responseJSON) in
+            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                success(responseJSON)
+            })
+        }) { (data, response, error, errorMsg) in
+            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                failure(errorMsg)
+            })
+        }
+    }
+    
+    func POSTIdentityDetails(params:Dictionary<String,Any>,fileArray:[UIImage],filenameArray:[String],success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping (String? )-> Void) -> Void {
+        
+        let url = kLocalURL+saveKYCDetails+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
+        
+        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        
+        RequestManager.sharedInstance.requestToUploadImagesWithParams(url: url, params: params, images: fileArray, fileNames: filenameArray, method: .POST, success: { (data, response, error, responseJSON) in
+            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                success(responseJSON)
+            })
+        }) { (data, response, error, errorMsg) in
+            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                failure(errorMsg)
+            })
+        }
+    }
+    
+    func POSTAddressDetails(params:Dictionary<String,Any>,fileArray:[UIImage],filenameArray:[String],success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping (String? )-> Void) -> Void {
+        
+        let url = kLocalURL+saveKYCDetails+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
+        
+        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        
+        RequestManager.sharedInstance.requestToUploadImagesWithParams(url: url, params: params, images: fileArray, fileNames: filenameArray, method: .POST, success: { (data, response, error, responseJSON) in
+            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                success(responseJSON)
+            })
+        }) { (data, response, error, errorMsg) in
+            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                failure(errorMsg)
+            })
+        }
+    }
+    
+    // MARK: - Generate Pin
+    
+    func generateOtpForKydId(params:Dictionary<String,Any>,success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping (String? )-> Void) -> Void {
+        
+        let url = kLocalURL+generatePinURL+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
+        
+        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        RequestManager.sharedInstance.makeAPICall(url: url, params: params, method: .POST, success: { (data, response, error, responseJSON) in
+            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                success(responseJSON)
+            })
+            
+        }) { (data, response, error, errorMsg) in
+            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                failure(errorMsg)
+            })
+            
+        }
+    }
+    
+    func setPinForKydId(params:Dictionary<String,Any>,success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping (String? )-> Void) -> Void {
+        
+        let url = kLocalURL+setPinURL+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
+        
+        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        RequestManager.sharedInstance.makeAPICall(url: url, params: params, method: .POST, success: { (data, response, error, responseJSON) in
+            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                success(responseJSON)
+            })
+            
+        }) { (data, response, error, errorMsg) in
+            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                failure(errorMsg)
+            })
+            
+        }
+    }
+    
+    func loginAPI(params:Dictionary<String,Any>,success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping (String? )-> Void) -> Void {
+        
+        let url = kLocalURL+setPinURL+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
         
         GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
         RequestManager.sharedInstance.makeAPICall(url: url, params: params, method: .POST, success: { (data, response, error, responseJSON) in
