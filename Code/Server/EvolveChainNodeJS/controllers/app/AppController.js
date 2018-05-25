@@ -612,9 +612,9 @@ class AppController extends BaseController {
                         if (error) {
                             logManager.Log(`Login:Error - ${error}`);
                             error = `Error :: ${error}`;
-                            return kycController.GetErrorResponse(error, res);
+                            return this.GetErrorResponse(error, res);
                         }
-                        if (!docData) return kycController.GetErrorResponse(messages.invalid_app_key, res);
+                        if (!docData) return this.GetErrorResponse(messages.invalid_app_key, res);
 
                         return this.GetSuccessLoginResponse( app, docData, res);
 
