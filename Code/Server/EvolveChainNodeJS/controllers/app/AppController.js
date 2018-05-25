@@ -578,7 +578,6 @@ class AppController extends BaseController {
             }
 
             let body = _.pick(req.body, ['ekyc_id', 'pin', 'vendor_uuid']);
-//            let key = req.params.key;
 
             var conditions = {
                 isdelete: '0',
@@ -590,27 +589,37 @@ class AppController extends BaseController {
                 if (error) {
                     return this.GetErrorResponse(error, res);
                 }
-
                 if (!app) {
                     return this.GetErrorResponse("Invalid ekyc_id", res);
                 }
-
                 if (app.vendor_uuid != body.vendor_uuid) {
                     return this.GetErrorResponse("Device mismatch", res);
                 }
-
                 if (app.pin != body.pin) {
                     return this.GetErrorResponse("Pin does not match", res);
                 }
-
                 var params = {
                     $set: { last_login_time: Date.now() }
                 }
-
                 App.update({
                     _id: app._id
                 }, params).then((success) => {
-                    this.GetSuccessResponse("Login", app, res);
+                    var con = {
+                        app_key: app.key
+                    }
+                    KycDocument.findOne(con,(error, docData) =>{
+
+                        if (error) {
+                            logManager.Log(`Login:Error - ${error}`);
+                            error = `Error :: ${error}`;
+                            return kycController.GetErrorResponse(error, res);
+                        }
+                        if (!docData) return kycController.GetErrorResponse(messages.invalid_app_key, res);
+
+                        return this.GetSuccessLoginResponse( app, docData, res);
+
+                    })
+
                 })
             });
 
@@ -620,6 +629,31 @@ class AppController extends BaseController {
         }
     }
 
+    GetSuccessLoginResponse(appEntity, docEntity, res) {
+        var response = {
+                    'success': 1,
+                    'now': Date.now(),
+                    'name': appEntity.name,
+                    'email': appEntity.email,
+                    'phone': appEntity.phone,
+//                    'basic_info' : docEntity.basic_info.details,
+                    "firstname": docEntity.basic_info.details.firstname,
+                    "middlename": docEntity.basic_info.details.middlename,
+                    "lastname": docEntity.basic_info.details.lastname,
+                    "dob": docEntity.basic_info.details.dob,
+                    "city": docEntity.basic_info.details.city,
+                    "address1": docEntity.basic_info.details.address1,
+                    "address2": docEntity.basic_info.details.address2,
+                    "place_of_birth":docEntity.basic_info.details.place_of_birth,
+                    "zip": docEntity.basic_info.details.zip,
+                    "state": docEntity.basic_info.details.state,
+                    "country": docEntity.basic_info.details.country,
+                    "profile_pic" : config.base_url + "/kyc/getdocumentimages/" + docEntity.basic_info.images[0]._id.toString(),
+                    'result': 'Login successful!'
+                }
+
+        return res.status(status.OK).jsonp(response);
+}
 
     FindAndModifyQuery(queryCondition, setParams) {
         const options = {
