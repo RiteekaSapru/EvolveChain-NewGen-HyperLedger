@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/splash_background"
     tools:context="com.newgen.evolvechain.activities.OthersRegistrationActivity">
 
 
@@ -14,6 +15,7 @@
         android:background="@color/colorDarkGray"
         android:text="@string/save"
         android:textAllCaps="false"
+        android:onClick="onSaveClick"
         android:textColor="@color/colorButtonText" />
 
     <android.support.v7.widget.RecyclerView

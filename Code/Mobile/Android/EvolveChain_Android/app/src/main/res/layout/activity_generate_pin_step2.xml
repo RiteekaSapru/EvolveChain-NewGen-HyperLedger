@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context="com.newgen.evolvechain.activities.GeneratePinStep2Activity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/enter_otp" />
+
+    <com.newgen.evolvechain.utils.PinText
+        android:id="@+id/edit_text_otp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:cursorVisible="false"
+        android:digits="1345678902"
+        android:inputType="number"
+        android:maxLength="6"
+        android:paddingLeft="@dimen/_16sdp"
+        android:paddingRight="@dimen/_16sdp"
+        android:textColor="#FFF"
+        android:textSize="@dimen/_20sdp"
+        app:pinBackgroundDrawable="@drawable/otp_background" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:text="@string/enter_pin" />
+
+    <com.newgen.evolvechain.utils.PinText
+        android:id="@+id/edit_text_code"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:cursorVisible="false"
+        android:digits="1345678902"
+        android:inputType="numberPassword"
+        android:maxLength="6"
+        android:paddingLeft="@dimen/_16sdp"
+        android:paddingRight="@dimen/_16sdp"
+        android:textColor="#FFF"
+        android:textSize="@dimen/_20sdp"
+        app:pinBackgroundDrawable="@drawable/otp_background" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:text="@string/re_enter_pin" />
+
+    <com.newgen.evolvechain.utils.PinText
+        android:id="@+id/edit_text_re_code"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:cursorVisible="false"
+        android:digits="1345678902"
+        android:inputType="numberPassword"
+        android:maxLength="6"
+        android:paddingLeft="@dimen/_16sdp"
+        android:paddingRight="@dimen/_16sdp"
+        android:textColor="#FFF"
+        android:textSize="@dimen/_20sdp"
+        app:pinBackgroundDrawable="@drawable/otp_background" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:background="@color/colorDarkGray"
+        android:onClick="onChangePinClick"
+        android:text="@string/change_pin"
+        android:textAllCaps="false"
+        android:textColor="@color/colorButtonText" />
+</LinearLayout>

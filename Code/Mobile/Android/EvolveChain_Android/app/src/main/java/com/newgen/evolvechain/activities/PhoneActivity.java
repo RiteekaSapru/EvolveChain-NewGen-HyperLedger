@@ -3,6 +3,7 @@ package com.newgen.evolvechain.activities;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,12 +12,15 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.newgen.evolvechain.AppConstants;
-import com.newgen.evolvechain.AppManager;
+import com.newgen.evolvechain.utils.AppConstants;
+import com.newgen.evolvechain.utils.AppManager;
 import com.newgen.evolvechain.R;
 import com.newgen.evolvechain.models.CountryCodeModel;
 import com.newgen.evolvechain.network_layer.PostTask;
 import com.newgen.evolvechain.network_layer.WebConnectionListener;
+import com.newgen.evolvechain.utils.DialogsManager;
+import com.newgen.evolvechain.utils.SharedPrefManager;
+import com.newgen.evolvechain.utils.Utility;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,6 +28,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class PhoneActivity extends AppCompatActivity {
     String[] countryNames;
@@ -71,8 +76,7 @@ public class PhoneActivity extends AppCompatActivity {
                 countryNames[i] = list.get(i).getName();
             }
 
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -96,40 +100,49 @@ public class PhoneActivity extends AppCompatActivity {
             try {
                 object.put("mobile", mobileNumber.getText().toString());
                 object.put("country_code", isdCode.getText().toString());
-            }
-            catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            final String urlData = AppConstants.SERVER_ADDRESS + AppConstants.METHOD_NAME + AppConstants.GENERATE_PHONE_OTP + AppManager.getInstance().initToken;
+            if (AppManager.getInstance().initToken.length() <= 0) {
+                getInitToken(view);
+            } else {
 
-            new PostTask(object.toString(), urlData, new WebConnectionListener() {
-                ProgressDialog dialog;
-                @Override
-                public void onTaskStart() {
-                    dialog = ProgressDialog.show(PhoneActivity.this, "", "Loading...");
-                }
+                final String urlData = AppConstants.SERVER_ADDRESS + AppConstants.METHOD_NAME + AppConstants.GENERATE_PHONE_OTP + AppManager.getInstance().initToken;
 
-                @Override
-                public void onTaskComplete(String result) {
-                    dialog.dismiss();
-                    try {
-                        JSONObject jsonObject = new JSONObject(result);
-                        int successCode = jsonObject.getInt("success");
-                        if (successCode == 1) {
-                            Intent intent = new Intent(PhoneActivity.this, OTPActivity.class);
-                            intent.putExtra("type", AppConstants.VERIFICATION_TYPE_PHONE);
-                            intent.putExtra("data", object.toString());
-                            intent.putExtra("url", urlData);
-                            intent.putExtra("value", isdCode.getText().toString() + mobileNumber.getText().toString());
-                            startActivity(intent);
+                new PostTask(object.toString(), urlData, new WebConnectionListener() {
+                    ProgressDialog dialog;
+
+                    @Override
+                    public void onTaskStart() {
+                        dialog = ProgressDialog.show(PhoneActivity.this, "", "Loading...");
+                    }
+
+                    @Override
+                    public void onTaskComplete(String result) {
+                        dialog.dismiss();
+                        try {
+                            JSONObject jsonObject = new JSONObject(result);
+                            int successCode = jsonObject.getInt("success");
+                            if (successCode == 1) {
+                                Intent intent = new Intent(PhoneActivity.this, OTPActivity.class);
+                                intent.putExtra("type", AppConstants.VERIFICATION_TYPE_PHONE);
+                                intent.putExtra("data", object.toString());
+                                intent.putExtra("url", urlData);
+                                intent.putExtra("value", isdCode.getText().toString() + mobileNumber.getText().toString());
+                                startActivity(intent);
+                            } else {
+                                DialogsManager.showErrorDialog(PhoneActivity.this, "Error", jsonObject.getString("error"));
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            DialogsManager.showErrorDialog(PhoneActivity.this, "Error", result);
                         }
                     }
-                    catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }).execute();
+                }).execute();
+            }
+        } else {
+            DialogsManager.showErrorDialog(this, "Error", "Please enter contact number to proceed");
         }
     }
 
@@ -147,5 +160,47 @@ public class PhoneActivity extends AppCompatActivity {
             return null;
         }
         return json;
+    }
+
+    private void getInitToken(final View view) {
+        String ip = Utility.getIPAddress(true);
+        String uniqueId = UUID.randomUUID().toString();
+
+        String urlData = AppConstants.SERVER_ADDRESS + AppConstants.METHOD_NAME + AppConstants.INITIALIZE;
+
+        JSONObject bodyJson = new JSONObject();
+        try {
+            bodyJson.put("ip", ip);
+            bodyJson.put("device_type", "android");
+            bodyJson.put("device_name", Build.MANUFACTURER + " " + Build.MODEL);
+            bodyJson.put("os_version", Build.VERSION.RELEASE);
+            bodyJson.put("vendor_uuid", uniqueId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        new PostTask(bodyJson.toString(), urlData, new WebConnectionListener() {
+            @Override
+            public void onTaskStart() {
+                Log.d("Getting token started", "here");
+            }
+
+            @Override
+            public void onTaskComplete(String result) {
+                Log.d("Token", result);
+                try {
+                    JSONObject object = new JSONObject(result);
+                    int successCode = object.getInt("success");
+                    if (successCode == 1) {
+                        String initToken = object.getString("key");
+                        new SharedPrefManager(PhoneActivity.this).setInitToken(initToken);
+                        onGetOtpClick(view);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    DialogsManager.showErrorDialog(PhoneActivity.this, "Error", e.toString());
+                }
+            }
+        }).execute();
     }
 }

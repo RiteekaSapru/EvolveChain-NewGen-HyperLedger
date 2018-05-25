@@ -10,10 +10,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.newgen.evolvechain.AppConstants;
-import com.newgen.evolvechain.AppManager;
+import com.newgen.evolvechain.utils.AppConstants;
+import com.newgen.evolvechain.utils.AppManager;
 import com.newgen.evolvechain.R;
-import com.newgen.evolvechain.Utility;
+import com.newgen.evolvechain.utils.DialogsManager;
+import com.newgen.evolvechain.utils.Utility;
 import com.newgen.evolvechain.network_layer.PostTask;
 import com.newgen.evolvechain.network_layer.WebConnectionListener;
 
@@ -113,15 +114,14 @@ public class OTPActivity extends AppCompatActivity {
                     int successCode = object.getInt("success");
                     switch (successCode) {
                         case 0:
-                            startTimer();
                             break;
                         case 1:
                             if (VERIFICATION_TYPE == AppConstants.VERIFICATION_TYPE_EMAIL) {
-                                AppManager.getInstance().basicModel.setEmail(valueData);
+                                //AppManager.getInstance().basicModel.setEmail(valueData);
                             }
                             else {
                                 if (VERIFICATION_TYPE == AppConstants.VERIFICATION_TYPE_PHONE) {
-                                    AppManager.getInstance().basicModel.setContactNumber(valueData);
+                                    //AppManager.getInstance().basicModel.setContactNumber(valueData);
                                 }
                             }
                             Intent intent = new Intent(OTPActivity.this, BasicDetailsActivity.class);
@@ -132,6 +132,7 @@ public class OTPActivity extends AppCompatActivity {
                 }
                 catch (Exception e) {
                     e.printStackTrace();
+                    DialogsManager.showErrorDialog(OTPActivity.this, "Error", result);
                 }
             }
         }).execute();

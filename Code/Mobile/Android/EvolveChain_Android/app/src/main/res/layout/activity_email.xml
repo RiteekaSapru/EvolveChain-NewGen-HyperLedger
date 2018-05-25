@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
+    android:background="@drawable/splash_background"
     tools:context="com.newgen.evolvechain.activities.EmailActivity">
 
     <android.support.design.widget.TextInputLayout

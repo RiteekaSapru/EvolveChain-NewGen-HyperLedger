@@ -13,7 +13,7 @@
     <string name="sign_in">Sign in</string>
     <string name="get_otp">Get OTP</string>
     <string name="enter_pin">Enter Pin</string>
-    <string name="re_enter_otp">Re-Enter OTP</string>
+    <string name="re_enter_pin">Re-Enter Pin</string>
     <string name="enter_otp">Enter OTP</string>
     <string name="save">Save</string>
     <string name="right_arrow">right_arrow</string>
@@ -34,6 +34,21 @@
     <string name="address_2">Address 2</string>
     <string name="state">State</string>
     <string name="country">Country</string>
-    <string name="area_code">Area Code</string>
+    <string name="area_code">Zip</string>
     <string name="identity_proof">identity proof</string>
+    <string name="enter_taxation_id">Enter Taxation Id</string>
+    <string name="account_number">Account Number</string>
+    <string name="bank_name">Bank Name</string>
+    <string name="ifsc_code">IFSC Code</string>
+    <string name="contact_number">Contact number</string>
+    <string name="date_of_birth">Date of Birth</string>
+    <string name="birth_place">Place of Birth</string>
+    <string name="birth_country">Birth Country</string>
+    <string name="issue_country">Issue Country</string>
+    <string name="type">Type</string>
+    <string name="number">Number</string>
+    <string name="address">Address</string>
+    <string name="street">Street</string>
+    <string name="city">City</string>
+    <string name="change_pin">Change Pin</string>
 </resources>

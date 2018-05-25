@@ -6,15 +6,17 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 
 import com.newgen.evolvechain.R;
+import com.newgen.evolvechain.utils.DialogsManager;
 
 public class  CountrySelectionActivity extends AppCompatActivity {
 
     private static final int SELECTED_COUNTRY_INDIA = 0;
     private static final int SELECTED_COUNTRY_OTHERS = 1;
 
-    private static int selectedOption = -1;
+    private static int selectedOption = 0;
     private Button proceedButton;
 
     @Override
@@ -26,7 +28,7 @@ public class  CountrySelectionActivity extends AppCompatActivity {
 
     private void initUis() {
         proceedButton = findViewById(R.id.btn_proceed);
-        proceedButton.setEnabled(false);
+
     }
 
     public void onCountrySelectionClicked(View view) {
@@ -52,6 +54,7 @@ public class  CountrySelectionActivity extends AppCompatActivity {
         if (selectedOption >= 0){
             switch (selectedOption){
                 case SELECTED_COUNTRY_INDIA:
+                    DialogsManager.showErrorDialog(this, "", "Under development");
 //                    Intent indiaIntent = new Intent(CountrySelectionActivity.this, IndiaRegistrationActivity.class);
 //                    startActivity(indiaIntent);
                     break;

@@ -1,7 +1,10 @@
-package com.newgen.evolvechain;
+package com.newgen.evolvechain.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+
+import com.newgen.evolvechain.utils.AppConstants;
+import com.newgen.evolvechain.utils.AppManager;
 
 /**
  * Created by onkar.gupta on 5/18/2018.

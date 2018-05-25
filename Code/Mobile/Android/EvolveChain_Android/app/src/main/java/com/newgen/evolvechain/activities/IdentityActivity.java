@@ -1,13 +1,18 @@
 package com.newgen.evolvechain.activities;
 
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.app.NavUtils;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -16,29 +21,54 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 
-import com.newgen.evolvechain.AppManager;
+import com.newgen.evolvechain.models.CountryCodeModel;
+import com.newgen.evolvechain.models.UserBasicModel;
+import com.newgen.evolvechain.models.documnets.DrivingLicenseModel;
+import com.newgen.evolvechain.models.documnets.PassportModel;
+import com.newgen.evolvechain.models.documnets.TaxationModel;
+import com.newgen.evolvechain.network_layer.MultiPartTask;
+import com.newgen.evolvechain.network_layer.WebConnectionListener;
+import com.newgen.evolvechain.utils.AppConstants;
+import com.newgen.evolvechain.utils.AppManager;
 import com.newgen.evolvechain.R;
+import com.newgen.evolvechain.utils.DialogsManager;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class IdentityActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
-    private Spinner spinner;
-    private EditText identityNumber, expiryDate;
+    private EditText editTextIdentityNumber, editTextExpiryDate, editTextIssueCountry;
     private ImageView frontImage, backImage;
+    private Spinner spinner;
 
     private static final int PICK_IMAGE_BACK = 1;
     private static final int PICK_IMAGE_FRONT = 0;
+
+    private static final int IDENTITY_TYPE_PASSPORT = 0;
+    private static final int IDENTITY_TYPE_DRIVING_LICENSE = 1;
+    private static final int IDENTITY_TYPE_TAXATION = 2;
+    private int identityType = IDENTITY_TYPE_PASSPORT;
+
     private Uri frontUri, backUri;
 
     private List<String> options = new ArrayList<>();
 
     Calendar myCalendar = Calendar.getInstance();
     DatePickerDialog.OnDateSetListener date;
+
+    String[] countryNames;
+    ArrayList<CountryCodeModel> list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +77,10 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
 
         options.add("Passport");
         options.add("Driving License");
+        options.add("Taxation Id");
 
         setUpDatePicker();
+        getCountryData();
         initUis();
 
     }
@@ -72,53 +104,65 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
     private void updateLabel() {
         String myFormat = "dd-MMM-yyyy"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
-        expiryDate.setText(sdf.format(myCalendar.getTime()));
+        editTextExpiryDate.setText(sdf.format(myCalendar.getTime()));
     }
 
     private void initUis() {
         spinner = findViewById(R.id.spinner);
         spinner.setOnItemSelectedListener(this);
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, R.layout.spinner_text_layout, options);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this, R.layout.spinner_text_layout, options);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(dataAdapter);
 
+        setSpinnerSelection();
 
-        identityNumber = findViewById(R.id.edit_text_identity_number);
-        expiryDate = findViewById(R.id.edit_text_expiry_date);
-        expiryDate.setOnClickListener(new View.OnClickListener() {
+        editTextIdentityNumber = findViewById(R.id.edit_text_identity_number);
+        editTextIssueCountry = findViewById(R.id.edit_text_issue_country);
+        editTextExpiryDate = findViewById(R.id.edit_text_expiry_date);
 
-            @Override
-            public void onClick(View v) {
-                new DatePickerDialog(IdentityActivity.this, date, myCalendar
-                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
-            }
-        });
         frontImage = findViewById(R.id.front_image);
         backImage = findViewById(R.id.back_image);
     }
 
+    private void setSpinnerSelection() {
+        if (AppManager.getInstance().identityModelV1.getType() >= 0) {
+            switch (AppManager.getInstance().identityModelV1.getType()) {
+                case AppConstants.DOCUMENT_TYPE_PASSPORT:
+                    spinner.setSelection(IDENTITY_TYPE_PASSPORT);
+                    break;
+                case AppConstants.DOCUMENT_TYPE_DRIVING_LICENSE:
+                    spinner.setSelection(IDENTITY_TYPE_DRIVING_LICENSE);
+                    break;
+                case AppConstants.DOCUMENT_TYPE_TAXATION:
+                    spinner.setSelection(IDENTITY_TYPE_TAXATION);
+                    break;
+            }
+        }
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case PICK_IMAGE_BACK:
-                backUri = data.getData();
-                try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), backUri);
-                    backImage.setImageBitmap(bitmap);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
-            case PICK_IMAGE_FRONT:
-                frontUri = data.getData();
-                try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), frontUri);
-                    frontImage.setImageBitmap(bitmap);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
+        if (resultCode != 0) {
+            switch (requestCode) {
+                case PICK_IMAGE_BACK:
+                    backUri = data.getData();
+                    try {
+                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), backUri);
+                        backImage.setImageBitmap(bitmap);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case PICK_IMAGE_FRONT:
+                    frontUri = data.getData();
+                    try {
+                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), frontUri);
+                        frontImage.setImageBitmap(bitmap);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+            }
         }
     }
 
@@ -142,24 +186,200 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
     }
 
     public void onExpiryDateClick(View view) {
+        if (identityType == IDENTITY_TYPE_TAXATION) {
+            Calendar minCalendar = Calendar.getInstance();
+            minCalendar.set(myCalendar.get(Calendar.YEAR) - 80, myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH));
+
+            Calendar maxCalendar = Calendar.getInstance();
+            maxCalendar.set(myCalendar.get(Calendar.YEAR) - 14, myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH));
+
+
+            DatePickerDialog datePickerDialog =  new DatePickerDialog(this, date, maxCalendar
+                    .get(Calendar.YEAR), maxCalendar.get(Calendar.MONTH),
+                    maxCalendar.get(Calendar.DAY_OF_MONTH));
+
+
+            datePickerDialog.getDatePicker().setMaxDate(maxCalendar.getTimeInMillis());
+            datePickerDialog.getDatePicker().setMinDate(minCalendar.getTimeInMillis());
+            datePickerDialog.show();
+        }
+        else {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(this, date, myCalendar
+                    .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                    myCalendar.get(Calendar.DAY_OF_MONTH));
+
+
+            datePickerDialog.getDatePicker().setMinDate(myCalendar.getTimeInMillis());
+            datePickerDialog.show();
+        }
     }
 
     public void onSaveClick(View view) {
-        if (frontUri != null && backUri != null) {
-            Intent intent = new Intent(this, OthersRegistrationActivity.class);
-            startActivity(intent);
+        String identityNumber = editTextIdentityNumber.getText().toString();
+        String expiryDate = editTextExpiryDate.getText().toString();
+        String issueCountry = editTextIssueCountry.getText().toString();
+
+        switch (identityType) {
+            case IDENTITY_TYPE_PASSPORT:
+                if (frontUri == null) {
+                    DialogsManager.showErrorDialog(this, "Error", "Please add front side image");
+                } else {
+                    if (backUri == null) {
+                        DialogsManager.showErrorDialog(this, "Error", "Please add back side image");
+                    } else {
+                        if (identityNumber.length() <= 0) {
+                            DialogsManager.showErrorDialog(this, "Error", "Please enter Passport number");
+                        } else {
+                            if (expiryDate.length() <= 0) {
+                                DialogsManager.showErrorDialog(this, "Error", "Please enter expiry date");
+                            } else {
+                                if (issueCountry.length() <= 0) {
+                                    DialogsManager.showErrorDialog(this, "Error", "Please enter issue country");
+                                } else {
+                                    AppManager.getInstance().passportModel = new PassportModel(identityNumber, expiryDate, issueCountry, frontUri, backUri);
+                                    AppManager.getInstance().identityModelV1.setType(AppConstants.DOCUMENT_TYPE_PASSPORT);
+                                    //saveDataToServer(AppConstants.DOCUMENT_TYPE_PASSPORT);
+                                    Intent intent = new Intent(this, OthersRegistrationActivity.class);
+                                    startActivity(intent);
+                                }
+                            }
+                        }
+                    }
+                }
+                break;
+            case IDENTITY_TYPE_DRIVING_LICENSE:
+                if (frontUri == null) {
+                    DialogsManager.showErrorDialog(this, "Error", "Please add front side image");
+                } else {
+                    if (backUri == null) {
+                        DialogsManager.showErrorDialog(this, "Error", "Please add back side image");
+                    } else {
+                        if (identityNumber.length() <= 0) {
+                            DialogsManager.showErrorDialog(this, "Error", "Please enter Driving License number");
+                        } else {
+                            if (expiryDate.length() <= 0) {
+                                DialogsManager.showErrorDialog(this, "Error", "Please enter expiry date");
+                            } else {
+                                if (issueCountry.length() <= 0) {
+                                    DialogsManager.showErrorDialog(this, "Error", "Please enter issue country");
+                                } else {
+                                    AppManager.getInstance().drivingLicenseModel = new DrivingLicenseModel(identityNumber, expiryDate, issueCountry, frontUri, backUri);
+                                    AppManager.getInstance().identityModelV1.setType(AppConstants.DOCUMENT_TYPE_DRIVING_LICENSE);
+                                    //saveDataToServer(AppConstants.DOCUMENT_TYPE_DRIVING_LICENSE);
+                                    Intent intent = new Intent(this, OthersRegistrationActivity.class);
+                                    startActivity(intent);
+                                }
+                            }
+                        }
+                    }
+                }
+                break;
+            case IDENTITY_TYPE_TAXATION:
+                if (frontUri == null) {
+                    DialogsManager.showErrorDialog(this, "Error", "Please add front side image");
+                } else {
+                    if (backUri == null) {
+                        DialogsManager.showErrorDialog(this, "Error", "Please add back side image");
+                    } else {
+                        if (identityNumber.length() <= 0) {
+                            DialogsManager.showErrorDialog(this, "Error", "Please enter Taxation number");
+                        } else {
+                            if (expiryDate.length() <= 0) {
+                                DialogsManager.showErrorDialog(this, "Error", "Please enter Birth date");
+                            } else {
+                                if (issueCountry.length() <= 0) {
+                                    DialogsManager.showErrorDialog(this, "Error", "Please enter issue country");
+                                } else {
+                                    AppManager.getInstance().taxationModel = new TaxationModel(identityNumber, expiryDate, issueCountry, frontUri, backUri);
+                                    AppManager.getInstance().identityModelV1.setType(AppConstants.DOCUMENT_TYPE_TAXATION);
+                                    //saveDataToServer(AppConstants.DOCUMENT_TYPE_TAXATION);
+                                    Intent intent = new Intent(this, OthersRegistrationActivity.class);
+                                    startActivity(intent);
+                                }
+                            }
+                        }
+                    }
+                }
+                break;
         }
     }
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+        identityType = i;
         AppManager.getInstance().identityModel.setType(i);
-        switch (i){
+        switch (i) {
             case 0:
-                identityNumber.setHint("Passport Number");
+                editTextIdentityNumber.setHint("Passport Number");
+                editTextExpiryDate.setHint("Date of Expiry");
+
+                if (AppManager.getInstance().passportModel != null) {
+                    PassportModel passportModel = AppManager.getInstance().passportModel;
+                    editTextIdentityNumber.setText(passportModel.getNumber());
+                    editTextIssueCountry.setText(passportModel.getIssueCountry());
+                    editTextExpiryDate.setText(passportModel.getExpiryDate());
+
+                    frontImage.setImageURI(passportModel.getFrontUri());
+                    backImage.setImageURI(passportModel.getBackUri());
+
+                    frontUri = passportModel.getFrontUri();
+                    backUri = passportModel.getBackUri();
+                } else {
+                    editTextIdentityNumber.setText("");
+                    editTextExpiryDate.setText("");
+                    editTextIssueCountry.setText("");
+
+                    frontImage.setImageResource(R.drawable.image_placeholder);
+                    backImage.setImageResource(R.drawable.image_placeholder);
+                }
                 break;
             case 1:
-                identityNumber.setHint("Driving License Number");
+                editTextIdentityNumber.setHint("Driving License Number");
+                editTextExpiryDate.setHint("Date of Expiry");
+
+                if (AppManager.getInstance().drivingLicenseModel != null) {
+                    DrivingLicenseModel drivingLicenseModel = AppManager.getInstance().drivingLicenseModel;
+                    editTextIdentityNumber.setText(drivingLicenseModel.getNumber());
+                    editTextIssueCountry.setText(drivingLicenseModel.getIssueCountry());
+                    editTextExpiryDate.setText(drivingLicenseModel.getExpiryDate());
+
+                    frontImage.setImageURI(drivingLicenseModel.getFrontUri());
+                    backImage.setImageURI(drivingLicenseModel.getBackUri());
+
+                    frontUri = drivingLicenseModel.getFrontUri();
+                    backUri = drivingLicenseModel.getBackUri();
+                } else {
+                    editTextIdentityNumber.setText("");
+                    editTextExpiryDate.setText("");
+                    editTextIssueCountry.setText("");
+
+                    frontImage.setImageResource(R.drawable.image_placeholder);
+                    backImage.setImageResource(R.drawable.image_placeholder);
+                }
+                break;
+            case 2:
+                editTextIdentityNumber.setHint("Taxation Number");
+                editTextExpiryDate.setHint("Date of birth");
+
+                if (AppManager.getInstance().taxationModel != null) {
+                    TaxationModel taxationModel = AppManager.getInstance().taxationModel;
+                    editTextIdentityNumber.setText(taxationModel.getNumber());
+                    editTextIssueCountry.setText(taxationModel.getCountry());
+                    editTextExpiryDate.setText(taxationModel.getDob());
+
+                    frontImage.setImageURI(taxationModel.getFrontUri());
+                    backImage.setImageURI(taxationModel.getBackUri());
+
+                    frontUri = taxationModel.getFrontUri();
+                    backUri = taxationModel.getBackUri();
+                } else {
+                    editTextIdentityNumber.setText("");
+                    editTextExpiryDate.setText("");
+                    editTextIssueCountry.setText("");
+
+                    frontImage.setImageResource(R.drawable.image_placeholder);
+                    backImage.setImageResource(R.drawable.image_placeholder);
+                }
                 break;
         }
     }
@@ -167,5 +387,63 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
 
+    }
+
+    public void onIssueCountryClick(View view) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Select your country");
+        builder.setItems(countryNames, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                editTextIssueCountry.setText(list.get(i).getName());
+            }
+        });
+        builder.create().show();
+    }
+
+    private void getCountryData() {
+        String data = loadJSONFromAsset();
+        parseDataToList(data);
+    }
+
+    public String loadJSONFromAsset() {
+        String json = null;
+        try {
+            InputStream is = this.getAssets().open("CountryList.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return json;
+    }
+
+    private void parseDataToList(String data) {
+        list = new ArrayList<>();
+
+        try {
+            JSONArray object = new JSONArray(data);
+
+            for (int i = 0; i < object.length(); i++) {
+                JSONObject jsonObject = object.getJSONObject(i);
+                CountryCodeModel model = new CountryCodeModel(jsonObject.getString("PhoneCode"), jsonObject.getString("Country"));
+                list.add(model);
+            }
+
+            Log.d("size", "size");
+
+            countryNames = new String[list.size()];
+
+            for (int i = 0; i < list.size(); i++) {
+                countryNames[i] = list.get(i).getName();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -1,17 +1,21 @@
 package com.newgen.evolvechain.activities;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
-import com.newgen.evolvechain.AppConstants;
-import com.newgen.evolvechain.AppManager;
+import com.newgen.evolvechain.utils.AppConstants;
+import com.newgen.evolvechain.utils.AppManager;
 import com.newgen.evolvechain.R;
-import com.newgen.evolvechain.SharedPrefManager;
-import com.newgen.evolvechain.Utility;
+import com.newgen.evolvechain.utils.SharedPrefManager;
+import com.newgen.evolvechain.utils.Utility;
 import com.newgen.evolvechain.network_layer.PostTask;
 import com.newgen.evolvechain.network_layer.WebConnectionListener;
 
@@ -20,6 +24,8 @@ import org.json.JSONObject;
 import java.util.UUID;
 
 public class SplashActivity extends AppCompatActivity {
+
+    private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +37,16 @@ public class SplashActivity extends AppCompatActivity {
         }
         else {
             AppManager.getInstance().initToken = new SharedPrefManager(this).getInitToken();
+        }
+
+        checkForPermission();
+    }
+
+    private void checkForPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
         }
     }
 
