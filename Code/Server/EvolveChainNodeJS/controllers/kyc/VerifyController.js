@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const async = require('async');
+// const async = require('async');
 const config = require('config');
 const emailService = require('../../services/EmailService')
 const smsService = require('../../services/SMSService')
@@ -22,29 +22,31 @@ const list = {
 
 class VerifyController extends BaseController {
     async GetKYCVerificationInfo(req, res) {
-        try {
+        let baseURL = commonUtility.GetAppBaseUrl(req); //config.base_url
 
-            // let test = config.ERROR_CODES.DEVICE_MISMATCH;
+        try {
+            
+            let appKey =  req.params.key;
             let document_query = {
-                app_key: req.params.key,
+                app_key: appKey,
                 isDelete: 0
             }
 
-            KycDocument.findOne(document_query, (error, docData) => {
+            KycDocument.findOne(document_query).populate('app_data').exec((error, docData)=> {
+                
                 if (error) {
                     logManager.Log(`GetKYCVerificationInfo-Error: ${error}`);
-                    return res.redirect(config.base_url);
-
+                    return res.redirect(baseURL);
                 }
 
                 if (!docData) {
                     logManager.Log(`GetKYCVerificationInfo-Doc not found`);
-                    return res.redirect(config.base_url);
+                    return res.redirect(baseURL);
                 }
 
                 let kycData = {
                     app_key: docData.app_key,
-                    eKycId: "", //get it from app if already verified
+                    eKycId:  docData.is_verified ? docData.app_data.ekyc_id : '',
                     is_verified: docData.is_verified,
                     hash: docData.hash,
                     verification_comment: docData.verification_comment,
@@ -52,24 +54,22 @@ class VerifyController extends BaseController {
                     IdentityInfo: this.GetDocumentInfo(docData.identity_info, "IDENTITY"),
                     AddressInfo: this.GetDocumentInfo(docData.address_info, "ADDRESS")
                 }
-
                 res.render('web/verifiyKycDocuments.html', { kycData: kycData });
-
-            }).catch(function (e) {
-                logManager.Log(`GetKYCVerificationInfo-Exception: ${e}`);
-                return res.redirect(config.base_url);
+            
             });
+
         } catch (e) {
             logManager.Log(`GetKYCVerificationInfo-Exception: ${e}`);
-            return res.redirect(config.base_url);
+            return res.redirect(baseURL);
         }
     }
 
     async VerifyKyc(req, res) {
         try {
 
+            const appKey= req.params.key;
             let document_query = {
-                app_key: req.params.key,
+                app_key: appKey,
                 isDelete: 0
             }
 
@@ -100,9 +100,13 @@ class VerifyController extends BaseController {
 
                     //generate eKycId if successfully updated
                     const eKycId = commonUtility.GenerateKYCId();
+                    App.update({'key':appKey}, {$set:{'ekyc_id': eKycId}}).then((error, updatedApp)=>
+                    {
+                        return res.redirect(req.baseUrl + "/verify/" + docData.app_key);
+                    });
                     //update app status to verified
                     //send email to user
-                    return res.redirect(req.baseUrl + "/verify/" + docData.app_key);
+                   
                 });
 
             })

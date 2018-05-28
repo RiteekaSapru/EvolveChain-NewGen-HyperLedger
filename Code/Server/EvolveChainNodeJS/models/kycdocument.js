@@ -7,6 +7,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const config = require('config');
+const commonUtility = require('../helpers/CommonUtility');
 
 const ImageInfo = new Schema({
     name: String,
@@ -33,6 +34,7 @@ const GeneralDocument = new Schema({
 
 const KYCDocument = new Schema({
     app_key: { type: String },
+   // app_data:{ type: String, field:'key', ref:'apps' },
     isDelete: { type: Boolean },
     //docInfo: { type: [DocInfo] },
     basic_info: {
@@ -68,6 +70,13 @@ const KYCDocument = new Schema({
     verification_time: { type: Date },
     verification_by: { type: String }
 });
+
+KYCDocument.virtual('app_data', {
+    ref: 'apps',
+    localField: 'app_key',
+    foreignField: 'key',
+    justOne: true // for many-to-1 relationships
+  });
 
 KYCDocument.pre('save', function (next) {
     var KYCDocument = this;

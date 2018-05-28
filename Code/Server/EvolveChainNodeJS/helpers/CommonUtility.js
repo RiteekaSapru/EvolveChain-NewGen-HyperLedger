@@ -112,6 +112,11 @@ class CommonUtility {
         return kycId;
     }
 
+    GetAppBaseUrl(req)
+    {
+        return  req.protocol + '://' + req.get('host');
+    }
+
 
 
 }
