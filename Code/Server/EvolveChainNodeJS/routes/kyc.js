@@ -17,7 +17,7 @@ kyc.post("/createupdatekyc/:key",keyMiddleware, KYCController.CreateUpdateKyc.bi
 kyc.post("/getStepStatus/:key", keyMiddleware, KYCController.GetStepStatus.bind(KYCController));
 kyc.post("/getKycDocument/:key", keyMiddleware, KYCController.GetKycDocument.bind(KYCController));
 kyc.post("/saveKycDocument/:key", keyMiddleware, KYCController.SaveKycDocument.bind(KYCController));
-kyc.post("/submitKycDocument/:key", keyMiddleware, KYCController.SubmitKycDocument.bind(KYCController));
+kyc.post("/submitKycDocument", KYCController.SubmitKycDocument.bind(KYCController));
 kyc.post("/unlinkKycImg/:key",keyMiddleware, KYCController.UnlinkKycImg.bind(KYCController));
 kyc.post("/removeImage/:key", keyMiddleware, KYCController.RemoveImage.bind(KYCController));
 kyc.post("/generateRandomKYC/:key", keyMiddleware, KYCController.GenerateRandomKYC.bind(KYCController));
