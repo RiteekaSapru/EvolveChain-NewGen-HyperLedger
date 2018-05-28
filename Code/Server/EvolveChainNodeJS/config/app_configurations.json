@@ -5,12 +5,6 @@
         "VERIFIED": "Verified",
         "REJECTED": "Rejected"
     },
-    "USA_UTILITY_BILL_TYPE": {
-        "ELECTRICITY_BILL": "Electricity Bill",
-        "MOBILE_BILL": "Mobile Bill",
-        "INTERNET_BILL": "Internet Bill",
-        "OTHER": "Other"
-    },
     "ERROR_CODE": {
         "ERROR": "E00",
         "DEVICE_MISMATCH": "E01",
