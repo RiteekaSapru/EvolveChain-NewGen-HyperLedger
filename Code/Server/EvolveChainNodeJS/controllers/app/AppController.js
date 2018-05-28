@@ -586,7 +586,8 @@ class AppController extends BaseController {
                     'key': appEntity.key,
                     'ip': appEntity.IP,
                     'Server': appEntity.Server,
-                    'Refer': appEntity.Refer
+                    'Refer': appEntity.Refer,
+                    'init_config': config.get('init_config')
                 };
                 break;
             case "GeneratePin":

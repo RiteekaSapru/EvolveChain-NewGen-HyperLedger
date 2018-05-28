@@ -4,6 +4,7 @@ const status = require('./status');
 const messages = require('./messages');
 const document_status = require('./document_status');
 const appConfig = require('./app_configurations');
+const init_config = require('./init_configurations');
 
 const admin_messages = require('./admin_messages');
 const merchant_messages = require('./merchant_messages');
@@ -56,7 +57,7 @@ module.exports = {
   ERROR_CODES: appConfig.ERROR_CODE,
   HTTP_STATUSES: appConfig.HTTP_STATUS,
   APP_STATUSES: appConfig.APP_STATUS,
-  USA_UTILITY_BILL_TYPES:appConfig.USA_UTILITY_BILL_TYPE,
+  init_config:init_config,
   messages: messages,
   FTP_URL: FTP_URL,
   admin_messages: admin_messages,
