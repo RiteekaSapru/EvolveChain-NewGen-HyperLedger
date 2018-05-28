@@ -1,6 +1,8 @@
 const _ = require('lodash');
-// const async = require('async');
+const path = require("path");
 const config = require('config');
+const fs = require("fs");
+const ejs = require('ejs');
 const emailService = require('../../services/EmailService')
 const smsService = require('../../services/SMSService')
 const commonUtility = require('../../helpers/CommonUtility');
@@ -9,31 +11,24 @@ const BaseController = require('../BaseController');
 
 const App = require('../../models/apps');
 const KycDocument = require('../../models/kycdocument');
+const EmailTemplatesPath = path.join(__dirname + "/../../public/email_template");
 
 const messages = config.messages;
-const list = {
-    SITE_NAME: config.get('app_name'),
-    web_site: config.get('web_site'),
-    test: {
-        new: 1,
-        old: 0
-    }
-}
 
 class VerifyController extends BaseController {
     async GetKYCVerificationInfo(req, res) {
         let baseURL = commonUtility.GetAppBaseUrl(req); //config.base_url
 
         try {
-            
-            let appKey =  req.params.key;
+
+            let appKey = req.params.key;
             let document_query = {
                 app_key: appKey,
                 isDelete: 0
             }
 
-            KycDocument.findOne(document_query).populate('app_data').exec((error, docData)=> {
-                
+            KycDocument.findOne(document_query).populate('app_data').exec((error, docData) => {
+
                 if (error) {
                     logManager.Log(`GetKYCVerificationInfo-Error: ${error}`);
                     return res.redirect(baseURL);
@@ -46,7 +41,7 @@ class VerifyController extends BaseController {
 
                 let kycData = {
                     app_key: docData.app_key,
-                    eKycId:  docData.is_verified ? docData.app_data.ekyc_id : '',
+                    eKycId: docData.is_verified ? docData.app_data.ekyc_id : '',
                     is_verified: docData.is_verified,
                     hash: docData.hash,
                     verification_comment: docData.verification_comment,
@@ -55,7 +50,7 @@ class VerifyController extends BaseController {
                     AddressInfo: this.GetDocumentInfo(docData.address_info, "ADDRESS")
                 }
                 res.render('web/verifiyKycDocuments.html', { kycData: kycData });
-            
+
             });
 
         } catch (e) {
@@ -67,24 +62,26 @@ class VerifyController extends BaseController {
     async VerifyKyc(req, res) {
         try {
 
-            const appKey= req.params.key;
+            let baseURL = commonUtility.GetAppBaseUrl(req); //config.base_url
+            const appKey = req.params.key;
+            var userEmailId = "";
             let document_query = {
                 app_key: appKey,
                 isDelete: 0
             }
 
-            KycDocument.findOne(document_query, (error, docData) => {
+            KycDocument.findOne(document_query).populate('app_data').exec((error, docData) => {
 
                 if (error) {
                     logManager.Log(`VerifyKyc-Error: ${e}`);
-                    res.render('web/contact.html', {});
+                    return res.redirect(baseURL);
                 }
 
                 if (!docData) {
                     logManager.Log(`VerifyKyc-Error: ${e}`);
-                    res.render('web/contact.html', {});
+                    return res.redirect(baseURL);
                 }
-
+                userEmailId = docData.app_data.email;
                 let isVerified = (req.body.radioButtonVerify == "0" ? 0 : 1);
                 var setParams = {
                     $set: {
@@ -96,17 +93,58 @@ class VerifyController extends BaseController {
 
                     }
                 }
+
                 KycDocument.update(document_query, setParams).then((success) => {
 
-                    //generate eKycId if successfully updated
-                    const eKycId = commonUtility.GenerateKYCId();
-                    App.update({'key':appKey}, {$set:{'ekyc_id': eKycId}}).then((error, updatedApp)=>
+                    var eKycId = "";
+                    var appStatus = config.APP_STATUSES.REJECTED;
+                    var emailTemplateHtml = '/kyc_reject.html';
+                    var subject = 'EvolveChain KYC - Rejected';
+                    var  resubmitPin = '';
+
+                    if (isVerified) {
+                        //generate eKycId 
+                        eKycId = commonUtility.GenerateKYCId();
+                        appStatus = config.APP_STATUSES.VERIFIED;
+                        emailTemplateHtml = '/kyc_success.html';
+                        subject = 'EvolveChain KYC - Approved';
+                    } 
+                    else
                     {
-                        return res.redirect(req.baseUrl + "/verify/" + docData.app_key);
+                        //generate resubmit pin
+                        resubmitPin = 'RS90890';
+                    }                
+                    var appSetParams =
+                        {
+                            $set:
+                                {
+                                    'ekyc_id': eKycId,
+                                    'status': appStatus
+                                }
+                        }
+                    //send email 
+                    var template = fs.readFileSync(EmailTemplatesPath + emailTemplateHtml, {
+                        encoding: 'utf-8'
                     });
-                    //update app status to verified
-                    //send email to user
-                   
+
+                    var emailBody = ejs.render(template, {
+                        eKycId: eKycId,
+                        resubmitPin:resubmitPin,
+                        SITE_IMAGE: config.get('SITE_IMAGE'),
+                        SITE_NAME: config.get('app_name'),
+                        CURRENT_YEAR: config.get('current_year')
+                    });
+
+                    emailService.SendEmail(userEmailId, subject, emailBody).then((success) => {
+                        //update app status                      
+                        App.update({ 'key': appKey }, appSetParams).then((success) => {
+                            return res.redirect(req.baseUrl + "/verify/" + docData.app_key);
+
+                        });
+                    }).catch((ex) => {
+                        return res.redirect(baseURL);
+                        // return this.SendExceptionResponse(res, ex);
+                    });
                 });
 
             })
@@ -132,8 +170,8 @@ class VerifyController extends BaseController {
             let detailKeys = Object.keys(details);
             Object.keys(metaDataInfo).forEach(function (key) {
                 //if(detailKeys.hasOwnProperty(key)){
-                    summaryInfo.DocDetails.push({ 'name': metaDataInfo[key], 'value': details[key] });
-               // }
+                summaryInfo.DocDetails.push({ 'name': metaDataInfo[key], 'value': details[key] });
+                // }
             });
             // Object.keys(details).forEach(function (key) {
             //     if(metaDataInfo.hasOwnProperty(key)){
@@ -142,8 +180,8 @@ class VerifyController extends BaseController {
             // });
 
             for (var j = 0; j < images.length; j++) {
-              let imgUrl = config.base_url + "/kyc/getdocumentimages/" + images[j]._id.toString();
-                 summaryInfo.DocImages.push({ 'url': imgUrl});
+                let imgUrl = config.base_url + "/kyc/getdocumentimages/" + images[j]._id.toString();
+                summaryInfo.DocImages.push({ 'url': imgUrl });
 
             }
         }

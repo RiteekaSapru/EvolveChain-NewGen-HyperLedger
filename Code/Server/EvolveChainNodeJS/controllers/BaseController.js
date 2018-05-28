@@ -1,10 +1,11 @@
 const config = require('config');
 const messages = config.get('messages');
 const App = require('../models/apps');
+const logManager = require('../helpers/LogManager');
 
 
 class BaseController {
-   
+
     // GetErrorResponse(error_code, error, res) {
     GetErrorResponse(error, res) {
         var error_message = error;
@@ -19,11 +20,12 @@ class BaseController {
                 "error_code": "E100",
                 "error": error_message
             };
+        logManager.Log(error_message);
         return res.status(config.HTTP_STATUSES.OK).jsonp(response);;
     }
 
-    SendExceptionResponse(res, ex) {       
-      return this.SendErrorResponse(res, "E100", ex.message);
+    SendExceptionResponse(res, ex) {
+        return this.SendErrorResponse(res, "E100", ex.message);
     }
 
     SendErrorResponse(res, errorCode, errorMessage = '') {
@@ -37,6 +39,7 @@ class BaseController {
                 "error_code": errorCode,
                 "error": resultMessage
             };
+        logManager.Log(resultMessage);
         return res.status(config.HTTP_STATUSES.OK).jsonp(response);;
     }
 
@@ -50,7 +53,7 @@ class BaseController {
         var message = "Unknown Error";
         switch (errorCode) {
             case config.ERROR_CODES.EXCEPTION: message = "Exception:"; break;
-            case config.ERROR_CODES.ERROR: message = "Error:"; break;            
+            case config.ERROR_CODES.ERROR: message = "Error:"; break;
             case config.ERROR_CODES.DEVICE_MISMATCH: message = "Your account is logged into from a new device, for security reason please re-generate pin to login from this device"; break;
             case config.ERROR_CODES.INCORRECT_PIN: message = "Please enter correct pin to continue"; break;
             case config.ERROR_CODES.INCORRECT_OTP: message = "Please enter correct OTP to continue"; break;

@@ -3,7 +3,7 @@
  * KYC Document model schema
  *
  */
-
+'use strict'
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const config = require('config');
@@ -71,12 +71,16 @@ const KYCDocument = new Schema({
     verification_by: { type: String }
 });
 
+
+
 KYCDocument.virtual('app_data', {
     ref: 'apps',
     localField: 'app_key',
     foreignField: 'key',
     justOne: true // for many-to-1 relationships
   });
+
+// KYCDocument.index({ app_key: 1}, { unique: true});
 
 KYCDocument.pre('save', function (next) {
     var KYCDocument = this;
@@ -90,4 +94,5 @@ KYCDocument.pre('update', function() {
   KYCDocument.pre('findOneAndUpdate', function() {
     this.findOneAndUpdate({},{ $set: { last_modified: commonUtility.UtcNow() } });
   });
+
 module.exports = mongoose.model('kycdocuments', KYCDocument);
