@@ -12,6 +12,7 @@ function keyMiddleware(req, res, next) {
   }
   
 app.post("/initialize", AppController.Initialize.bind(AppController));
+app.post("/resubmitInitialize", AppController.ResubmitInitialize.bind(AppController));
 
 app.post("/generateEmailOtp/:key",keyMiddleware, AppController.GenerateEmailOTP.bind(AppController));
 app.post("/verifyemail/:key",keyMiddleware, AppController.VerifyEmail.bind(AppController));

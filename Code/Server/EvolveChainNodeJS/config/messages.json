@@ -36,7 +36,7 @@
     "doc_not_found"         : "Document not found!",
     "doc_data"              : "Document data get successfully!",
     "req_email"             : "Email not correct!",
-    "req_email_code"        : "Email code missing!",    
+    "req_email_code"        : "Email code missing!",
     "image_data"            : "Image data get successfully!",
     "resize_image"          : "Image resized!",
     "verify_email_code"     : "Please check your email to get the code",
@@ -44,6 +44,7 @@
     "req_mobile"            : "Mobile missing!",
     "verify_phone_code"     : "Mobile verification OTP sent",
     "req_mobile_code"       : "Mobile Code missing!",
+    "req_country_code"      : "Country code missing",
     "invalid_emial_mobile"  : "Invalid Email and Mobile!",
     "success"               : "success",
     "req_step"              : "step name missing!",
@@ -95,6 +96,7 @@
     "req_identity_no_numeric": "Identity Number Must Be Numeric!",
     "req_identity_no_length": "Identity Number Length Must Be 12!",
     "req_identity_image"    : "Identity photos Required!",
+    "req_resubmit_pin"      : "resubmit pin missing",
     "save_identity_info"    : "Identity Information save success",
     "kyc_incompleted"       : "Kyc Incompleted !",
     "kyc_process"           : "Your Kyc Verification Procces in EvolveChain.",
@@ -129,5 +131,8 @@
     "E06"                   : "Incorrect input parametrs in the request",
     "E07"                   : "No application record found", 
     "E08"                   : "No document record found",
-    "E09"                   : "New pin cann't be same as old pin"
+    "E09"                   : "New pin can't be same as old pin",
+    "E11"                   : "Please enter the correct details",
+    "E12"                   : "Phone number or email missing",
+    "E13"                   : "Country code missing"
 }
