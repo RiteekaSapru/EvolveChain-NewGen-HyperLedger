@@ -1,5 +1,5 @@
 {
-    "COUNTRY": [
+    "COUNTRIES": [
         { "NAME":"India", "PHONE_CODE":"91" },
         { "NAME":"NorthAmerica", "PHONE_CODE":"1" }
     ],
