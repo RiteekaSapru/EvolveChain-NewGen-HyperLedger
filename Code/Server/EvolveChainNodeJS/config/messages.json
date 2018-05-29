@@ -118,5 +118,16 @@
     "not_found_phone_wallet": "Phone not registered with GreenCoinX!",
     "phone_missing"         : "Phone missing!", 
     "req_verify_status"     : "Verify status missing!",
-    "file_not_found"         : "File not found"
+    "file_not_found"        : "File not found",
+    "E100"                  :  "Exception:",
+    "E00"                   : "Error:" ,          
+    "E01"                   : "Your account is logged into from a new device, for security reason please re-generate pin to login from this device",
+    "E02"                   : "Please enter correct pin to continue",
+    "E03"                   : "Please enter correct OTP to continue",
+    "E04"                   : "Please enter correct App Key to continue",
+    "E05"                   : "Please enter correct eKycId to continue",
+    "E06"                   : "Incorrect input parametrs in the request",
+    "E07"                   : "No application record found", 
+    "E08"                   : "No document record found",
+    "E09"                   : "New pin cann't be same as old pin"
 }
