@@ -29,7 +29,9 @@ class BaseController {
     }
 
     SendErrorResponse(res, errorCode, errorMessage = '') {
-        var resultMessage = this.GetMessageByErrorCode(errorCode)
+//       var resultMessage = this.GetMessageByErrorCode(errorCode)
+        
+        var resultMessage = messages[errorCode];
         if (errorMessage != '')
             resultMessage = resultMessage + "; " + errorMessage;
         var response =
@@ -49,7 +51,7 @@ class BaseController {
         return result.array()[0].msg;
     }
 
-    GetMessageByErrorCode(errorCode) {
+/*    GetMessageByErrorCode(errorCode) {
         var message = "Unknown Error";
         switch (errorCode) {
             case config.ERROR_CODES.EXCEPTION: message = "Exception:"; break;
@@ -67,7 +69,7 @@ class BaseController {
 
         return message;
     }
-
+*/
 
 
 }
