@@ -9,9 +9,16 @@ class CommonUtility {
     NowDate() {
         return dateFormat(new Date(), "isoUtcDateTime");
     }
+
     UtcNow() {
         return dateFormat(new Date(), "isoUtcDateTime");
     }
+
+    ConvertToUtc(localDate)
+    {
+        return dateFormat(localDate, "isoUtcDateTime");        
+    }
+
     AddMinutesToUtcNow(minutes)
     {
         var newDate = new Date(Date.now() + minutes * 60000);        
@@ -95,19 +102,17 @@ class CommonUtility {
 
     GenerateKYCId()
     {
-        var secret1 = authenticator.generateKey();
-        secret1 = secret1.replace(/\W/g, '').toLowerCase();
-        var secret1_code = authenticator.generateToken(secret1);
+        var secretKey1 = authenticator.generateKey();
+        secretKey1 = secretKey1.replace(/\W/g, '').toLowerCase();
+        var secret1_code = authenticator.generateToken(secretKey1);
 
-        var secret2 = authenticator.generateKey();
-        secret2 = secret2.replace(/\W/g, '').toLowerCase();
-        var secret2_code = authenticator.generateToken(secret2);
+        var secretKey2 = authenticator.generateKey();
+        secretKey2 = secretKey2.replace(/\W/g, '').toLowerCase();
+        var secret2_code = authenticator.generateToken(secretKey2);
 
-        var secret3 = authenticator.generateKey();
-        secret3 = secret3.replace(/\W/g, '').toLowerCase();
-        var secret3_code = authenticator.generateToken(secret3);
+        let secretCode = secret1_code + secret2_code;       
 
-        var kycId = secret1_code + '-' + secret2_code + '-' + secret3_code;
+        var kycId = 'USA-' + secretCode.substring(0, 4) + '-' + secretCode.substring(4, 8) + '-' + secretCode.substring(8, 12);
         return kycId;
     }
 

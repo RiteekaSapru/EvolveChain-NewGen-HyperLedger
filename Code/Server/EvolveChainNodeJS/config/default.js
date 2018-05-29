@@ -42,6 +42,7 @@ const ver_mail_id = 'riteeka.sapru@newgen.co.in';
 
 const web_site = BASE_URL+'/public/web';
 const appLogoUrl = 'https://cdn1.imggmi.com/uploads/2018/5/29/1a4a6ccc5a9022b5e29625aba369182d-full.png';
+//const appLogoUrl = SITE_IMAGE + '/Logo.png';
 
 
 module.exports = {

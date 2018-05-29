@@ -1,8 +1,10 @@
 /* App model schema */
 'use strict'
 const mongoose = require('mongoose');
-const commonUtility = require('../helpers/CommonUtility');
 const Schema = mongoose.Schema;
+const config = require('config');
+const commonUtility = require('../helpers/CommonUtility');
+
 
 var validateEmail = function(email) {
     var reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -57,6 +59,13 @@ const App = new Schema({
     resubmit_pin : {type:String} 
     
 });
+
+App.virtual('kycdoc_data', {
+    ref: 'kycdocuments',
+    localField: 'key',
+    foreignField: 'app_key',
+    justOne: true // for many-to-1 relationships
+  });
 
 App.index({ key: 1, ekyc_id: 1 }, { unique: true});
 

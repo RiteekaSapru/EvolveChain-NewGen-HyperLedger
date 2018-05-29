@@ -92,40 +92,37 @@ class AppController extends BaseController {
 
         try {
 
-                let result = await req.getValidationResult();
-                if (!result.isEmpty()) {
-                    let error = this.GetErrors(result);
-                    return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
-                }
-
-            let body = _.pick(req.body, ['email','phone', 'country_code', 'resubmit_pin']);
-            {
-            if(body.email=="" && body.phone=="")
-            {
-                return this.SendErrorResponse(res, config.ERROR_CODES.MISSING_PHONE_EMAIL,"");
+            let result = await req.getValidationResult();
+            if (!result.isEmpty()) {
+                let error = this.GetErrors(result);
+                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
             }
-            else if(body.email=="")
+
+            let body = _.pick(req.body, ['email', 'phone', 'country_code', 'resubmit_pin']);
             {
-                if(body.country_code=="")
-//                if(body.country_code.notEmpty())
-                {
-                    return this.SendErrorResponse(res, config.ERROR_CODES.MISSING_COUNTRY_CODE,"" );
+                if (body.email == "" && body.phone == "") {
+                    return this.SendErrorResponse(res, config.ERROR_CODES.MISSING_PHONE_EMAIL, "");
                 }
-                else{
-                    var conditions = {
-                    phone: body.phone,
-                    country_code: body.country_code,
-                    resubmit_pin: body.resubmit_pin
+                else if (body.email == "") {
+                    if (body.country_code == "")
+                    //                if(body.country_code.notEmpty())
+                    {
+                        return this.SendErrorResponse(res, config.ERROR_CODES.MISSING_COUNTRY_CODE, "");
+                    }
+                    else {
+                        var conditions = {
+                            phone: body.phone,
+                            country_code: body.country_code,
+                            resubmit_pin: body.resubmit_pin
+                        }
                     }
                 }
-            }
-            else if(body.phone=="")
-            {
-                var conditions = {
-                    email: body.email,
-                    resubmit_pin: body.resubmit_pin
+                else if (body.phone == "") {
+                    var conditions = {
+                        email: body.email,
+                        resubmit_pin: body.resubmit_pin
+                    }
                 }
-            }
             }
             App.findOne(conditions, (error, app) => {
 
@@ -191,7 +188,6 @@ class AppController extends BaseController {
                 var email_code = commonUtility.GenerateOTP(6);
 
                 //send verification code email
-
                 var template = fs.readFileSync(EmailTemplatesPath + '/email_varified.html', {
                     encoding: 'utf-8'
                 });
@@ -199,7 +195,7 @@ class AppController extends BaseController {
                 var emailBody = ejs.render(template, {
                     email: email,
                     kyc_id: email_code,
-                    SITE_IMAGE: config.get('SITE_IMAGE'),
+                    APP_LOGO_URL: config.get('APP_LOGO_URL'),
                     SITE_NAME: config.get('app_name'),
                     CURRENT_YEAR: config.get('current_year')
                 });
@@ -209,7 +205,6 @@ class AppController extends BaseController {
                 emailService.SendEmail(email, subject, emailBody).then((success) => {
 
                     let md5EmailCode = md5(email_code);
-                    // var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
                     var expireTime = commonUtility.AddMinutesToUtcNow(OTP_EXPIRY_MINS);
 
                     var setParams = {
@@ -221,11 +216,13 @@ class AppController extends BaseController {
                         }
                     }
 
-                    this.FindAndModifyQuery(conditions, setParams).exec(
-                        (error, updatedApp) => {
-                            return this.SendResponse("GenerateEmailOTP", error, updatedApp, res);
+                    App.update(conditions, setParams).then(
+                        (success) => {
+                            return this.GetSuccessResponse("GenerateEmailOTP", null, res);
                         }
-                    );
+                    ).catch((ex) => {
+                        return this.SendExceptionResponse(res, ex);
+                    });
 
                 }).catch((ex) => {
                     return this.SendExceptionResponse(res, ex);
@@ -254,22 +251,47 @@ class AppController extends BaseController {
             let key = req.params.key;
 
             var conditions = {
-                key: key,
-                email: body.email.toLowerCase(),
-                email_code: body.email_code.toLowerCase()
-            }
-            var setParams = {
-                $set: { email_verified: 1 }
+                key: key
+                // email: body.email.toLowerCase(),
+                // email_code: body.email_code.toLowerCase()
             }
 
-            this.FindAndModifyQuery(conditions, setParams).exec(
-                (error, updatedApp) => {
-                    return this.SendResponse("VerifyEmail", error, updatedApp, res);
+            App.findOne(conditions, (error, app) => {
+                if (error) {
+                    return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND, error);
                 }
-            );
+
+                if (!app)
+                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_KEY);
+
+                if (app.email != body.email.toLowerCase())
+                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_EMAIL);
+
+                var currentUtc = commonUtility.UtcNow();
+                //explicitly needs to convert to UTC, somehow mongodb or node js convert it to local timezone
+                var expireTime = commonUtility.ConvertToUtc(app.email_code_expire_time);
+                if (expireTime < currentUtc)
+                    return this.SendErrorResponse(res, config.ERROR_CODES.OTP_EXPIRED);
+
+                if (app.email_code != body.email_code.toLowerCase())
+                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_OTP);
+
+
+                var setParams = {
+                    $set: { email_verified: 1 }
+                }
+
+                App.update(conditions, setParams).then(
+                    (success) => {
+                        return this.GetSuccessResponse("VerifyEmail", null, res);
+                    }
+                ).catch((ex) => {
+                    return this.SendExceptionResponse(res, ex);
+                });
+
+            });
 
         } catch (ex) {
-            // logManager.Log(`VerifyEmail:Exception-${ex}`);
             return this.SendExceptionResponse(res, ex);
         }
 
@@ -327,11 +349,19 @@ class AppController extends BaseController {
                         }
                     }
 
-                    this.FindAndModifyQuery(conditions, setParams).exec(
-                        (error, updatedApp) => {
-                            return this.SendResponse("GenerateMobileOTP", error, updatedApp, res);
+                    App.update(conditions, setParams).then(
+                        (success) => {
+                            return this.GetSuccessResponse("GenerateMobileOTP", null, res);
                         }
-                    );
+                    ).catch((ex) => {
+                        return this.SendExceptionResponse(res, ex);
+                    });
+
+                    // this.FindAndModifyQuery(conditions, setParams).exec(
+                    //     (error, updatedApp) => {
+                    //         return this.SendResponse("GenerateMobileOTP", error, updatedApp, res);
+                    //     }
+                    // );
 
                 }).catch((ex) => {
                     return this.SendExceptionResponse(res, ex);
@@ -363,25 +393,48 @@ class AppController extends BaseController {
             let key = req.params.key;
 
             // var expireTime = new Date(Date.now() - (OTP_EXPIRY_MINS * 60000));
-            var expireTime = commonUtility.AddMinutesToUtcNow(-OTP_EXPIRY_MINS);
 
             var conditions = {
-                key: key,
-                phone: body.mobile,
-                phone_code: body.phone_code,
-                country_Code: body.country_Code,
-                phone_code_expire_time: { $gte: expireTime }
+                key: key
+                // phone: body.mobile,
+                // phone_code: body.phone_code,
+                // country_Code: body.country_Code,
+                // phone_code_expire_time: { $gte: expireTime }
             }
 
-            var setParams = {
-                $set: { phone_verified: 1 }
-            }
-
-            this.FindAndModifyQuery(conditions, setParams).exec(
-                (error, updatedApp) => {
-                    return this.SendResponse("VerifyMobile", error, updatedApp, res);
+            App.findOne(conditions, (error, app) => {
+                if (error) {
+                    return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND, error);
                 }
-            );
+
+                if (!app)
+                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_KEY);
+
+                if (app.phone != body.mobile.toLowerCase() && app.country_code != body.country_Code)
+                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_PHONE);
+
+                var currentUtc = commonUtility.UtcNow();
+                //explicitly needs to convert to UTC, somehow mongodb or node js convert it to local timezone
+                var expireTime = commonUtility.ConvertToUtc(app.phone_code_expire_time);
+                if (expireTime < currentUtc)
+                    return this.SendErrorResponse(res, config.ERROR_CODES.OTP_EXPIRED);
+
+                if (app.phone_code != body.phone_code.toLowerCase())
+                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_OTP);
+
+                var setParams = {
+                    $set: { email_verified: 1 }
+                }
+
+                App.update(conditions, setParams).then(
+                    (success) => {
+                        return this.GetSuccessResponse("VerifyMobile", null, res);
+                    }
+                ).catch((ex) => {
+                    return this.SendExceptionResponse(res, ex);
+                });
+
+            });
 
         } catch (ex) {
             return this.SendExceptionResponse(res, ex);
@@ -759,19 +812,19 @@ class AppController extends BaseController {
         return res.status(status.OK).jsonp(response);
     }
 
-       GetSuccessResubmitInitialize(appEntity, docEntity, res) {
-            var response = {
-                "success": 1,
-                "now": Date.now(),
-                "name": appEntity.name,
-                "email": appEntity.email,
-                "phone": appEntity.phone,
-                "basic_info_details": docEntity.basic_info.details,
-                "address_info_details": docEntity.address_info.details,
-                "identity_info_details": docEntity.identity_info.details,
-                "profile_pic": config.base_url + "/kyc/getdocumentimages/" + docEntity.basic_info.images[0]._id.toString(),
-                "result": "Resubmit initialize successful!"
-            }
+    GetSuccessResubmitInitialize(appEntity, docEntity, res) {
+        var response = {
+            "success": 1,
+            "now": Date.now(),
+            "name": appEntity.name,
+            "email": appEntity.email,
+            "phone": appEntity.phone,
+            "basic_info_details": docEntity.basic_info.details,
+            "address_info_details": docEntity.address_info.details,
+            "identity_info_details": docEntity.identity_info.details,
+            "profile_pic": config.base_url + "/kyc/getdocumentimages/" + docEntity.basic_info.images[0]._id.toString(),
+            "result": "Resubmit initialize successful!"
+        }
 
         return res.status(status.OK).jsonp(response);
     }
