@@ -16,7 +16,10 @@
         "APP_NOT_FOUND": "E07",
         "DOCUMENT_NOT_FOUND": "E08",
         "SAME_PIN":"E09",
-        "EXCEPTION": "E100"
+        "EXCEPTION": "E100",
+        "INCORRECT_DETAILS": "E11",
+        "MISSING_PHONE_EMAIL": "E12",
+        "MISSING_COUNTRY_CODE": "E13"
     },
     "HTTP_STATUS":{
         "OK": 200,

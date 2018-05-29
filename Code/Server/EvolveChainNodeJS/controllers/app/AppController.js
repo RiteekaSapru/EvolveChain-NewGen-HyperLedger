@@ -85,6 +85,76 @@ class AppController extends BaseController {
         }
     }
 
+
+    async ResubmitInitialize(req, res) {
+
+        req.checkBody("resubmit_pin", messages.req_resubmit_pin).notEmpty();
+
+        try {
+
+                let result = await req.getValidationResult();
+                if (!result.isEmpty()) {
+                    let error = this.GetErrors(result);
+                    return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+                }
+
+            let body = _.pick(req.body, ['email','phone', 'country_code', 'resubmit_pin']);
+            {
+            if(body.email=="" && body.phone=="")
+            {
+                return this.SendErrorResponse(res, config.ERROR_CODES.MISSING_PHONE_EMAIL,"");
+            }
+            else if(body.email=="")
+            {
+                if(body.country_code=="")
+//                if(body.country_code.notEmpty())
+                {
+                    return this.SendErrorResponse(res, config.ERROR_CODES.MISSING_COUNTRY_CODE,"" );
+                }
+                else{
+                    var conditions = {
+                    phone: body.phone,
+                    country_code: body.country_code,
+                    resubmit_pin: body.resubmit_pin
+                    }
+                }
+            }
+            else if(body.phone=="")
+            {
+                var conditions = {
+                    email: body.email,
+                    resubmit_pin: body.resubmit_pin
+                }
+            }
+            }
+            App.findOne(conditions, (error, app) => {
+
+                if (error) {
+                    return this.SendErrorResponse(res, config.ERROR_CODES.ERROR);
+                }
+                if (!app) { //Add the error code and corresponding message
+                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_DETAILS);
+                }
+                var con = {
+                    app_key: app.key
+                }
+                KycDocument.findOne(con, (error, docData) => {
+                    if (error) return this.SendErrorResponse(res, config.ERROR_CODES.ERROR);
+
+                    if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
+
+                    return this.GetSuccessResubmitInitialize(app, docData, res);
+                })
+
+            });
+
+        } catch (ex) {
+            logManager.Log(`ResubmitInitialize:Exception- ${ex}`);
+            return this.SendExceptionResponse(res, ex);
+        }
+    }
+
+
     async GenerateEmailOTP(req, res) {
 
         req.checkBody("email", messages.req_email).notEmpty().isEmail();
@@ -208,7 +278,7 @@ class AppController extends BaseController {
     async GenerateMobileOTP(req, res) {
 
         req.checkBody("mobile", messages.req_mobile).notEmpty();
-        req.checkBody("country_code", messages.req_mobile).notEmpty();
+        req.checkBody("country_code", messages.req_country_code).notEmpty();
 
         try {
 
@@ -276,7 +346,7 @@ class AppController extends BaseController {
     async VerifyMobile(req, res) {
 
         req.checkBody("mobile", messages.req_mobile).notEmpty();
-        req.checkBody("country_code", messages.req_mobile).notEmpty();
+        req.checkBody("country_code", messages.req_country_code).notEmpty();
         req.checkBody("phone_code", messages.req_mobile_code).notEmpty();
 
         try {
@@ -684,8 +754,24 @@ class AppController extends BaseController {
             "state": docEntity.basic_info.details.state,
             "country": docEntity.basic_info.details.country,
             "profile_pic": config.base_url + "/kyc/getdocumentimages/" + docEntity.basic_info.images[0]._id.toString(),
-            'result': 'Login successful!'
+            "result": "Login successful!"
         }
+        return res.status(status.OK).jsonp(response);
+    }
+
+       GetSuccessResubmitInitialize(appEntity, docEntity, res) {
+            var response = {
+                "success": 1,
+                "now": Date.now(),
+                "name": appEntity.name,
+                "email": appEntity.email,
+                "phone": appEntity.phone,
+                "basic_info_details": docEntity.basic_info.details,
+                "address_info_details": docEntity.address_info.details,
+                "identity_info_details": docEntity.identity_info.details,
+                "profile_pic": config.base_url + "/kyc/getdocumentimages/" + docEntity.basic_info.images[0]._id.toString(),
+                "result": "Resubmit initialize successful!"
+            }
 
         return res.status(status.OK).jsonp(response);
     }
