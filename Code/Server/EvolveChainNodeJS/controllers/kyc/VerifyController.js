@@ -130,7 +130,7 @@ class VerifyController extends BaseController {
                     var emailBody = ejs.render(template, {
                         eKycId: eKycId,
                         resubmitPin:resubmitPin,
-                        SITE_IMAGE: config.get('SITE_IMAGE'),
+                        APP_LOGO_URL: config.get('APP_LOGO_URL'),                        
                         SITE_NAME: config.get('app_name'),
                         CURRENT_YEAR: config.get('current_year')
                     });

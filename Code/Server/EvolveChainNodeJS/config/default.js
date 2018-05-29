@@ -40,7 +40,8 @@ const MAIL_4 = 'admin@'+process.env.COMPANY_DOMAIN;
 
 const ver_mail_id = 'riteeka.sapru@newgen.co.in';
 
-const web_site = BASE_URL+'/public/web'
+const web_site = BASE_URL+'/public/web';
+const appLogoUrl = 'https://cdn1.imggmi.com/uploads/2018/5/29/1a4a6ccc5a9022b5e29625aba369182d-full.png';
 
 
 module.exports = {
@@ -77,4 +78,5 @@ module.exports = {
   web_site: web_site,
   DB_NAME: DB_NAME,
   OTP_EXPIRY_MINS:30,
+  APP_LOGO_URL:appLogoUrl 
 };
