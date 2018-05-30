@@ -1,34 +1,34 @@
-const fs = require("fs");
-const ejs = require('ejs');
-const path = require("path");
+const FS = require("fs");
+const EJS = require('ejs');
+const PATH = require("path");
 const _ = require('lodash');
-const config = require('config');
-const status = config.get('status');
-const messages = config.get('messages');
+const CONFIG = require('config');
+const STATUS = CONFIG.get('status');
+const MESSAGES = CONFIG.get('messages');
 
-const md5 = require('md5');
-const emailService = require('../../services/EmailService')
-const smsService = require('../../services/SMSService')
-const commonUtility = require('../../helpers/CommonUtility');
-const logManager = require('../../helpers/LogManager');
-const BaseController = require('../BaseController');
+const MD5 = require('md5');
+const EMAIL_SERVICE = require('../../services/EmailService')
+const SMS_SERVICE = require('../../services/SMSService')
+const COMMON_UTILITY = require('../../helpers/CommonUtility');
+const LOG_MANAGER = require('../../helpers/LogManager');
+const BASE_CONTROLLER = require('../BaseController');
 
-const App = require('../../models/apps');
-const KycDocument = require('../../models/kycdocument');
+const APP = require('../../models/apps');
+const KYC_DOCUMENT = require('../../models/kycdocument');
 
-const PUBLIC_PATH = config.get('PUBLIC_PATH');
-const EmailTemplatesPath = path.join(__dirname + "/../../public/email_template");
-const OTP_EXPIRY_MINS = config.get('OTP_EXPIRY_MINS');
+const PUBLIC_PATH = CONFIG.get('PUBLIC_PATH');
+const EMAIL_TEMPLATES_PATH = PATH.join(__dirname + "/../../public/email_template");
+const OTP_EXPIRY_MINS = CONFIG.get('OTP_EXPIRY_MINS');
 
-class AppController extends BaseController {
+class AppController extends BASE_CONTROLLER {
 
     async Initialize(req, res) {
 
-        req.checkBody("ip", messages.req_IP).notEmpty();
-        req.checkBody("device_type", messages.req_device_type).notEmpty();
-        req.checkBody("device_name", messages.req_device_name).notEmpty();
-        req.checkBody("os_version", messages.req_os_version).notEmpty();
-        req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
+        req.checkBody("ip", MESSAGES.req_IP).notEmpty();
+        req.checkBody("device_type", MESSAGES.req_device_type).notEmpty();
+        req.checkBody("device_name", MESSAGES.req_device_name).notEmpty();
+        req.checkBody("os_version", MESSAGES.req_os_version).notEmpty();
+        req.checkBody("vendor_uuid", MESSAGES.req_vendor_uuid).notEmpty();
 
         try {
 
@@ -36,15 +36,15 @@ class AppController extends BaseController {
 
             if (!result.isEmpty()) {
                 let error = super.GetErrors(result);
-                logManager.Log(`Initialize:Invalid Request- ${error}`);
-                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+                LOG_MANAGER.Log(`Initialize:Invalid Request- ${error}`);
+                return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INVALID_REQUEST, error);
             }
 
             let body = _.pick(req.body, ['ip', 'device_type', 'device_name', 'os_version', 'vendor_uuid']);
 
-            body.key = commonUtility.GenerateUniqueToken();
-            body.SERVER_ADDR = md5(req.connection.localAddress);
-            body.REMOTE_ADDR = md5(req.connection.remoteAddress);
+            body.key = COMMON_UTILITY.GenerateUniqueToken();
+            body.SERVER_ADDR = MD5(req.connection.localAddress);
+            body.REMOTE_ADDR = MD5(req.connection.remoteAddress);
 
             var params = {
                 IP: body.ip,
@@ -58,18 +58,18 @@ class AppController extends BaseController {
                 Refer: body.REMOTE_ADDR
             }
 
-            commonUtility.RemoveNull(params); // remove blank value from array
+            COMMON_UTILITY.RemoveNull(params); // remove blank value from array
 
-            var app = new App(params);
+            var app = new APP(params);
 
             app.save().then((newApp) => {
                 var kycDocParam = {
                     app_key: newApp.key,
                     isDelete: 0,
-                    status: config.APP_STATUSES.PENDING,
-                    last_modified: commonUtility.UtcNow()
+                    CONFIG: CONFIG.APP_STATUSES.PENDING,
+                    last_modified: COMMON_UTILITY.UtcNow()
                 }
-                var kycDoc = new KycDocument(kycDocParam);
+                var kycDoc = new KYC_DOCUMENT(kycDocParam);
                 kycDoc.save().then((newKycDoc) => {
                     return this.GetSuccessResponse("Initialize", newApp, res);
                 }).catch((ex) => {
@@ -81,7 +81,7 @@ class AppController extends BaseController {
             });
 
         } catch (ex) {
-            logManager.Log(`Initialize:Exception- ${ex}`);
+            LOG_MANAGER.Log(`Initialize:Exception- ${ex}`);
             return this.SendExceptionResponse(res, ex);
         }
     }
@@ -89,16 +89,16 @@ class AppController extends BaseController {
 
     async ResubmitInitialize(req, res) {
 
-        req.checkBody("resubmit_pin", messages.req_resubmit_pin).notEmpty();
-        req.checkBody("user_contact_type", messages.req_user_contact_type).isIn(['email', 'phone']);
+        req.checkBody("resubmit_pin", MESSAGES.req_resubmit_pin).notEmpty();
+        req.checkBody("user_contact_type", MESSAGES.req_user_contact_type).isIn(['email', 'phone']);
 
         switch (req.body.user_contact_type) {
             case "phone":
-                req.checkBody("phone", messages.req_mobile).notEmpty();
-                req.checkBody("country_code", messages.req_country_code).notEmpty();
+                req.checkBody("phone", MESSAGES.req_mobile).notEmpty();
+                req.checkBody("country_code", MESSAGES.req_country_code).notEmpty();
                 break;
             case "email":
-                req.checkBody("email", messages.req_email).notEmpty();
+                req.checkBody("email", MESSAGES.req_email).notEmpty();
                 break;
             default:
                 return this.GetErrorResponse('user contact type missing!', res);
@@ -110,7 +110,7 @@ class AppController extends BaseController {
 
                 if (!result.isEmpty()) {
                     let error = this.GetErrors(result);
-                    return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+                    return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INVALID_REQUEST, error);
                 }
 
                 let body = _.pick(req.body, ['email','phone', 'country_code', 'resubmit_pin', 'user_contact_type']);
@@ -130,26 +130,26 @@ class AppController extends BaseController {
                         }
                         break;
                     default:
-                        return kycController.GetErrorResponse('contact type missing!', res);
+                        return this.GetErrorResponse('contact type missing!', res);
                         break;
                 }
 
-                App.findOne(conditions, (error, app) => {
+                APP.findOne(conditions, (error, app) => {
 
                     if (error) {
-                        return this.SendErrorResponse(res, config.ERROR_CODES.ERROR);
+                        return this.SendErrorResponse(res, CONFIG.ERROR_CODES.ERROR);
                     }
                     if (!app) {
-                        return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
+                        return this.SendErrorResponse(res, CONFIG.ERROR_CODES.APP_NOT_FOUND);
                     }
                     var con = {
                         app_key: app.key,
                         isDelete: 0
                     }
-                    KycDocument.findOne(con, (error, docData) => {
-                        if (error) return this.SendErrorResponse(res, config.ERROR_CODES.ERROR);
+                    KYC_DOCUMENT.findOne(con, (error, docData) => {
+                        if (error) return this.SendErrorResponse(res, CONFIG.ERROR_CODES.ERROR);
 
-                        if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
+                        if (!docData) return this.SendErrorResponse(res, CONFIG.ERROR_CODES.DOCUMENT_NOT_FOUND);
 
                         return this.GetSuccessResubmitInitialize(app, docData, res);
                     })
@@ -157,7 +157,7 @@ class AppController extends BaseController {
                 });
 
         } catch (ex) {
-            logManager.Log(`ResubmitInitialize:Exception- ${ex}`);
+            LOG_MANAGER.Log(`ResubmitInitialize:Exception- ${ex}`);
             return this.SendExceptionResponse(res, ex);
         }
     }
@@ -165,14 +165,14 @@ class AppController extends BaseController {
 
     async GenerateEmailOTP(req, res) {
 
-        req.checkBody("email", messages.req_email).notEmpty().isEmail();
+        req.checkBody("email", MESSAGES.req_email).notEmpty().isEmail();
 
         try {
             let result = await req.getValidationResult();
 
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
-                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+                return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INVALID_REQUEST, error);
 
             }
 
@@ -184,39 +184,39 @@ class AppController extends BaseController {
                 key: key
             }
 
-            App.findOne(conditions, (error, app) => {
+            APP.findOne(conditions, (error, app) => {
 
                 if (error) {
                     error = `Error :: ${error}`;
-                    return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND, error);
+                    return this.SendErrorResponse(res, CONFIG.ERROR_CODES.APP_NOT_FOUND, error);
                 }
 
                 if (!app)
-                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_KEY);
+                    return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_KEY);
 
 
                 var email = body.email.toLowerCase();
-                var email_code = commonUtility.GenerateOTP(6);
+                var email_code = COMMON_UTILITY.GenerateOTP(6);
 
                 //send verification code email
-                var template = fs.readFileSync(EmailTemplatesPath + '/email_varified.html', {
+                var template = FS.readFileSync(EMAIL_TEMPLATES_PATH + '/email_varified.html', {
                     encoding: 'utf-8'
                 });
 
-                var emailBody = ejs.render(template, {
+                var emailBody = EJS.render(template, {
                     email: email,
                     kyc_id: email_code,
-                    APP_LOGO_URL: config.get('APP_LOGO_URL'),
-                    SITE_NAME: config.get('app_name'),
-                    CURRENT_YEAR: config.get('current_year')
+                    APP_LOGO_URL: CONFIG.get('APP_LOGO_URL'),
+                    SITE_NAME: CONFIG.get('app_name'),
+                    CURRENT_YEAR: CONFIG.get('current_year')
                 });
 
                 const subject = 'EvolveChain KYC - Email Code';
 
-                emailService.SendEmail(email, subject, emailBody).then((success) => {
+                EMAIL_SERVICE.SendEmail(email, subject, emailBody).then((success) => {
 
-                    let md5EmailCode = md5(email_code);
-                    var expireTime = commonUtility.AddMinutesToUtcNow(OTP_EXPIRY_MINS);
+                    let md5EmailCode = MD5(email_code);
+                    var expireTime = COMMON_UTILITY.AddMinutesToUtcNow(OTP_EXPIRY_MINS);
 
                     var setParams = {
                         $set: {
@@ -227,7 +227,7 @@ class AppController extends BaseController {
                         }
                     }
 
-                    App.update(conditions, setParams).then(
+                    APP.update(conditions, setParams).then(
                         (success) => {
                             return this.GetSuccessResponse("GenerateEmailOTP", null, res);
                         }
@@ -246,15 +246,15 @@ class AppController extends BaseController {
 
     async VerifyEmail(req, res) {
 
-        req.checkBody("email", messages.req_email).notEmpty().isEmail();
-        req.checkBody("email_code", messages.req_email_code).notEmpty();
+        req.checkBody("email", MESSAGES.req_email).notEmpty().isEmail();
+        req.checkBody("email_code", MESSAGES.req_email_code).notEmpty();
 
         try {
             let result = await req.getValidationResult();
 
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
-                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+                return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INVALID_REQUEST, error);
 
             }
 
@@ -267,32 +267,32 @@ class AppController extends BaseController {
                 // email_code: body.email_code.toLowerCase()
             }
 
-            App.findOne(conditions, (error, app) => {
+            APP.findOne(conditions, (error, app) => {
                 if (error) {
-                    return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND, error);
+                    return this.SendErrorResponse(res, CONFIG.ERROR_CODES.APP_NOT_FOUND, error);
                 }
 
                 if (!app)
-                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_KEY);
+                    return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_KEY);
 
                 if (app.email != body.email.toLowerCase())
-                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_EMAIL);
+                    return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_EMAIL);
 
-                var currentUtc = commonUtility.UtcNow();
+                var currentUtc = COMMON_UTILITY.UtcNow();
                 //explicitly needs to convert to UTC, somehow mongodb or node js convert it to local timezone
-                var expireTime = commonUtility.ConvertToUtc(app.email_code_expire_time);
+                var expireTime = COMMON_UTILITY.ConvertToUtc(app.email_code_expire_time);
                 if (expireTime < currentUtc)
-                    return this.SendErrorResponse(res, config.ERROR_CODES.OTP_EXPIRED);
+                    return this.SendErrorResponse(res, CONFIG.ERROR_CODES.OTP_EXPIRED);
 
                 if (app.email_code != body.email_code.toLowerCase())
-                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_OTP);
+                    return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_OTP);
 
 
                 var setParams = {
                     $set: { email_verified: 1 }
                 }
 
-                App.update(conditions, setParams).then(
+                APP.update(conditions, setParams).then(
                     (success) => {
                         return this.GetSuccessResponse("VerifyEmail", null, res);
                     }
@@ -310,8 +310,8 @@ class AppController extends BaseController {
 
     async GenerateMobileOTP(req, res) {
 
-        req.checkBody("mobile", messages.req_mobile).notEmpty();
-        req.checkBody("country_code", messages.req_country_code).notEmpty();
+        req.checkBody("mobile", MESSAGES.req_mobile).notEmpty();
+        req.checkBody("country_code", MESSAGES.req_country_code).notEmpty();
 
         try {
 
@@ -319,7 +319,7 @@ class AppController extends BaseController {
 
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
-                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+                return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INVALID_REQUEST, error);
 
             }
 
@@ -330,13 +330,13 @@ class AppController extends BaseController {
                 key: key
             }
 
-            App.findOne(conditions, (error, app) => {
+            APP.findOne(conditions, (error, app) => {
 
-                if (error) return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, error);
+                if (error) return this.SendErrorResponse(res, CONFIG.ERROR_CODES.ERROR, error);
 
-                if (!app) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND, error);
+                if (!app) return this.SendErrorResponse(res, CONFIG.ERROR_CODES.APP_NOT_FOUND, error);
 
-                var phone_code = commonUtility.GenerateOTP(6);
+                var phone_code = COMMON_UTILITY.GenerateOTP(6);
 
 
                 var phone = body.mobile.replace("+", "");
@@ -344,11 +344,11 @@ class AppController extends BaseController {
                 var msg = 'EvolveChain mobile verification code: ' + phone_code + '.';
                 let toPhone = "+" + countryCode + phone;
 
-                smsService.SendSMS(toPhone, msg).then(message => {
+                SMS_SERVICE.SendSMS(toPhone, msg).then(message => {
 
-                    let md5MobileOTP = md5(phone_code);
+                    let md5MobileOTP = MD5(phone_code);
                     // var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
-                    var expireTime = commonUtility.AddMinutesToUtcNow(OTP_EXPIRY_MINS);
+                    var expireTime = COMMON_UTILITY.AddMinutesToUtcNow(OTP_EXPIRY_MINS);
 
                     var setParams = {
                         $set: {
@@ -360,7 +360,7 @@ class AppController extends BaseController {
                         }
                     }
 
-                    App.update(conditions, setParams).then(
+                    APP.update(conditions, setParams).then(
                         (success) => {
                             return this.GetSuccessResponse("GenerateMobileOTP", null, res);
                         }
@@ -386,9 +386,9 @@ class AppController extends BaseController {
 
     async VerifyMobile(req, res) {
 
-        req.checkBody("mobile", messages.req_mobile).notEmpty();
-        req.checkBody("country_code", messages.req_country_code).notEmpty();
-        req.checkBody("phone_code", messages.req_mobile_code).notEmpty();
+        req.checkBody("mobile", MESSAGES.req_mobile).notEmpty();
+        req.checkBody("country_code", MESSAGES.req_country_code).notEmpty();
+        req.checkBody("phone_code", MESSAGES.req_mobile_code).notEmpty();
 
         try {
 
@@ -396,7 +396,7 @@ class AppController extends BaseController {
 
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
-                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+                return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INVALID_REQUEST, error);
 
             }
 
@@ -413,31 +413,31 @@ class AppController extends BaseController {
                 // phone_code_expire_time: { $gte: expireTime }
             }
 
-            App.findOne(conditions, (error, app) => {
+            APP.findOne(conditions, (error, app) => {
                 if (error) {
-                    return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND, error);
+                    return this.SendErrorResponse(res, CONFIG.ERROR_CODES.APP_NOT_FOUND, error);
                 }
 
                 if (!app)
-                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_KEY);
+                    return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_KEY);
 
                 if (app.phone != body.mobile.toLowerCase() && app.country_code != body.country_Code)
-                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_PHONE);
+                    return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_PHONE);
 
-                var currentUtc = commonUtility.UtcNow();
+                var currentUtc = COMMON_UTILITY.UtcNow();
                 //explicitly needs to convert to UTC, somehow mongodb or node js convert it to local timezone
-                var expireTime = commonUtility.ConvertToUtc(app.phone_code_expire_time);
+                var expireTime = COMMON_UTILITY.ConvertToUtc(app.phone_code_expire_time);
                 if (expireTime < currentUtc)
-                    return this.SendErrorResponse(res, config.ERROR_CODES.OTP_EXPIRED);
+                    return this.SendErrorResponse(res, CONFIG.ERROR_CODES.OTP_EXPIRED);
 
                 if (app.phone_code != body.phone_code.toLowerCase())
-                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_OTP);
+                    return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_OTP);
 
                 var setParams = {
                     $set: { email_verified: 1 }
                 }
 
-                App.update(conditions, setParams).then(
+                APP.update(conditions, setParams).then(
                     (success) => {
                         return this.GetSuccessResponse("VerifyMobile", null, res);
                     }
@@ -455,14 +455,14 @@ class AppController extends BaseController {
     async GeneratePin(req, res) {
 
         //       let current_ref= this;
-        req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
+        req.checkBody("ekyc_id", MESSAGES.req_ekycid).notEmpty();
 
         try {
 
             let result = await req.getValidationResult();
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
-                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+                return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INVALID_REQUEST, error);
 
             }
 
@@ -472,26 +472,26 @@ class AppController extends BaseController {
                 ekyc_id: body.ekyc_id
             }
 
-            App.findOne(conditions, (error, app) => {
+            APP.findOne(conditions, (error, app) => {
 
-                if (error) return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, error);
+                if (error) return this.SendErrorResponse(res, CONFIG.ERROR_CODES.ERROR, error);
 
-                if (!app) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND, error);
+                if (!app) return this.SendErrorResponse(res, CONFIG.ERROR_CODES.APP_NOT_FOUND, error);
 
                 //Email verification
                 var email = app.email.toLowerCase();
-                var ver_code = commonUtility.GenerateOTP(6);
+                var ver_code = COMMON_UTILITY.GenerateOTP(6);
 
-                var template = fs.readFileSync(EmailTemplatesPath + '/email_varified.html', {
+                var template = FS.readFileSync(EMAIL_TEMPLATES_PATH + '/email_varified.html', {
                     encoding: 'utf-8'
                 });
 
-                var emailBody = ejs.render(template, {
+                var emailBody = EJS.render(template, {
                     email: email,
                     kyc_id: ver_code,
-                    SITE_IMAGE: config.get('SITE_IMAGE'),
-                    SITE_NAME: config.get('app_name'),
-                    CURRENT_YEAR: config.get('current_year')
+                    APP_LOGO_URL: CONFIG.get('APP_LOGO_URL'),
+                    SITE_NAME: CONFIG.get('app_name'),
+                    CURRENT_YEAR: CONFIG.get('current_year')
                 });
 
                 const subject = 'EvolveChain KYC - Email Code';
@@ -502,11 +502,11 @@ class AppController extends BaseController {
                 var msg = 'EvolveChain mobile verification code: ' + ver_code + '.';
                 let toPhone = "+" + countryCode + phone;
 
-                smsService.SendSMS(toPhone, msg)
+                SMS_SERVICE.SendSMS(toPhone, msg)
                     .then(message => {
-                        let md5MobileOTP = md5(ver_code);
+                        let md5MobileOTP = MD5(ver_code);
                         // var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
-                        // var expireTime = commonUtility.AddMinutesToUtcNow(OTP_EXPIRY_MINS);
+                        // var expireTime = COMMON_UTILITY.AddMinutesToUtcNow(OTP_EXPIRY_MINS);
 
                         var setParams = {
                             $set: {
@@ -519,13 +519,13 @@ class AppController extends BaseController {
                     .then((error, updatedApp) => {
 
                         if (!error && !updatedApp) {
-                            this.SendErrorResponse(res, config.ERROR_CODES.ERROR, error);
+                            this.SendErrorResponse(res, CONFIG.ERROR_CODES.ERROR, error);
                         }
-                        else return emailService.SendEmail(email, subject, emailBody);
+                        else return EMAIL_SERVICE.SendEmail(email, subject, emailBody);
                     })
                     .then((success) => {
 
-                        let md5EmailCode = md5(ver_code);
+                        let md5EmailCode = MD5(ver_code);
                         var setParams = {
                             $set: {
                                 otp: md5EmailCode
@@ -553,17 +553,17 @@ class AppController extends BaseController {
     async SetPin(req, res) {
 
 
-        req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
-        req.checkBody("pin_otp", messages.req_otp).notEmpty();
-        req.checkBody("pin", messages.req_pin).notEmpty();
-        req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
+        req.checkBody("ekyc_id", MESSAGES.req_ekycid).notEmpty();
+        req.checkBody("pin_otp", MESSAGES.req_otp).notEmpty();
+        req.checkBody("pin", MESSAGES.req_pin).notEmpty();
+        req.checkBody("vendor_uuid", MESSAGES.req_vendor_uuid).notEmpty();
 
         try {
 
             let result = await req.getValidationResult();
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
-                this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+                this.SendErrorResponse(res, CONFIG.ERROR_CODES.INVALID_REQUEST, error);
             }
 
             let body = _.pick(req.body, ['ekyc_id', 'pin_otp', 'pin', 'vendor_uuid']);
@@ -593,22 +593,22 @@ class AppController extends BaseController {
 
     async ChangePin(req, res) {
 
-        req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
-        req.checkBody("pin", messages.req_pin).notEmpty();
-        req.checkBody("new_pin", messages.req_new_pin).notEmpty();
+        req.checkBody("ekyc_id", MESSAGES.req_ekycid).notEmpty();
+        req.checkBody("pin", MESSAGES.req_pin).notEmpty();
+        req.checkBody("new_pin", MESSAGES.req_new_pin).notEmpty();
 
         try {
             let result = await req.getValidationResult();
 
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
-                this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+                this.SendErrorResponse(res, CONFIG.ERROR_CODES.INVALID_REQUEST, error);
             }
 
             let body = _.pick(req.body, ['pin', 'new_pin', 'ekyc_id']);
 
             if (body.pin == body.new_pin) {
-                return this.SendErrorResponse(res, config.ERROR_CODES.SAME_PIN);
+                return this.SendErrorResponse(res, CONFIG.ERROR_CODES.SAME_PIN);
             }
 
             let conditions = {
@@ -633,15 +633,15 @@ class AppController extends BaseController {
 
     async Login(req, res) {
 
-        req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
-        req.checkBody("pin", messages.req_pin).notEmpty();
-        req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
+        req.checkBody("ekyc_id", MESSAGES.req_ekycid).notEmpty();
+        req.checkBody("pin", MESSAGES.req_pin).notEmpty();
+        req.checkBody("vendor_uuid", MESSAGES.req_vendor_uuid).notEmpty();
 
         try {
             let result = await req.getValidationResult();
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
-                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+                return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INVALID_REQUEST, error);
             }
 
             let body = _.pick(req.body, ['ekyc_id', 'pin', 'vendor_uuid']);
@@ -651,33 +651,33 @@ class AppController extends BaseController {
                 ekyc_id: body.ekyc_id,
             }
 
-            App.findOne(conditions, (error, app) => {
+            APP.findOne(conditions, (error, app) => {
 
                 if (error) {
-                    return this.SendErrorResponse(res, config.ERROR_CODES.ERROR);
+                    return this.SendErrorResponse(res, CONFIG.ERROR_CODES.ERROR);
                 }
                 if (!app) {
-                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_EKYCID);
+                    return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_EKYCID);
                 }
                 if (app.vendor_uuid != body.vendor_uuid) {
-                    return this.SendErrorResponse(res, config.ERROR_CODES.DEVICE_MISMATCH);
+                    return this.SendErrorResponse(res, CONFIG.ERROR_CODES.DEVICE_MISMATCH);
                 }
                 if (app.pin != body.pin) {
-                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_PIN);
+                    return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_PIN);
                 }
                 var params = {
                     $set: { last_login_time: Date.now() }
                 }
-                App.update({
+                APP.update({
                     _id: app._id
                 }, params).then((success) => {
                     var con = {
                         app_key: app.key
                     }
-                    KycDocument.findOne(con, (error, docData) => {
-                        if (error) return this.SendErrorResponse(res, config.ERROR_CODES.ERROR);
+                    KYC_DOCUMENT.findOne(con, (error, docData) => {
+                        if (error) return this.SendErrorResponse(res, CONFIG.ERROR_CODES.ERROR);
 
-                        if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
+                        if (!docData) return this.SendErrorResponse(res, CONFIG.ERROR_CODES.DOCUMENT_NOT_FOUND);
 
                         return this.GetSuccessLoginResponse(app, docData, res);
 
@@ -696,7 +696,7 @@ class AppController extends BaseController {
             upsert: false,
             returnNewDocument: true
         }
-        return App.findOneAndUpdate(queryCondition, setParams, options);
+        return APP.findOneAndUpdate(queryCondition, setParams, options);
     }
 
     SendResponse(apiName, error, updatedApp, res) {
@@ -721,7 +721,7 @@ class AppController extends BaseController {
                     'ip': appEntity.IP,
                     'Server': appEntity.Server,
                     'Refer': appEntity.Refer,
-                    'init_config': config.get('init_config')
+                    'init_config': CONFIG.get('init_config')
                 };
                 break;
             case "GeneratePin":
@@ -731,7 +731,7 @@ class AppController extends BaseController {
                     'key': appEntity.key,
                     'Server': appEntity.Server,
                     'Refer': appEntity.Refer,
-                    'result': messages.verify_email_phone_code
+                    'result': MESSAGES.verify_email_phone_code
                 }
                 break;
             case "SetPin":
@@ -741,7 +741,7 @@ class AppController extends BaseController {
                     'key': appEntity.key,
                     'Server': appEntity.Server,
                     'Refer': appEntity.Refer,
-                    'result': 'Pin has been set successfully!'
+                    'result': MESSAGES.set_pin_success
                 }
                 break;
             case "ChangePin":
@@ -752,14 +752,14 @@ class AppController extends BaseController {
                     'Server': appEntity.Server,
                     'Refer': appEntity.Refer,
                     'pin': appEntity.pin,
-                    'result': 'Pin has been changed successfully!'
+                    'result': MESSAGES.change_pin_success
                 }
                 break;
             case "GenerateEmailOTP":
                 response = {
                     'success': 1,
                     'now': Date.now(),
-                    'result': messages.verify_email_code
+                    'result': MESSAGES.verify_email_code
                 }
                 break;
             case "VerifyEmail":
@@ -773,30 +773,19 @@ class AppController extends BaseController {
                 response = {
                     'success': 1,
                     'now': Date.now(),
-                    'result': messages.verify_phone_code
+                    'result': MESSAGES.verify_phone_code
                 }
                 break;
             case "VerifyMobile":
                 response = {
                     'success': 1,
                     'now': Date.now(),
-                    'result': 'Phone verified successfully!'
-                }
-                break;
-            case "Login":
-                response = {
-                    'success': 1,
-                    'now': Date.now(),
-                    'name': appEntity.name,
-                    'email': appEntity.email,
-                    'phone': appEntity.phone,
-                    //                   'profile': ,
-                    'result': 'Login successful!'
+                    'result': MESSAGES.verify_mobile_success
                 }
                 break;
         }
 
-        return res.status(status.OK).jsonp(response);
+        return res.status(STATUS.OK).jsonp(response);
     }
 
     GetSuccessLoginResponse(appEntity, docEntity, res) {
@@ -817,10 +806,10 @@ class AppController extends BaseController {
             "zip": docEntity.basic_info.details.zip,
             "state": docEntity.basic_info.details.state,
             "country": docEntity.basic_info.details.country,
-            "profile_pic": config.base_url + "/kyc/getdocumentimages/" + docEntity.basic_info.images[0]._id.toString(),
-            "result": "Login successful!"
+            "profile_pic": CONFIG.base_url + "/kyc/getdocumentimages/" + docEntity.basic_info.images[0]._id.toString(),
+            "result": MESSAGES.login_success
         }
-        return res.status(status.OK).jsonp(response);
+        return res.status(STATUS.OK).jsonp(response);
     }
 
 
@@ -831,12 +820,12 @@ class AppController extends BaseController {
                 "name": appEntity.name,
                 "email": appEntity.email,
                 "phone": appEntity.phone,
-                "BasicInfo": commonUtility.GetKycDocumentInfo(docEntity.basic_info, "BASIC"),
-                "IdentityInfo": commonUtility.GetKycDocumentInfo(docEntity.identity_info, "IDENTITY"),
-                "AddressInfo": commonUtility.GetKycDocumentInfo(docEntity.address_info, "ADDRESS"),
-                "result": "Resubmit initialize successful!"
+                "BasicInfo": COMMON_UTILITY.GetKycDocumentInfo(docEntity.basic_info, "BASIC"),
+                "IdentityInfo": COMMON_UTILITY.GetKycDocumentInfo(docEntity.identity_info, "IDENTITY"),
+                "AddressInfo": COMMON_UTILITY.GetKycDocumentInfo(docEntity.address_info, "ADDRESS"),
+                "result": MESSAGES.resubmit_init_success
             }
-        return res.status(status.OK).jsonp(response);
+        return res.status(STATUS.OK).jsonp(response);
     }
 }
 
