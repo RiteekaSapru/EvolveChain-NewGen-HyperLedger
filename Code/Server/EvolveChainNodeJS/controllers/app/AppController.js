@@ -100,7 +100,7 @@ class AppController extends BaseController {
                 req.checkBody("email", messages.req_email).notEmpty();
                 break;
             default:
-                return kycController.GetErrorResponse('user contact type missing!', res);
+                return this.GetErrorResponse('user contact type missing!', res);
                 break;
         }
 
