@@ -1,34 +1,52 @@
 const config = require('config');
+const _ = require('lodash');
 const GeneralService = require('./GeneralService');
 
-const HL_URL_EKYC = config.get('HL_URL') + "/EKYC"; 
+const HL_URL_EKYC = config.get('HL_URL') + "/EKYC";
 
 class HyperLedgerService {
 
     //save eKycId to Hyper Ledger
     //let hl_URL_KYC = config.HL_URL + "/EKYC";
 
-    GetEkycDetails(){
+    GetEkycDetails() {
         return GeneralService.GetService(HL_URL_EKYC);
     }
 
-    PostEkycDetails(basicDetailObj) {
-            return GeneralService.PostService(HL_URL_EKYC , basicDetailObj);
+    PostEkycDetails(eKycId, basicDetailObj) {
+        basicDetailObj.eKYCId = eKycId;
+        let eKycInfo = _.pick(basicDetailObj, ['eKYCId', 'firstname',"middlename", "lastname", 
+        "place_of_birth", "dob", "city", "address1",   "address2","zip", "state", "country"]);
+        // var test = {
+        //         "eKYCId": eKycId,
+        //         "firstname": "first 1",
+        //         "middlename": "middle 1",
+        //         "lastname": "last 1",
+        //         "dob": "2015-03-15",
+        //         "place_of_birth": "pnp",
+        //         "city": "pnp",
+        //         "address1": "address 1",
+        //         "address2": "address 2",
+        //         "zip": "zip 1",
+        //         "state": "state 1",
+        //         "country": "country 1"
+        //     }
+        return GeneralService.PostService(HL_URL_EKYC, eKycInfo);
     }
 
-    GetEkycDetailsById(eKycId){
+    GetEkycDetailsById(eKycId) {
         let url = HL_URL_EKYC + '/' + eKycId;
         return GeneralService.GetService(url);
     }
 
-    DeleteEkyc(eKycId){
+    DeleteEkyc(eKycId) {
         let deleteUrl = HL_URL_EKYC + '/' + eKycId;
         return GeneralService.DeleteService(deleteUrl);
     }
 
-    UpdateEkyc(eKycId,basicDetailObj){
+    UpdateEkyc(eKycId, basicDetailObj) {
         let updateUrl = HL_URL_EKYC + '/' + eKycId;
-        return GeneralService.PutService(updateUrl,basicDetailObj);
+        return GeneralService.PutService(updateUrl, basicDetailObj);
     }
 }
 
@@ -63,7 +81,7 @@ class HyperLedgerService {
 // }).then((result) => {
 //     console.log(result);
 // }).catch((err) => {
-   
+
 //     var respErr  = JSON.parse(err.error);
 //     var errorResult = {
 //         origUrl: respErr.origUrl,

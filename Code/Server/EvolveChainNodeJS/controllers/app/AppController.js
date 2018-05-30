@@ -35,9 +35,8 @@ class AppController extends BASE_CONTROLLER {
             let result = await req.getValidationResult();
 
             if (!result.isEmpty()) {
-                let error = super.GetErrors(result);
-                LOG_MANAGER.Log(`Initialize:Invalid Request- ${error}`);
-                return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INVALID_REQUEST, error);
+                let error = super.GetErrors(result);              
+                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
             }
 
             let body = _.pick(req.body, ['ip', 'device_type', 'device_name', 'os_version', 'vendor_uuid']);
