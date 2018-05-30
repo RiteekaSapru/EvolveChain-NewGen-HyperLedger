@@ -30,7 +30,7 @@ const BASE_PATH = config.get('base_path');
 const PUBLIC_PATH = config.get('PUBLIC_PATH');
 var im = require('imagemagick');
 const EmailTemplatesPath = path.join(__dirname + "/../../public/email_template");
-var to = config.get('ver_mail_id');
+//var to = config.get('ver_mail_id');
 
 var bucket;
 mongo.MongoClient.connect(config.get('MONGODB_URL'), function (err, db) {
@@ -827,8 +827,8 @@ async SubmitKycDocument(req, res) {
                     encoding: 'utf-8'
                 });
 
-                to = to.toString();
-
+                // to = to.toString();
+                let toEmailIds= config.APPROVER_EMAIL_IDS;
                 var emailBody = ejs.render(template, {
                     kyc_verify_url: config.get('base_url')+"/verify/"+ docData.app_key,
 //                        hash: docData.app_key,
@@ -839,7 +839,7 @@ async SubmitKycDocument(req, res) {
 
                 const subject = 'EvolveChain KYC - Verification Link';
 
-                emailService.SendEmail(to, subject, emailBody).then(function (success) {
+                emailService.SendEmail(toEmailIds, subject, emailBody).then(function (success) {
                     var response = {
                         'success': 1,
                         'now': Date.now(),

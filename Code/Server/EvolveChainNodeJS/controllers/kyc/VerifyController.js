@@ -69,7 +69,7 @@ class VerifyController extends BaseController {
                 app_key: appKey,
                 isDelete: 0
             }
-
+            
             KycDocument.findOne(document_query).populate('app_data').exec((error, docData) => {
 
                 if (error) {
@@ -112,7 +112,7 @@ class VerifyController extends BaseController {
                     else
                     {
                         //generate resubmit pin
-                        resubmitPin = 'RS90890';
+                        resubmitPin = commonUtility.GenerateOTP(6);
                     }                
                     var appSetParams =
                         {

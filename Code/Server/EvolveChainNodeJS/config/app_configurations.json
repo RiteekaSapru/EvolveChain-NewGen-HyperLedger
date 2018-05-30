@@ -7,6 +7,8 @@
     },
     "ERROR_CODE": {
         "ERROR": "E00",
+        "EXCEPTION": "E100",
+        
         "DEVICE_MISMATCH": "E01",
         "INCORRECT_PIN": "E02",
         "INCORRECT_OTP": "E03",
@@ -17,6 +19,11 @@
         "DOCUMENT_NOT_FOUND": "E08",
         "SAME_PIN":"E09",
         "EXCEPTION": "E100"
+        "INCORRECT_EMAIL": "E10",
+        "INCORRECT_DETAILS": "E11",
+        "MISSING_PHONE_EMAIL": "E12",        
+        "INCORRECT_PHONE": "E13",
+        "OTP_EXPIRED":"E14"        
     },
     "HTTP_STATUS":{
         "OK": 200,

@@ -72,7 +72,7 @@
     "req_country"           : "Country Required!",
     "req_address_proof"     : "Address Proof Required!",
     "save_address_info"     : "Address Information save success",
-    "req_passport_number"          : "Passport Number Required!",
+    "req_passport_number"   : "Passport Number Required!",
     "expiry"                : "Passport Expiry Required!",
     "pass_country"          : "Passport Country Required!",
     "invalid_expiry_date"   : "Passport expiry not valid yyyy-mm-dd",
@@ -122,7 +122,7 @@
     "phone_missing"         : "Phone missing!", 
     "req_verify_status"     : "Verify status missing!",
     "file_not_found"        : "File not found",
-    "E100"                  :  "Exception:",
+    "E100"                  : "Exception:",
     "E00"                   : "Error:" ,          
     "E01"                   : "Your account is logged into from a new device, for security reason please re-generate pin to login from this device",
     "E02"                   : "Please enter correct pin to continue",
@@ -132,5 +132,10 @@
     "E06"                   : "Incorrect input parameters in the request",
     "E07"                   : "No application record found", 
     "E08"                   : "No document record found",
-    "E09"                   : "New pin can't be same as old pin"
+    "E09"                   : "New pin can't be same as old pin",
+    "E10"                   : "Please enter correct email",
+    "E11"                   : "Please enter the correct details",
+    "E12"                   : "Phone number or email missing",
+    "E13"                   : "Please enter correct phone details",
+    "E14"                   : "OTP has expired, please resend OTP"
 }
