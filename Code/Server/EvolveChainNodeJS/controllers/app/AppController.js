@@ -12,6 +12,7 @@ const smsService = require('../../services/SMSService')
 const commonUtility = require('../../helpers/CommonUtility');
 const logManager = require('../../helpers/LogManager');
 const BaseController = require('../BaseController');
+
 const App = require('../../models/apps');
 const KycDocument = require('../../models/kycdocument');
 
@@ -142,7 +143,8 @@ class AppController extends BaseController {
                         return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
                     }
                     var con = {
-                        app_key: app.key
+                        app_key: app.key,
+                        isDelete: 0
                     }
                     KycDocument.findOne(con, (error, docData) => {
                         if (error) return this.SendErrorResponse(res, config.ERROR_CODES.ERROR);
@@ -821,24 +823,21 @@ class AppController extends BaseController {
         return res.status(status.OK).jsonp(response);
     }
 
-    GetSuccessResubmitInitialize(appEntity, docEntity, res) {
-        var response = {
-            "success": 1,
-            "now": Date.now(),
-            "name": appEntity.name,
-            "email": appEntity.email,
-            "phone": appEntity.phone,
-            "basic_info_details": docEntity.basic_info.details,
-            "address_info_details": docEntity.address_info.details,
-            "identity_info_details": docEntity.identity_info.details,
-            "profile_pic": config.base_url + "/kyc/getdocumentimages/" + docEntity.basic_info.images[0]._id.toString(),
-            "result": "Resubmit initialize successful!"
-        }
 
+       GetSuccessResubmitInitialize(appEntity, docEntity, res) {
+            var response = {
+                "success": 1,
+                "now": Date.now(),
+                "name": appEntity.name,
+                "email": appEntity.email,
+                "phone": appEntity.phone,
+                "BasicInfo": commonUtility.GetKycDocumentInfo(docEntity.basic_info, "BASIC"),
+                "IdentityInfo": commonUtility.GetKycDocumentInfo(docEntity.identity_info, "IDENTITY"),
+                "AddressInfo": commonUtility.GetKycDocumentInfo(docEntity.address_info, "ADDRESS"),
+                "result": "Resubmit initialize successful!"
+            }
         return res.status(status.OK).jsonp(response);
     }
-
-
 }
 
 module.exports = new AppController();
