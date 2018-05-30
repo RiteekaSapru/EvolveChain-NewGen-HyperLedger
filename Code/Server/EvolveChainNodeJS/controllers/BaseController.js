@@ -31,7 +31,7 @@ class BaseController {
     SendErrorResponse(res, errorCode, errorMessage = '') {
 //       var resultMessage = this.GetMessageByErrorCode(errorCode)
 
-        var errorMessageFrmErrorCode =  messages[errorCode] ;
+        var errorMessageFrmErrorCode =  messages.ERROR_CODES[errorCode] ;
 
         var resultMessage = errorMessageFrmErrorCode == undefined || errorMessageFrmErrorCode == null ? "Unknown error" : errorMessageFrmErrorCode ;
         if (errorMessage != '')
