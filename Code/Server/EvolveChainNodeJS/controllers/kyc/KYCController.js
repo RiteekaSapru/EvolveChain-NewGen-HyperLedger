@@ -667,6 +667,7 @@ class KYCController extends BaseController {
                     zip: body.zip,
                     state: body.state,
                     country: body.country,
+                    street : body.street,
                     document_type: "basic"
                 };
                 setParams.basic_info = {};
