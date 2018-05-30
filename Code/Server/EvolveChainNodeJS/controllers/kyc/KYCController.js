@@ -819,7 +819,19 @@ async SubmitKycDocument(req, res) {
                 if (docData.basic_info.details == undefined || docData.basic_info.details == null || docData.basic_info.details.document_type == undefined)
                 {    return res.status(status.OK).jsonp({
                     "success": 0,
-                    "error": "Documents missing or incorrect"
+                    "error": "Basic documents missing"
+                    });
+                }
+                if (docData.identity_info.details == undefined || docData.identity_info.details == null)
+                {    return res.status(status.OK).jsonp({
+                    "success": 0,
+                    "error": "Identity documents missing"
+                    });
+                }
+                if (docData.address_info.details == undefined || docData.address_info.details == null)
+                {    return res.status(status.OK).jsonp({
+                    "success": 0,
+                    "error": "Address documents missing"
                     });
                 }
 
