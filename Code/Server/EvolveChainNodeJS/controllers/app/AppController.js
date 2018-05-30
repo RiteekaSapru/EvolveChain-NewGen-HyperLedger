@@ -89,64 +89,70 @@ class AppController extends BaseController {
     async ResubmitInitialize(req, res) {
 
         req.checkBody("resubmit_pin", messages.req_resubmit_pin).notEmpty();
+        req.checkBody("user_contact_type", messages.req_user_contact_type).isIn(['email', 'phone']);
+
+        switch (req.body.user_contact_type) {
+            case "phone":
+                req.checkBody("phone", messages.req_mobile).notEmpty();
+                req.checkBody("country_code", messages.req_country_code).notEmpty();
+                break;
+            case "email":
+                req.checkBody("email", messages.req_email).notEmpty();
+                break;
+            default:
+                return kycController.GetErrorResponse('user contact type missing!', res);
+                break;
+        }
 
         try {
-
                 let result = await req.getValidationResult();
+
                 if (!result.isEmpty()) {
                     let error = this.GetErrors(result);
                     return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
                 }
 
-            let body = _.pick(req.body, ['email','phone', 'country_code', 'resubmit_pin']);
-            {
-            if(body.email=="" && body.phone=="")
-            {
-                return this.SendErrorResponse(res, config.ERROR_CODES.MISSING_PHONE_EMAIL,"");
-            }
-            else if(body.email=="")
-            {
-                if(body.country_code=="")
-//                if(body.country_code.notEmpty())
-                {
-                    return this.SendErrorResponse(res, config.ERROR_CODES.MISSING_COUNTRY_CODE,"" );
-                }
-                else{
+                let body = _.pick(req.body, ['email','phone', 'country_code', 'resubmit_pin', 'user_contact_type']);
+
+                switch (req.body.user_contact_type) {
+                    case "phone":
                     var conditions = {
-                    phone: body.phone,
-                    country_code: body.country_code,
-                    resubmit_pin: body.resubmit_pin
+                        phone: body.phone,
+                        country_code: body.country_code,
+                        resubmit_pin: body.resubmit_pin
                     }
+                        break;
+                    case "email":
+                        var conditions = {
+                            email: body.email,
+                            resubmit_pin: body.resubmit_pin
+                        }
+                        break;
+                    default:
+                        return kycController.GetErrorResponse('contact type missing!', res);
+                        break;
                 }
-            }
-            else if(body.phone=="")
-            {
-                var conditions = {
-                    email: body.email,
-                    resubmit_pin: body.resubmit_pin
-                }
-            }
-            }
-            App.findOne(conditions, (error, app) => {
 
-                if (error) {
-                    return this.SendErrorResponse(res, config.ERROR_CODES.ERROR);
-                }
-                if (!app) { //Add the error code and corresponding message
-                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_DETAILS);
-                }
-                var con = {
-                    app_key: app.key
-                }
-                KycDocument.findOne(con, (error, docData) => {
-                    if (error) return this.SendErrorResponse(res, config.ERROR_CODES.ERROR);
+                App.findOne(conditions, (error, app) => {
 
-                    if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
+                    if (error) {
+                        return this.SendErrorResponse(res, config.ERROR_CODES.ERROR);
+                    }
+                    if (!app) {
+                        return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
+                    }
+                    var con = {
+                        app_key: app.key
+                    }
+                    KycDocument.findOne(con, (error, docData) => {
+                        if (error) return this.SendErrorResponse(res, config.ERROR_CODES.ERROR);
 
-                    return this.GetSuccessResubmitInitialize(app, docData, res);
-                })
+                        if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
 
-            });
+                        return this.GetSuccessResubmitInitialize(app, docData, res);
+                    })
+
+                });
 
         } catch (ex) {
             logManager.Log(`ResubmitInitialize:Exception- ${ex}`);
