@@ -25,13 +25,14 @@ class EmailService{
                 user: process.env.SMTP_USERNAME || 'gordhan@yudiz.com', // SMTP email
                 pass: process.env.SMTP_PASSWORD || 'Gordhan_9033' // Your password
             },
-            // proxy: 'http://username:password@192.168.55.218:8080/',            
+            proxy: 'http://ngoyal:nvngyl@750@192.168.55.218:8080/',            
             secure: true
         });
     
-    return transporter.sendMail(mailOption).then((success)=> {
+    return transporter.sendMail(mailOption).then((emailSuccess)=> {
        // return success.messageId;
        transporter.close();
+       return Promise.resolve(emailSuccess);
     });
 };
 	
