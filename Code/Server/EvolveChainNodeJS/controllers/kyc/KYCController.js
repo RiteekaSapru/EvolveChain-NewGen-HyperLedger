@@ -822,13 +822,13 @@ async SubmitKycDocument(req, res) {
                     "error": "Basic documents missing"
                     });
                 }
-                if (docData.identity_info.details == undefined || docData.identity_info.details == null)
+                if (docData.identity_info.details == undefined || docData.identity_info.details == null||docData.identity_info.details.document_type == undefined)
                 {    return res.status(status.OK).jsonp({
                     "success": 0,
                     "error": "Identity documents missing"
                     });
                 }
-                if (docData.address_info.details == undefined || docData.address_info.details == null)
+                if (docData.address_info.details == undefined || docData.address_info.details == null||docData.address_info.details.document_type == undefined)
                 {    return res.status(status.OK).jsonp({
                     "success": 0,
                     "error": "Address documents missing"
