@@ -17,7 +17,7 @@ const EmailTemplatesPath = path.join(__dirname + "/../../public/email_template")
 const messages = config.messages;
 
 class VerifyController extends BaseController {
-    
+
     async GetKYCVerificationInfo(req, res) {
 
         let baseURL = commonUtility.GetAppBaseUrl(req); //config.base_url
@@ -29,7 +29,7 @@ class VerifyController extends BaseController {
                 isDelete: 0
             }
 
-            var docData = KycDocument.findOne(document_query).populate('app_data').exec();// => {
+            var docData = await KycDocument.findOne(document_query).populate('app_data').exec();// => {
 
             if (!docData) {
                 logManager.Log(`GetKYCVerificationInfo-Doc not found`);
@@ -73,12 +73,11 @@ class VerifyController extends BaseController {
             }
 
             //check if it is already verified
-
-            let alreadyVerified = (docData.app_data.status == config.APP_STATUSES.VERIFIED);
+            let alreadyVerified = (appData.status == config.APP_STATUSES.VERIFIED);
             if (alreadyVerified) {
                 return res.redirect(baseURL);
             }
-            
+
             userEmailId = appData.email;
             let isVerified = (req.body.radioButtonVerify == "0" ? 0 : 1);
 
@@ -124,7 +123,6 @@ class VerifyController extends BaseController {
             });
 
             if (isVerified && eKycId != '') {
-
                 let basicDetails = appData.kycdoc_data.basic_info.details;
 
                 var hlResult = await hyperLedgerService.PostEkycDetails(eKycId, basicDetails);//.then((result) => {
@@ -169,13 +167,7 @@ class VerifyController extends BaseController {
                 //if(detailKeys.hasOwnProperty(key)){
                 summaryInfo.DocDetails.push({ 'name': metaDataInfo[key], 'value': details[key] });
                 // }
-            });
-            // Object.keys(details).forEach(function (key) {
-            //     if(metaDataInfo.hasOwnProperty(key)){
-            //         summaryInfo.DocDetails.push({ 'name': metaDataInfo[key], 'value': details[key] });
-            //     }
-            // });
-
+            });            
             for (var j = 0; j < images.length; j++) {
                 let imgUrl = config.base_url + "/kyc/getdocumentimages/" + images[j]._id.toString();
                 summaryInfo.DocImages.push({ 'url': imgUrl });
@@ -184,19 +176,6 @@ class VerifyController extends BaseController {
         }
         return summaryInfo;
     }
-
-
-    // NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams) {
-    //     return new Promise((resolve, reject) => {
-    //         emailService.SendEmail(userEmailId, subject, emailBody).then((emailSuccess) => { 
-    //             App.update({ 'key': appKey }, appSetParams).then((appSuccess) => {
-    //                 resolve(appSuccess);
-    //             });
-    //         }).catch((ex) => {
-    //             reject(ex);
-    //         });
-    //     });
-    // }
 }
 
 module.exports = new VerifyController();

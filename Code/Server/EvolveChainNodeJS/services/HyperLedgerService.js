@@ -17,20 +17,7 @@ class HyperLedgerService {
         basicDetailObj.eKYCId = eKycId;
         let eKycInfo = _.pick(basicDetailObj, ['eKYCId', 'firstname',"middlename", "lastname", 
         "place_of_birth", "dob", "city", "address1",   "address2","zip", "state", "country"]);
-        // var test = {
-        //         "eKYCId": eKycId,
-        //         "firstname": "first 1",
-        //         "middlename": "middle 1",
-        //         "lastname": "last 1",
-        //         "dob": "2015-03-15",
-        //         "place_of_birth": "pnp",
-        //         "city": "pnp",
-        //         "address1": "address 1",
-        //         "address2": "address 2",
-        //         "zip": "zip 1",
-        //         "state": "state 1",
-        //         "country": "country 1"
-        //     }
+       
         return GeneralService.PostService(HL_URL_EKYC, eKycInfo);
     }
 

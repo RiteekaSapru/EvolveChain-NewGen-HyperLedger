@@ -41,8 +41,8 @@ const MAIL_4 = 'admin@'+process.env.COMPANY_DOMAIN;
 const approver_email_ids = 'riteeka.sapru@newgen.co.in';
 
 const web_site = BASE_URL+'/public/web';
-const appLogoUrl = 'https://cdn1.imggmi.com/uploads/2018/5/29/1a4a6ccc5a9022b5e29625aba369182d-full.png';
-//const appLogoUrl = SITE_IMAGE + '/Logo.png';
+const appLogoUrl = 'https://cdn1.imggmi.com/uploads/2018/5/31/eb3111c644ef4739a7c8c8258f27cb7a-full.png';
+//const appLogoUrl = SITE_IMAGE + '/logo.png';
 
 
 module.exports = {

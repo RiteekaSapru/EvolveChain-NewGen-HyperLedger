@@ -553,8 +553,8 @@ class KYCController extends BaseController {
                                 let infoType = body.step + "_info";
 
                                 //Check if it is same step
-                                if (docData[infoType] != undefined && docData[infoType] != null && docData[infoType].details.document_type != undefined)
-                                    return kycController.GetErrorResponse("Uploaded information is already available", res);
+                                // if (docData[infoType] != undefined && docData[infoType] != null && docData[infoType].details.document_type != undefined)
+                                //     return kycController.GetErrorResponse("Uploaded information is already available", res);
 
                                 //if(docData.)
                                 //return kycController.GetErrorResponse("Information for all the uploads is already present", res);
