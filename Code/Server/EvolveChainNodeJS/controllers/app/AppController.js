@@ -822,9 +822,12 @@ class AppController extends BASE_CONTROLLER {
                 "name": appEntity.name,
                 "email": appEntity.email,
                 "phone": appEntity.phone,
-                "BasicInfo": COMMON_UTILITY.GetKycDocumentInfo(docEntity.basic_info, "BASIC"),
-                "IdentityInfo": COMMON_UTILITY.GetKycDocumentInfo(docEntity.identity_info, "IDENTITY"),
-                "AddressInfo": COMMON_UTILITY.GetKycDocumentInfo(docEntity.address_info, "ADDRESS"),
+                "BasicInfoDetails": docEntity.basic_info.details,
+                "BasicInfoImages": COMMON_UTILITY.GetKycImages(docEntity.basic_info, "BASIC"),
+                "IdentityInfoDetails" :docEntity.identity_info.details,
+                "IdentityInfoImages": COMMON_UTILITY.GetKycImages(docEntity.identity_info, "IDENTITY"),
+                "AddressInfoDetails": docEntity.address_info.details,
+                "AddressInfoImages": COMMON_UTILITY.GetKycImages(docEntity.address_info, "ADDRESS"),
                 "result": MESSAGES.resubmit_init_success
             }
         return res.status(STATUS.OK).jsonp(response);

@@ -121,21 +121,13 @@ class CommonUtility {
         return  req.protocol + '://' + req.get('host');
     }
 
-    GetKycDocumentInfo(docInfo, docType) {
+    GetKycImages(docInfo, docType) {
         let summaryInfo = {
-            DocDetails: [],
             DocImages: []
         };
 
         if (docInfo.details != undefined) {
-            var details = docInfo.details;
             let images = docInfo.images;
-
-            let metaDataInfo = this.GetKycDocumentMetaDataInfo(docType);
-            let detailKeys = Object.keys(details);
-            Object.keys(metaDataInfo).forEach(function (key) {
-                summaryInfo.DocDetails.push({ 'name': metaDataInfo[key], 'value': details[key] });
-            });
 
             for (var j = 0; j < images.length; j++) {
                 let imgUrl = config.base_url + "/kyc/getdocumentimages/" + images[j]._id.toString();
@@ -144,6 +136,30 @@ class CommonUtility {
         }
         return summaryInfo;
     }
+
+    // GetKycDocumentInfo(docInfo, docType) {
+    //     let summaryInfo = {
+    //         DocDetails: [],
+    //         DocImages: []
+    //     };
+
+    //     if (docInfo.details != undefined) {
+    //         var details = docInfo.details;
+    //         let images = docInfo.images;
+
+    //         let metaDataInfo = this.GetKycDocumentMetaDataInfo(docType);
+    //         let detailKeys = Object.keys(details);
+    //         Object.keys(metaDataInfo).forEach(function (key) {
+    //             summaryInfo.DocDetails.push({ 'name': metaDataInfo[key], 'value': details[key] });
+    //         });
+
+    //         for (var j = 0; j < images.length; j++) {
+    //             let imgUrl = config.base_url + "/kyc/getdocumentimages/" + images[j]._id.toString();
+    //             summaryInfo.DocImages.push({ 'url': imgUrl });
+    //         }
+    //     }
+    //     return summaryInfo;
+    // }
 
 
 }
