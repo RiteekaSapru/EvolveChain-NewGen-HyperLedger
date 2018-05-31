@@ -7,11 +7,11 @@
         "MIN": "11",
         "MAX": "90"
     },
-    "USA_UTILITY_BILL_TYPE": {
-        "ELECTRICITY_BILL": "Electricity Bill",
-        "MOBILE_BILL": "Mobile Bill",
-        "INTERNET_BILL": "Internet Bill",
-        "OTHER": "Other"
-    },
-    "DATE_FORMAT": "YYYY-MM-DD"
+    "USA_UTILITY_BILL_TYPE": [
+       {"CODE": "ELECTRICITY_BILL", "NAME": "Electricity Bill"},
+       {"CODE": "MOBILE_BILL", "NAME": "Mobile Bill"},
+       {"CODE": "INTERNET_BILL", "NAME": "Internet Bill"},
+       {"CODE": "OTHER", "NAME": "OTHER"}
+    ],
+    "DATE_FORMAT": "yyyy-MM-dd"
 }

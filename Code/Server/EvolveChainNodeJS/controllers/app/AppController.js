@@ -433,7 +433,7 @@ class AppController extends BASE_CONTROLLER {
                     return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_OTP);
 
                 var setParams = {
-                    $set: { email_verified: 1 }
+                    $set: { phone_verified: 1 }
                 }
 
                 APP.update(conditions, setParams).then(

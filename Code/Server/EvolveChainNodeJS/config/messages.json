@@ -59,6 +59,7 @@
     "req_firstname": "First Name Required!",
     "req_lastname": "Last Name Required!",
     "req_dob": "Date Of Birth Required!",
+    "req_pob": "Place Of Birth Required!",
     "req_address": "Address Required!",
     "invalid_date": "Date of birth not valid yyyy-mm-dd",
     "req_profile_image": "Profile Image Required!",
