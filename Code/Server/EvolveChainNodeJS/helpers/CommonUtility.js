@@ -137,6 +137,24 @@ class CommonUtility {
         return summaryInfo;
     }
 
+    GetKycDocumentInfo(docInfo, docType) {
+        let summaryInfo = {
+            DocDetails : {},
+            DocImages: []
+        };
+        if (docInfo.details != undefined) {
+            var details = docInfo.details;
+            let images = docInfo.images;
+            summaryInfo.DocDetails = JSON.parse(JSON.stringify(details));
+
+            for (var j = 0; j < images.length; j++) {
+                let imgUrl = config.base_url + "/kyc/getdocumentimages/" + images[j]._id.toString();
+                summaryInfo.DocImages.push({ 'url': imgUrl });
+            }
+        }
+        return summaryInfo;
+    }
+
     // GetKycDocumentInfo(docInfo, docType) {
     //     let summaryInfo = {
     //         DocDetails: [],
