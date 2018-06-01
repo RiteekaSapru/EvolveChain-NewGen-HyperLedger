@@ -844,13 +844,12 @@ async SubmitKycDocument(req, res) {
                 let toEmailIds= config.APPROVER_EMAIL_IDS;
                 var emailBody = ejs.render(template, {
                     kyc_verify_url: config.get('base_url')+"/verify/"+ docData.app_key,
-//                        hash: docData.app_key,
-                    SITE_IMAGE: config.get('SITE_IMAGE'),
+                    APP_LOGO_URL: config.get('APP_LOGO_URL'),
                     SITE_NAME: config.get('app_name'),
                     CURRENT_YEAR: config.get('current_year')
                 });
 
-                const subject = 'EvolveChain KYC - Verification Link';
+                const subject = 'EvolveChain KYC - Verification Request';
 
                 emailService.SendEmail(toEmailIds, subject, emailBody).then(function (success) {
                     var response = {

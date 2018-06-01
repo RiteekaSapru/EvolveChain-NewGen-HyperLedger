@@ -81,6 +81,8 @@ class VerifyController extends BaseController {
             userEmailId = appData.email;
             let isVerified = (req.body.radioButtonVerify == "0" ? 0 : 1);
 
+            let basicDetails = appData.kycdoc_data.basic_info.details;
+            
             var eKycId = "";
             var appStatus = config.APP_STATUSES.REJECTED;
             var emailTemplateHtml = '/kyc_reject.html';
@@ -89,7 +91,7 @@ class VerifyController extends BaseController {
 
             if (isVerified) {
                 //generate eKycId 
-                eKycId = commonUtility.GenerateKYCId();
+                eKycId = commonUtility.GenerateKYCId(basicDetails.country, basicDetails.firstname);
                 appStatus = config.APP_STATUSES.VERIFIED;
                 emailTemplateHtml = '/kyc_success.html';
                 subject = 'EvolveChain KYC - Approved';
@@ -123,7 +125,6 @@ class VerifyController extends BaseController {
             });
 
             if (isVerified && eKycId != '') {
-                let basicDetails = appData.kycdoc_data.basic_info.details;
 
                 var hlResult = await hyperLedgerService.PostEkycDetails(eKycId, basicDetails);//.then((result) => {
                 if (hlResult && hlResult.eKYCId == eKycId) {
