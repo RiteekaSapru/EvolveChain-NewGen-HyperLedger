@@ -12,6 +12,7 @@ function keyMiddleware(req, res, next) {
   }
   
 app.post("/initialize", AppController.Initialize.bind(AppController));
+app.post("/resubmitInitialize", AppController.ResubmitInitialize.bind(AppController));
 
 app.post("/generateEmailOtp/:key",keyMiddleware, AppController.GenerateEmailOTP.bind(AppController));
 app.post("/verifyemail/:key",keyMiddleware, AppController.VerifyEmail.bind(AppController));
@@ -23,7 +24,7 @@ app.post("/GeneratePin", AppController.GeneratePin.bind(AppController));
 app.post("/setpin", AppController.SetPin.bind(AppController));
 app.post("/changepin", AppController.ChangePin.bind(AppController));
 app.post("/login", AppController.Login.bind(AppController));
-app.post("/logout/:key", keyMiddleware, AppController.Logout.bind(AppController));
+app.post("/getEkycId", AppController.GetEkycId.bind(AppController));
 
 // app.use(AuthMiddleware(["app"]));
 app.use("/*", (req, res) => {

@@ -8,14 +8,53 @@ npm install --save request-promise
 
 const request = require('request-promise');
 
-class GeneralService{
+class GeneralService {
 
-GetService(url, data){
+  GetService(url, data) {
+
+    return request({
+      "method": "GET",
+      "uri": url,
+      "json": true,
+      // "headers": {
+      //   "Authorization": "Bearer " + github.token,
+      //   "User-Agent": "My little demo app"
+      // }
+    });
+  }
+
+  PostService(url, data) {
+
+    return request({
+      "method": "POST",
+      "uri": url,
+      "json": data,
+      // "headers": {
+      //   "Authorization": "Bearer " + github.token,
+      //   "User-Agent": "My little demo app"
+      // }
+    });
+  }
+
+  DeleteService(url, data) {
+
+    return request({
+      "method": "DELETE",
+      "uri": url,
+      "json": data,
+      // "headers": {
+      //   "Authorization": "Bearer " + github.token,
+      //   "User-Agent": "My little demo app"
+      // }
+    });
+  }
+
+DeleteService(url,data){
 
   return request({
-    "method":"GET", 
+    "method":"DELETE", 
     "uri": url,
-    "json": true,
+    "json": data,
     // "headers": {
     //   "Authorization": "Bearer " + github.token,
     //   "User-Agent": "My little demo app"
@@ -23,10 +62,10 @@ GetService(url, data){
   });
 }
 
-PostService(url,data){
+PutService(url,data){
 
   return request({
-    "method":"POST", 
+    "method":"PUT", 
     "uri": url,
     "json": data,
     // "headers": {
@@ -48,13 +87,13 @@ module.exports = new GeneralService();
 //         "device_name":"Chrome-arpit",
 //         "os_version": "7",
 //         "vendor_uuid":"769b47ee-4a0e-11e8-9234-0123456789ab"
-    
+
 // }).then((result) => {
 
 //     console.log(result);
 
 // }).catch((err) => {
-   
+
 //     var respErr  = JSON.parse(err.error);
 //     var errorResult = {
 //         origUrl: respErr.origUrl,

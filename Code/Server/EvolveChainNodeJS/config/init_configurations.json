@@ -1,0 +1,17 @@
+{
+    "COUNTRIES": [
+        { "NAME":"India", "PHONE_CODE":"91" },
+        { "NAME":"NorthAmerica", "PHONE_CODE":"1" }
+    ],
+    "AGE_LIMIT": {
+        "MIN": "11",
+        "MAX": "90"
+    },
+    "USA_UTILITY_BILL_TYPE": [
+       {"CODE": "ELECTRICITY_BILL", "NAME": "Electricity Bill"},
+       {"CODE": "MOBILE_BILL", "NAME": "Mobile Bill"},
+       {"CODE": "INTERNET_BILL", "NAME": "Internet Bill"},
+       {"CODE": "OTHER", "NAME": "OTHER"}
+    ],
+    "DATE_FORMAT": "yyyy-MM-dd"
+}
