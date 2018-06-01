@@ -54,33 +54,26 @@ class AppController extends BASE_CONTROLLER {
                 key: body.key,
                 isdelete: '0',
                 Server: body.SERVER_ADDR,
-                Refer: body.REMOTE_ADDR
+                Refer: body.REMOTE_ADDR,
+                status: CONFIG.APP_STATUSES.PENDING
             }
 
             COMMON_UTILITY.RemoveNull(params); // remove blank value from array
 
             var app = new APP(params);
+            var newApp = await app.save();
 
-            app.save().then((newApp) => {
-                var kycDocParam = {
-                    app_key: newApp.key,
-                    isDelete: 0,
-                    status: CONFIG.APP_STATUSES.PENDING,
-                    last_modified: COMMON_UTILITY.UtcNow()
-                }
-                var kycDoc = new KYC_DOCUMENT(kycDocParam);
-                kycDoc.save().then((newKycDoc) => {
-                    return this.GetSuccessResponse("Initialize", newApp, res);
-                }).catch((ex) => {
-                    return this.SendExceptionResponse(error, res);
-                });
+            var kycDocParam = {
+                app_key: newApp.key,
+                isDelete: 0,
+                last_modified: COMMON_UTILITY.UtcNow()
+            }
 
-            }).catch((ex) => {
-                return this.SendExceptionResponse(res, ex);
-            });
+            var kycDoc = new KYC_DOCUMENT(kycDocParam);
+            var newKycDoc = await kycDoc.save();
+            return this.GetSuccessResponse("Initialize", newApp, res);
 
         } catch (ex) {
-            LOG_MANAGER.Log(`Initialize:Exception- ${ex}`);
             return this.SendExceptionResponse(res, ex);
         }
     }
@@ -207,15 +200,16 @@ class AppController extends BASE_CONTROLLER {
 
             var emailSuccess = await EMAIL_SERVICE.SendEmail(email, subject, emailBody);
 
-            let md5EmailCode = MD5(email_code);
+            let md5OTP = MD5(email_code);
             var expireTime = COMMON_UTILITY.AddMinutesToUtcNow(OTP_EXPIRY_MINS);
 
             var setParams = {
                 $set: {
-                    email: email,
-                    email_code: md5EmailCode,
-                    email_verified: 0,
-                    email_code_expire_time: expireTime
+                    email_info: {
+                        otp: md5OTP,
+                        otp_expiry_time: expireTime,
+                        id: email
+                    }
                 }
             }
 
@@ -254,20 +248,20 @@ class AppController extends BASE_CONTROLLER {
             if (!app)
                 return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_KEY);
 
-            if (app.email != body.email.toLowerCase())
+            if (app.email_info.id != body.email.toLowerCase())
                 return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_EMAIL);
 
             var currentUtc = COMMON_UTILITY.UtcNow();
             //explicitly needs to convert to UTC, somehow mongodb or node js convert it to local timezone
-            var expireTime = COMMON_UTILITY.ConvertToUtc(app.email_code_expire_time);
+            var expireTime = COMMON_UTILITY.ConvertToUtc(app.email_info.otp_expiry_time);
             if (expireTime < currentUtc)
                 return this.SendErrorResponse(res, CONFIG.ERROR_CODES.OTP_EXPIRED);
 
-            if (app.email_code != body.email_code.toLowerCase())
+            if (app.email_info.otp != body.email_code.toLowerCase())
                 return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_OTP);
 
             var setParams = {
-                $set: { email_verified: 1 }
+                $set: { email: body.email.toLowerCase() }
             }
 
             await APP.update(conditions, setParams);
@@ -316,17 +310,18 @@ class AppController extends BASE_CONTROLLER {
 
             let smsResult = await SMS_SERVICE.SendSMS(toPhone, msg);
 
-            let md5MobileOTP = MD5(phone_code);
+            let md5OTP = MD5(phone_code);
             // var expireTime = new Date(Date.now() + (OTP_EXPIRY_MINS * 60000));
             var expireTime = COMMON_UTILITY.AddMinutesToUtcNow(OTP_EXPIRY_MINS);
 
             var setParams = {
                 $set: {
-                    phone: phone,
-                    phone_code: md5MobileOTP,
-                    country_code: countryCode,
-                    phone_verified: 0,
-                    phone_code_expire_time: expireTime
+                    phone_info: {
+                        otp: md5OTP,
+                        otp_expiry_time: expireTime,
+                        number: phone,
+                        country_code: countryCode
+                    }
                 }
             }
 
@@ -355,7 +350,9 @@ class AppController extends BASE_CONTROLLER {
 
             let body = _.pick(req.body, ['mobile', 'country_code', 'phone_code']);
             let key = req.params.key;
-
+            let mobilenumber = body.mobile.toLowerCase();
+            let phoneCountryCode = body.country_code;
+            let phoneOtp = body.phone_code.toLowerCase();
             var conditions = {
                 key: key
             }
@@ -365,20 +362,20 @@ class AppController extends BASE_CONTROLLER {
             if (!app)
                 return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_KEY);
 
-            if (app.phone != body.mobile.toLowerCase() && app.country_code != body.country_Code)
+            if (app.phone_info.number != mobilenumber || app.phone_info.country_code != phoneCountryCode)
                 return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_PHONE);
 
             var currentUtc = COMMON_UTILITY.UtcNow();
             //explicitly needs to convert to UTC, somehow mongodb or node js convert it to local timezone
-            var expireTime = COMMON_UTILITY.ConvertToUtc(app.phone_code_expire_time);
+            var expireTime = COMMON_UTILITY.ConvertToUtc(app.phone_info.otp_expiry_time);
             if (expireTime < currentUtc)
                 return this.SendErrorResponse(res, CONFIG.ERROR_CODES.OTP_EXPIRED);
 
-            if (app.phone_code != body.phone_code.toLowerCase())
+            if (app.phone_info.otp != phoneOtp)
                 return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_OTP);
 
             var setParams = {
-                $set: { phone_verified: 1 }
+                $set: { phone: mobilenumber, country_code:phoneCountryCode }
             }
 
             await APP.update(conditions, setParams);
@@ -440,7 +437,7 @@ class AppController extends BASE_CONTROLLER {
                 let toPhone = "+" + countryCode + phone;
 
                 SMS_SERVICE.SendSMS(toPhone, msg)
-                    .then(message => { 
+                    .then(message => {
                         return EMAIL_SERVICE.SendEmail(email, subject, emailBody);
                     })
                     .then((success) => {
@@ -470,7 +467,7 @@ class AppController extends BASE_CONTROLLER {
     }
 
     async SetPin(req, res) {
-        
+
         req.checkBody("ekyc_id", MESSAGES.req_ekycid).notEmpty();
         req.checkBody("pin_otp", MESSAGES.req_otp).notEmpty();
         req.checkBody("pin", MESSAGES.req_pin).notEmpty();
@@ -554,35 +551,35 @@ class AppController extends BASE_CONTROLLER {
     async GetEkycId(req, res) {
 
         req.checkBody("vendor_uuid", MESSAGES.req_vendor_uuid).notEmpty();
-    
+
         try {
-    
+
             let result = await req.getValidationResult();
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
                 return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INVALID_REQUEST, error);
             }
-    
+
             let body = _.pick(req.body, ['vendor_uuid']);
-    
+
             let conditions = {
                 vendor_uuid: body.vendor_uuid
             }
-    
-    //        var appData = await APP.findOne(conditions).exec();
+
+            //        var appData = await APP.findOne(conditions).exec();
             var appData = await APP.findOne(conditions);
 
             if (!appData) return this.SendErrorResponse(res, CONFIG.ERROR_CODES.APP_NOT_FOUND);
 
-            if(appData.ekyc_id == undefined || appData.ekyc_id == null)
-            {    return res.status(STATUS.OK).jsonp({
-                "success": 0,
-                "error": "Ekyc Id for this device does not exist!"
+            if (appData.ekyc_id == undefined || appData.ekyc_id == null) {
+                return res.status(STATUS.OK).jsonp({
+                    "success": 0,
+                    "error": "Ekyc Id for this device does not exist!"
                 });
             }
 
             return this.GetSuccessResponse("GetEkycId", appData, res);
-    
+
         } catch (e) {
             LOG_MANAGER.Log(`GetKYCVerificationInfo-Exception: ${e}`);
             return this.SendExceptionResponse(res, e);
@@ -784,19 +781,19 @@ class AppController extends BASE_CONTROLLER {
     }
 
 
-       GetSuccessResubmitInitialize(appEntity, docEntity, res) {
-            var response = {
-                "success": 1,
-                "now": Date.now(),
-                "name": appEntity.name,
-                "email": appEntity.email,
-                "phone": appEntity.phone,
-                'appkey' : appEntity.key,
-                "BasicInfo": COMMON_UTILITY.GetKycDocumentInfo(docEntity.basic_info, "BASIC"),
-                "AddressInfo": COMMON_UTILITY.GetKycDocumentInfo(docEntity.address_info, "ADDRESS"),
-                "IdentityInfo": COMMON_UTILITY.GetKycDocumentInfo(docEntity.identity_info, "IDENTITY"),
-                "result": MESSAGES.resubmit_init_success
-            }
+    GetSuccessResubmitInitialize(appEntity, docEntity, res) {
+        var response = {
+            "success": 1,
+            "now": Date.now(),
+            "name": appEntity.name,
+            "email": appEntity.email,
+            "phone": appEntity.phone,
+            'appkey': appEntity.key,
+            "BasicInfo": COMMON_UTILITY.GetKycDocumentInfo(docEntity.basic_info, "BASIC"),
+            "AddressInfo": COMMON_UTILITY.GetKycDocumentInfo(docEntity.address_info, "ADDRESS"),
+            "IdentityInfo": COMMON_UTILITY.GetKycDocumentInfo(docEntity.identity_info, "IDENTITY"),
+            "result": MESSAGES.resubmit_init_success
+        }
         return res.status(STATUS.OK).jsonp(response);
     }
 }

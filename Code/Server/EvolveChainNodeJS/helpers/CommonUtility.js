@@ -1,5 +1,4 @@
 const config = require('config');
-var im = require('imagemagick');
 const messages = config.get('messages');
 var dateFormat = require('dateformat');
 const md5 = require('md5');
@@ -38,31 +37,6 @@ class CommonUtility {
                 delete obj[propName];
             }
         }
-    }
-
-    // common for image resize
-    async ImageResize(source, destination, width, callback) {
-        let response = {
-            'error': true,
-            'data': [],
-            'message': messages.something_wentwrong,
-        }
-        im.resize({
-            srcPath: source,
-            dstPath: destination,
-            width: width
-        }, function (error, stdout, stderr) {
-            if (error) {
-                let err = `Error :: ${error}`;
-                response.message = err;
-            } else {
-                response.error = false;
-                response.message = messages.resize_image;
-                response.data = destination;
-            }
-            console.log(response);
-            callback(response);
-        });
     }
 
     GetKycDocumentMetaDataInfo(document_type) {

@@ -1,13 +1,7 @@
 const config = require('config');
 const nodemailer = require('nodemailer');
-
+const logManager = require('../helpers/LogManager');
 class EmailService{	
-
-	// constructor(req, res, db){
-	// 	this.req = req
-    //     this.res = res
-    //     this.db = db
-	// }  
 
     SendEmail(toEmailIds, subject, htmlEmailBody) {
 
@@ -24,14 +18,14 @@ class EmailService{
             auth: {
                 user: process.env.SMTP_USERNAME || 'gordhan@yudiz.com', // SMTP email
                 pass: process.env.SMTP_PASSWORD || 'Gordhan_9033' // Your password
-            },
-            //proxy: 'http://username:pswd@192.168.55.218:8080/',            
+            },           
             secure: true
         });
     
     return transporter.sendMail(mailOption).then((emailSuccess)=> {
        // return success.messageId;
        transporter.close();
+       logManager.Log(mailOption.to + ":" + emailSuccess.messageId);
        return Promise.resolve(emailSuccess);
     });
 };

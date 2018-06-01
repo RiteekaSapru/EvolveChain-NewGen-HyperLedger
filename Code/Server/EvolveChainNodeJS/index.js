@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const expressValidator = require("express-validator");
 const routes = require('./routes');
 var mongo = require('mongodb');
+const logManager = require('./helpers/LogManager');
 
 const status = config.get('status');
 const PORT = config.get('port');
@@ -71,3 +72,8 @@ const server = app.listen(PORT, () => {
 });
 
 server.timeout = 300000; //5 minutes time out
+
+process.on('uncaughtException', (err)=> {
+    logManager.Log("!!!Uncaught Exception!!! " + err.message);
+});
+

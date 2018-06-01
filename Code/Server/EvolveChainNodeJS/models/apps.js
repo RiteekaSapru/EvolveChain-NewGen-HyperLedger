@@ -25,21 +25,33 @@ const App = new Schema({
     Server: { type: String },
     vendor_uuid: { type: String },
 
-    // email: { type: String, validate: {validator: validateEmail, message:'Invalid email address'}},
-    email: { type: String },
-    email_code: { type: String },
-    email_verified: { type: Boolean },
-    email_code_expire_time: { type: Date },
+   
+    // email_code: { type: String },
+    // email_verified: { type: Boolean },
+    // email_code_expire_time: { type: Date },
 
     isdelete: { type: String },
     key: { type: String },
     name: { type: String },
 
     phone: { type: String },
-    phone_code: { type: String },
-    phone_verified: { type: Boolean },
     country_code: { type: String },
-    phone_code_expire_time: { type: Date },
+
+    phone_info: {
+        otp:{type:String},
+        otp_expiry_time: { type: Date },
+        number:{type:String},
+        country_code:{type:Number}
+    }, 
+    
+     // email: { type: String, validate: {validator: validateEmail, message:'Invalid email address'}},
+     email: { type: String },
+     email_info: {
+         otp:{type:String},
+         otp_expiry_time: { type: Date },
+         id:{type:String}
+     },   
+ 
 
     pin: { type: String },
     pin_otp: { type: String },
