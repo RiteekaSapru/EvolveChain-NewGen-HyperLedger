@@ -864,6 +864,21 @@ async SubmitKycDocument(req, res) {
                     return this.GetErrorResponse(error, res);
                 });
 
+
+                var appConditions = {
+                    key: docData.app_key
+                }
+                var params = {
+                    status: config.APP_STATUSES.IN_PROCESS
+                }
+                this.updateApp(appConditions, params, function (response) {
+                    if (response.error == true) {
+                        return res.status(status.OK).jsonp({
+                            "success": 0,
+                            "error": messages.something_wentwrong
+                        });
+                    }
+                });
             })
         } catch (e) {
             let error = `Error :: ${e}`;

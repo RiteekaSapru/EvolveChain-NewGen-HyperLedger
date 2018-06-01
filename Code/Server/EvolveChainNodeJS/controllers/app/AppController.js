@@ -549,6 +549,48 @@ class AppController extends BASE_CONTROLLER {
         }
     }
 
+
+
+    async GetEkycId(req, res) {
+
+        req.checkBody("vendor_uuid", MESSAGES.req_vendor_uuid).notEmpty();
+    
+        try {
+    
+            let result = await req.getValidationResult();
+            if (!result.isEmpty()) {
+                let error = this.GetErrors(result);
+                return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INVALID_REQUEST, error);
+            }
+    
+            let body = _.pick(req.body, ['vendor_uuid']);
+    
+            let conditions = {
+                vendor_uuid: body.vendor_uuid
+            }
+    
+    //        var appData = await APP.findOne(conditions).exec();
+            var appData = await APP.findOne(conditions);
+
+            if (!appData) return this.SendErrorResponse(res, CONFIG.ERROR_CODES.APP_NOT_FOUND);
+
+            if(appData.ekyc_id == undefined || appData.ekyc_id == null)
+            {    return res.status(STATUS.OK).jsonp({
+                "success": 0,
+                "error": "Ekyc Id for this device does not exist!"
+                });
+            }
+
+            return this.GetSuccessResponse("GetEkycId", appData, res);
+    
+        } catch (e) {
+            LOG_MANAGER.Log(`GetKYCVerificationInfo-Exception: ${e}`);
+            return this.SendExceptionResponse(res, e);
+        }
+    }
+
+
+
     async Login(req, res) {
 
         req.checkBody("ekyc_id", MESSAGES.req_ekycid).notEmpty();
@@ -699,6 +741,14 @@ class AppController extends BASE_CONTROLLER {
                     'success': 1,
                     'now': Date.now(),
                     'result': MESSAGES.verify_mobile_success
+                }
+                break;
+            case "GetEkycId":
+                response = {
+                    'success': 1,
+                    'now': Date.now(),
+                    'ekyc_id': appEntity.ekyc_id,
+                    'result': MESSAGES.ekyc_same_device
                 }
                 break;
         }
