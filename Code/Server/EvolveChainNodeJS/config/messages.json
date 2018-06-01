@@ -68,6 +68,7 @@
     "change_pin_success": "Pin has been changed successfully!",
     "verify_mobile_success": "Phone verified successfully!",
     "login_success": "Login successful!",
+    "ekyc_same_device": "Ekyc Id exist for this device",
     "resubmit_init_success": "Resubmit initialize successful!",
     "save_info": "Information save success",
     "req_street": "Address Street Required!",
