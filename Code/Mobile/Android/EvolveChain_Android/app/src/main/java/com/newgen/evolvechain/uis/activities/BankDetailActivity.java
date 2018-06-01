@@ -1,4 +1,4 @@
-package com.newgen.evolvechain.activities;
+package com.newgen.evolvechain.uis.activities;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;

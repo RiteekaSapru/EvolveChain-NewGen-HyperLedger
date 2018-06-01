@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:padding="16dp"
     android:background="@drawable/splash_background"
-    tools:context="com.newgen.evolvechain.activities.EmailActivity">
+    tools:context=".uis.activities.EmailActivity">
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/edit_text_email_wrapper"

@@ -1,4 +1,4 @@
-package com.newgen.evolvechain.activities;
+package com.newgen.evolvechain.uis.activities;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;

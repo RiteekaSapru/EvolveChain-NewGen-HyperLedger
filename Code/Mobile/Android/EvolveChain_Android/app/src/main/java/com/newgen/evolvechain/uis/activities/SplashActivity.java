@@ -1,4 +1,4 @@
-package com.newgen.evolvechain.activities;
+package com.newgen.evolvechain.uis.activities;
 
 import android.Manifest;
 import android.content.Intent;
@@ -14,14 +14,13 @@ import android.view.View;
 import com.newgen.evolvechain.utils.AppConstants;
 import com.newgen.evolvechain.utils.AppManager;
 import com.newgen.evolvechain.R;
+import com.newgen.evolvechain.utils.AppUtil;
 import com.newgen.evolvechain.utils.SharedPrefManager;
 import com.newgen.evolvechain.utils.Utility;
 import com.newgen.evolvechain.network_layer.PostTask;
 import com.newgen.evolvechain.network_layer.WebConnectionListener;
 
 import org.json.JSONObject;
-
-import java.util.UUID;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -32,12 +31,13 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        if (!(new SharedPrefManager(this).getInitToken().length() > 0)) {
-            getInitToken();
-        }
-        else {
-            AppManager.getInstance().initToken = new SharedPrefManager(this).getInitToken();
-        }
+//        if (!(new SharedPrefManager(this).getInitToken().length() > 0)) {
+//            getInitToken();
+//        }
+//        else {
+//            AppManager.getInstance().initToken = new SharedPrefManager(this).getInitToken();
+//            Log.d("initToken", AppManager.getInstance().initToken);
+//        }
 
         checkForPermission();
     }
@@ -51,8 +51,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     public void onSignUpClick(View view) {
-        Intent intent = new Intent(this, CountrySelectionActivity.class);
-        startActivity(intent);
+        getInitToken();
     }
 
     public void onAlreadyHaveIdClick(View view) {
@@ -62,7 +61,7 @@ public class SplashActivity extends AppCompatActivity {
 
     private void getInitToken() {
         String ip = Utility.getIPAddress(true);
-        String uniqueId = UUID.randomUUID().toString();
+        String uniqueId = AppManager.getInstance().uuid;
 
         String urlData = AppConstants.SERVER_ADDRESS + AppConstants.METHOD_NAME + AppConstants.INITIALIZE;
 
@@ -93,6 +92,10 @@ public class SplashActivity extends AppCompatActivity {
                     if (successCode == 1) {
                         String initToken = object.getString("key");
                         new SharedPrefManager(SplashActivity.this).setInitToken(initToken);
+                        AppUtil.saveSignUpInitData(result);
+
+                        Intent intent = new Intent(SplashActivity.this, CountrySelectionActivity.class);
+                        startActivity(intent);
                     }
                 }
                 catch (Exception e) {

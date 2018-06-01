@@ -1,13 +1,14 @@
-package com.newgen.evolvechain.activities;
+package com.newgen.evolvechain.uis.activities;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Bitmap;
+import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.provider.MediaStore;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,10 +26,8 @@ import com.newgen.evolvechain.models.AddressModel;
 import com.newgen.evolvechain.models.CountryCodeModel;
 import com.newgen.evolvechain.models.documnets.DrivingLicenseModel;
 import com.newgen.evolvechain.models.documnets.PassportModel;
-import com.newgen.evolvechain.models.documnets.TaxationModel;
 import com.newgen.evolvechain.models.documnets.UtilityBillModel;
-import com.newgen.evolvechain.network_layer.MultiPartTask;
-import com.newgen.evolvechain.network_layer.WebConnectionListener;
+import com.newgen.evolvechain.models.documnets.UtilityBillTypeModel;
 import com.newgen.evolvechain.utils.AppConstants;
 import com.newgen.evolvechain.utils.AppManager;
 import com.newgen.evolvechain.R;
@@ -42,10 +41,9 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.TimeZone;
 
 public class AddressActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
@@ -61,14 +59,18 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
     private static final int ADDRESS_TYPE_PASSPORT = 0;
     private static final int ADDRESS_TYPE_DRIVING_LICENSE = 1;
     private static final int ADDRESS_TYPE_UTILITY_BILL = 2;
+    private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
     private int addressType = ADDRESS_TYPE_PASSPORT;
     private Uri uri1, uri2;
 
     Calendar myCalendar = Calendar.getInstance();
+    Calendar minCalendar = Calendar.getInstance();
     DatePickerDialog.OnDateSetListener date;
 
     String[] countryNames;
     ArrayList<CountryCodeModel> list;
+    UtilityBillTypeModel[] typeModels;
+    String currentBillType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,8 +87,9 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
     }
 
     private void updateLabel() {
-        String myFormat = "dd-MMM-yyyy"; //In which you need put here
+        String myFormat = "yyyy-MM-dd"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         editTextExpiryDate.setText(sdf.format(myCalendar.getTime()));
     }
 
@@ -158,12 +161,15 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
 
                 if (type.length() <= 0) {
                     DialogsManager.showErrorDialog(this, "Error", "Please provide type to proceed");
+                    editTextType.requestFocus();
                 } else {
                     if (number.length() <= 0) {
                         DialogsManager.showErrorDialog(this, "Error", "Please provide Bill number to proceed");
+                        editTextNumber.requestFocus();
                     } else {
                         if (address.length() <= 0) {
                             DialogsManager.showErrorDialog(this, "Error", "Please provide Address to proceed");
+                            editTextAddress.requestFocus();
                         } else {
                             if (uri1 == null) {
                                 DialogsManager.showErrorDialog(this, "Error", "Please add front side of Utility bill");
@@ -171,7 +177,7 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
                                 if (uri2 == null) {
                                     DialogsManager.showErrorDialog(this, "Error", "Please back side of Utility bill");
                                 } else {
-                                    AppManager.getInstance().utilityBillModel = new UtilityBillModel(address, type, number, uri1, uri2);
+                                    AppManager.getInstance().utilityBillModel = new UtilityBillModel(currentBillType, number, address, uri1, uri2);
                                     AppManager.getInstance().addressModelV1.setType(AppConstants.DOCUMENT_TYPE_UTILITY_BILL);
                                     Intent intent = new Intent(AddressActivity.this, OthersRegistrationActivity.class);
                                     startActivity(intent);
@@ -248,17 +254,30 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
 
 
     public void onImageClick(View view) {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        switch (view.getId()) {
-            case R.id.image1:
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_1);
-                break;
-            case R.id.image2:
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_2);
-                break;
+        Snackbar snackbar = Snackbar.make(findViewById(R.id.address_view), "Please provide read file permission to pick image", Snackbar.LENGTH_LONG);
+        if (checkForPermission()) {
+            snackbar.dismiss();
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            switch (view.getId()) {
+                case R.id.image1:
+                    startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_1);
+                    break;
+                case R.id.image2:
+                    startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_2);
+                    break;
+            }
         }
+        else {
+            snackbar.show();
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+        }
+    }
+    private boolean checkForPermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
@@ -266,13 +285,13 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
         if (resultCode != 0) {
             Uri backUri = data.getData();
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), backUri);
+                //Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), backUri);
                 if (requestCode == PICK_IMAGE_1) {
-                    image1.setImageBitmap(bitmap);
                     uri1 = backUri;
+                    image1.setImageURI(uri1);
                 } else {
                     uri2 = backUri;
-                    image2.setImageBitmap(bitmap);
+                    image2.setImageURI(uri2);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -304,6 +323,9 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
                     editTextidentityNumber.setText("");
                     editTextCountry.setText("");
                     editTextExpiryDate.setText("");
+                    uri1 = null;
+                    uri2 = null;
+
                     image1.setImageResource(R.drawable.image_placeholder);
                     image2.setImageResource(R.drawable.image_placeholder);
                 }
@@ -329,6 +351,9 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
                     editTextidentityNumber.setText("");
                     editTextCountry.setText("");
                     editTextExpiryDate.setText("");
+                    uri1 = null;
+                    uri2 = null;
+
                     image1.setImageResource(R.drawable.image_placeholder);
                     image2.setImageResource(R.drawable.image_placeholder);
                 }
@@ -353,6 +378,9 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
                     editTextType.setText("");
                     editTextNumber.setText("");
                     editTextAddress.setText("");
+                    uri1 = null;
+                    uri2 = null;
+
                     image1.setImageResource(R.drawable.image_placeholder);
                     image2.setImageResource(R.drawable.image_placeholder);
                 }
@@ -372,7 +400,7 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
                 myCalendar.get(Calendar.DAY_OF_MONTH));
 
 
-        datePickerDialog.getDatePicker().setMinDate(myCalendar.getTimeInMillis());
+        datePickerDialog.getDatePicker().setMinDate(minCalendar.getTimeInMillis());
         datePickerDialog.show();
     }
 
@@ -432,5 +460,25 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void onTypeClick(View view) {
+        typeModels = AppManager.getInstance().utilityBillTypeModels;
+
+        final String[] types = new String[typeModels.length];
+        for (int i = 0; i < typeModels.length; i++) {
+            types[i] = typeModels[i].getName();
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Choose Utility bill type");
+        builder.setItems(types, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                editTextType.setText(types[i]);
+                currentBillType = typeModels[i].getCode();
+            }
+        });
+        builder.create().show();
     }
 }

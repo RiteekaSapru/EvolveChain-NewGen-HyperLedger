@@ -6,27 +6,27 @@
     android:orientation="vertical"
     android:padding="16dp"
     android:background="@drawable/splash_background"
-    tools:context="com.newgen.evolvechain.activities.CountrySelectionActivity">
+    tools:context=".uis.activities.CountrySelectionActivity">
 
     <RadioGroup
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/country_radio_group">
 
-        <RadioButton
-            android:id="@+id/radioButtonIndia"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onCountrySelectionClicked"
-            android:text="@string/india"
-            android:checked="true"/>
+        <!--<RadioButton-->
+            <!--android:id="@+id/radioButtonIndia"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:onClick="onCountrySelectionClicked"-->
+            <!--android:text="@string/india"-->
+            <!--android:checked="true"/>-->
 
-        <RadioButton
-            android:id="@+id/radioButtonOthers"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onCountrySelectionClicked"
-            android:text="@string/other_countries" />
+        <!--<RadioButton-->
+            <!--android:id="@+id/radioButtonOthers"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:onClick="onCountrySelectionClicked"-->
+            <!--android:text="@string/other_countries" />-->
     </RadioGroup>
 
     <Button

@@ -53,7 +53,7 @@ public class PostTask extends AsyncTask<Void, Void, String> {
         }
         catch (Exception e) {
             e.printStackTrace();
-             result = "Error";
+             result = e.toString();
         }
 
         return result;

@@ -1,30 +1,25 @@
-package com.newgen.evolvechain.activities;
+package com.newgen.evolvechain.uis.activities;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.media.Image;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.CountDownTimer;
-import android.provider.MediaStore;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.util.Patterns;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -35,7 +30,6 @@ import android.widget.TextView;
 import com.newgen.evolvechain.R;
 import com.newgen.evolvechain.models.CountryCodeModel;
 import com.newgen.evolvechain.models.UserBasicModel;
-import com.newgen.evolvechain.network_layer.MultiPartTask;
 import com.newgen.evolvechain.network_layer.PostTask;
 import com.newgen.evolvechain.network_layer.WebConnectionListener;
 import com.newgen.evolvechain.utils.AppConstants;
@@ -45,25 +39,19 @@ import com.newgen.evolvechain.utils.PinText;
 import com.newgen.evolvechain.utils.SharedPrefManager;
 import com.newgen.evolvechain.utils.Utility;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
+import java.util.TimeZone;
 import java.util.UUID;
 
 public class BasicDetailActivity extends AppCompatActivity {
 
     private ImageView image;
     private EditText emailText, phoneText, firstNameText, middleNameText, lastNameText, dobText, birthPlaceText, address1Text, address2Text, streetText, cityText, stateText, countryText, areaCodeText;
-    private Button resendButton;
+    private Button resendButton, saveButton;
     private PinText otpText;
     private TextView isdCode;
     private LinearLayout otpLayout;
@@ -71,8 +59,9 @@ public class BasicDetailActivity extends AppCompatActivity {
     private static final int VERIFYING_EMAIL = 0;
     private static final int VERIFYING_PHONE = 1;
     private static final int PICK_IMAGE = 0;
+    private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
     String[] countryNames;
-    ArrayList<CountryCodeModel> list;
+    CountryCodeModel[] list;
     String currentBodyData;
     private Uri uri;
     private String verifiedEmail = "", verifiedPhone = "";
@@ -81,6 +70,8 @@ public class BasicDetailActivity extends AppCompatActivity {
     int count = 60;
 
     Calendar myCalendar = Calendar.getInstance();
+    Calendar minCalendar = Calendar.getInstance();
+    Calendar maxCalendar = Calendar.getInstance();
     DatePickerDialog.OnDateSetListener date;
 
     @Override
@@ -88,9 +79,21 @@ public class BasicDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_basic_detail);
 
-        getCountryData();
+
+        getMinMaxDate();
+        getCountryDataFromSingleton();
         initUIs();
         setUpDatePicker();
+    }
+
+    private void getMinMaxDate() {
+
+        int minAge = Integer.parseInt(AppManager.getInstance().minAge);
+        int maxAge = Integer.parseInt(AppManager.getInstance().maxAge);
+
+        minCalendar.set(myCalendar.get(Calendar.YEAR) - maxAge, myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH));
+
+        maxCalendar.set(myCalendar.get(Calendar.YEAR) - minAge, myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH));
     }
 
     @Override
@@ -99,13 +102,24 @@ public class BasicDetailActivity extends AppCompatActivity {
             if (requestCode == PICK_IMAGE) {
                 Uri selectedImage = data.getData();
                 try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
-                    image.setImageBitmap(bitmap);
+                    //Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
                     uri = selectedImage;
+                    image.setImageURI(uri);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    @Override
+    public void onBackPressed(){
+        if (otpLayout.getVisibility() == View.VISIBLE) {
+            otpLayout.setVisibility(View.GONE);
+            saveButton.setVisibility(View.VISIBLE);
+        }
+        else {
+            super.onBackPressed();
         }
     }
 
@@ -126,31 +140,36 @@ public class BasicDetailActivity extends AppCompatActivity {
     }
 
     private void updateLabel() {
-        String myFormat = "dd-MMM-yyyy"; //In which you need put here
+        String myFormat = "yyyy-MM-dd"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         ((EditText) findViewById(R.id.edit_text_dob)).setText(sdf.format(myCalendar.getTime()));
     }
 
-    private void getCountryData() {
-        String data = loadJSONFromAsset();
-        parseDataToList(data);
+    private boolean checkForPermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
 
-    public String loadJSONFromAsset() {
-        String json = null;
-        try {
-            InputStream is = this.getAssets().open("CountryList.json");
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            json = new String(buffer, "UTF-8");
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-        return json;
-    }
+//    private void getCountryData() {
+//        String data = loadJSONFromAsset();
+//        parseDataToList();
+//    }
+//
+//    public String loadJSONFromAsset() {
+//        String json = null;
+//        try {
+//            InputStream is = this.getAssets().open("CountryList.json");
+//            int size = is.available();
+//            byte[] buffer = new byte[size];
+//            is.read(buffer);
+//            is.close();
+//            json = new String(buffer, "UTF-8");
+//        } catch (IOException ex) {
+//            ex.printStackTrace();
+//            return null;
+//        }
+//        return json;
+//    }
 
     private void initUIs() {
         image = findViewById(R.id.image);
@@ -161,11 +180,17 @@ public class BasicDetailActivity extends AppCompatActivity {
         resendButton.setEnabled(false);
         otpText = findViewById(R.id.edit_text_otp);
         isdCode = findViewById(R.id.isd_code);
+        isdCode.setText(list[0].getPhoneCode());
 
         firstNameText = findViewById(R.id.edit_text_first_name);
         middleNameText = findViewById(R.id.edit_text_middle_name);
         lastNameText = findViewById(R.id.edit_text_last_name);
+
         dobText = findViewById(R.id.edit_text_dob);
+        if (AppManager.getInstance().birthDateString.length() > 0) {
+            dobText.setText(AppManager.getInstance().birthDateString);
+        }
+
         birthPlaceText = findViewById(R.id.edit_text_birth_state);
         address1Text = findViewById(R.id.edit_text_address_1);
         address2Text = findViewById(R.id.edit_text_address_2);
@@ -174,13 +199,44 @@ public class BasicDetailActivity extends AppCompatActivity {
         stateText = findViewById(R.id.edit_text_state);
         countryText = findViewById(R.id.edit_text_country);
         areaCodeText = findViewById(R.id.edit_text_area_code);
+        saveButton = findViewById(R.id.button_save);
+
+        if (AppManager.getInstance().basicModel != null) {
+            UserBasicModel basicModel = AppManager.getInstance().basicModel;
+            image.setImageURI(basicModel.getUri());
+            emailText.setText(basicModel.getEmail());
+            isdCode.setText(basicModel.getIsd());
+            phoneText.setText(basicModel.getPhone());
+            firstNameText.setText(basicModel.getFirstName());
+            middleNameText.setText(basicModel.getMiddleName());
+            lastNameText.setText(basicModel.getLastName());
+            dobText.setText(basicModel.getDob());
+            birthPlaceText.setText(basicModel.getPlaceBirth());
+            address1Text.setText(basicModel.getAddress1());
+            address2Text.setText(basicModel.getAddress2());
+            streetText.setText(basicModel.getStreet());
+            cityText.setText(basicModel.getCity());
+            stateText.setText(basicModel.getState());
+            countryText.setText(basicModel.getCountry());
+            areaCodeText.setText(basicModel.getZip()) ;
+        }
     }
 
     public void onAddImageClick(View view) {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
+        Snackbar snackbar = Snackbar.make(findViewById(R.id.basic_view), "Please provide read file permission to pick image", Snackbar.LENGTH_LONG);
+        if (checkForPermission()) {
+            snackbar.dismiss();
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
+        }
+        else {
+            snackbar.show();
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+        }
     }
 
     public void onAddEmailClick(View view) {
@@ -240,6 +296,10 @@ public class BasicDetailActivity extends AppCompatActivity {
     private void handleOTPLayout(final int verifying) {
         count = 60;
         otpLayout.setVisibility(View.VISIBLE);
+        saveButton.setVisibility(View.GONE);
+
+        resendButton.setBackgroundColor(ContextCompat.getColor(this, android.R.color.darker_gray));
+        resendButton.setEnabled(false);
         startTimer();
         otpText.setFocusable(true);
         otpText.setFocusableInTouchMode(true);
@@ -265,7 +325,7 @@ public class BasicDetailActivity extends AppCompatActivity {
             final JSONObject object = new JSONObject();
             try {
                 object.put("mobile", phone);
-                object.put("country_code", "91");
+                object.put("country_code", isdCode.getText().toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -348,7 +408,7 @@ public class BasicDetailActivity extends AppCompatActivity {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    DialogsManager.showErrorDialog(BasicDetailActivity.this, "Error", e.toString());
+                    DialogsManager.showErrorDialog(BasicDetailActivity.this, "Error", "We are having some connection issue with server, please try after some time");
                 }
             }
         }).execute();
@@ -379,6 +439,7 @@ public class BasicDetailActivity extends AppCompatActivity {
 
     private void callCheckPIN(int verifying) {
         if (otpText.getText().toString().trim().length() == 6) {
+            image.requestFocus();
             Utility.hideKeyBoard(BasicDetailActivity.this, this.findViewById(android.R.id.content).getRootView());
             verifyToken(otpText.getText().toString(), verifying);
         }
@@ -437,15 +498,16 @@ public class BasicDetailActivity extends AppCompatActivity {
                             break;
                         case 1:
                             otpLayout.setVisibility(View.GONE);
+                            saveButton.setVisibility(View.VISIBLE);
 
                             if (VERIFICATION_TYPE == AppConstants.VERIFICATION_TYPE_EMAIL) {
                                 //AppManager.getInstance().basicModel.setEmail(valueData);
-                                disableEditText(emailText);
+                                //disableEditText(emailText);
                                 verifiedEmail = emailText.getText().toString();
                             } else {
                                 if (VERIFICATION_TYPE == AppConstants.VERIFICATION_TYPE_PHONE) {
                                     //AppManager.getInstance().basicModel.setContactNumber(valueData);
-                                    disableEditText(phoneText);
+                                    //disableEditText(phoneText);
                                     verifiedPhone = phoneText.getText().toString();
                                 }
                             }
@@ -455,6 +517,8 @@ public class BasicDetailActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                     DialogsManager.showErrorDialog(BasicDetailActivity.this, "Error", result);
+                    otpLayout.setVisibility(View.GONE);
+                    saveButton.setVisibility(View.VISIBLE);
                 }
             }
         }).execute();
@@ -489,46 +553,23 @@ public class BasicDetailActivity extends AppCompatActivity {
         builder.setItems(countryNames, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                isdCode.setText(list.get(i).getPhoneCode());
+                isdCode.setText(list[i].getPhoneCode());
             }
         });
         builder.create().show();
     }
 
-    private void parseDataToList(String data) {
-        list = new ArrayList<>();
+    private void getCountryDataFromSingleton() {
+        list = AppManager.getInstance().countryCodeModels;
 
-        try {
-            JSONArray object = new JSONArray(data);
+        countryNames = new String[list.length];
 
-            for (int i = 0; i < object.length(); i++) {
-                JSONObject jsonObject = object.getJSONObject(i);
-                CountryCodeModel model = new CountryCodeModel(jsonObject.getString("PhoneCode"), jsonObject.getString("Country"));
-                list.add(model);
-            }
-
-            Log.d("size", "size");
-
-            countryNames = new String[list.size()];
-
-            for (int i = 0; i < list.size(); i++) {
-                countryNames[i] = list.get(i).getName();
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        for (int i = 0; i < list.length; i++) {
+            countryNames[i] = list[i].getName();
         }
     }
 
     public void onBirthDateClick(View view) {
-
-        Calendar minCalendar = Calendar.getInstance();
-        minCalendar.set(myCalendar.get(Calendar.YEAR) - 80, myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH));
-
-        Calendar maxCalendar = Calendar.getInstance();
-        maxCalendar.set(myCalendar.get(Calendar.YEAR) - 14, myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH));
-
-
         DatePickerDialog datePickerDialog =  new DatePickerDialog(BasicDetailActivity.this, date, maxCalendar
                 .get(Calendar.YEAR), maxCalendar.get(Calendar.MONTH),
                 maxCalendar.get(Calendar.DAY_OF_MONTH));
@@ -553,6 +594,7 @@ public class BasicDetailActivity extends AppCompatActivity {
         String country = countryText.getText().toString();
         String areaCode = areaCodeText.getText().toString();
         verifiedEmail = emailText.getText().toString();
+        String isd = isdCode.getText().toString();
 
 
         if (uri == null) {
@@ -560,47 +602,63 @@ public class BasicDetailActivity extends AppCompatActivity {
         } else {
             if (verifiedEmail.length() <= 0) {
                 DialogsManager.showErrorDialog(this, "Error", "Please verify your email");
+                emailText.requestFocus();
             } else {
                 if (verifiedPhone.length() <= 0) {
                     DialogsManager.showErrorDialog(this, "Error", "Please verify your phone");
+                    phoneText.requestFocus();
                 } else {
                     if (firstName.length() <= 0) {
                         DialogsManager.showErrorDialog(this, "Error", "Please fill first name");
+                        firstNameText.requestFocus();
                     } else {
                         if (lastName.length() <= 0) {
                             DialogsManager.showErrorDialog(this, "Error", "Please fill last name");
+                            lastNameText.requestFocus();
                         } else {
                             if (dob.length() <= 0) {
                                 DialogsManager.showErrorDialog(this, "Error", "Please fill Date of birth");
+                                dobText.requestFocus();
                             } else {
                                 if (birthPlace.length() <= 0) {
                                     DialogsManager.showErrorDialog(this, "Error", "Please fill place of birth");
+                                    birthPlaceText.requestFocus();
                                 } else {
                                     if (address1.length() <= 0) {
                                         DialogsManager.showErrorDialog(this, "Error", "Please fill address");
+                                        address1Text.requestFocus();
                                     } else {
                                         if (street.length() <= 0) {
                                             DialogsManager.showErrorDialog(this, "Error", "Please fill street");
+                                            streetText.requestFocus();
                                         } else {
                                             if (city.length() <= 0) {
                                                 DialogsManager.showErrorDialog(this, "Error", "Please fill City");
+                                                cityText.requestFocus();
                                             } else {
-                                                if (areaCode.length() <= 0) {
-                                                    DialogsManager.showErrorDialog(this, "Error", "Please fill zip code");
+                                                if (areaCode.length() <= 4) {
+                                                    DialogsManager.showErrorDialog(this, "Error", "Please enter valid zip code");
+                                                    areaCodeText.requestFocus();
                                                 } else {
                                                     if (state.length() <= 0) {
                                                         DialogsManager.showErrorDialog(this, "Error", "Please fill state");
+                                                        stateText.requestFocus();
                                                     } else {
                                                         if (country.length() <= 0) {
                                                             DialogsManager.showErrorDialog(this, "Error", "Please fill country");
+                                                            countryText.requestFocus();
                                                         } else {
                                                             AppManager.getInstance().basicModel = new UserBasicModel(
-                                                                    verifiedEmail, verifiedPhone,
+                                                                    verifiedEmail, verifiedPhone, isd,
                                                                     firstName, middleName, lastName,
                                                                     dob, birthPlace,
                                                                     address1, address2, street, city,
                                                                     areaCode, state, country,
                                                                     uri);
+                                                            AppManager.getInstance().birthDateString = dob;
+                                                            if (AppManager.getInstance().taxationModel != null) {
+                                                                AppManager.getInstance().taxationModel.setDob(dob);
+                                                            }
                                                             Intent intent = new Intent(BasicDetailActivity.this, OthersRegistrationActivity.class);
                                                             startActivity(intent);
                                                         }
@@ -624,7 +682,7 @@ public class BasicDetailActivity extends AppCompatActivity {
         builder.setItems(countryNames, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                countryText.setText(list.get(i).getName());
+                countryText.setText(list[i].getName());
             }
         });
         builder.create().show();

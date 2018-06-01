@@ -38,4 +38,8 @@ public class TaxationModel {
     public String getDob() {
         return dob;
     }
+
+    public void setDob(String dob) {
+        this.dob = dob;
+    }
 }

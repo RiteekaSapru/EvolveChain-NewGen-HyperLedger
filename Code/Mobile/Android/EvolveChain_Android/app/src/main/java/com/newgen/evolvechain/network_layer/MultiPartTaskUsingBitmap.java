@@ -5,9 +5,10 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
-import android.util.Log;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,23 +21,27 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Created by onkar.gupta on 5/23/2018.
+ * Created by onkar.gupta on 5/28/2018.
  *
  */
 
-public class MultiPartTask extends AsyncTask<Void, Void, String> {
+public class MultiPartTaskUsingBitmap extends AsyncTask<Void, Void, String>{
 
+    private Context context;
     private String url1, fileMimeType;
     private String[] fileField, filepath;
     private Map<String, String> params;
     private WebConnectionListener listener;
+    private Uri[] uris;
 
-    public MultiPartTask(String url1, Map<String, String> params, String[] filepath, String[] fileField, String fileMimeType, WebConnectionListener listener) {
+    public MultiPartTaskUsingBitmap(Context context, Uri[] uris, String url1, Map<String, String> params, String[] filepath, String[] fileField, String fileMimeType, WebConnectionListener listener) {
+        this.context = context;
         this.url1 = url1;
         this.params = params;
         this.filepath = filepath;
         this.fileField = fileField;
         this.fileMimeType = fileMimeType;
+        this.uris = uris;
         this.listener = listener;
     }
 
@@ -52,8 +57,6 @@ public class MultiPartTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected String doInBackground(Void... voids) {
-
-
         String twoHyphens = "--";
         String boundary = "*****" + Long.toString(System.currentTimeMillis()) + "*****";
         String lineEnd = "\r\n";
@@ -80,36 +83,52 @@ public class MultiPartTask extends AsyncTask<Void, Void, String> {
 
             outputStream = new DataOutputStream(connection.getOutputStream());
 
-
             for (int i = 0; i < filepath.length; i++) {
-                File file = new File(filepath[i]);
-                FileInputStream fileInputStream = new FileInputStream(file);
-                String[] q = filepath[i].split("/");
-                int idx = q.length - 1;
-                outputStream.writeBytes(twoHyphens + boundary + lineEnd);
-                outputStream.writeBytes("Content-Disposition: form-data; name=\"" + fileField[i] + "\"; filename=\"" + q[idx] + "\"" + lineEnd);
+
+                Bitmap scaledBitmap = scaleDown(uris[i], 600, true);
+
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                scaledBitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+                byte[] bitmapdata = bos.toByteArray();
+                ByteArrayInputStream bs = new ByteArrayInputStream(bitmapdata);
+
+
+//                File file = new File(filepath[i]);
+//                FileInputStream fileInputStream = new FileInputStream(file);
+
+                if (filepath[i] != null) {
+                    String[] q = filepath[i].split("/");
+                    int idx = q.length - 1;
+                    outputStream.writeBytes(twoHyphens + boundary + lineEnd);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\"" + fileField[i] + "\"; filename=\"" + q[idx] + "\"" + lineEnd);
+                }
+                else {
+
+                    outputStream.writeBytes(twoHyphens + boundary + lineEnd);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\"" + fileField[i] + "\"; filename=\"" + "mobile_image" + "\"" + lineEnd);
+                }
                 outputStream.writeBytes("Content-Type: " + fileMimeType + lineEnd);
                 outputStream.writeBytes("Content-Transfer-Encoding: binary" + lineEnd);
 
                 outputStream.writeBytes(lineEnd);
 
-                bytesAvailable = fileInputStream.available();
+                bytesAvailable = bs.available();
                 bufferSize = Math.min(bytesAvailable, maxBufferSize);
                 buffer = new byte[bufferSize];
 
-                bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+                bytesRead = bs.read(buffer, 0, bufferSize);
                 while (bytesRead > 0) {
                     outputStream.write(buffer, 0, bufferSize);
-                    bytesAvailable = fileInputStream.available();
+                    bytesAvailable = bs.available();
                     bufferSize = Math.min(bytesAvailable, maxBufferSize);
-                    bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+                    bytesRead = bs.read(buffer, 0, bufferSize);
                 }
 
                 outputStream.writeBytes(lineEnd);
-                fileInputStream.close();
+                bs.close();
+                scaledBitmap = null;
             }
 
-            // Upload POST Data
             Iterator<String> keys = params.keySet().iterator();
             while (keys.hasNext()) {
                 String key = keys.next();
@@ -141,7 +160,26 @@ public class MultiPartTask extends AsyncTask<Void, Void, String> {
             e.printStackTrace();
             return "error";
         }
+    }
 
+    private Bitmap scaleDown(Uri imageUri, float maxImageSize, boolean filter) {
+        Bitmap bitmap = null;
+        try {
+            bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), imageUri);
+
+            float ratio = Math.min(
+                    (float) maxImageSize / bitmap.getWidth(),
+                    (float) maxImageSize / bitmap.getHeight());
+            int width = Math.round((float) ratio * bitmap.getWidth());
+            int height = Math.round((float) ratio * bitmap.getHeight());
+
+            bitmap = Bitmap.createScaledBitmap(bitmap, width,
+                    height, filter);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return bitmap;
     }
 
     private String convertStreamToString(InputStream is) {

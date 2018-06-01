@@ -1,14 +1,15 @@
-package com.newgen.evolvechain.activities;
+package com.newgen.evolvechain.uis.activities;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Bitmap;
+import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.provider.MediaStore;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,12 +23,9 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 
 import com.newgen.evolvechain.models.CountryCodeModel;
-import com.newgen.evolvechain.models.UserBasicModel;
 import com.newgen.evolvechain.models.documnets.DrivingLicenseModel;
 import com.newgen.evolvechain.models.documnets.PassportModel;
 import com.newgen.evolvechain.models.documnets.TaxationModel;
-import com.newgen.evolvechain.network_layer.MultiPartTask;
-import com.newgen.evolvechain.network_layer.WebConnectionListener;
 import com.newgen.evolvechain.utils.AppConstants;
 import com.newgen.evolvechain.utils.AppManager;
 import com.newgen.evolvechain.R;
@@ -41,10 +39,9 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.TimeZone;
 
 public class IdentityActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
@@ -58,6 +55,7 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
     private static final int IDENTITY_TYPE_PASSPORT = 0;
     private static final int IDENTITY_TYPE_DRIVING_LICENSE = 1;
     private static final int IDENTITY_TYPE_TAXATION = 2;
+    private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
     private int identityType = IDENTITY_TYPE_PASSPORT;
 
     private Uri frontUri, backUri;
@@ -65,6 +63,8 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
     private List<String> options = new ArrayList<>();
 
     Calendar myCalendar = Calendar.getInstance();
+    Calendar minCalendar = Calendar.getInstance();
+    Calendar maxCalendar = Calendar.getInstance();
     DatePickerDialog.OnDateSetListener date;
 
     String[] countryNames;
@@ -79,10 +79,21 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
         options.add("Driving License");
         options.add("Taxation Id");
 
+        getMinMaxDate();
         setUpDatePicker();
         getCountryData();
         initUis();
 
+    }
+
+    private void getMinMaxDate() {
+
+        int minAge = Integer.parseInt(AppManager.getInstance().minAge);
+        int maxAge = Integer.parseInt(AppManager.getInstance().maxAge);
+
+        minCalendar.set(myCalendar.get(Calendar.YEAR) - maxAge, myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH));
+
+        maxCalendar.set(myCalendar.get(Calendar.YEAR) - minAge, myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH));
     }
 
     private void setUpDatePicker() {
@@ -102,8 +113,9 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
     }
 
     private void updateLabel() {
-        String myFormat = "dd-MMM-yyyy"; //In which you need put here
+        String myFormat = "yyyy-MM -dd"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         editTextExpiryDate.setText(sdf.format(myCalendar.getTime()));
     }
 
@@ -147,8 +159,8 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
                 case PICK_IMAGE_BACK:
                     backUri = data.getData();
                     try {
-                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), backUri);
-                        backImage.setImageBitmap(bitmap);
+                        //Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), backUri);
+                        backImage.setImageURI(backUri);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -156,8 +168,8 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
                 case PICK_IMAGE_FRONT:
                     frontUri = data.getData();
                     try {
-                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), frontUri);
-                        frontImage.setImageBitmap(bitmap);
+                        //Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), frontUri);
+                        frontImage.setImageURI(frontUri);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -172,28 +184,45 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
     }
 
     public void onBackImageClick(View view) {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_BACK);
+        Snackbar snackbar = Snackbar.make(findViewById(R.id.identity_view), "Please provide read file permission to pick image", Snackbar.LENGTH_LONG);
+        if (checkForPermission()) {
+            snackbar.dismiss();
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_BACK);
+        }
+        else {
+            snackbar.show();
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+        }
     }
 
     public void onFrontImageClick(View view) {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_FRONT);
+        Snackbar snackbar = Snackbar.make(findViewById(R.id.identity_view), "Please provide read file permission to pick image", Snackbar.LENGTH_LONG);
+        if (checkForPermission()) {
+            snackbar.dismiss();
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_FRONT);
+        }
+        else {
+            snackbar.show();
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+        }
+    }
+
+    private boolean checkForPermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
 
     public void onExpiryDateClick(View view) {
         if (identityType == IDENTITY_TYPE_TAXATION) {
-            Calendar minCalendar = Calendar.getInstance();
-            minCalendar.set(myCalendar.get(Calendar.YEAR) - 80, myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH));
-
-            Calendar maxCalendar = Calendar.getInstance();
-            maxCalendar.set(myCalendar.get(Calendar.YEAR) - 14, myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH));
-
-
             DatePickerDialog datePickerDialog =  new DatePickerDialog(this, date, maxCalendar
                     .get(Calendar.YEAR), maxCalendar.get(Calendar.MONTH),
                     maxCalendar.get(Calendar.DAY_OF_MONTH));
@@ -229,12 +258,15 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
                     } else {
                         if (identityNumber.length() <= 0) {
                             DialogsManager.showErrorDialog(this, "Error", "Please enter Passport number");
+                            editTextIdentityNumber.requestFocus();
                         } else {
                             if (expiryDate.length() <= 0) {
                                 DialogsManager.showErrorDialog(this, "Error", "Please enter expiry date");
+                                editTextExpiryDate.requestFocus();
                             } else {
                                 if (issueCountry.length() <= 0) {
                                     DialogsManager.showErrorDialog(this, "Error", "Please enter issue country");
+                                    editTextIssueCountry.requestFocus();
                                 } else {
                                     AppManager.getInstance().passportModel = new PassportModel(identityNumber, expiryDate, issueCountry, frontUri, backUri);
                                     AppManager.getInstance().identityModelV1.setType(AppConstants.DOCUMENT_TYPE_PASSPORT);
@@ -281,8 +313,8 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
                     if (backUri == null) {
                         DialogsManager.showErrorDialog(this, "Error", "Please add back side image");
                     } else {
-                        if (identityNumber.length() <= 0) {
-                            DialogsManager.showErrorDialog(this, "Error", "Please enter Taxation number");
+                        if (identityNumber.length() <= 8) {
+                            DialogsManager.showErrorDialog(this, "Error", "Please enter valid Taxation number");
                         } else {
                             if (expiryDate.length() <= 0) {
                                 DialogsManager.showErrorDialog(this, "Error", "Please enter Birth date");
@@ -292,6 +324,10 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
                                 } else {
                                     AppManager.getInstance().taxationModel = new TaxationModel(identityNumber, expiryDate, issueCountry, frontUri, backUri);
                                     AppManager.getInstance().identityModelV1.setType(AppConstants.DOCUMENT_TYPE_TAXATION);
+                                    AppManager.getInstance().birthDateString = expiryDate;
+                                    if (AppManager.getInstance().basicModel != null) {
+                                        AppManager.getInstance().basicModel.setDob(expiryDate);
+                                    }
                                     //saveDataToServer(AppConstants.DOCUMENT_TYPE_TAXATION);
                                     Intent intent = new Intent(this, OthersRegistrationActivity.class);
                                     startActivity(intent);
@@ -328,6 +364,8 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
                     editTextIdentityNumber.setText("");
                     editTextExpiryDate.setText("");
                     editTextIssueCountry.setText("");
+                    frontUri = null;
+                    backUri = null;
 
                     frontImage.setImageResource(R.drawable.image_placeholder);
                     backImage.setImageResource(R.drawable.image_placeholder);
@@ -352,6 +390,8 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
                     editTextIdentityNumber.setText("");
                     editTextExpiryDate.setText("");
                     editTextIssueCountry.setText("");
+                    frontUri = null;
+                    backUri = null;
 
                     frontImage.setImageResource(R.drawable.image_placeholder);
                     backImage.setImageResource(R.drawable.image_placeholder);
@@ -362,6 +402,11 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
                 editTextExpiryDate.setHint("Date of birth");
 
                 if (AppManager.getInstance().taxationModel != null) {
+                    if (AppManager.getInstance().birthDateString.length() > 0) {
+                        editTextExpiryDate.setText(AppManager.getInstance().birthDateString);
+                        AppManager.getInstance().taxationModel.setDob(AppManager.getInstance().birthDateString);
+                    }
+
                     TaxationModel taxationModel = AppManager.getInstance().taxationModel;
                     editTextIdentityNumber.setText(taxationModel.getNumber());
                     editTextIssueCountry.setText(taxationModel.getCountry());
@@ -376,6 +421,11 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
                     editTextIdentityNumber.setText("");
                     editTextExpiryDate.setText("");
                     editTextIssueCountry.setText("");
+                    if (AppManager.getInstance().birthDateString.length() > 0) {
+                        editTextExpiryDate.setText(AppManager.getInstance().birthDateString);
+                    }
+                    frontUri = null;
+                    backUri = null;
 
                     frontImage.setImageResource(R.drawable.image_placeholder);
                     backImage.setImageResource(R.drawable.image_placeholder);

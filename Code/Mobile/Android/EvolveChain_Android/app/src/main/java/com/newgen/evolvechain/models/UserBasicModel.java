@@ -2,16 +2,18 @@ package com.newgen.evolvechain.models;
 
 import android.net.Uri;
 
+import java.io.Serializable;
+
 /**
  * Created by onkar.gupta on 5/18/2018.
  *
  */
 
-public class UserBasicModel {
+public class UserBasicModel implements Serializable{
     private Uri uri;
-    private String email, phone, firstName, middleName, lastName, dob, placeBirth, address1, address2, street, city, zip, state, country;
+    private String email, phone, isd, firstName, middleName, lastName, dob, placeBirth, address1, address2, street, city, zip, state, country;
 
-    public UserBasicModel(String email, String phone,
+    public UserBasicModel(String email, String phone, String isd,
                           String firstName, String middleName, String lastName,
                           String dob, String placeBirth,
                           String address1, String address2, String street, String city,
@@ -19,6 +21,7 @@ public class UserBasicModel {
                           Uri uri) {
         this.email = email;
         this.phone = phone;
+        this.isd = isd;
         this.firstName = firstName;
         this.middleName = middleName;
         this.lastName = lastName;
@@ -92,5 +95,13 @@ public class UserBasicModel {
 
     public String getZip() {
         return zip;
+    }
+
+    public String getIsd() {
+        return isd;
+    }
+
+    public void setDob(String dob) {
+        this.dob = dob;
     }
 }

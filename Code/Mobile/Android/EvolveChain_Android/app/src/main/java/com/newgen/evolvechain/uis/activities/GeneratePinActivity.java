@@ -1,4 +1,4 @@
-package com.newgen.evolvechain.activities;
+package com.newgen.evolvechain.uis.activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -6,18 +6,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 
 import com.newgen.evolvechain.R;
 import com.newgen.evolvechain.network_layer.PostTask;
 import com.newgen.evolvechain.network_layer.WebConnectionListener;
 import com.newgen.evolvechain.utils.AppConstants;
-import com.newgen.evolvechain.utils.AppManager;
 import com.newgen.evolvechain.utils.DialogsManager;
 
 import org.json.JSONObject;
-
-import java.util.UUID;
 
 public class GeneratePinActivity extends AppCompatActivity {
 
@@ -36,7 +32,7 @@ public class GeneratePinActivity extends AppCompatActivity {
         if (id.length() <= 0) {
             DialogsManager.showErrorDialog(this, "Error", "Please Enter KYC Id");
         } else {
-            String url = AppConstants.SERVER_ADDRESS + AppConstants.METHOD_NAME + AppConstants.GENERATE_PIN + AppManager.getInstance().initToken;
+            String url = AppConstants.SERVER_ADDRESS + AppConstants.METHOD_NAME + AppConstants.GENERATE_PIN;// + AppManager.getInstance().initToken;
             final JSONObject object = new JSONObject();
             try {
                 object.put("ekyc_id", id);

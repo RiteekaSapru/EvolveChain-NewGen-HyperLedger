@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context="com.newgen.evolvechain.activities.GeneratePinStep2Activity">
+    tools:context=".uis.activities.GeneratePinStep2Activity">
 
     <TextView
         android:layout_width="wrap_content"
@@ -24,7 +24,7 @@
         android:paddingLeft="@dimen/_16sdp"
         android:paddingRight="@dimen/_16sdp"
         android:textColor="#FFF"
-        android:textSize="@dimen/_20sdp"
+        android:textSize="@dimen/_16sdp"
         app:pinBackgroundDrawable="@drawable/otp_background" />
 
 
@@ -45,7 +45,7 @@
         android:paddingLeft="@dimen/_16sdp"
         android:paddingRight="@dimen/_16sdp"
         android:textColor="#FFF"
-        android:textSize="@dimen/_20sdp"
+        android:textSize="@dimen/_16sdp"
         app:pinBackgroundDrawable="@drawable/otp_background" />
 
 
@@ -66,7 +66,7 @@
         android:paddingLeft="@dimen/_16sdp"
         android:paddingRight="@dimen/_16sdp"
         android:textColor="#FFF"
-        android:textSize="@dimen/_20sdp"
+        android:textSize="@dimen/_16sdp"
         app:pinBackgroundDrawable="@drawable/otp_background" />
 
     <Button
