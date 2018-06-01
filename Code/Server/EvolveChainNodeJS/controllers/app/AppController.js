@@ -481,7 +481,7 @@ class AppController extends BASE_CONTROLLER {
             let result = await req.getValidationResult();
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
-                this.SendErrorResponse(res, CONFIG.ERROR_CODES.INVALID_REQUEST, error);
+                return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INVALID_REQUEST, error);
             }
 
             let body = _.pick(req.body, ['ekyc_id', 'pin_otp', 'pin', 'vendor_uuid']);
