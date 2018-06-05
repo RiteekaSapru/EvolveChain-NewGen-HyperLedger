@@ -21,7 +21,10 @@
         "INCORRECT_DETAILS": "E11",
         "MISSING_PHONE_EMAIL": "E12",        
         "INCORRECT_PHONE": "E13",
-        "OTP_EXPIRED":"E14"        
+        "OTP_EXPIRED":"E14",
+        "BASIC_DOCS_MISSING": "E15",
+        "IDENTITY_DOCS_MISSING":"E16",
+        "ADDRESS_DOCS_MISSING":"E17"    
     },
     "HTTP_STATUS":{
         "OK": 200,
