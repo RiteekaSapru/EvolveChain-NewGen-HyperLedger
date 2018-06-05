@@ -126,27 +126,21 @@ class AppController extends base_controller {
                     break;
             }
 
-            app.findOne(conditions, (error, app) => {
+            var App = await app.findOne(conditions);
 
-                if (error) {
-                    return this.SendErrorResponse(res, config.ERROR_CODES.ERROR);
-                }
-                if (!app) {
-                    return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
-                }
-                var con = {
-                    app_key: app.key,
-                    isDelete: 0
-                }
-                kyc_document.findOne(con, (error, docData) => {
-                    if (error) return this.SendErrorResponse(res, config.ERROR_CODES.ERROR);
+            if (!App)
+                return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
 
-                    if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
+            var con = {
+                app_key: App.key,
+                isDelete: 0
+            }
 
-                    return this.GetSuccessResubmitInitialize(app, docData, res);
-                })
+            var docData = await kyc_document.findOne(con);
 
-            });
+            if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
+
+            return this.GetSuccessResubmitInitialize(App, docData, res);
 
         } catch (ex) {
             return this.SendExceptionResponse(res, ex);
@@ -173,9 +167,9 @@ class AppController extends base_controller {
                 key: key
             }
 
-            var app = await app.findOne(conditions);
+            var App = await app.findOne(conditions);
 
-            if (!app)
+            if (!App)
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_KEY);
 
 
@@ -242,21 +236,21 @@ class AppController extends base_controller {
                 key: key
             }
 
-            var app = await app.findOne(conditions);
+            var App = await app.findOne(conditions);
 
-            if (!app)
+            if (!App)
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_KEY);
 
-            if (app.email_info.id != body.email.toLowerCase())
+            if (App.email_info.id != body.email.toLowerCase())
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_EMAIL);
 
             var currentUtc = common_utility.UtcNow();
             //explicitly needs to convert to UTC, somehow mongodb or node js convert it to local timezone
-            var expireTime = common_utility.ConvertToUtc(app.email_info.otp_expiry_time);
+            var expireTime = common_utility.ConvertToUtc(App.email_info.otp_expiry_time);
             if (expireTime < currentUtc)
                 return this.SendErrorResponse(res, config.ERROR_CODES.OTP_EXPIRED);
 
-            if (app.email_info.otp != body.email_code.toLowerCase())
+            if (App.email_info.otp != body.email_code.toLowerCase())
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_OTP);
 
             var setParams = {
@@ -295,9 +289,9 @@ class AppController extends base_controller {
                 key: key
             }
 
-            var app = await app.findOne(conditions);
+            var App = await app.findOne(conditions);
 
-            if (!app) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND, error);
+            if (!App) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND, error);
 
             var phone_code = common_utility.GenerateOTP(6);
 
@@ -356,21 +350,21 @@ class AppController extends base_controller {
                 key: key
             }
 
-            var app = await app.findOne(conditions);
+            var App = await app.findOne(conditions);
 
-            if (!app)
+            if (!App)
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_KEY);
 
-            if (app.phone_info.number != mobilenumber || app.phone_info.country_code != phoneCountryCode)
+            if (App.phone_info.number != mobilenumber || App.phone_info.country_code != phoneCountryCode)
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_PHONE);
 
             var currentUtc = common_utility.UtcNow();
             //explicitly needs to convert to UTC, somehow mongodb or node js convert it to local timezone
-            var expireTime = common_utility.ConvertToUtc(app.phone_info.otp_expiry_time);
+            var expireTime = common_utility.ConvertToUtc(App.phone_info.otp_expiry_time);
             if (expireTime < currentUtc)
                 return this.SendErrorResponse(res, config.ERROR_CODES.OTP_EXPIRED);
 
-            if (app.phone_info.otp != phoneOtp)
+            if (App.phone_info.otp != phoneOtp)
                 return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_OTP);
 
             var setParams = {
@@ -387,7 +381,6 @@ class AppController extends base_controller {
 
     async GeneratePin(req, res) {
 
-        //       let current_ref= this;
         req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
 
         try {
@@ -396,7 +389,6 @@ class AppController extends base_controller {
             if (!result.isEmpty()) {
                 let error = this.GetErrors(result);
                 return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
-
             }
 
             let body = _.pick(req.body, ['ekyc_id']);
@@ -405,59 +397,50 @@ class AppController extends base_controller {
                 ekyc_id: body.ekyc_id
             }
 
-            app.findOne(conditions, (error, app) => {
+            var App = await app.findOne(conditions);
 
-                if (error) return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, error);
+            if (!App)
+                return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_EKYCID);
 
-                if (!app) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND, error);
+            //Email verification
+            var email = App.email.toLowerCase();
+            var ver_code = common_utility.GenerateOTP(6);
 
-                //Email verification
-                var email = app.email.toLowerCase();
-                var ver_code = common_utility.GenerateOTP(6);
-
-                var template = fs.readFileSync(EMAIL_TEMPLATES_PATH + '/email_varified.html', {
-                    encoding: 'utf-8'
-                });
-
-                var emailBody = ejs.render(template, {
-                    email: email,
-                    kyc_id: ver_code,
-                    APP_LOGO_URL: config.get('APP_LOGO_URL'),
-                    SITE_NAME: config.get('app_name'),
-                    CURRENT_YEAR: config.get('current_year')
-                });
-
-                const subject = 'EvolveChain KYC - Email Code';
-
-                //Mobile Verification
-                var phone = app.phone.replace("+", "");
-                var countryCode = app.country_code.replace("+", "");
-                var msg = 'EvolveChain mobile verification code: ' + ver_code + '.';
-                let toPhone = "+" + countryCode + phone;
-
-                sms_service.SendSMS(toPhone, msg)
-                    .then(message => {
-                        return email_service.SendEmail(email, subject, emailBody);
-                    })
-                    .then((success) => {
-
-                        let md5EmailCode = md5(ver_code);
-                        var setParams = {
-                            $set: {
-                                pin_otp: md5EmailCode
-                            }
-                        }
-                        return this.FindAndModifyQuery(conditions, setParams).exec();
-
-                    })
-                    .then((updatedApp, error) => {
-                        return this.SendResponse("GeneratePin", error, updatedApp, res);
-                    })
-                    .catch((ex) => {
-                        return this.SendExceptionResponse(res, ex);
-                    });
-
+            var template = fs.readFileSync(EMAIL_TEMPLATES_PATH + '/email_varified.html', {
+                encoding: 'utf-8'
             });
+
+            var emailBody = ejs.render(template, {
+                email: email,
+                kyc_id: ver_code,
+                APP_LOGO_URL: config.get('APP_LOGO_URL'),
+                SITE_NAME: config.get('app_name'),
+                CURRENT_YEAR: config.get('current_year')
+            });
+            const subject = 'EvolveChain KYC - Email Code';
+
+            //Mobile Verification
+            var phone = App.phone.replace("+", "");
+            var countryCode = App.country_code.replace("+", "");
+            var msg = 'EvolveChain mobile verification code: ' + ver_code + '.';
+            let toPhone = "+" + countryCode + phone;
+
+
+            var emailSuccess = await email_service.SendEmail(email, subject, emailBody);
+            let smsResult = await sms_service.SendSMS(toPhone, msg);
+
+            let md5EmailCode = md5(ver_code);
+            var setParams = {
+                $set: {
+                    pin_otp: md5EmailCode
+                }
+            }
+
+            var updatedApp = await this.FindAndModifyQuery(conditions, setParams);
+
+            if (!updatedApp) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
+
+            return this.GetSuccessResponse("GeneratePin", updatedApp, res);
 
         } catch (ex) {
             return this.SendExceptionResponse(res, ex);
@@ -494,11 +477,11 @@ class AppController extends base_controller {
                 }
             }
 
-            this.FindAndModifyQuery(conditions, setParams).exec(
-                (error, updatedApp) => {
-                    return this.SendResponse("SetPin", error, updatedApp, res);
-                }
-            );
+            var updatedApp = await this.FindAndModifyQuery(conditions, setParams);
+
+            if (!updatedApp) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
+
+            return this.GetSuccessResponse("SetPin", updatedApp, res);
 
         } catch (ex) {
             return this.SendExceptionResponse(res, ex);
@@ -534,11 +517,11 @@ class AppController extends base_controller {
                 pin: body.new_pin,
             }
 
-            this.FindAndModifyQuery(conditions, setParams).exec(
-                (error, updatedApp) => {
-                    return this.SendResponse("ChangePin", error, updatedApp, res);
-                }
-            );
+            var updatedApp = await this.FindAndModifyQuery(conditions, setParams);
+
+            if (!updatedApp) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
+            
+            return this.GetSuccessResponse("ChangePin", updatedApp, res);
 
         } catch (ex) {
             return this.SendExceptionResponse(res, ex);
@@ -565,16 +548,12 @@ class AppController extends base_controller {
                 vendor_uuid: body.vendor_uuid
             }
 
-            //        var appData = await APP.findOne(conditions).exec();
             var appData = await app.findOne(conditions);
 
             if (!appData) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
 
             if (appData.ekyc_id == undefined || appData.ekyc_id == null) {
-                return res.status(status.OK).jsonp({
-                    "success": 0,
-                    "error": "Ekyc Id for this device does not exist!"
-                });
+                return this.SendErrorResponse(res, config.ERROR_CODES.DEVICE_EKYCID_NOT_FOUND);
             }
 
             return this.GetSuccessResponse("GetEkycId", appData, res);
@@ -606,40 +585,36 @@ class AppController extends base_controller {
                 ekyc_id: body.ekyc_id,
             }
 
-            app.findOne(conditions, (error, app) => {
+            var App = await app.findOne(conditions);
 
-                if (error) {
-                    return this.SendErrorResponse(res, config.ERROR_CODES.ERROR);
-                }
-                if (!app) {
-                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_EKYCID);
-                }
-                if (app.vendor_uuid != body.vendor_uuid) {
-                    return this.SendErrorResponse(res, config.ERROR_CODES.DEVICE_MISMATCH);
-                }
-                if (app.pin != body.pin) {
-                    return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_PIN);
-                }
-                var params = {
-                    $set: { last_login_time: Date.now() }
-                }
-                app.update({
-                    _id: app._id
-                }, params).then((success) => {
-                    var con = {
-                        app_key: app.key
-                    }
-                    kyc_document.findOne(con, (error, docData) => {
-                        if (error) return this.SendErrorResponse(res, config.ERROR_CODES.ERROR);
+            if (!App){
+                return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_EKYCID);
+            }
+            if (App.vendor_uuid != body.vendor_uuid) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.DEVICE_MISMATCH);
+            }
+            if (App.pin != body.pin) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_PIN);
+            }
 
-                        if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
+            var cond = {
+                _id: App._id
+            }
+            var params = {
+                $set: { last_login_time: Date.now() }
+            }
 
-                        return this.GetSuccessLoginResponse(app, docData, res);
+            await app.update(cond, params);
 
-                    })
+            var con = {
+                app_key: App.key
+            }
 
-                })
-            });
+            var docData = await kyc_document.findOne(con);
+
+            if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
+
+            return this.GetSuccessLoginResponse(App, docData, res);
 
         } catch (ex) {
             return this.SendExceptionResponse(res, ex);
