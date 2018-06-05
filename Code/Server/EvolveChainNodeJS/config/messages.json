@@ -147,6 +147,7 @@
         "E14": "OTP has expired, please resend OTP",
         "E15": "Basic documents missing",
         "E16": "Identity documents missing",
-        "E17": "Address documents missing"
+        "E17": "Address documents missing",
+        "E18": "Ekyc Id for this device does not exist!"
     }
 }
