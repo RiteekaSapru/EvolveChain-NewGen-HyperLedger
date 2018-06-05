@@ -1,7 +1,7 @@
 {
     "COUNTRIES": [
-        { "NAME":"India", "PHONE_CODE":"91" },
-        { "NAME":"NorthAmerica", "PHONE_CODE":"1" }
+        { "NAME":"India", "PHONE_CODE":"91", "PHONE_FORMAT":"9999999999" },
+        { "NAME":"NorthAmerica", "PHONE_CODE":"1", "PHONE_FORMAT":"999-999-9999" }
     ],
     "AGE_LIMIT": {
         "MIN": "11",

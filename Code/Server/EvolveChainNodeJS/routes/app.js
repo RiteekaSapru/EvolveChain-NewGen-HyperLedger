@@ -10,7 +10,7 @@ function keyMiddleware(req, res, next) {
     } 
     next();
   }
-  
+//   app.get("/Test", AppController.Test.bind(AppController));
 app.post("/initialize", AppController.Initialize.bind(AppController));
 app.post("/resubmitInitialize", AppController.ResubmitInitialize.bind(AppController));
 

@@ -25,11 +25,6 @@ const App = new Schema({
     Server: { type: String },
     vendor_uuid: { type: String },
 
-   
-    // email_code: { type: String },
-    // email_verified: { type: Boolean },
-    // email_code_expire_time: { type: Date },
-
     isdelete: { type: String },
     key: { type: String },
     name: { type: String },

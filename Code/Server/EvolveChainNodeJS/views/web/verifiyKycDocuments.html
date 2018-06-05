@@ -40,14 +40,16 @@
                         <hr>
                         <div class="row">
                             <div class="col-sm-12">
-                                <h5 class="alert header"> Basic
-                                    <span class="float-right"></span>
-                                </h5>
+
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-6">
-                                <table>
+                                <h5 class="alert header"> Basic
+                                    <span class="float-right"></span>
+                                </h5>
+
+                                <table class="table">
                                     <% for(let j = 0; j < kycData.BasicInfo.DocDetails.length; j++) { %>
                                         <tr>
                                             <td>
@@ -61,7 +63,10 @@
                                 </table>
                             </div>
                             <div class="col-sm-6">
-                                <table>
+                                <h5 class="alert header"> Face
+                                    <span class="float-right"></span>
+                                </h5>
+                                <table class="table">
                                     <tr>
                                         <% for(let k = 0; k <  kycData.BasicInfo.DocImages.length; k++) { %>
 
@@ -139,16 +144,22 @@
                 </div>
 
                 <hr>
+
+                <label>
+                    <input value="Reason1 full fgg" type="checkbox" name="ck"> Reason 1</label>
+                <label>
+                    <input value="Reason2 gg gjgjs" type="checkbox" name="ck"> Reason 2</label>
+                <label>
+                    <input value="Reason3" type="checkbox" name="ck"> Reason 3</label>
+                <label>
+                    <input value="Reason4" type="checkbox" name="ck"> Reason 4</label>
                 <input type="text" value="<%=kycData.verification_comment%>" class="form-control input-lg" placeholder="Comments" name="textBoxComment"
                 />
                 <hr>
                 <% if(!kycData.is_verified) {%>
-                    <label class="btn btn-success">
-                        <input value="1" type="radio" name="radioButtonVerify"> Verify</label>
-                    <label class="btn btn-danger">
-                        <input value="0" type="radio" name="radioButtonVerify"> Reject</label>
-                    <hr>
-                    <input type="submit" value="Submit" class="btn btn-primary">
+                <input value="Verify" type="submit" name="action" class="btn btn-success">
+
+                <input value="Reject" type="submit" name="action" class="btn btn-danger">
                     <%}%>
             </div>
 

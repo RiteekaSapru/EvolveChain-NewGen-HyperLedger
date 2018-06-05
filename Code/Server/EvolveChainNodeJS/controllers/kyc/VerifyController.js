@@ -79,7 +79,8 @@ class VerifyController extends BaseController {
             }
 
             userEmailId = appData.email;
-            let isVerified = (req.body.radioButtonVerify == "0" ? 0 : 1);
+            var action = req.body.action;
+            let isVerified = (action.toUpperCase() == "VERIFY");
 
             let basicDetails = appData.kycdoc_data.basic_info.details;
             

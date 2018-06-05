@@ -44,10 +44,10 @@ class CommonUtility {
         switch (document_type) { //set to UPPER case
             case 'BASIC':
                 metaDataInfo = {
-                    'firstname': 'First Name', 'lastname': 'Last Name', 'middlename': 'Middle Name',
-                    'dob': 'Date Of Birth',
-                    'city': 'City', 'address1': 'Address 1', 'address2': 'Address 2',
-                    'place_of_birth': 'Birth Place', 'zip': 'Zip', 'state': 'State', 'country': 'Country'
+                    'firstname': 'First Name', 'middlename': 'Middle Name','lastname': 'Last Name', 
+                    'dob': 'Date Of Birth', 'place_of_birth': 'Birth Place',
+                    'address1': 'Address 1', 'address2': 'Address 2', 'city': 'City',
+                    'zip': 'Zip', 'state': 'State', 'country': 'Country'
                 };
                 break;
             case 'IDENTITY':
