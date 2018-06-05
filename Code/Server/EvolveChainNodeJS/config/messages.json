@@ -144,6 +144,9 @@
         "E11": "Please enter the correct details",
         "E12": "Phone number or email missing",
         "E13": "Please enter correct phone details",
-        "E14": "OTP has expired, please resend OTP"
+        "E14": "OTP has expired, please resend OTP",
+        "E15": "Basic documents missing",
+        "E16": "Identity documents missing",
+        "E17": "Address documents missing"
     }
 }

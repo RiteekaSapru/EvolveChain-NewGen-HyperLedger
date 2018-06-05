@@ -797,7 +797,6 @@ async SubmitKycDocument(req, res) {
 
             if (!result.isEmpty()) {
                 let error = kycController.GetErrors(result);
-                logManager.Log(`SubmitKycDocument:Error - ${error}`);
                 return kycController.GetErrorResponse(error, res);
             }
 
@@ -807,33 +806,46 @@ async SubmitKycDocument(req, res) {
                 app_key : body.app_key
             }
 
-            KYCDocument.findOne(conditions,(error, docData) =>{
 
-                if (error) {
-                    logManager.Log(`SubmitKycDocument:Error - ${error}`);
-                    error = `Error :: ${error}`;
-                    return kycController.GetErrorResponse(error, res);
-                }
-                if (!docData) return kycController.GetErrorResponse(messages.invalid_app_key, res);
+            var docData = await KYCDocument.findOne(conditions);
+
+                if (!docData)
+                return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_KEY);
 
                 if (docData.basic_info.details == undefined || docData.basic_info.details == null || docData.basic_info.details.document_type == undefined)
-                {    return res.status(status.OK).jsonp({
-                    "success": 0,
-                    "error": "Basic documents missing"
-                    });
-                }
+                    return this.SendErrorResponse(res, config.ERROR_CODES.BASIC_DOCS_MISSING);
+
                 if (docData.identity_info.details == undefined || docData.identity_info.details == null||docData.identity_info.details.document_type == undefined)
-                {    return res.status(status.OK).jsonp({
-                    "success": 0,
-                    "error": "Identity documents missing"
-                    });
-                }
+                    return this.SendErrorResponse(res, config.ERROR_CODES.IDENTITY_DOCS_MISSING);
+
                 if (docData.address_info.details == undefined || docData.address_info.details == null||docData.address_info.details.document_type == undefined)
-                {    return res.status(status.OK).jsonp({
-                    "success": 0,
-                    "error": "Address documents missing"
-                    });
-                }
+                    return this.SendErrorResponse(res, config.ERROR_CODES.ADDRESS_DOCS_MISSING);
+
+
+
+                var basic_images_id = docData.basic_info.images.map(x => x._id.toString());
+                var address_images_id = docData.address_info.images.map(x => x._id.toString());
+                var identity_images_id = docData.identity_info.images.map(x => x._id.toString());
+
+                var result_basic = await File.find(
+                        { "key" : {$in : basic_images_id }}, 
+                        { "key": 1}
+                );
+                if ((basic_images_id.length!==result_basic.length)) return kycController.GetErrorResponse(messages.file_not_found, res);
+
+                var result_address = await File.find(
+                    { "key" : {$in : address_images_id }}, 
+                    { "key": 1}
+                );
+                if ((address_images_id.length!==result_address.length)) return kycController.GetErrorResponse(messages.file_not_found, res);
+
+                var result_identity = await File.find(
+                    { "key" : {$in : identity_images_id }}, 
+                    { "key": 1}
+                );
+                if ((identity_images_id.length!==result_identity.length)) return kycController.GetErrorResponse(messages.file_not_found, res);
+
+
 
                 //link send through email 
                 var template = fs.readFileSync(EmailTemplatesPath + '/verifyKycRequest.html', {
@@ -851,19 +863,20 @@ async SubmitKycDocument(req, res) {
 
                 const subject = 'EvolveChain KYC - Verification Request';
 
-                emailService.SendEmail(toEmailIds, subject, emailBody).then(function (success) {
-                    var response = {
-                        'success': 1,
-                        'now': Date.now(),
-                        'result' : "Email sent to the admin for verification!"
-                    }
-                    return res.status(status.OK).jsonp(response);
+                // emailService.SendEmail(toEmailIds, subject, emailBody).then(function (success) {
+                //     var response = {
+                //         'success': 1,
+                //         'now': Date.now(),
+                //         'result' : "Email sent to the admin for verification!"
+                //     }
+                //     return res.status(status.OK).jsonp(response);
 
-                }).catch(function (e) {
-                    let error = `Error :: ${e}`;
-                    return this.GetErrorResponse(error, res);
-                });
+                // }).catch(function (e) {
+                //     let error = `Error :: ${e}`;
+                //     return this.GetErrorResponse(error, res);
+                // });
 
+                var emailSuccess = await emailService.SendEmail(toEmailIds, subject, emailBody);
 
                 var appConditions = {
                     key: docData.app_key
@@ -871,18 +884,13 @@ async SubmitKycDocument(req, res) {
                 var params = {
                     status: config.APP_STATUSES.IN_PROCESS
                 }
-                this.updateApp(appConditions, params, function (response) {
-                    if (response.error == true) {
-                        return res.status(status.OK).jsonp({
-                            "success": 0,
-                            "error": messages.something_wentwrong
-                        });
-                    }
-                });
-            })
-        } catch (e) {
-            let error = `Error :: ${e}`;
-            return this.GetErrorResponse(error, res);
+
+                await this.updateApp(appConditions, params);
+
+                return this.GetSuccessResponse("SubmitKycDocument", docData, res);
+
+        } catch (ex) {
+            return this.SendExceptionResponse(res, ex);
         }
     }
 
