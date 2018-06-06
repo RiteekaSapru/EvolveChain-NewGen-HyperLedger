@@ -37,5 +37,9 @@
         "NotAcceptable": 406,
         "Unauthorized": 401,
         "Forbidden": 403
+    },
+    "VERIFICATION_REASON": {
+        "DM": "Data mismatch",
+        "BI": "Blurred images : Images not clear"
     }
 }

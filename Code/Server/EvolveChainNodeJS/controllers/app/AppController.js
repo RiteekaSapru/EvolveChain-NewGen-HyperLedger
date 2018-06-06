@@ -60,8 +60,8 @@ class AppController extends base_controller {
 
             common_utility.RemoveNull(params); // remove blank value from array
 
-            var app = new app(params);
-            var newApp = await app.save();
+            var App = new app(params);
+            var newApp = await App.save();
 
             var kycDocParam = {
                 app_key: newApp.key,
