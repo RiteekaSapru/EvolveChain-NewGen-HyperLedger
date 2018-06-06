@@ -14,6 +14,7 @@ const log_manager = require('../../helpers/LogManager');
 const base_controller = require('../BaseController');
 
 const app = require('../../models/apps');
+
 const kyc_document = require('../../models/kycdocument');
 
 const PUBLIC_PATH = config.get('PUBLIC_PATH');
@@ -29,6 +30,7 @@ class AppController extends base_controller {
         req.checkBody("device_name", messages.req_device_name).notEmpty();
         req.checkBody("os_version", messages.req_os_version).notEmpty();
         req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
+        req.checkBody("country_iso", messages.req_vendor_uuid).notEmpty();
 
         try {
 
@@ -39,11 +41,11 @@ class AppController extends base_controller {
                 return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
             }
 
-            let body = _.pick(req.body, ['ip', 'device_type', 'device_name', 'os_version', 'vendor_uuid']);
+            let body = _.pick(req.body, ['ip', 'device_type', 'device_name', 'os_version', 'vendor_uuid', 'country_iso']);
 
             body.key = common_utility.GenerateUniqueToken();
-            body.SERVER_ADDR = md5(req.connection.localAddress);
-            body.REMOTE_ADDR = md5(req.connection.remoteAddress);
+            body.SERVER_ADDR = req.connection.localAddress;
+            body.REMOTE_ADDR = req.connection.remoteAddress;
 
             var params = {
                 IP: body.ip,
@@ -55,10 +57,16 @@ class AppController extends base_controller {
                 isdelete: '0',
                 Server: body.SERVER_ADDR,
                 Refer: body.REMOTE_ADDR,
-                status: config.APP_STATUSES.PENDING
+                status: config.APP_STATUSES.PENDING,
+                country_iso: body.country_iso
             }
 
             common_utility.RemoveNull(params); // remove blank value from array
+
+            //Temp work : need to fetch from Database later
+            var documentList = config.init_config.DOCUMENT_LIST;
+            var iso = body.country_iso.toUpperCase();
+            const countrydocs = documentList.find(c => c.country_iso.findIndex(d=>d==iso) >-1).documents;
 
             var App = new app(params);
             var newApp = await App.save();
@@ -69,8 +77,11 @@ class AppController extends base_controller {
                 last_modified: common_utility.UtcNow()
             }
 
+         
             var kycDoc = new kyc_document(kycDocParam);
             var newKycDoc = await kycDoc.save();
+            newApp.documents = countrydocs
+
             return this.GetSuccessResponse("Initialize", newApp, res);
 
         } catch (ex) {
@@ -368,7 +379,7 @@ class AppController extends base_controller {
                 return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_OTP);
 
             var setParams = {
-                $set: { phone: mobilenumber, country_code:phoneCountryCode }
+                $set: { phone: mobilenumber, country_code: phoneCountryCode }
             }
 
             await app.update(conditions, setParams);
@@ -520,7 +531,7 @@ class AppController extends base_controller {
             var updatedApp = await this.FindAndModifyQuery(conditions, setParams);
 
             if (!updatedApp) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
-            
+
             return this.GetSuccessResponse("ChangePin", updatedApp, res);
 
         } catch (ex) {
@@ -587,7 +598,7 @@ class AppController extends base_controller {
 
             var App = await app.findOne(conditions);
 
-            if (!App){
+            if (!App) {
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_EKYCID);
             }
             if (App.vendor_uuid != body.vendor_uuid) {
@@ -651,7 +662,8 @@ class AppController extends base_controller {
                     'ip': appEntity.IP,
                     'Server': appEntity.Server,
                     'Refer': appEntity.Refer,
-                    'init_config': config.get('init_config')
+                    'documents': appEntity.documents
+                    // 'init_config': config.get('init_config')
                 };
                 break;
             case "GeneratePin":

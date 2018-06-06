@@ -1,17 +1,80 @@
 {
     "COUNTRIES": [
-        { "NAME":"India", "PHONE_CODE":"91", "PHONE_FORMAT":"9999999999" },
-        { "NAME":"NorthAmerica", "PHONE_CODE":"1", "PHONE_FORMAT":"999-999-9999" }
+        {
+            "ISO": "IN",
+            "NAME": "India",
+            "PHONE_CODE": "91",
+            "PHONE_FORMAT": "9999999999"
+        },
+        {
+            "ISO": "US",
+            "NAME": "USA",
+            "PHONE_CODE": "1",
+            "PHONE_FORMAT": "999-999-9999"
+        },
+        {
+            "ISO": "CA",
+            "NAME": "CANADA",
+            "PHONE_CODE": "1",
+            "PHONE_FORMAT": "999-999-9999"
+        }
     ],
     "AGE_LIMIT": {
         "MIN": "11",
         "MAX": "90"
     },
     "USA_UTILITY_BILL_TYPE": [
-       {"CODE": "ELECTRICITY_BILL", "NAME": "Electricity Bill"},
-       {"CODE": "MOBILE_BILL", "NAME": "Mobile Bill"},
-       {"CODE": "INTERNET_BILL", "NAME": "Internet Bill"},
-       {"CODE": "OTHER", "NAME": "OTHER"}
+        {
+            "CODE": "ELECTRICITY_BILL",
+            "NAME": "Electricity Bill"
+        },
+        {
+            "CODE": "MOBILE_BILL",
+            "NAME": "Mobile Bill"
+        },
+        {
+            "CODE": "INTERNET_BILL",
+            "NAME": "Internet Bill"
+        },
+        {
+            "CODE": "OTHER",
+            "NAME": "OTHER"
+        }
     ],
-    "DATE_FORMAT": "yyyy-MM-dd"
+    "DATE_FORMAT": "yyyy-MM-dd",
+    "DOCUMENT_LIST": [
+        {
+            "country_iso": ["IN", "US", "CA"],
+            "documents": [
+                {
+                    "name": "Passport",
+                    "code": "PP",
+                    "type": "B",
+                    "expiry_date": true,
+                    "sub_docs": []
+                },
+                {
+                    "name": "Utility Bills",
+                    "code": "UB",
+                    "type": "A",
+                    "expiry_date": false,
+                    "sub_docs": [
+                        {
+                            "code": "UB_EB",
+                            "name": "Electricity Bill"
+                        },
+                        {
+                            "code": "UB_MB",
+                            "name": "Mobile Bill"
+                        },
+                        {
+                            "code": "UB_IB",
+                            "name": "Internet Bill"
+                        }
+                    ]
+                }
+            ]
+        }
+       
+    ]
 }
