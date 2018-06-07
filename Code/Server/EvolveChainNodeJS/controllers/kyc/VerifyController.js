@@ -38,12 +38,27 @@ class VerifyController extends BaseController {
             }
 
             //Get exisitng reasons 
-            let appReasons = [];   //docData.app_data.verification_reasons
+            let appReasons = docData.app_data.verification_reasons;
             let reasonList = await VerificationReasons.find();
-            //update reason array with state = checked
-            // reasonList[4].state = 1;
-            // reasonList[1].state = true;
-            // reasonList[2].state = 0;
+
+
+            for (var j = 0; j < appReasons.length; j++) {
+                for (var i = 0; i < reasonList.length; i++)
+                {
+                    if(appReasons[j]==reasonList[i].code)
+                        {
+                            var conditions = {
+                                code: appReasons[j]
+                            }
+                            var setParams = {
+                                $set: { state: true}
+                            }
+                            await VerificationReasons.update(conditions, setParams);
+                        }
+                }
+            }
+
+        reasonList = await VerificationReasons.find();
 
             let isVerified = (docData.app_data.status == config.APP_STATUSES.VERIFIED);
             let kycData = {
