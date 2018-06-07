@@ -34,6 +34,7 @@ public class PostTask extends AsyncTask<Void, Void, String> {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
+            conn.setConnectTimeout(10000);
             conn.connect();
 
             byte[] bodyBytes = bodyData.getBytes("UTF-8");
@@ -52,7 +53,7 @@ public class PostTask extends AsyncTask<Void, Void, String> {
         }
         catch (Exception e) {
             e.printStackTrace();
-             result = "Error";
+             result = e.toString();
         }
 
         return result;

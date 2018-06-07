@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context="com.newgen.evolvechain.activities.OTPActivity">
+    android:background="@drawable/splash_background"
+    tools:context=".uis.activities.OTPActivity">
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/edit_text_otp_wrapper"

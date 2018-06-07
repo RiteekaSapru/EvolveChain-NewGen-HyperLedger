@@ -1,5 +1,4 @@
 const config = require('config');
-var im = require('imagemagick');
 const messages = config.get('messages');
 var dateFormat = require('dateformat');
 const md5 = require('md5');
@@ -9,12 +8,17 @@ class CommonUtility {
     NowDate() {
         return dateFormat(new Date(), "isoUtcDateTime");
     }
+
     UtcNow() {
         return dateFormat(new Date(), "isoUtcDateTime");
     }
-    AddMinutesToUtcNow(minutes)
-    {
-        var newDate = new Date(Date.now() + minutes * 60000);        
+
+    ConvertToUtc(localDate) {
+        return dateFormat(localDate, "isoUtcDateTime");
+    }
+
+    AddMinutesToUtcNow(minutes) {
+        var newDate = new Date(Date.now() + minutes * 60000);
         return dateFormat(newDate, "isoUtcDateTime");
     }
 
@@ -28,7 +32,6 @@ class CommonUtility {
     }
 
     RemoveNull(obj) {
-        console.log(obj);
         for (var propName in obj) {
             if (obj[propName] === null || obj[propName] === undefined || obj[propName] === '') {
                 delete obj[propName];
@@ -36,82 +39,130 @@ class CommonUtility {
         }
     }
 
-    // common for image resize
-    async ImageResize(source, destination, width, callback) {
-        let response = {
-            'error': true,
-            'data': [],
-            'message': messages.something_wentwrong,
-        }
-        im.resize({
-            srcPath: source,
-            dstPath: destination,
-            width: width
-        }, function (error, stdout, stderr) {
-            if (error) {
-                let err = `Error :: ${error}`;
-                response.message = err;
-            } else {
-                response.error = false;
-                response.message = messages.resize_image;
-                response.data = destination;
-            }
-            console.log(response);
-            callback(response);
-        });
-    }
-
     GetKycDocumentMetaDataInfo(document_type) {
         var metaDataInfo;
         switch (document_type) { //set to UPPER case
             case 'BASIC':
-                metaDataInfo = { 'firstname': 'First Name', 'lastname': 'Last Name', 'middlename': 'Middle Name', 
-                                'dob': 'Date Of Birth',
-                                'city': 'City', 'address1':'Address 1', 'address2':'Address 2',
-                                'place_of_birth': 'Birth Place', 'zip': 'Zip', 'state':'State', 'country': 'Country' };
+                metaDataInfo = {
+                    'firstname': 'First Name', 'middlename': 'Middle Name','lastname': 'Last Name', 
+                    'dob': 'Date Of Birth', 'place_of_birth': 'Birth Place',
+                    'address1': 'Address 1', 'address2': 'Address 2', 'city': 'City',
+                    'zip': 'Zip', 'state': 'State'
+                };
                 break;
             case 'IDENTITY':
             case 'ADDRESS':
-                metaDataInfo = { 'document_type':'Title', 'number': 'Number', 'expiry_date': 'Expiry Date', 'country': 'Country' };
-                break;            
+                metaDataInfo = { 'document_type': 'Title', 'number': 'Number', 'expiry_date': 'Expiry Date'};
+                break;
         }
         return metaDataInfo;
     }
 
-    GenerateUniqueToken()
-    {
-         var token = md5(Date.now());
-         return token;
+    GenerateUniqueToken() {
+        var token = md5(Date.now());
+        return token;
     }
 
-    GenerateOTP(noOfDigits)
-    {
-            // Authenticator
-          var secret = authenticator.generateKey();
-          secret = secret.replace(/\W/g, '').toLowerCase();
-          var otpToken = authenticator.generateToken(secret);          
-          var code = otpToken.substring(0, noOfDigits);
-          return code;
+    GenerateOTP(noOfDigits) {
+        // Authenticator
+        var secret = authenticator.generateKey();
+        secret = secret.replace(/\W/g, '').toLowerCase();
+        var otpToken = authenticator.generateToken(secret);
+        var code = otpToken.substring(0, noOfDigits);
+        return code;
     }
 
-    GenerateKYCId()
-    {
-        var secret1 = authenticator.generateKey();
-        secret1 = secret1.replace(/\W/g, '').toLowerCase();
-        var secret1_code = authenticator.generateToken(secret1);
+    GenerateKYCId(countryISO, firstName) {
+        var secretKey1 = authenticator.generateKey();
+        secretKey1 = secretKey1.replace(/\W/g, '').toLowerCase();
+        var secret1_code = authenticator.generateToken(secretKey1);
 
-        var secret2 = authenticator.generateKey();
-        secret2 = secret2.replace(/\W/g, '').toLowerCase();
-        var secret2_code = authenticator.generateToken(secret2);
+        var secretKey2 = authenticator.generateKey();
+        secretKey2 = secretKey2.replace(/\W/g, '').toLowerCase();
+        var secret2_code = authenticator.generateToken(secretKey2);
 
-        var secret3 = authenticator.generateKey();
-        secret3 = secret3.replace(/\W/g, '').toLowerCase();
-        var secret3_code = authenticator.generateToken(secret3);
+        let secretCode = secret1_code + secret2_code;
 
-        var kycId = secret1_code + '-' + secret2_code + '-' + secret3_code;
-        return kycId;
+        // var countryISO = this.GetCountryISO(country);
+
+        var kycId = countryISO.substring(0, 2) + firstName.substring(0, 1) + '-' + secretCode.substring(0, 4) + '-' + secretCode.substring(4, 8) + '-' + secretCode.substring(8, 12);
+
+        return kycId.toUpperCase();
     }
 
+    GetCountryISO(countryName) {
+        var iso = "EC";
+        const countryList = require('../config/countries');
+
+        const country = countryList.find(c => c.Country.toUpperCase() === countryName.toUpperCase());
+        if (country)
+            iso = country.ISO;
+
+        return iso;
+
+    }
+
+    GetAppBaseUrl(req) {
+        return req.protocol + '://' + req.get('host');
+    }
+
+    GetKycImages(docInfo, docType) {
+        let summaryInfo = {
+            DocImages: []
+        };
+
+        if (docInfo.details != undefined) {
+            let images = docInfo.images;
+
+            for (var j = 0; j < images.length; j++) {
+                let imgUrl = config.base_url + "/kyc/getdocumentimages/" + images[j]._id.toString();
+                summaryInfo.DocImages.push({ 'url': imgUrl });
+            }
+        }
+        return summaryInfo;
+    }
+
+    GetKycDocumentInfo(docInfo, docType) {
+        let summaryInfo = {
+            DocDetails: {},
+            DocImages: []
+        };
+        if (docInfo.details != undefined) {
+            var details = docInfo.details;
+            let images = docInfo.images;
+            summaryInfo.DocDetails = JSON.parse(JSON.stringify(details));
+
+            for (var j = 0; j < images.length; j++) {
+                let imgUrl = config.base_url + "/kyc/getdocumentimages/" + images[j]._id.toString();
+                summaryInfo.DocImages.push({ 'url': imgUrl });
+            }
+        }
+        return summaryInfo;
+    }
+
+    // GetKycDocumentInfo(docInfo, docType) {
+    //     let summaryInfo = {
+    //         DocDetails: [],
+    //         DocImages: []
+    //     };
+
+    //     if (docInfo.details != undefined) {
+    //         var details = docInfo.details;
+    //         let images = docInfo.images;
+
+    //         let metaDataInfo = this.GetKycDocumentMetaDataInfo(docType);
+    //         let detailKeys = Object.keys(details);
+    //         Object.keys(metaDataInfo).forEach(function (key) {
+    //             summaryInfo.DocDetails.push({ 'name': metaDataInfo[key], 'value': details[key] });
+    //         });
+
+    //         for (var j = 0; j < images.length; j++) {
+    //             let imgUrl = config.base_url + "/kyc/getdocumentimages/" + images[j]._id.toString();
+    //             summaryInfo.DocImages.push({ 'url': imgUrl });
+    //         }
+    //     }
+    //     return summaryInfo;
+    // }
 
 
 }

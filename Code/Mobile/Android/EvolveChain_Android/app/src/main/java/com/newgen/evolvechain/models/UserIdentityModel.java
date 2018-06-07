@@ -12,7 +12,7 @@ public class UserIdentityModel {
     public static final int IDENTITY_PASSPORT = 1;
 
     private int type;
-    private String number, expiryDate;
+    private String number, expiryDate, issueCountry;
     private Uri frontImageUri, backImageUri;
 
     public UserIdentityModel(){
@@ -56,5 +56,13 @@ public class UserIdentityModel {
 
     public void setFrontImageUri(Uri frontImageUri) {
         this.frontImageUri = frontImageUri;
+    }
+
+    public void setIssueCountry(String issueCountry) {
+        this.issueCountry = issueCountry;
+    }
+
+    public String getIssueCountry() {
+        return issueCountry;
     }
 }

@@ -30,7 +30,7 @@ const BASE_PATH = config.get('base_path');
 const PUBLIC_PATH = config.get('PUBLIC_PATH');
 var im = require('imagemagick');
 const EmailTemplatesPath = path.join(__dirname + "/../../public/email_template");
-var to = config.get('ver_mail_id');
+//var to = config.get('ver_mail_id');
 
 var bucket;
 mongo.MongoClient.connect(config.get('MONGODB_URL'), function (err, db) {
@@ -553,8 +553,8 @@ class KYCController extends BaseController {
                                 let infoType = body.step + "_info";
 
                                 //Check if it is same step
-                                if (docData[infoType] != undefined && docData[infoType] != null && docData[infoType].details.document_type != undefined)
-                                    return kycController.GetErrorResponse("Uploaded information is already available", res);
+                                // if (docData[infoType] != undefined && docData[infoType] != null && docData[infoType].details.document_type != undefined)
+                                //     return kycController.GetErrorResponse("Uploaded information is already available", res);
 
                                 //if(docData.)
                                 //return kycController.GetErrorResponse("Information for all the uploads is already present", res);
@@ -667,6 +667,7 @@ class KYCController extends BaseController {
                     zip: body.zip,
                     state: body.state,
                     country: body.country,
+                    street : body.street,
                     document_type: "basic"
                 };
                 setParams.basic_info = {};
@@ -780,209 +781,8 @@ class KYCController extends BaseController {
         }
     }
 
-/*    async SubmitKycDocument(req, res) {
-
-        if (_.isUndefined(req.params.key) || req.params.key == '' || req.params.key == null) {
-            return res.status(status.OK).json({ 'success': 0, 'now': Date.now(), 'error': 'Key missing!' });
-        }
-
-        try {
-            // var obj = new KYCController();
-            let key = req.params.key;
-
-            let conditions = {
-                key: key,
-                isdelete: "0"
-            }
-
-            App.findOne(conditions, (error, app) => {
-
-                if (error) {
-                    console.log(`Error :: ${error}`);
-                    error = `Error :: ${error}`;
-                    return res.status(status.OK).json({ 'success': 0, "error": error });
-                }
-
-                if (!app) return res.status(status.OK).jsonp({
-                    "success": 0,
-                    'now': Date.now(),
-                    "error": messages.invalid_key
-                });
-
-                let document_query = {
-                    hash: app.hash
-                }
-
-                Document.findOne(document_query, (error, docData) => {
-
-                    if (error) {
-                        console.log(`Error :: ${error}`);
-                        error = `Error :: ${error}`;
-                        return res.status(status.OK).json({ 'success': 0, "error": error });
-                    }
-
-                    if (!docData) return res.status(status.OK).jsonp({
-                        "success": 0,
-                        'now': Date.now(),
-                        "error": messages.document_not_found
-                    });
-
-                    var kyc = docData.toJSON();
-
-                    var basic = kyc.step.basic.status;
-                    var address = kyc.step.address.status;
-                    var Identity = kyc.step.identity.status;
-                    var taxation = kyc.step.taxation.status;
-                    var holdimg = kyc.step.holdimg.status;
-                    var passport = kyc.step.passport.status;
-                    var drivinglicense = kyc.step.drivinglicense.status;
-
-                    if (basic == '' || address == '' || Identity == '' || taxation == '' || holdimg == '') {
-                        return res.status(status.OK).jsonp({
-                            "success": 0,
-                            'now': Date.now(),
-                            "error": messages.kyc_incompleted
-                        });
-
-                    } else if (basic == 'process' || address == 'process' || Identity == 'process' || taxation == 'process' || holdimg == 'process') {
-                        return res.status(status.OK).jsonp({
-                            "success": 0,
-                            'now': Date.now(),
-                            "error": messages.kyc_process
-                        });
-
-                    } else if (basic == 'reject' || address == 'reject' || Identity == 'reject' || taxation == 'reject' || holdimg == 'reject') {
-                        return res.status(status.OK).jsonp({
-                            "success": 0,
-                            'now': Date.now(),
-                            "error": messages.kyc_reject
-                        });
-
-                    } else if (basic == 'incompleted' || address == 'incompleted' || Identity == 'incompleted' || taxation == 'incompleted' || holdimg == 'incompleted') {
-                        return res.status(status.OK).jsonp({
-                            "success": 0,
-                            'now': Date.now(),
-                            "error": messages.kyc_incompleted_edit
-                        });
-                    } else if (basic == 'approved' && address == 'approved' && Identity == 'approved' && taxation == 'approved' && holdimg == 'approved') {
-                        return res.status(status.OK).jsonp({
-                            "success": 0,
-                            'now': Date.now(),
-                            "error": messages.kyc_approved
-                        });
-                    }
 
 
-                    //send verification code email
-
-                    var template = fs.readFileSync(EmailTemplatesPath + '/kyc_varified.html', {
-                        encoding: 'utf-8'
-                    });
-
-                    var emailBody = ejs.render(template, {
-                        email: app.email,
-                        kyc_id: kyc.kyc_id,
-                        kyc_verify_url: config.get('base_url') + '/verify/index/' + app.key,
-                        hash: app.hash,
-                        SITE_IMAGE: config.get('SITE_IMAGE'),
-                        SITE_NAME: config.get('app_name'),
-                        CURRENT_YEAR: config.get('current_year')
-                    });
-                    var to = [config.get('MAIL_1'), config.get('MAIL_2')];
-                    to = to.toString();
-                    const subject = 'EvolveChain KYC - New Form Submit';
-
-
-                    emailService.SendEmail(to, subject, emailBody).then(function (success) {
-
-                        let params = {};
-                        async.forEachOf(kyc.step, function (step, key, outerCallback) { // for get all steps
-                            if (key == 'issubmit') {
-                                var new_key = 'step.' + key;
-
-                                params[new_key] = 'y'
-                                outerCallback();
-                            }
-                            else {
-                                async.forEachOf(step, function (val, sk, innerCallback) { // for get all sub step
-                                    if (sk == 'status' && val == 'completed') {
-                                        var new_key = 'step.' + key + '.' + sk;
-                                        var new_message = 'step.' + key + '.message';
-
-                                        params[new_key] = 'process';
-                                        params[new_message] = 'In process'
-                                        innerCallback()
-                                    }
-                                    else {
-                                        innerCallback()
-                                    }
-
-                                }, function () {
-                                    outerCallback();
-                                })
-                            }
-
-                        }, function () {
-                            console.log(params);
-
-                            var conditions = { 'hash': kyc.hash };
-
-                            this.updateDocument(conditions, params, function (response) {
-
-                                if (response.error == true) {
-                                    return res.status(status.OK).jsonp({
-                                        "success": 0,
-                                        'now': Date.now(),
-                                        "error": response.message
-                                    });
-                                }
-                                else {
-
-                                    // create wallet
-                                    var REMOTE_ADDR = md5(req.connection.remoteAddress);
-
-                                    var params = {
-                                        'kyc_id': kyc.kyc_id,
-                                        'email': app.email,
-                                        'phone': app.phone,
-                                        'details.Mobile': app.phone,
-                                        'hash': md5(email),
-                                        'secret': kyc.secret,
-                                        'IP': REMOTE_ADDR
-                                    }
-
-                                    var newWallet = new Wallet(params);
-
-                                    newWallet.save().then((lastAddedDoc) => {
-                                        var response = {
-                                            'success': 1,
-                                            'now': Date.now(),
-                                            'result': messages.kyc_submited
-                                        }
-                                        return res.status(status.OK).jsonp(response);
-
-                                    }).catch(function (error) {
-                                        return res.status(status.OK).jsonp({ 'success': 0, "error": error });
-                                    });
-                                }
-                            });
-                        })
-
-                    }).catch(function (e) {
-                        let err = `Error :: ${e}`;
-                        return res.status(status.OK).jsonp({ 'success': 0, "error": err });
-                    });
-
-                })
-            })
-
-        } catch (e) {
-            console.log(`Error :: ${e}`);
-            let err = `Error :: ${e}`;
-            return res.status(status.OK).json({ 'success': 0, "error": err });
-        }
-    }
-*/
 
 
 
@@ -997,7 +797,6 @@ async SubmitKycDocument(req, res) {
 
             if (!result.isEmpty()) {
                 let error = kycController.GetErrors(result);
-                logManager.Log(`SubmitKycDocument:Error - ${error}`);
                 return kycController.GetErrorResponse(error, res);
             }
 
@@ -1007,56 +806,91 @@ async SubmitKycDocument(req, res) {
                 app_key : body.app_key
             }
 
-            KYCDocument.findOne(conditions,(error, docData) =>{
 
-                if (error) {
-                    logManager.Log(`SubmitKycDocument:Error - ${error}`);
-                    error = `Error :: ${error}`;
-                    return kycController.GetErrorResponse(error, res);
-                }
-                if (!docData) return kycController.GetErrorResponse(messages.invalid_app_key, res);
+            var docData = await KYCDocument.findOne(conditions);
+
+                if (!docData)
+                return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_KEY);
 
                 if (docData.basic_info.details == undefined || docData.basic_info.details == null || docData.basic_info.details.document_type == undefined)
-                {    return res.status(status.OK).jsonp({
-                    "success": 0,
-                    "error": "Documents missing or incorrect"
-                    });
-                }
+                    return this.SendErrorResponse(res, config.ERROR_CODES.BASIC_DOCS_MISSING);
+
+                if (docData.identity_info.details == undefined || docData.identity_info.details == null||docData.identity_info.details.document_type == undefined)
+                    return this.SendErrorResponse(res, config.ERROR_CODES.IDENTITY_DOCS_MISSING);
+
+                if (docData.address_info.details == undefined || docData.address_info.details == null||docData.address_info.details.document_type == undefined)
+                    return this.SendErrorResponse(res, config.ERROR_CODES.ADDRESS_DOCS_MISSING);
+
+
+
+                var basic_images_id = docData.basic_info.images.map(x => x._id.toString());
+                var address_images_id = docData.address_info.images.map(x => x._id.toString());
+                var identity_images_id = docData.identity_info.images.map(x => x._id.toString());
+
+                var result_basic = await File.find(
+                        { "key" : {$in : basic_images_id }}, 
+                        { "key": 1}
+                );
+                if ((basic_images_id.length!==result_basic.length)) return kycController.GetErrorResponse(messages.file_not_found, res);
+
+                var result_address = await File.find(
+                    { "key" : {$in : address_images_id }}, 
+                    { "key": 1}
+                );
+                if ((address_images_id.length!==result_address.length)) return kycController.GetErrorResponse(messages.file_not_found, res);
+
+                var result_identity = await File.find(
+                    { "key" : {$in : identity_images_id }}, 
+                    { "key": 1}
+                );
+                if ((identity_images_id.length!==result_identity.length)) return kycController.GetErrorResponse(messages.file_not_found, res);
+
+
 
                 //link send through email 
-                var template = fs.readFileSync(EmailTemplatesPath + '/kyc_varified.html', {
+                var template = fs.readFileSync(EmailTemplatesPath + '/verifyKycRequest.html', {
                     encoding: 'utf-8'
                 });
 
-                to = to.toString();
-
+                // to = to.toString();
+                let toEmailIds= config.APPROVER_EMAIL_IDS;
                 var emailBody = ejs.render(template, {
                     kyc_verify_url: config.get('base_url')+"/verify/"+ docData.app_key,
-//                        hash: docData.app_key,
-                    SITE_IMAGE: config.get('SITE_IMAGE'),
+                    APP_LOGO_URL: config.get('APP_LOGO_URL'),
                     SITE_NAME: config.get('app_name'),
                     CURRENT_YEAR: config.get('current_year')
                 });
 
-                const subject = 'EvolveChain KYC - Verification Link';
+                const subject = 'EvolveChain KYC - Verification Request';
 
-                emailService.SendEmail(to, subject, emailBody).then(function (success) {
-                    var response = {
-                        'success': 1,
-                        'now': Date.now(),
-                        'result' : "Email sent to the admin for verification!"
-                    }
-                    return res.status(status.OK).jsonp(response);
+                // emailService.SendEmail(toEmailIds, subject, emailBody).then(function (success) {
+                //     var response = {
+                //         'success': 1,
+                //         'now': Date.now(),
+                //         'result' : "Email sent to the admin for verification!"
+                //     }
+                //     return res.status(status.OK).jsonp(response);
 
-                }).catch(function (e) {
-                    let error = `Error :: ${e}`;
-                    return this.GetErrorResponse(error, res);
-                });
+                // }).catch(function (e) {
+                //     let error = `Error :: ${e}`;
+                //     return this.GetErrorResponse(error, res);
+                // });
 
-            })
-        } catch (e) {
-            let error = `Error :: ${e}`;
-            return this.GetErrorResponse(error, res);
+                var emailSuccess = await emailService.SendEmail(toEmailIds, subject, emailBody);
+
+                var appConditions = {
+                    key: docData.app_key
+                }
+                var params = {
+                    status: config.APP_STATUSES.IN_PROCESS
+                }
+
+                await this.updateApp(appConditions, params);
+
+                return this.GetSuccessResponse("SubmitKycDocument", docData, res);
+
+        } catch (ex) {
+            return this.SendExceptionResponse(res, ex);
         }
     }
 

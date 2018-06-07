@@ -5,21 +5,27 @@
         "VERIFIED": "Verified",
         "REJECTED": "Rejected"
     },
-    "USA_UTILITY_BILL_TYPE": {
-        "ELECTRICITY_BILL": "Electricity Bill",
-        "MOBILE_BILL": "Mobile Bill",
-        "INTERNET_BILL": "Internet Bill",
-        "OTHER": "Other"
-    },
     "ERROR_CODE": {
         "ERROR": "E00",
+        "EXCEPTION": "E100",  
         "DEVICE_MISMATCH": "E01",
         "INCORRECT_PIN": "E02",
         "INCORRECT_OTP": "E03",
         "INCORRECT_KEY": "E04",
         "INCORRECT_EKYCID": "E05",
         "INVALID_REQUEST": "E06",
-        "APP_NOT_FOUND": "E10"
+        "APP_NOT_FOUND": "E07",
+        "DOCUMENT_NOT_FOUND": "E08",
+        "SAME_PIN":"E09",
+        "INCORRECT_EMAIL": "E10",
+        "INCORRECT_DETAILS": "E11",
+        "MISSING_PHONE_EMAIL": "E12",
+        "INCORRECT_PHONE": "E13",
+        "OTP_EXPIRED":"E14",
+        "BASIC_DOCS_MISSING": "E15",
+        "IDENTITY_DOCS_MISSING":"E16",
+        "ADDRESS_DOCS_MISSING":"E17",
+        "DEVICE_EKYCID_NOT_FOUND": "E18"
     },
     "HTTP_STATUS":{
         "OK": 200,
@@ -31,5 +37,9 @@
         "NotAcceptable": 406,
         "Unauthorized": 401,
         "Forbidden": 403
+    },
+    "VERIFICATION_REASON": {
+        "DM": "Data mismatch",
+        "BI": "Blurred images : Images not clear"
     }
 }

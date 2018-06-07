@@ -3,10 +3,11 @@
  * KYC Document model schema
  *
  */
-
+'use strict'
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const config = require('config');
+const commonUtility = require('../helpers/CommonUtility');
 
 const ImageInfo = new Schema({
     name: String,
@@ -33,6 +34,7 @@ const GeneralDocument = new Schema({
 
 const KYCDocument = new Schema({
     app_key: { type: String },
+   // app_data:{ type: String, field:'key', ref:'apps' },
     isDelete: { type: Boolean },
     //docInfo: { type: [DocInfo] },
     basic_info: {
@@ -44,6 +46,7 @@ const KYCDocument = new Schema({
             city: { type: String },
             address1: { type: String },
             address2: { type: String },
+            street :{type : String},
             place_of_birth: { type: String },
             zip: { type: String },
             state: { type: String },
@@ -69,6 +72,17 @@ const KYCDocument = new Schema({
     verification_by: { type: String }
 });
 
+
+
+KYCDocument.virtual('app_data', {
+    ref: 'apps',
+    localField: 'app_key',
+    foreignField: 'key',
+    justOne: true // for many-to-1 relationships
+  });
+
+// KYCDocument.index({ app_key: 1}, { unique: true});
+
 KYCDocument.pre('save', function (next) {
     var KYCDocument = this;
     next();
@@ -81,4 +95,5 @@ KYCDocument.pre('update', function() {
   KYCDocument.pre('findOneAndUpdate', function() {
     this.findOneAndUpdate({},{ $set: { last_modified: commonUtility.UtcNow() } });
   });
+
 module.exports = mongoose.model('kycdocuments', KYCDocument);

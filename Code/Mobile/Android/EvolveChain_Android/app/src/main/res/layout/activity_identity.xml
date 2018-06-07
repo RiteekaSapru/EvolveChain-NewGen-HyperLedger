@@ -3,7 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.newgen.evolvechain.activities.IdentityActivity">
+    android:background="@drawable/splash_background"
+    android:id="@+id/identity_view"
+    tools:context=".uis.activities.IdentityActivity">
 
     <Button
         android:id="@+id/button_save"
@@ -39,7 +41,7 @@
                 <Spinner
                     android:id="@+id/spinner"
                     android:layout_width="match_parent"
-                    android:layout_height="30dp"/>
+                    android:layout_height="wrap_content"/>
 
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/edit_text_identity_number_wrapper"
@@ -64,11 +66,28 @@
                         android:id="@+id/edit_text_expiry_date"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/expiry_date"
                         android:cursorVisible="false"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
                         android:onClick="onExpiryDateClick" />
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/edit_text_issue_country_wrapper"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp">
+
+                    <EditText
+                        android:id="@+id/edit_text_issue_country"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:onClick="onIssueCountryClick"
+                        android:hint="@string/issue_country"/>
                 </android.support.design.widget.TextInputLayout>
             </LinearLayout>
         </ScrollView>
