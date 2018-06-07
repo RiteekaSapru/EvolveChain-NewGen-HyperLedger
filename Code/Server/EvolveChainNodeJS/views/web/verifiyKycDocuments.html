@@ -145,14 +145,24 @@
 
                 <hr>
 
-                <label>
-                    <input value="Reason1 full fgg" type="checkbox" name="ck"> Reason 1</label>
-                <label>
-                    <input value="Reason2 gg gjgjs" type="checkbox" name="ck"> Reason 2</label>
-                <label>
-                    <input value="Reason3" type="checkbox" name="ck"> Reason 3</label>
-                <label>
-                    <input value="Reason4" type="checkbox" name="ck"> Reason 4</label>
+                <table class="table">
+                    <tr>
+                    <th>REASONS:</th>
+                    </tr>
+                    <tr>
+                        <td style="display: grid;
+                        grid-template-columns: auto auto auto;">
+
+                            <% for(let j = 0; j < kycData.verification_reason.length; j++) { %>
+                               <label style="
+                               text-align:left;">
+                            <input  value=<%=kycData.verification_reason[j]%> type="checkbox" name="checkbox"> <%=kycData.verification_reason[j]%></label>
+                            <% } %>
+                        </td>
+                    </tr>
+                
+                </table>
+
                 <input type="text" value="<%=kycData.verification_comment%>" class="form-control input-lg" placeholder="Comments" name="textBoxComment"
                 />
                 <hr>
