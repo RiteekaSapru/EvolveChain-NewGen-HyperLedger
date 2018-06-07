@@ -142,7 +142,8 @@ class VerifyController extends BaseController {
                             verification_comment: req.body.textBoxComment,
                             verification_time: commonUtility.UtcNow(),
                             verification_by: "Admin",//set the email of approver
-                            verification_reasons: reasonList
+                            verification_reasons: reasonList,
+                            resubmit_pin:resubmitPin
                         }
                 }
             //send email 
