@@ -175,8 +175,6 @@
                         </div>
                 </div>
 
-                <hr>
-
                 <table class="table">
                     <tr>
                     <th>Reasons:</th>
@@ -188,7 +186,7 @@
                             <% for(let j = 0; j < kycData.reasonList.length; j++) { %>
                                <label style="
                                text-align:left;">
-                            <input  value=<%=kycData.reasonList[j].reason%> type="checkbox" name="checkbox" <%=kycData.reasonList[j].state ? 'checked': 'unchecked' %> >  <%=kycData.reasonList[j].reason%></label>
+                            <input  value=<%=kycData.reasonList[j].reason%> type="checkbox" name="reasonList" <%=kycData.reasonList[j].state ? 'checked': 'unchecked' %> >  <%=kycData.reasonList[j].reason%></label>
                             <% } %>
                         </td>
                     </tr>

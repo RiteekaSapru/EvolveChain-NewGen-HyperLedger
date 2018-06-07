@@ -38,7 +38,7 @@ class VerifyController extends BaseController {
             }
 
             //Get exisitng reasons 
-            let appReasons = [];   
+            let appReasons = [];   //docData.app_data.verification_reasons
             let reasonList = await VerificationReasons.find();
             //update reason array with state = checked
             // reasonList[4].state = 1;
@@ -94,6 +94,8 @@ class VerifyController extends BaseController {
 
             userEmailId = appData.email;
             var action = req.body.action;
+            var reasonList = req.body.reasonList;
+
             let isVerified = (action.toUpperCase() == "VERIFY");
 
             let basicDetails = appData.kycdoc_data.basic_info.details;
@@ -123,7 +125,8 @@ class VerifyController extends BaseController {
                             'status': appStatus,
                             verification_comment: req.body.textBoxComment,
                             verification_time: commonUtility.UtcNow(),
-                            verification_by: "Admin"//set the email of approver
+                            verification_by: "Admin",//set the email of approver
+                            verification_reasons:reasonList
                         }
                 }
             //send email 
