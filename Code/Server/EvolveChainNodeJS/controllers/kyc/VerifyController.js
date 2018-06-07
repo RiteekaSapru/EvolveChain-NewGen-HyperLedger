@@ -188,7 +188,7 @@ class VerifyController extends BaseController {
                 // }
             });            
             for (var j = 0; j < images.length; j++) {
-                let imgUrl = config.base_url + "/kyc/getdocumentimages/" + images[j]._id.toString();
+                let imgUrl = config.base_url + "/kyc/getdocumentimages/" + images[j].file_key;
                 summaryInfo.DocImages.push({ 'url': imgUrl });
 
             }

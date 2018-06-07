@@ -29,7 +29,7 @@ const FileSchema = new Schema({
     // details_hold_img_id: {type: String}
     data: Buffer,
     contentType: String,
-    key : String
+    //key : String
 });
 
 

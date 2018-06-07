@@ -12,7 +12,8 @@ const commonUtility = require('../helpers/CommonUtility');
 const ImageInfo = new Schema({
     name: String,
     contentType: String,
-    encoding: String
+    encoding: String,
+    file_key : String
 });
 
 // const DocInfo = new Schema({
@@ -60,6 +61,10 @@ const KYCDocument = new Schema({
         images: { type: [ImageInfo] },
     },
     identity_info: {
+        details:{type: GeneralDocument},
+        images: { type: [ImageInfo] },
+    },
+    face_info: {
         details:{type: GeneralDocument},
         images: { type: [ImageInfo] },
     },

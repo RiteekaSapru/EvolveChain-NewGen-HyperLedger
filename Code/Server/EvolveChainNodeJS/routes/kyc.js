@@ -15,7 +15,7 @@ function keyMiddleware(req, res, next) {
 kyc.get("/getdocumentimages/:key",KYCController.GetDocumentImages.bind(KYCController))
 //kyc.post("/createupdatekyc/:key",keyMiddleware, KYCController.CreateUpdateKyc.bind(KYCController));
 //kyc.post("/getStepStatus/:key", keyMiddleware, KYCController.GetStepStatus.bind(KYCController));
-kyc.post("/getKycDocument/:key", keyMiddleware, KYCController.GetKycDocument.bind(KYCController));
+//kyc.post("/getKycDocument/:key", keyMiddleware, KYCController.GetKycDocument.bind(KYCController));
 kyc.post("/saveKycDocument/:key", keyMiddleware, KYCController.SaveKycDocument.bind(KYCController));
 kyc.post("/submitKycDocument", KYCController.SubmitKycDocument.bind(KYCController));
 //kyc.post("/unlinkKycImg/:key",keyMiddleware, KYCController.UnlinkKycImg.bind(KYCController));
