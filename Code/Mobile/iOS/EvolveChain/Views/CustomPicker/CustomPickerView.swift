@@ -26,12 +26,15 @@ class CustomPickerView: UIView, UIPickerViewDelegate, UIPickerViewDataSource {
         return UINib(nibName: "CustomPickerView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CustomPickerView
     }
     
-    func setUpView(custom:Bool,customList:[String])
+    func setUpView(custom:Bool,customList:[String],arrCountry:[Country])
     {
         IsCustom = custom
         customArray = customList
-        countryList = Country.getCountryList()
-        selectedCountry = countryList[0]
+        countryList = arrCountry
+        if countryList.count > 0{
+            selectedCountry = countryList[0]
+        }
+        
         customPicker.delegate = self
         customPicker.dataSource = self
     }

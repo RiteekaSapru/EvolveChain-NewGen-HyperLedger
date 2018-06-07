@@ -10,15 +10,23 @@ import UIKit
 
 class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate {
 
-    @IBOutlet weak var txtfldKYCId: UITextField!
+    @IBOutlet weak var txtfldKYCId: NoCursorTextfield!
     @IBOutlet weak var txtfld1: BackSpaceTextfield!
     @IBOutlet weak var txtfld2: BackSpaceTextfield!
     @IBOutlet weak var txtfld3: BackSpaceTextfield!
     @IBOutlet weak var txtfld4: BackSpaceTextfield!
     @IBOutlet weak var txtfld5: BackSpaceTextfield!
     @IBOutlet weak var txtfld6: BackSpaceTextfield!
+    @IBOutlet weak var lblTitle: UILabel!
     
+    @IBOutlet weak var btnBack: UIButton!
+    @IBOutlet weak var btnLogin: UIButton!
     @IBOutlet weak var vwPinHolder: UIView!
+    
+    @IBOutlet weak var btnGeneratePin: UIButton!
+    
+    var kycIdText:String = ""
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         txtfld1.backDelegate = self
@@ -27,8 +35,23 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
         txtfld4.backDelegate = self
         txtfld5.backDelegate = self
         txtfld6.backDelegate = self
+        txtfldKYCId.backDelegate = self
         
-        txtfldKYCId.text = "344565456462323786786"
+        if let kyc = _userDefault.object(forKey: kApplicationKycIdKey) as? String{
+            txtfldKYCId.text = changeTextToStar(stringToChange: kyc )
+            kycIdText = kyc
+        }
+//        txtfldKYCId.text = changeTextToStar(stringToChange: (_userDefault.object(forKey: kApplicationKycIdKey) as? String)!)
+        
+        if (BasicDetailsModel.sharedInstance.isBasicDetailsComplete)
+        {
+            setupForPinCheck()
+        }
+        
+        if ((_userDefault.object(forKey: kApplicationPinKey)) != nil)
+        {
+             btnBack.isHidden = true
+        }
         // Do any additional setup after loading the view.
     }
 
@@ -40,10 +63,59 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        txtfldKYCId.becomeFirstResponder()
+        if txtfldKYCId.text!.count >= 18 {
+            txtfld1.becomeFirstResponder()
+        }
+        else {
+             txtfldKYCId.becomeFirstResponder()
+        }
+       
     }
     
      // MARK: - Custom Methods
+    func setupForPinCheck() {
+
+//        txtfldKYCId.isUserInteractionEnabled = false
+        btnLogin.setTitle("Continue", for: .normal)
+        btnGeneratePin.setTitle("Forgot Pin", for: .normal)
+        btnBack.isHidden = true
+        
+        if GlobalMethods.sharedInstance.checkIfBioMetricSupported(){
+            GlobalMethods.sharedInstance.beginBiometricID { (status) in
+                print(status)
+                let pin = _userDefault.object(forKey: kApplicationPinKey)
+                let kyc = self.kycIdText.trimmingCharacters(in: .whitespaces)
+                _userDefault.set(kyc, forKey: kApplicationKycIdKey)
+                self.view.endEditing(true)
+                self.loginAPI(kyc, pin as! String)
+            }
+        }
+//        lblTitle.text = "Check Pin"
+    }
+    
+    func changeTextToStar(stringToChange:String) -> String{
+        var hashPassword = String()
+        
+        for index in 0..<stringToChange.count {
+            
+            let indexStart = stringToChange.index(stringToChange.startIndex, offsetBy: index)
+            let indexEnd = stringToChange.index(stringToChange.startIndex, offsetBy: index+1)
+            
+            let newString = String(stringToChange[indexStart..<indexEnd])
+            
+            if index < 3 || index > 13 || newString == "-"{
+                
+                hashPassword += newString
+            }
+            else{
+                hashPassword += "*"
+            }
+            
+            
+        }
+        
+        return hashPassword
+    }
     
     func clearPin()  {
         txtfld1.text = ""
@@ -73,12 +145,16 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
     }
     
     func checkValidation() -> Bool {
-        if txtfldKYCId.text?.count == 0{
+        if kycIdText.count == 0{
             GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText:stringKYCIDEmpty)
+            txtfldKYCId.becomeFirstResponder()
             return false;
         }
         else if getPIN().count < 6{
             GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringPinEmpty)
+            self.clearPin()
+            self.shakeView(viewToShake: self.vwPinHolder)
+            self.txtfld1.becomeFirstResponder()
             return false;
         }
         else{
@@ -86,33 +162,100 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
         }
     }
     
+    func checkPin() {
+        
+//        if (_userDefault.object(forKey: kApplicationPinKey) != nil) {
+//
+//            let pin = _userDefault.object(forKey: kApplicationPinKey) as! String
+//
+//            if pin == GlobalMethods.sharedInstance.convertToMD5(string: getPIN()){
+//                GlobalMethods.sharedInstance.popVC()
+//            }
+//            else{
+//                self.clearPin()
+//                self.shakeView(viewToShake: self.vwPinHolder)
+//                txtfld1.becomeFirstResponder()
+//            }
+//        }
+//        else{
+        let pin = GlobalMethods.sharedInstance.convertToMD5(string: getPIN())
+        let kyc = self.kycIdText.trimmingCharacters(in: .whitespaces)
+        _userDefault.set(kyc, forKey: kApplicationKycIdKey)
+            loginAPI(kyc, pin)
+//        }
+    }
+    
+    func processResponse(data:Data,errorMsg:String) {
+        do {
+            if let jsonDict = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? Dictionary<String,Any> {
+                let errorCode = RawdataConverter.optionalString(jsonDict["error_code"])
+            
+                if errorCode == ErrorCode.INCORRECT_EKYCID.rawValue{
+                   self.txtfldKYCId.text = ""
+                    self.kycIdText = ""
+                    self.clearPin()
+                    self.shakeView(viewToShake: self.txtfldKYCId)
+                     self.txtfldKYCId.becomeFirstResponder()
+                }
+                else if errorCode == ErrorCode.INCORRECT_PIN.rawValue{
+                    self.clearPin()
+                    self.shakeView(viewToShake: self.vwPinHolder)
+                    self.txtfld1.becomeFirstResponder()
+                }
+                else{
+                   GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: errorMsg)
+                }
+            }
+            else{
+            
+            }
+        }
+        catch let error as NSError {
+            print(error)
+            
+        }
+    }
  // MARK: - Actions
     
     @IBAction func actionLogin(_ sender: Any) {
         
         if checkValidation() {
-                loginAPI()
+            self.view.endEditing(true)
+            checkPin()
         }
     }
     
     @IBAction func actionGeneratePin(_ sender: Any) {
         let generateObj = self.storyboard?.instantiateViewController(withIdentifier: "GenerateOtpVC") as! GenerateOtpVC
-        generateObj.kycID = txtfldKYCId.text!
+        generateObj.kycID = kycIdText
         GlobalMethods.sharedInstance.pushVC(generateObj)
         
     }
 
+    @IBAction func actionBack(_ sender: Any) {
+        GlobalMethods.sharedInstance.popVC()
+    }
     //MARK: - Textfield
     
-    func textFieldDidDelete(textfield: BackSpaceTextfield) {
-        if textfield.text!.count < 1 {
-            let previousTag = textfield.tag - 1
-            if previousTag > 7{
-                let previousResponder = self.view?.viewWithTag(previousTag) as! BackSpaceTextfield
-                previousResponder.text = ""
-                previousResponder.becomeFirstResponder()
+    func textFieldDidDelete(textfield: UITextField) {
+        if textfield.tag == 0 {
+//            if kycIdText.last == "-" {
+//                print(kycIdText)
+//                kycIdText.removeLast()
+////                textfield.text = changeTextToStar(stringToChange: kycIdText)
+//            }
+        }
+        else{
+            if textfield.text!.count < 1 {
+                let previousTag = textfield.tag - 1
+                if previousTag > 6{
+                    let previousResponder = self.view?.viewWithTag(previousTag) as! BackSpaceTextfield
+                    previousResponder.text = ""
+                    previousResponder.becomeFirstResponder()
+                }
             }
         }
+        
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool
@@ -127,11 +270,74 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
         // Do not add a line break
         return false
     }
+    
+    func textFieldShouldClear(_ textField: UITextField) -> Bool {
+         if textField.tag == 0 {
+            kycIdText = ""
+        }
+        
+        return true
+    }
 
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         
         if textField.tag == 0 {
-            return true
+            
+//            var hashPassword = String()
+            let result = string.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+            let newChar = result.first
+            let offsetToUpdate = kycIdText.index(kycIdText.startIndex, offsetBy: range.location)
+            
+            if string == "" {
+                if kycIdText.last == "-" {
+                    print(kycIdText)
+                    kycIdText.removeLast()
+                    kycIdText.removeLast()
+                    textField.text = changeTextToStar(stringToChange: kycIdText)
+                    return false
+                }
+                else{
+                    kycIdText.remove(at: offsetToUpdate)
+                }
+                return true
+            }
+            else if kycIdText.count >= 18 || result.count == 0{
+                return false
+            }
+            else if result.count > 1{
+//                passwordText.insert(newChar!, at: offsetToUpdate)
+                 let indexEnd = string.index(string.startIndex, offsetBy: 18 - kycIdText.count )
+                kycIdText.append(String(string[..<indexEnd]))
+            }
+            else{
+            
+                 kycIdText.append(newChar!)
+                if kycIdText.count == 3 || kycIdText.count == 8 || kycIdText.count == 13{
+                    kycIdText.append("-")
+                }
+            }
+           
+            
+            
+//            for index in 0..<passwordText.count {
+//                let indexStart = passwordText.index(passwordText.startIndex, offsetBy: index)
+//                let indexEnd = passwordText.index(passwordText.startIndex, offsetBy: index+1)
+//
+//                let newString = String(passwordText[indexStart..<indexEnd])
+//
+//                if index < 3 || index > 13 || newString == "-"{
+//
+//                    hashPassword += newString
+//                }
+//                else{
+//                     hashPassword += "*"
+//                }
+//
+//
+//            }
+            textField.text = changeTextToStar(stringToChange: kycIdText)
+            return false
+//            return true
         }
         
         if textField.text!.count < 1  && string.count > 0{
@@ -151,7 +357,7 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
                 if checkValidation(){
                     // Call API
                    
-                    loginAPI()
+                    checkPin()
                 }
             }
             else{
@@ -170,15 +376,21 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
     
      //MARK: - Webservice
     
-    func loginAPI() {
-        let pin = GlobalMethods.sharedInstance.convertToMD5(string: getPIN())
-        let param = ["ekyc_id":txtfldKYCId.text!,"pin":pin,"vendor_uuid":UIDevice.current.identifierForVendor?.uuidString] as [String : Any]
+    func loginAPI(_ kycID:String,_ pinHash:String) {
+        
+        
+       
+        var param = ["ekyc_id":kycID,"pin":pinHash,"vendor_uuid":GlobalMethods.sharedInstance.getUniqueIdForDevice()] as [String : Any]
+        
+//        param.updateValue("25794606-8288-4C41-B1E9-79619C86914C", forKey: "vendor_uuid")
         
         NetworkManager.sharedInstance.loginAPI(params: param, success: { (responseJson) in
-          GlobalMethods.sharedInstance.loginUser(details: responseJson)
-        }) { (errorMsg) in
-            self.clearPin()
-            self.shakeView(viewToShake: self.vwPinHolder)
+
+          GlobalMethods.sharedInstance.loginUser(details: responseJson, kyc_id:kycID, pin: pinHash)
+        }) { (errorMsg,response) in
+            
+            _userDefault.removeObject(forKey: kApplicationKycIdKey)
+            self.processResponse(data: response!, errorMsg: errorMsg!)
         }
     }
 }

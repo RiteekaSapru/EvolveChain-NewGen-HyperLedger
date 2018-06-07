@@ -51,13 +51,22 @@ class EntryHomeVC: UIViewController {
     
     //MARK: - Actions
     
-    @IBAction func actionRegister(_ sender: UIButton) {
-        
+    fileprivate func moveToRegister() {
         let countrySelectionVC = self.storyboard?.instantiateViewController(withIdentifier: "CountrySelectionVC")
         
         GlobalMethods.sharedInstance.pushVC(countrySelectionVC!)
+    }
+    
+    @IBAction func actionRegister(_ sender: UIButton) {
         
-        
+//        FlowManager.sharedInstance.initialiseKey(success: {
+//            DispatchQueue.main.async {
+//                self.moveToRegister()
+//            }
+//        }) { (errorMsg) in
+//            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: errorMsg!)
+//        }
+        self.moveToRegister()
     }
     
     @IBAction func actionLogin(_ sender: Any) {

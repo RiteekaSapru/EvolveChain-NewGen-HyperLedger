@@ -58,6 +58,7 @@ class GenerateOtpVC: UIViewController {
     
     @IBAction func actionGetOtp(_ sender: Any) {
         if checkValidations() {
+            self.view.endEditing(true)
            generatePin()
         }
     }

@@ -10,23 +10,21 @@ import UIKit
 
 class UtilityBillModel: NSObject {
     
-    var type: String = ""
-   
-    var number: String = ""
-    var address: String = ""
-    
-    var frontImage : UIImage = UIImage.init(named: "ic_img_placeholder")!
-    var backImage : UIImage = UIImage.init(named: "ic_img_placeholder")!
-     var iscomplete :Bool = false
+    var type: UtilityBillTypeModel            = UtilityBillTypeModel.init()
+    var number: String          = ""
+    var address: String         = ""
+    var frontImage : UIImage    = UIImage.init(named: "ic_img_placeholder")!
+    var backImage : UIImage     = UIImage.init(named: "ic_img_placeholder")!
+    var iscomplete :Bool        = false
     
     // MARK:- Init
     override init() {
         super.init()
-        number             = ""
+        number              = ""
         address             = ""
-        type             = ""
-        frontImage       = UIImage.init(named: "ic_img_placeholder")!
-        backImage       = UIImage.init(named: "ic_img_placeholder")!
-        iscomplete = false
+        type                = UtilityBillTypeModel.init()
+        frontImage          = UIImage.init(named: "ic_img_placeholder")!
+        backImage           = UIImage.init(named: "ic_img_placeholder")!
+        iscomplete          = false
     }
 }

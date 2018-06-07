@@ -54,22 +54,87 @@ extension UIView {
         }
     }
     
-//    @IBInspectable
-//    public var cornerRadius: CGFloat = 2.0 {
-//        didSet {
-//            self.layer.cornerRadius = self.cornerRadius
+    func addShadow() {
+        var shadowLayer: CAShapeLayer!
+        if shadowLayer == nil {
+            shadowLayer = CAShapeLayer()
+            shadowLayer.path = UIBezierPath(roundedRect: bounds, cornerRadius: 50.0).cgPath
+            shadowLayer.fillColor = UIColor.clear.cgColor
+            
+            shadowLayer.shadowColor = UIColor.darkGray.cgColor
+            shadowLayer.shadowPath = shadowLayer.path
+            shadowLayer.shadowOffset = CGSize(width: 3.0, height: 3.0)
+            shadowLayer.shadowOpacity = 0.7
+            shadowLayer.shadowRadius = 50.0
+            
+//            layer.insertSublayer(shadowLayer, at: 0)
+            layer.insertSublayer(shadowLayer, below: nil) // also works
+        }
+    }
+    
+}
+
+extension UIImageView {
+    
+    func downloadImage(url: URL) {
+//       addLoader()
+        if GlobalMethods.sharedInstance.checkIfFileExists(fileName: url.lastPathComponent){
+             print("File Exists")
+            let image = GlobalMethods.sharedInstance.getLocallySavedImage(fileName: url.lastPathComponent)
+            DispatchQueue.main.async() {
+//                self.removeLoader()
+                self.image = image
+            }
+        }
+        else{
+//            addLoader()
+             print("Download Started")
+            RequestManager.sharedInstance.getDataFromUrl(url: url) { data, response, error in
+                guard let data = data, error == nil else { return }
+                print(response?.suggestedFilename ?? url.lastPathComponent)
+                print("Download Finished")
+                let image = UIImage(data: data)
+                if GlobalMethods.sharedInstance.saveImage(image: image!, fileName: url.lastPathComponent){
+                    print("Saved")
+                }
+                else{
+                    print("Not Saved")
+                }
+                DispatchQueue.main.async() {
+//                    self.removeLoader()
+                    self.image = image
+                }
+            }
+        }
+    }
+    
+//    func addLoader() {
+//        DispatchQueue.main.async() {
+//            let loader = UIActivityIndicatorView.init(activityIndicatorStyle: .gray)
+//            loader.center = self.center
+//            loader.tag = 999
+//            loader.hidesWhenStopped = true
+//            self.addSubview(loader)
+//            loader.startAnimating()
+//        }
+//
+//    }
+//
+//    func removeLoader() {
+//        if let loader = self.viewWithTag(999) as? UIActivityIndicatorView{
+//            DispatchQueue.main.async() {
+//                loader.stopAnimating()
+//                loader.removeFromSuperview()
+//            }
 //        }
 //    }
-//
-//    func addCornerRadius(radius:CGFloat) -> Void {
-//
-//        self.layer.masksToBounds = true;
-//        self.layer.cornerRadius = radius;
-//    }
-    
-//    func addBorder(borderWidth:CGFloat, border) -> Void {
-//
-//        self.layer.masksToBounds = true;
-//        self.layer.cornerRadius = radius;
-//    }
+}
+
+extension UIRefreshControl {
+    func beginRefreshingManually() {
+        if let scrollView = superview as? UIScrollView {
+            scrollView.setContentOffset(CGPoint(x: 0, y: scrollView.contentOffset.y - frame.height), animated: true)
+        }
+        beginRefreshing()
+    }
 }

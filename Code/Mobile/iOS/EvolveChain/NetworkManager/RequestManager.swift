@@ -56,6 +56,70 @@ class RequestManager: NSObject {
         
     }
     
+    func makeGetAPICall(url: String,params: Dictionary<String, Any>?, method: HttpMethod, success:@escaping ( Data? ,HTTPURLResponse?  , NSError? ,Array<Any>) -> Void, failure: @escaping ( Data? ,HTTPURLResponse?  , NSError?,String? )-> Void) {
+        
+        if !isConnectedToNetwork() {
+            failure(nil , nil , nil,stringNoInternet)
+            return
+        }
+        
+        DispatchQueue.main.async(execute: {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+        })
+        
+        
+        var request = URLRequest(url: URL(string: url)!)
+        NSLog("URL = \(url)")
+        NSLog("Params = \(params)")
+        
+        if let params = params {
+            
+            let  jsonData = try? JSONSerialization.data(withJSONObject: params, options: .prettyPrinted)
+            
+            
+            request.httpBody = jsonData//?.base64EncodedData()
+            
+        }
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpMethod = method.rawValue
+        
+        
+        URLSession.shared.dataTask(with: request as URLRequest) { (data, response, error) -> Void in
+            
+            DispatchQueue.main.async(execute: {
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+            })
+            
+            if let data = data {
+                
+                if let response = response as? HTTPURLResponse, 200...299 ~= response.statusCode {
+                    do {
+                        if let jsonArray = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? Array<Any>
+                        {
+                            print(jsonArray)
+                            success(data , response , error as NSError?,jsonArray)
+                        } else {
+                            print("bad json")
+                            var backToString = String(data: data, encoding: String.Encoding.utf8) as String?
+                            print(backToString)
+                            failure(data , response , error as NSError?,"Unable to parse JSON.")
+                        }
+                    } catch let error as NSError {
+                        print(error)
+                        failure(data , response, error as NSError?,"Unable to parse JSON.")
+                    }
+                    
+                } else {
+                    failure(data , response as? HTTPURLResponse, error as NSError?,error?.localizedDescription)
+                }
+            }else {
+                
+                failure(data , response as? HTTPURLResponse, error as NSError?,error?.localizedDescription)
+                
+            }
+            }.resume()
+        
+    }
     
     func makeAPICall(url: String,params: Dictionary<String, Any>?, method: HttpMethod, success:@escaping ( Data? ,HTTPURLResponse?  , NSError? ,Dictionary<String,Any>) -> Void, failure: @escaping ( Data? ,HTTPURLResponse?  , NSError?,String? )-> Void) {
         
@@ -63,20 +127,25 @@ class RequestManager: NSObject {
             failure(nil , nil , nil,stringNoInternet)
             return
         }
-        UIApplication.shared.isNetworkActivityIndicatorVisible = true
+        
+        DispatchQueue.main.async(execute: {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+        })
+        
         
         var request = URLRequest(url: URL(string: url)!)
         NSLog("URL = \(url)")
+        NSLog("Params = \(params)")
         
         if let params = params {
             
             let  jsonData = try? JSONSerialization.data(withJSONObject: params, options: .prettyPrinted)
             
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            
             request.httpBody = jsonData//?.base64EncodedData()
             
         }
-        
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpMethod = method.rawValue
 
         
@@ -105,7 +174,20 @@ class RequestManager: NSObject {
                                         // now val is not nil and the Optional has been unwrapped, so use it
                                         errorString = val
                                     }
-                                    failure(data , response , error as NSError?,errorString)
+                                    
+                                    if let errorCode = RawdataConverter.optionalString(jsonDict["error_code"]) {
+                                       
+                                        if errorCode == ErrorCode.APP_NOT_FOUND.rawValue{
+                                            GlobalMethods.sharedInstance.logOutUser()
+                                            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: errorString)
+                                        }
+                                        else if errorCode == ErrorCode.DEVICE_MISMATCH.rawValue{
+                                            GlobalMethods.sharedInstance.deviceMismatch(errorMsg: errorString)
+                                        }
+                                        else{
+                                            failure(data , response , error as NSError?,errorString)
+                                        }
+                                    }
                                 }
                             }
                             else{
@@ -113,6 +195,8 @@ class RequestManager: NSObject {
                             }
                         } else {
                             print("bad json")
+                            var backToString = String(data: data, encoding: String.Encoding.utf8) as String!
+                            print(backToString)
                              failure(data , response , error as NSError?,"Unable to parse JSON.")
                         }
                     } catch let error as NSError {
@@ -121,11 +205,11 @@ class RequestManager: NSObject {
                     }
                     
                 } else {
-                    failure(data , response as? HTTPURLResponse, error as NSError?,error.debugDescription)
+                    failure(data , response as? HTTPURLResponse, error as NSError?,error?.localizedDescription)
                 }
             }else {
                 
-                failure(data , response as? HTTPURLResponse, error as NSError?,error.debugDescription)
+                failure(data , response as? HTTPURLResponse, error as NSError?,error?.localizedDescription)
                 
             }
             }.resume()
@@ -141,8 +225,11 @@ class RequestManager: NSObject {
         var request = URLRequest(url: URL(string: url)!)
         
         NSLog("URL = \(url)")
+         NSLog("Params = \(params)")
         
-        UIApplication.shared.isNetworkActivityIndicatorVisible = true
+        DispatchQueue.main.async(execute: {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+        })
         
         let boundary = "*****14737809831466499882746641449*****"
 
@@ -179,14 +266,17 @@ class RequestManager: NSObject {
                 bodyData.append(String("\r\n").data(using: String.Encoding.utf8)!)
                 bodyData.append(String("Content-Type: \(mimetype)").data(using: String.Encoding.utf8)!)
                 bodyData.append(String("\r\n").data(using: String.Encoding.utf8)!)
+//                bodyData.append(String("Content-Transfer-Encoding: binary").data(using: String.Encoding.utf8)!)
                 bodyData.append(String("\r\n").data(using: String.Encoding.utf8)!)
+//                bodyData.append(String("\r\n").data(using: String.Encoding.utf8)!)
                 bodyData.append(image_data!)
                 bodyData.append(String("\r\n").data(using: String.Encoding.utf8)!)
-                bodyData.append("--\(boundary)--\r\n".data(using: String.Encoding.utf8)!)
+//                bodyData.append("--\(boundary)--\r\n".data(using: String.Encoding.utf8)!)
 //                bodyData.append("--\(boundary)\r\n".data(using: String.Encoding.utf8)!)
             }
         }
-        
+                bodyData.append("--\(boundary)--\r\n".data(using: String.Encoding.utf8)!)
+
         
         
         request.httpBody = bodyData as Data
@@ -220,7 +310,25 @@ class RequestManager: NSObject {
                                 }
                             }
                             else{
-                                failure(data , response , error as NSError?,RawdataConverter.optionalString(jsonDict["error"]))
+                                var errorString = "Server Error"
+                                if let val = RawdataConverter.optionalString(jsonDict["error"]) {
+                                    // now val is not nil and the Optional has been unwrapped, so use it
+                                    errorString = val
+                                }
+                                
+                                if let errorCode = RawdataConverter.optionalString(jsonDict["error_code"]) {
+                                    
+                                    if errorCode == ErrorCode.APP_NOT_FOUND.rawValue{
+                                        GlobalMethods.sharedInstance.logOutUser()
+                                        GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: errorString)
+                                    }
+                                    else if errorCode == ErrorCode.DEVICE_MISMATCH.rawValue{
+                                        GlobalMethods.sharedInstance.deviceMismatch(errorMsg: errorString)
+                                    }
+                                    else{
+                                        failure(data , response , error as NSError?,errorString)
+                                    }
+                                }
                             }
                         } else {
                             print("bad json")
@@ -242,5 +350,11 @@ class RequestManager: NSObject {
             }
  
         }.resume()
+    }
+    
+    func getDataFromUrl(url: URL, completion: @escaping (Data?, URLResponse?, Error?) -> ()) {
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            completion(data, response, error)
+            }.resume()
     }
 }
