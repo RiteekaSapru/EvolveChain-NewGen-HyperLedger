@@ -3,6 +3,7 @@ const path = require("path");
 const config = require('config');
 const fs = require("fs");
 const ejs = require('ejs');
+const md5 = require('md5');
 const emailService = require('../../services/EmailService');
 const smsService = require('../../services/SMSService');
 const hyperLedgerService = require('../../services/HyperLedgerService');
@@ -143,7 +144,7 @@ class VerifyController extends BaseController {
                             verification_time: commonUtility.UtcNow(),
                             verification_by: "Admin",//set the email of approver
                             verification_reasons: reasonList,
-                            resubmit_pin:resubmitPin
+                            resubmit_pin:md5(resubmitPin)
                         }
                 }
             //send email 
