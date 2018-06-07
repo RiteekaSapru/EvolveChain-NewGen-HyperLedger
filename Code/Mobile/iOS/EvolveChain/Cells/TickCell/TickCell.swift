@@ -11,6 +11,7 @@ import UIKit
 class TickCell: UITableViewCell {
 
     @IBOutlet weak var lblText: UILabel!
+    @IBOutlet weak var vwHolder: UIView!
     @IBOutlet weak var imgTick: UIImageView!
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -23,8 +24,9 @@ class TickCell: UITableViewCell {
         // Configure the view for the selected state
     }
     
-    func setUpCell(title:String,sideImage:String) -> Void {
+    func setUpCell(title:String,sideImage:String,textColor:UIColor) -> Void {
         lblText.text = title
         imgTick.image = UIImage.init(named: sideImage)
+        lblText.textColor = textColor
     }
 }

@@ -9,21 +9,21 @@
 import UIKit
 
 class TaxationModel: NSObject {
-    var number: String = ""
-    var country: String = ""
-    var expiry: Date = Date()
-    var frontImage : UIImage = UIImage.init(named: "ic_img_placeholder")!
-    var backImage : UIImage = UIImage.init(named: "ic_img_placeholder")!
-    var iscomplete :Bool = false
+    var number: String          = ""
+    var country: String         = ""
+    var dob: Date            = Date()
+    var frontImage : UIImage    = UIImage.init(named: "ic_img_placeholder")!
+    var backImage : UIImage     = UIImage.init(named: "ic_img_placeholder")!
+    var iscomplete :Bool        = false
     
     // MARK:- Init
     override init() {
         super.init()
-        number             = ""
+        number              = ""
         country             = ""
-        frontImage       = UIImage.init(named: "ic_img_placeholder")!
-        backImage       = UIImage.init(named: "ic_img_placeholder")!
-        iscomplete = false
-         expiry            = Date()
+        frontImage          = UIImage.init(named: "ic_img_placeholder")!
+        backImage           = UIImage.init(named: "ic_img_placeholder")!
+        iscomplete          = false
+        dob              = Date()
     }
 }

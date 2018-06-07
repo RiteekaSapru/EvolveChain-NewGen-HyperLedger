@@ -13,10 +13,25 @@ class NetworkManager: NSObject {
 static let sharedInstance = NetworkManager()
     
     
+    func countryListAPI(success:@escaping ( Array<Any> ) -> Void, failure: @escaping (String? )-> Void) {
+        
+//        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        let url = kLocalURL+countryListURL
+       
+        RequestManager.sharedInstance.makeGetAPICall(url: url, params: nil, method: .GET, success: { (data, response, error, responseJSON) in
+//            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                success(responseJSON)
+//            })
+        }) { (data, response, error, errorMsg) in
+//            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                failure(errorMsg)
+//            })
+        }
+    }
     
     func initialiseAPI(success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping (String? )-> Void) {
         
-        
+         GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
         let url = kLocalURL+initaliseURL
         var ipAdd = GlobalMethods.sharedInstance.getIFAddresses();
         
@@ -26,12 +41,17 @@ static let sharedInstance = NetworkManager()
         param["os"]             = UIDevice.current.systemName
         param["device_name"]    = UIDevice.current.modelSJName
         param["ip"]             = ipAdd[1];
-        param["vendor_uuid"]    = UIDevice.current.identifierForVendor?.uuidString
+        param["vendor_uuid"]    = GlobalMethods.sharedInstance.getUniqueIdForDevice()
+        param["country_iso"]    = SignupConfigModel.sharedInstance.selectedCountry.iso
         
         RequestManager.sharedInstance.makeAPICall(url: url, params: param, method: .POST, success: { (data, response, error, responseJSON) in
-            success(responseJSON)
+            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                success(responseJSON)
+            })
         }) { (data, response, error, errorMsg) in
-           failure(errorMsg)
+            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                failure(errorMsg)
+            })
         }
     }
     
@@ -41,16 +61,16 @@ static let sharedInstance = NetworkManager()
         
         let url = kLocalURL+generateEmailOtpURL+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
         
-        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        
         RequestManager.sharedInstance.makeAPICall(url: url, params: params, method: .POST, success: { (data, response, error, responseJSON) in
-            GlobalMethods.sharedInstance.dismissLoader(complete: {
+            //GlobalMethods.sharedInstance.dismissLoader(complete: {
                 success(responseJSON)
-            })
+            //})
             
         }) { (data, response, error, errorMsg) in
-            GlobalMethods.sharedInstance.dismissLoader(complete: {
+            //GlobalMethods.sharedInstance.dismissLoader(complete: {
                 failure(errorMsg)
-            })
+           // })
             
         }
     }
@@ -61,9 +81,9 @@ static let sharedInstance = NetworkManager()
         
 
         RequestManager.sharedInstance.makeAPICall(url: url, params: params, method: .POST, success: { (data, response, error, responseJSON) in
-            GlobalMethods.sharedInstance.dismissLoader(complete: {
+            //GlobalMethods.sharedInstance.dismissLoader(complete: {
                 success(responseJSON)
-            })
+            //})
             
         }) { (data, response, error, errorMsg) in
 
@@ -77,16 +97,16 @@ static let sharedInstance = NetworkManager()
         
         let url = kLocalURL+generateMobileOtpURL+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
         
-        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+//        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
         RequestManager.sharedInstance.makeAPICall(url: url, params: params, method: .POST, success: { (data, response, error, responseJSON) in
-            GlobalMethods.sharedInstance.dismissLoader(complete: {
+//            GlobalMethods.sharedInstance.dismissLoader(complete: {
                 success(responseJSON)
-            })
+//            })
             
         }) { (data, response, error, errorMsg) in
-            GlobalMethods.sharedInstance.dismissLoader(complete: {
+//            GlobalMethods.sharedInstance.dismissLoader(complete: {
                 failure(errorMsg)
-            })
+//            })
             
         }
     }
@@ -98,9 +118,9 @@ static let sharedInstance = NetworkManager()
         let url = kLocalURL+verifyMobileOtpURL+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
         
         RequestManager.sharedInstance.makeAPICall(url: url, params: params, method: .POST, success: { (data, response, error, responseJSON) in
-            GlobalMethods.sharedInstance.dismissLoader(complete: {
+            //GlobalMethods.sharedInstance.dismissLoader(complete: {
                 success(responseJSON)
-            })
+            //})
             
         }) { (data, response, error, errorMsg) in
 
@@ -163,11 +183,31 @@ static let sharedInstance = NetworkManager()
         }
     }
     
-    // MARK: - Generate Pin
+    func POSTKYCComplete(params:Dictionary<String,Any>,success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping (String? )-> Void) -> Void {
+        
+        let url = kLocalURL+submitKYCDetails//+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
+        
+        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        
+        RequestManager.sharedInstance.makeAPICall(url: url, params: params, method: .POST, success: { (data, response, error, responseJSON) in
+            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                success(responseJSON)
+            })
+            
+        }) { (data, response, error, errorMsg) in
+            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                failure(errorMsg)
+            })
+            
+        }
+        
+    }
+    
+    // MARK: - Login Module
     
     func generateOtpForKydId(params:Dictionary<String,Any>,success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping (String? )-> Void) -> Void {
         
-        let url = kLocalURL+generatePinURL+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
+        let url = kLocalURL+generatePinURL//+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
         
         GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
         RequestManager.sharedInstance.makeAPICall(url: url, params: params, method: .POST, success: { (data, response, error, responseJSON) in
@@ -183,9 +223,9 @@ static let sharedInstance = NetworkManager()
         }
     }
     
-    func setPinForKydId(params:Dictionary<String,Any>,success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping (String? )-> Void) -> Void {
+    func setPinForKydId(params:Dictionary<String,Any>,success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping (String?,Data? )-> Void) -> Void {
         
-        let url = kLocalURL+setPinURL+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
+        let url = kLocalURL+setPinURL//+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
         
         GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
         RequestManager.sharedInstance.makeAPICall(url: url, params: params, method: .POST, success: { (data, response, error, responseJSON) in
@@ -195,15 +235,36 @@ static let sharedInstance = NetworkManager()
             
         }) { (data, response, error, errorMsg) in
             GlobalMethods.sharedInstance.dismissLoader(complete: {
-                failure(errorMsg)
+                failure(errorMsg,data)
             })
             
         }
     }
     
-    func loginAPI(params:Dictionary<String,Any>,success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping (String? )-> Void) -> Void {
+    func loginAPI(params:Dictionary<String,Any>,success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping( String?,Data? )-> Void) -> Void {
         
-        let url = kLocalURL+setPinURL+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
+        let url = kLocalURL+loginURL//+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
+        
+        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        
+        RequestManager.sharedInstance.makeAPICall(url: url, params: params, method: .POST, success: { (data, response, error, responseJson) in
+            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                success(responseJson)
+            })
+        }) { (data, response, error, errorMsg) in
+           
+            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                failure(errorMsg,data)
+            })
+    
+        }
+    }
+    
+      // MARK: - Post Login Module
+    
+    func changePinAPI(params:Dictionary<String,Any>,success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping (String?,Data? )-> Void) -> Void {
+        
+        let url = kLocalURL+changePinURL
         
         GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
         RequestManager.sharedInstance.makeAPICall(url: url, params: params, method: .POST, success: { (data, response, error, responseJSON) in
@@ -213,7 +274,7 @@ static let sharedInstance = NetworkManager()
             
         }) { (data, response, error, errorMsg) in
             GlobalMethods.sharedInstance.dismissLoader(complete: {
-                failure(errorMsg)
+                failure(errorMsg,data)
             })
             
         }

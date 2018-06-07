@@ -44,6 +44,21 @@ extension Foundation.Date
             return formatter
         }()
         
+        static let formatterLocal :DateFormatter = {
+            let formatter = DateFormatter()
+//            formatter.locale = Locale(identifier: "en")
+            formatter.timeZone = TimeZone.current
+            formatter.dateFormat = "yyyy-MM-dd"
+            return formatter
+        }()
+        static let formatterUTC :DateFormatter = {
+            let formatter = DateFormatter()
+            //            formatter.locale = Locale(identifier: "en")
+//            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+            formatter.timeZone = TimeZone(secondsFromGMT: 0)
+            formatter.dateFormat = SignupConfigModel.sharedInstance.dateFormat
+            return formatter
+        }()
         
     }
     
@@ -167,4 +182,12 @@ extension Foundation.Date
             options: NSCalendar.Options.matchNextTime)
         return date!
     }
+    
+    func getUTCDateStringFromDateString() -> String {
+        
+        let date = Date.formatterUTC.string(from: self)
+        return date
+    }
+    
+    
 }

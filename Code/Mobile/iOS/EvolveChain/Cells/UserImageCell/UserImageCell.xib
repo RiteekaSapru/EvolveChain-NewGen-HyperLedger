@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="UserImageCell" rowHeight="130" id="KGk-i7-Jjw" customClass="UserImageCell" customModule="EvolveChain" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="386" height="130"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="386" height="129.5"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8XQ-Pl-QmK">
+                        <rect key="frame" x="15" y="14" width="356" height="100.5"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Tdx-rx-wed">
+                                <rect key="frame" x="128" y="0.0" width="100" height="100"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="100" id="hq8-i9-eU4"/>
+                                    <constraint firstAttribute="height" constant="100" id="yxO-Ub-3lu"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="color" keyPath="borderColor">
+                                        <color key="value" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="borderWidth">
+                                        <real key="value" value="1"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
+                                        <real key="value" value="50"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </imageView>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="Tdx-rx-wed" secondAttribute="trailing" id="7hY-Xk-1iO"/>
+                            <constraint firstItem="Tdx-rx-wed" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="8XQ-Pl-QmK" secondAttribute="leading" id="Pcp-sg-R6Q"/>
+                            <constraint firstItem="Tdx-rx-wed" firstAttribute="centerX" secondItem="8XQ-Pl-QmK" secondAttribute="centerX" id="lTH-Tk-z16"/>
+                            <constraint firstAttribute="bottom" secondItem="Tdx-rx-wed" secondAttribute="bottom" id="ti6-Hj-AyH"/>
+                            <constraint firstItem="Tdx-rx-wed" firstAttribute="top" secondItem="8XQ-Pl-QmK" secondAttribute="top" id="ure-dD-pge"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                <constraints>
+                    <constraint firstItem="8XQ-Pl-QmK" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="15" id="NML-vU-pAF"/>
+                    <constraint firstAttribute="bottom" secondItem="8XQ-Pl-QmK" secondAttribute="bottom" constant="10" id="ONd-Ox-Ak9"/>
+                    <constraint firstAttribute="trailing" secondItem="8XQ-Pl-QmK" secondAttribute="trailing" constant="15" id="UqU-ux-Hvs"/>
+                    <constraint firstItem="8XQ-Pl-QmK" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="dZd-bs-lFS"/>
+                </constraints>
+            </tableViewCellContentView>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <connections>
+                <outlet property="imgUser" destination="Tdx-rx-wed" id="G5q-FV-C7t"/>
+            </connections>
+            <point key="canvasLocation" x="67" y="104"/>
+        </tableViewCell>
+    </objects>
+</document>

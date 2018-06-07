@@ -12,15 +12,16 @@ class FlowManager: NSObject {
 
     static let sharedInstance = FlowManager()
     
-    func initialiseKey() -> Void {
-        NetworkManager.sharedInstance.initialiseAPI(success: { (responseJSON) in
-            _userDefault.set(responseJSON["key"], forKey: kApplicationKey)
-        }) { (errorMsg) in
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now()+1.0) {
-                self.initialiseKey()
-            }
-        }
-    }
+//    func initialiseKey(success:@escaping (  ) -> Void, failure: @escaping (String? )-> Void) -> Void {
+//        NetworkManager.sharedInstance.initialiseAPI(success: { (responseJSON) in
+//            _userDefault.set(responseJSON["key"], forKey: kApplicationKey)
+//            _userDefault.set(responseJSON["init_config"], forKey: kApplicationInitConfigKey)
+//            GlobalMethods.sharedInstance.initConfig()
+//            success()
+//        }) { (errorMsg) in
+//            failure(errorMsg)
+//        }
+//    }
 
     func moveToLogin() -> Void {
         GlobalMethods.sharedInstance.pushVC(getLoginStoryBoard().instantiateViewController(withIdentifier: "LoginVC"))
@@ -44,7 +45,33 @@ class FlowManager: NSObject {
     }
     
     func resetToSplash() {
+        
         _navigator.setViewControllers([ getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "EntryHomeVC")], animated: true)
+    }
+    
+    func resetToGeneratePin() {
+        
+        let splashVC = getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "EntryHomeVC")
+        
+        let loginVC = getLoginStoryBoard().instantiateViewController(withIdentifier: "LoginVC")
+        
+        let generateVC = getLoginStoryBoard().instantiateViewController(withIdentifier: "GenerateOtpVC") as! GenerateOtpVC
+    
+        let setPinVCObj = getLoginStoryBoard().instantiateViewController(withIdentifier: "SetPinVC") as! SetPinVC
+        
+        if let kycId = _userDefault.object(forKey: kApplicationKycIdKey) as? String{
+            generateVC.kycID = kycId
+            setPinVCObj.stringVerify = kycId
+        }
+        
+        _navigator.setViewControllers([splashVC,loginVC,generateVC,setPinVCObj], animated: true)
+    }
+    
+    func showPinUI() {
+        
+        if !(_navigator.topViewController is LoginVC){
+            moveToLogin()
+        }
     }
 }
 
@@ -61,9 +88,12 @@ extension AppDelegate {
         self.window?.rootViewController = navigator
         self.window?.makeKeyAndVisible()
         
-        if (_userDefault.object(forKey: kApplicationKey) == nil)
+        if ((_userDefault.object(forKey: kApplicationPinKey)) != nil)
         {
-            FlowManager.sharedInstance.initialiseKey();
+//            let details = _userDefault.object(forKey: kApplicationUserDetailsKey) as! Dictionary<String, Any>
+//            BasicDetailsModel.sharedInstance.initWithResponse(responseJson: details)
+//            FlowManager.sharedInstance.moveToHome()
+            FlowManager.sharedInstance.moveToLogin()
         }
     }
     

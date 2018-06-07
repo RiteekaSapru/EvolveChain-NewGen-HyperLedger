@@ -10,6 +10,8 @@ import UIKit
 
 class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate  {
 
+    
+
     @IBOutlet weak var vwOTPHolder: UIView!
     @IBOutlet weak var vwPinHolder: UIView!
     @IBOutlet weak var vwRePinHolder: UIView!
@@ -43,18 +45,6 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
         txtfld1.backDelegate = self
         txtfld2.backDelegate = self
         txtfld3.backDelegate = self
@@ -75,6 +65,18 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
         txtfld16.backDelegate = self
         txtfld17.backDelegate = self
         txtfld18.backDelegate = self
+        // Do any additional setup after loading the view.
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+      
         
         txtfld1.becomeFirstResponder()
         startTimer()
@@ -178,8 +180,8 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
         viewToShake.layer.add(animation, forKey: "position")
     }
     
-    func pinGenerated() {
-        let alert = UIAlertController.init(title: nil, message: "Pin generated.", preferredStyle: .actionSheet)
+    func pinGenerated(msg:String) {
+        let alert = UIAlertController.init(title: nil, message: msg, preferredStyle: .alert)
         let defaultAction = UIAlertAction.init(title: "Okay", style: .cancel) { (alert: UIAlertAction!) in
             self.moveToLogin()
         }
@@ -189,10 +191,50 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
     
     func moveToLogin() {
         
+        
+        
+        _userDefault.removeObject(forKey: kApplicationKycIdKey)
         var viewControllers = _navigator.viewControllers
         viewControllers.removeLast(2) // views to pop
         navigationController?.setViewControllers(viewControllers, animated: true)
     }
+    
+    func processResponse(data:Data,errorMsg:String) {
+        do {
+            if let jsonDict = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? Dictionary<String,Any> {
+                let errorCode = RawdataConverter.optionalString(jsonDict["error_code"])
+                
+                if errorCode == ErrorCode.INCORRECT_OTP.rawValue{
+                    
+                    self.clearOTP()
+                    self.shakeView(viewToShake: self.vwOTPHolder)
+                    self.txtfld1.becomeFirstResponder()
+                }
+//                else if errorCode == ErrorCode.INCORRECT_PIN.rawValue{
+//                    self.clearPin()
+//                    self.shakeView(viewToShake: self.vwPinHolder)
+//                    self.txtfld1.becomeFirstResponder()
+//                }
+                else{
+                     self.clearOTP()
+                    self.clearPins()
+                     self.shakeView(viewToShake: self.vwPinHolder)
+                    self.shakeView(viewToShake: self.vwOTPHolder)
+                    self.shakeView(viewToShake: self.vwRePinHolder)
+                    self.txtfld1.becomeFirstResponder()
+                    GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: errorMsg)
+                }
+            }
+            else{
+                
+            }
+        }
+        catch let error as NSError {
+            print(error)
+            
+        }
+    }
+    
     
      // MARK: - Extract text
     
@@ -221,7 +263,7 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
     
     // MARK: - Textfield
     
-    func textFieldDidDelete(textfield: BackSpaceTextfield) {
+    func textFieldDidDelete(textfield: UITextField) {
         if textfield.text!.count < 1 {
             let previousTag = textfield.tag - 1
             if previousTag > 0{
@@ -249,6 +291,8 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
                 //call Validate
                 if checkValidations(){
                     // Call API
+                    self.view.endEditing(true)
+                    self.generatePin()
                 }
             }
             else{
@@ -286,20 +330,26 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
     
     func generatePin() {
         
-        let params = ["ekyc_id":stringVerify,"pin_otp":GlobalMethods.sharedInstance.convertToMD5(string: getOTP()),"pin":GlobalMethods.sharedInstance.convertToMD5(string: getNewPin()),"vendor_uuid":UIDevice.current.identifierForVendor?.uuidString]
+        let params = ["ekyc_id":stringVerify,"pin_otp":GlobalMethods.sharedInstance.convertToMD5(string: getOTP()),"pin":GlobalMethods.sharedInstance.convertToMD5(string: getNewPin()),"vendor_uuid":GlobalMethods.sharedInstance.getUniqueIdForDevice()]
         
         NetworkManager.sharedInstance.setPinForKydId(params: params, success: { (responseJson) in
-            self.pinGenerated()
-        }) { (errorMsg) in
-            self.clearOTP()
-            self.clearPins()
-            self.shakeView(viewToShake: self.vwOTPHolder)
-            self.shakeView(viewToShake: self.vwPinHolder)
-            self.shakeView(viewToShake: self.vwRePinHolder)
+            if ((_userDefault.object(forKey: kApplicationPinKey)) != nil)
+            {
+                _userDefault.set(GlobalMethods.sharedInstance.convertToMD5(string: self.getNewPin()), forKey: kApplicationPinKey)
+            }
+            self.pinGenerated(msg: RawdataConverter.string(responseJson["result"]))
+        }) { (errorMsg,data) in
+//            self.clearOTP()
+//            self.clearPins()
+//            self.shakeView(viewToShake: self.vwOTPHolder)
+//            self.shakeView(viewToShake: self.vwPinHolder)
+//            self.shakeView(viewToShake: self.vwRePinHolder)
+//            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: errorMsg!)
+            self.processResponse(data: data!, errorMsg: errorMsg!)
         }
     }
     
-    // MARK: - Webservice
+    
     
     func generateOTP()  {
         let params = ["ekyc_id":stringVerify]
