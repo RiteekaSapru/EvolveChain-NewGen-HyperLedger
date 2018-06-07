@@ -39,42 +39,43 @@ class VerifyController extends BaseController {
 
             //Get exisitng reasons 
             let appReasons = docData.app_data.verification_reasons;
-            let reasonList = await VerificationReasons.find();
-
+            let allReasons = await VerificationReasons.find();
 
             for (var j = 0; j < appReasons.length; j++) {
-                for (var i = 0; i < reasonList.length; i++)
-                {
-                    if(appReasons[j]==reasonList[i].code)
-                        {
-                            var conditions = {
-                                code: appReasons[j]
-                            }
-                            var setParams = {
-                                $set: { state: true}
-                            }
-                            await VerificationReasons.update(conditions, setParams);
-                        }
-                }
+                let idx = allReasons.findIndex(r=>r.code == appReasons[j]);
+                allReasons[idx].state = true;
             }
 
-        reasonList = await VerificationReasons.find();
+            // for (var j = 0; j < appReasons.length; j++) {               
+            //     for (var i = 0; i < reasonList.length; i++) {
+            //         if (appReasons[j] == reasonList[i].code) {
+            //             var conditions = {
+            //                 code: appReasons[j]
+            //             }
+            //             var setParams = {
+            //                 $set: { state: true }
+            //             }
+            //             await VerificationReasons.update(conditions, setParams);
+            //         }
+            //     }
+            // }
+            // reasonList = await VerificationReasons.find();
 
             let isVerified = (docData.app_data.status == config.APP_STATUSES.VERIFIED);
             let kycData = {
                 app_key: docData.app_key,
                 eKycId: isVerified ? docData.app_data.ekyc_id : docData.app_data.status,
-                country_iso:docData.app_data.country_iso,
+                country_iso: docData.app_data.country_iso,
                 is_verified: isVerified,
                 hash: docData.hash,
                 verification_comment: docData.verification_comment,
                 verification_code: docData.app_data.verification_code,
-                email:docData.app_data.email,
+                email: docData.app_data.email,
                 phone: "+" + docData.app_data.isd_code + "-" + docData.app_data.phone,
                 BasicInfo: this.GetDocumentInfo(docData.basic_info, "BASIC"),
                 IdentityInfo: this.GetDocumentInfo(docData.identity_info, "IDENTITY"),
                 AddressInfo: this.GetDocumentInfo(docData.address_info, "ADDRESS"),
-                reasonList: reasonList
+                reasonList: allReasons
             }
             res.render('web/verifiyKycDocuments.html', { kycData: kycData });
 
@@ -114,7 +115,7 @@ class VerifyController extends BaseController {
             let isVerified = (action.toUpperCase() == "VERIFY");
 
             let basicDetails = appData.kycdoc_data.basic_info.details;
-            
+
             var eKycId = "";
             var appStatus = config.APP_STATUSES.REJECTED;
             var emailTemplateHtml = '/kyc_reject.html';
@@ -141,7 +142,7 @@ class VerifyController extends BaseController {
                             verification_comment: req.body.textBoxComment,
                             verification_time: commonUtility.UtcNow(),
                             verification_by: "Admin",//set the email of approver
-                            verification_reasons:reasonList
+                            verification_reasons: reasonList
                         }
                 }
             //send email 
@@ -201,7 +202,7 @@ class VerifyController extends BaseController {
                 //if(detailKeys.hasOwnProperty(key)){
                 summaryInfo.DocDetails.push({ 'name': metaDataInfo[key], 'value': details[key] });
                 // }
-            });            
+            });
             for (var j = 0; j < images.length; j++) {
                 let imgUrl = config.base_url + "/kyc/getdocumentimages/" + images[j].file_key;
                 summaryInfo.DocImages.push({ 'url': imgUrl });

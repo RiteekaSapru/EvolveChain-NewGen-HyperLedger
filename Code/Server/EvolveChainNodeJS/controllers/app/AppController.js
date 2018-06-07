@@ -65,7 +65,7 @@ class AppController extends base_controller {
             //Temp work : need to fetch from Database later
             var documentList = config.init_config.DOCUMENT_LIST;
             var iso = body.country_iso.toUpperCase();
-            const countrydocs = documentList.find(c => c.country_iso.findIndex(d => d == iso) > -1).documents;
+            const countryDocs = documentList.filter(c => c.country_iso.findIndex(d => d == iso) > -1);
 
             var App = new app(params);
             var newApp = await App.save();
@@ -79,7 +79,7 @@ class AppController extends base_controller {
 
             var kycDoc = new kyc_document(kycDocParam);
             var newKycDoc = await kycDoc.save();
-            newApp.documents = countrydocs
+            newApp.documents = countryDocs
 
             return this.GetSuccessResponse("Initialize", newApp, res);
 
@@ -152,7 +152,7 @@ class AppController extends base_controller {
             //Temp work : need to fetch from Database later
             var documentList = config.init_config.DOCUMENT_LIST;
             var iso = App.country_iso.toUpperCase();
-            const countryDocs = documentList.find(c => c.country_iso.findIndex(d => d == iso) > -1).documents;
+            const countryDocs = documentList.filter(c => c.country_iso.findIndex(d => d == iso) > -1);            
             App.documents = countryDocs;
             return this.GetSuccessResubmitInitialize(App, docData, res);
 
