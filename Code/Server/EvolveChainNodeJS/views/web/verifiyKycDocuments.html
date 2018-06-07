@@ -24,16 +24,22 @@
                         </h4>
 
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-5">
                                 App Id:
                                 <b>
                                     <%=kycData.app_key%>
                                 </b>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 eKycId:
                                 <b>
                                     <%=kycData.eKycId%>
+                                </b>
+                            </div>
+                            <div class="col-md-3">
+                                Country:
+                                <b>
+                                    <%=kycData.country_iso%>
                                 </b>
                             </div>
                         </div>
@@ -63,7 +69,7 @@
                                 </table>
                             </div>
                             <div class="col-sm-6">
-                                <h5 class="alert header"> Face
+                                <h5 class="alert header"> Profile
                                     <span class="float-right"></span>
                                 </h5>
                                 <table class="table">
@@ -76,6 +82,32 @@
 
                                             <% } %>
                                     </tr>
+                                </table>
+                                <table class="table">
+                                        <tr>
+                                            <td>
+                                                Email:
+                                            </td>
+                                            <td>
+                                                <%=kycData.email%>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                Phone:
+                                            </td>
+                                            <td>
+                                                <%=kycData.phone%>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                Verification Code:
+                                            </td>
+                                            <td>
+                                                <%=kycData.verification_code%>
+                                            </td>
+                                        </tr>
                                 </table>
                             </div>
 
@@ -147,16 +179,16 @@
 
                 <table class="table">
                     <tr>
-                    <th>REASONS:</th>
+                    <th>Reasons:</th>
                     </tr>
                     <tr>
                         <td style="display: grid;
                         grid-template-columns: auto auto auto;">
 
-                            <% for(let j = 0; j < kycData.verification_reason.length; j++) { %>
+                            <% for(let j = 0; j < kycData.reasonList.length; j++) { %>
                                <label style="
                                text-align:left;">
-                            <input  value=<%=kycData.verification_reason[j]%> type="checkbox" name="checkbox"> <%=kycData.verification_reason[j]%></label>
+                            <input  value=<%=kycData.reasonList[j].reason%> type="checkbox" name="checkbox" <%=kycData.reasonList[j].state ? 'checked': 'unchecked' %> >  <%=kycData.reasonList[j].reason%></label>
                             <% } %>
                         </td>
                     </tr>

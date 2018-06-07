@@ -13,10 +13,14 @@ class HyperLedgerService {
         return GeneralService.GetService(HL_URL_EKYC);
     }
 
-    PostEkycDetails(eKycId, basicDetailObj) {
+    PostEkycDetails(eKycId, email, phone, isd_code, basicDetailObj) {
         basicDetailObj.eKYCId = eKycId;
-        let eKycInfo = _.pick(basicDetailObj, ['eKYCId', 'firstname',"middlename", "lastname", 
-        "place_of_birth", "dob", "city", "address1",   "address2","zip", "state", "country"]);
+        basicDetailObj.email = email;
+        basicDetailObj.phone = phone;
+        basicDetailObj.phone_code = isd_code;
+
+        let eKycInfo = _.pick(basicDetailObj, ['eKYCId', 'email', 'phone', 'phone_code', 'firstname',"middlename", "lastname", 
+        "place_of_birth", "dob", "city", "street", "address1",   "address2","zip", "state", "country"]);
        
         return GeneralService.PostService(HL_URL_EKYC, eKycInfo);
     }

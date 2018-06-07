@@ -33,7 +33,6 @@ class AppController extends base_controller {
         req.checkBody("country_iso", messages.req_vendor_uuid).notEmpty();
 
         try {
-
             let result = await req.getValidationResult();
 
             if (!result.isEmpty()) {
@@ -66,7 +65,7 @@ class AppController extends base_controller {
             //Temp work : need to fetch from Database later
             var documentList = config.init_config.DOCUMENT_LIST;
             var iso = body.country_iso.toUpperCase();
-            const countrydocs = documentList.find(c => c.country_iso.findIndex(d=>d==iso) >-1).documents;
+            const countrydocs = documentList.find(c => c.country_iso.findIndex(d => d == iso) > -1).documents;
 
             var App = new app(params);
             var newApp = await App.save();
@@ -77,7 +76,7 @@ class AppController extends base_controller {
                 last_modified: common_utility.UtcNow()
             }
 
-         
+
             var kycDoc = new kyc_document(kycDocParam);
             var newKycDoc = await kycDoc.save();
             newApp.documents = countrydocs
@@ -122,7 +121,7 @@ class AppController extends base_controller {
                 case "phone":
                     var conditions = {
                         phone: body.phone,
-                        country_code: body.country_code,
+                        isd_code: body.country_code,
                         resubmit_pin: body.resubmit_pin
                     }
                     break;
@@ -150,7 +149,11 @@ class AppController extends base_controller {
             var docData = await kyc_document.findOne(con);
 
             if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
-
+            //Temp work : need to fetch from Database later
+            var documentList = config.init_config.DOCUMENT_LIST;
+            var iso = App.country_iso.toUpperCase();
+            const countryDocs = documentList.find(c => c.country_iso.findIndex(d => d == iso) > -1).documents;
+            App.documents = countryDocs;
             return this.GetSuccessResubmitInitialize(App, docData, res);
 
         } catch (ex) {
@@ -308,9 +311,9 @@ class AppController extends base_controller {
 
 
             var phone = body.mobile.replace("+", "");
-            var countryCode = body.country_code.replace("+", "");
+            var isdCode = body.country_code.replace("+", "");
             var msg = 'EvolveChain mobile verification code: ' + phone_code + '.';
-            let toPhone = "+" + countryCode + phone;
+            let toPhone = "+" + isdCode + phone;
 
             let smsResult = await sms_service.SendSMS(toPhone, msg);
 
@@ -324,7 +327,7 @@ class AppController extends base_controller {
                         otp: md5OTP,
                         otp_expiry_time: expireTime,
                         number: phone,
-                        country_code: countryCode
+                        isd_code: isdCode
                     }
                 }
             }
@@ -355,7 +358,7 @@ class AppController extends base_controller {
             let body = _.pick(req.body, ['mobile', 'country_code', 'phone_code']);
             let key = req.params.key;
             let mobilenumber = body.mobile.toLowerCase();
-            let phoneCountryCode = body.country_code;
+            let isdCode = body.country_code;
             let phoneOtp = body.phone_code.toLowerCase();
             var conditions = {
                 key: key
@@ -366,7 +369,7 @@ class AppController extends base_controller {
             if (!App)
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_KEY);
 
-            if (App.phone_info.number != mobilenumber || App.phone_info.country_code != phoneCountryCode)
+            if (App.phone_info.number != mobilenumber || App.phone_info.isd_code != isdCode)
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_PHONE);
 
             var currentUtc = common_utility.UtcNow();
@@ -379,7 +382,7 @@ class AppController extends base_controller {
                 return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_OTP);
 
             var setParams = {
-                $set: { phone: mobilenumber, country_code: phoneCountryCode }
+                $set: { phone: mobilenumber, isd_code: isdCode }
             }
 
             await app.update(conditions, setParams);
@@ -432,9 +435,9 @@ class AppController extends base_controller {
 
             //Mobile Verification
             var phone = App.phone.replace("+", "");
-            var countryCode = App.country_code.replace("+", "");
+            var isdCode = App.isd_code.replace("+", "");
             var msg = 'EvolveChain mobile verification code: ' + ver_code + '.';
-            let toPhone = "+" + countryCode + phone;
+            let toPhone = "+" + isdCode + phone;
 
 
             var emailSuccess = await email_service.SendEmail(email, subject, emailBody);
@@ -746,7 +749,7 @@ class AppController extends base_controller {
             'email': appEntity.email,
             'phone': appEntity.phone,
             'appkey': appEntity.key,
-            'country_code': appEntity.country_code,
+            'country_code': appEntity.isd_code,
             "firstname": docEntity.basic_info.details.firstname,
             "middlename": docEntity.basic_info.details.middlename,
             "lastname": docEntity.basic_info.details.lastname,
@@ -773,10 +776,12 @@ class AppController extends base_controller {
             "name": appEntity.name,
             "email": appEntity.email,
             "phone": appEntity.phone,
+            'country_code': appEntity.isd_code,
             'appkey': appEntity.key,
             "BasicInfo": common_utility.GetKycDocumentInfo(docEntity.basic_info, "BASIC"),
             "AddressInfo": common_utility.GetKycDocumentInfo(docEntity.address_info, "ADDRESS"),
             "IdentityInfo": common_utility.GetKycDocumentInfo(docEntity.identity_info, "IDENTITY"),
+            'documents': appEntity.documents,
             "result": messages.resubmit_init_success
         }
         return res.status(status.OK).jsonp(response);

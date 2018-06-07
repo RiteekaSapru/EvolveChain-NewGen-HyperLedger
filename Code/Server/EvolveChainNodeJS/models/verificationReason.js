@@ -7,7 +7,9 @@ const commonUtility = require('../helpers/CommonUtility');
 
 
 const VerificationReasons = new Schema({
-    reason: { type: String }
+    reason: { type: String },
+    code: { type: String },
+    state: { type: Boolean, default:false}
 });
 
 

@@ -37,22 +37,29 @@ class VerifyController extends BaseController {
                 return res.redirect(baseURL);
             }
 
-
-            let verReason= await VerificationReasons.distinct("reason");
-            // console.log(verReason);
-
+            //Get exisitng reasons 
+            let appReasons = [];   
+            let reasonList = await VerificationReasons.find();
+            //update reason array with state = checked
+            // reasonList[4].state = 1;
+            // reasonList[1].state = true;
+            // reasonList[2].state = 0;
 
             let isVerified = (docData.app_data.status == config.APP_STATUSES.VERIFIED);
             let kycData = {
                 app_key: docData.app_key,
                 eKycId: isVerified ? docData.app_data.ekyc_id : docData.app_data.status,
+                country_iso:docData.app_data.country_iso,
                 is_verified: isVerified,
                 hash: docData.hash,
                 verification_comment: docData.verification_comment,
+                verification_code: docData.app_data.verification_code,
+                email:docData.app_data.email,
+                phone: "+" + docData.app_data.isd_code + "-" + docData.app_data.phone,
                 BasicInfo: this.GetDocumentInfo(docData.basic_info, "BASIC"),
                 IdentityInfo: this.GetDocumentInfo(docData.identity_info, "IDENTITY"),
                 AddressInfo: this.GetDocumentInfo(docData.address_info, "ADDRESS"),
-                verification_reason: verReason
+                reasonList: reasonList
             }
             res.render('web/verifiyKycDocuments.html', { kycData: kycData });
 
@@ -99,7 +106,7 @@ class VerifyController extends BaseController {
 
             if (isVerified) {
                 //generate eKycId 
-                eKycId = commonUtility.GenerateKYCId(basicDetails.country, basicDetails.firstname);
+                eKycId = commonUtility.GenerateKYCId(appData.country_iso, basicDetails.firstname);
                 appStatus = config.APP_STATUSES.VERIFIED;
                 emailTemplateHtml = '/kyc_success.html';
                 subject = 'EvolveChain KYC - Approved';
@@ -134,7 +141,7 @@ class VerifyController extends BaseController {
 
             if (isVerified && eKycId != '') {
 
-                var hlResult = await hyperLedgerService.PostEkycDetails(eKycId, basicDetails);//.then((result) => {
+                var hlResult = await hyperLedgerService.PostEkycDetails(eKycId, appData.email, appData.phone, appData.isd_code, basicDetails);//.then((result) => {
                 if (hlResult && hlResult.eKYCId == eKycId) {
                     var result = await this.NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams);
                 }

@@ -47,12 +47,12 @@ class CommonUtility {
                     'firstname': 'First Name', 'middlename': 'Middle Name','lastname': 'Last Name', 
                     'dob': 'Date Of Birth', 'place_of_birth': 'Birth Place',
                     'address1': 'Address 1', 'address2': 'Address 2', 'city': 'City',
-                    'zip': 'Zip', 'state': 'State', 'country': 'Country'
+                    'zip': 'Zip', 'state': 'State'
                 };
                 break;
             case 'IDENTITY':
             case 'ADDRESS':
-                metaDataInfo = { 'document_type': 'Title', 'number': 'Number', 'expiry_date': 'Expiry Date', 'country': 'Country' };
+                metaDataInfo = { 'document_type': 'Title', 'number': 'Number', 'expiry_date': 'Expiry Date'};
                 break;
         }
         return metaDataInfo;
@@ -72,7 +72,7 @@ class CommonUtility {
         return code;
     }
 
-    GenerateKYCId(country, firstName) {
+    GenerateKYCId(countryISO, firstName) {
         var secretKey1 = authenticator.generateKey();
         secretKey1 = secretKey1.replace(/\W/g, '').toLowerCase();
         var secret1_code = authenticator.generateToken(secretKey1);
@@ -83,7 +83,7 @@ class CommonUtility {
 
         let secretCode = secret1_code + secret2_code;
 
-        var countryISO = this.GetCountryISO(country);
+        // var countryISO = this.GetCountryISO(country);
 
         var kycId = countryISO.substring(0, 2) + firstName.substring(0, 1) + '-' + secretCode.substring(0, 4) + '-' + secretCode.substring(4, 8) + '-' + secretCode.substring(8, 12);
 

@@ -16,6 +16,7 @@ const App = new Schema({
 
     affiliateType: { type: String },
     country: { type: String },
+    country_iso: { type: String },
 
     device_name: { type: String },
     device_type: { type: String },
@@ -30,13 +31,13 @@ const App = new Schema({
     name: { type: String },
 
     phone: { type: String },
-    country_code: { type: String },
+    isd_code: { type: String },
 
     phone_info: {
         otp:{type:String},
         otp_expiry_time: { type: Date },
         number:{type:String},
-        country_code:{type:Number}
+        isd_code:{type:Number}
     }, 
     
      // email: { type: String, validate: {validator: validateEmail, message:'Invalid email address'}},
@@ -65,7 +66,9 @@ const App = new Schema({
     status: { type: String },
     resubmit_pin: { type: String },
 
+    verification_code:{type:String},
     verification_comment: { type: String },
+    verification_reasons: [{type:String}],
     verification_time: { type: String },
     verification_by: { type: String }
 
