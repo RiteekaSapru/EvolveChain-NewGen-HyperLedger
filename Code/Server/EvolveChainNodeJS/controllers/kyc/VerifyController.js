@@ -12,6 +12,7 @@ const BaseController = require('../BaseController');
 
 const App = require('../../models/apps');
 const KycDocument = require('../../models/kycdocument');
+const VerificationReasons = require('../../models/verificationReason');
 const EmailTemplatesPath = path.join(__dirname + "/../../public/email_template");
 
 const messages = config.messages;
@@ -36,6 +37,11 @@ class VerifyController extends BaseController {
                 return res.redirect(baseURL);
             }
 
+
+            let verReason= await VerificationReasons.distinct("reason");
+            // console.log(verReason);
+
+
             let isVerified = (docData.app_data.status == config.APP_STATUSES.VERIFIED);
             let kycData = {
                 app_key: docData.app_key,
@@ -45,7 +51,8 @@ class VerifyController extends BaseController {
                 verification_comment: docData.verification_comment,
                 BasicInfo: this.GetDocumentInfo(docData.basic_info, "BASIC"),
                 IdentityInfo: this.GetDocumentInfo(docData.identity_info, "IDENTITY"),
-                AddressInfo: this.GetDocumentInfo(docData.address_info, "ADDRESS")
+                AddressInfo: this.GetDocumentInfo(docData.address_info, "ADDRESS"),
+                verification_reason: verReason
             }
             res.render('web/verifiyKycDocuments.html', { kycData: kycData });
 
