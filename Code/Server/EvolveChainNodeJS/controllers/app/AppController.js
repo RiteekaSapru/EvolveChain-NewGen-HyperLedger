@@ -70,9 +70,11 @@ class AppController extends base_controller {
             var App = new app(params);
             var newApp = await App.save();
 
+            let verification_code = common_utility.GenerateOTP(6);
             var kycDocParam = {
                 app_key: newApp.key,
                 isDelete: 0,
+                face_info: {details: {number:verification_code}},
                 last_modified: common_utility.UtcNow()
             }
 
@@ -80,6 +82,7 @@ class AppController extends base_controller {
             var kycDoc = new kyc_document(kycDocParam);
             var newKycDoc = await kycDoc.save();
             newApp.documents = countryDocs
+            newApp.verification_code = verification_code;
 
             return this.GetSuccessResponse("Initialize", newApp, res);
 
@@ -665,7 +668,8 @@ class AppController extends base_controller {
                     'ip': appEntity.IP,
                     'Server': appEntity.Server,
                     'Refer': appEntity.Refer,
-                    'documents': appEntity.documents
+                    'documents': appEntity.documents,
+                    'verification_code':appEntity.verification_code
                     // 'init_config': config.get('init_config')
                 };
                 break;
