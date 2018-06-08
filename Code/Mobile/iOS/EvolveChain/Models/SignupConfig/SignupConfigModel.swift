@@ -18,6 +18,8 @@ class SignupConfigModel: NSObject {
     var selectedCountry: CountryModel   = CountryModel.init()
     var arrCountryList: [CountryModel]   = []
     
+    var verificationCode: String = ""
+    
     var arrUtilityBillTypeList:[UtilityBillTypeModel] = []
         
     // MARK:- Init

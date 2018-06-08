@@ -56,7 +56,7 @@ extension Foundation.Date
             //            formatter.locale = Locale(identifier: "en")
 //            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
             formatter.timeZone = TimeZone(secondsFromGMT: 0)
-            formatter.dateFormat = SignupConfigModel.sharedInstance.dateFormat
+            formatter.dateFormat = "yyyy-MM-dd"//SignupConfigModel.sharedInstance.dateFormat
             return formatter
         }()
         

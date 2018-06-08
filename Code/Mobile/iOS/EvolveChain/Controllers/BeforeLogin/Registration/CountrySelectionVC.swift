@@ -67,10 +67,13 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
     func processToRegister(response:Dictionary<String,Any>) {
         
         DocumentManager.sharedInstance.initWith(docArray: RawdataConverter.array(response["documents"]) as! [Dictionary<String, Any>])
+        
+        _userDefault.set(response["key"], forKey: kApplicationKey)
+        SignupConfigModel.sharedInstance.verificationCode = RawdataConverter.string(response["verification_code"])
+        
+        
         let regVC = self.storyboard?.instantiateViewController(withIdentifier: "AmericaRegistrationVC") as! AmericaRegistrationVC
-//        regVC.titleString = countryArray[selectedIndex]
         GlobalMethods.sharedInstance.pushVC(regVC)
-//        BasicDetailsModel.sharedInstance.countryType = .India
     }
     
     // MARK: - Tableview
@@ -119,7 +122,10 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
         NetworkManager.sharedInstance.countryListAPI(success: { (response) in
             self.processResponse(response: response)
         }) { (errorMsg) in
-            self.refreshControl.endRefreshing()
+            DispatchQueue.main.async {
+                self.refreshControl.endRefreshing()
+            }
+            
             GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: errorMsg!)
         }
     }
@@ -128,7 +134,10 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
         SignupConfigModel.sharedInstance.selectedCountry = countryArray[selectedIndex]
         
         NetworkManager.sharedInstance.initialiseAPI(success: { (responseJson) in
-            self.processToRegister(response: responseJson)
+            DispatchQueue.main.async {
+                 self.processToRegister(response: responseJson)
+            }
+           
         }) { (errorMsg) in
             GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: errorMsg!)
         }

@@ -13,6 +13,8 @@ class ImageCell: UITableViewCell {
     @IBOutlet weak var imgImageLeft: UIImageView!
     @IBOutlet weak var imgImageRight: UIImageView!
     
+    @IBOutlet weak var widthRightImageLayout: NSLayoutConstraint!
+    @IBOutlet weak var widthLeftImageLayout: NSLayoutConstraint!
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
@@ -26,10 +28,24 @@ class ImageCell: UITableViewCell {
     
     // MARK: - Methods
     
-    func setData(imgFront:UIImage,imgBack:UIImage) {
+    func setData(imgFront:Any,imgBack:UIImage) {
         
-        imgImageLeft.image = imgFront
         imgImageRight.image = imgBack
+        
+        if imgFront is UIImage {
+            imgImageLeft.image = imgFront as? UIImage
+            widthRightImageLayout.constant = (_screenSize.width - 30 - 10) / 2
+            widthLeftImageLayout.constant = (_screenSize.width - 30 - 10) / 2
+        }
+        else{
+            
+            imgImageLeft.image = nil
+            widthRightImageLayout.constant = _screenSize.width - 30
+            widthLeftImageLayout.constant = 0
+
+            
+           
+        }
     }
     
 }

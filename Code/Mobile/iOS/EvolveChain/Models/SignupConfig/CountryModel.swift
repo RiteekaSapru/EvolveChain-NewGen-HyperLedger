@@ -38,8 +38,8 @@ class CountryModel: NSObject {
         currencyCode = RawdataConverter.string(countryDict["currency_code"])
         
         if let ageLimit = RawdataConverter.dictionary(countryDict["age_limit"]){
-            maxAge = RawdataConverter.integer(ageLimit["min"])
-            minAge = RawdataConverter.integer(ageLimit["max"])
+            maxAge = RawdataConverter.integer(ageLimit["max"])
+            minAge = RawdataConverter.integer(ageLimit["min"])
         }
         
 

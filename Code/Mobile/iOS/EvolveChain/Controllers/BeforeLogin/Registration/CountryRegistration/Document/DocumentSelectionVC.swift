@@ -6,10 +6,7 @@
 //  Copyright © 2018 EvolveChain. All rights reserved.
 //
 
-enum DocumentType : String {
-    case  IdentityType
-    case  AddressType
-}
+
 
 import UIKit
 

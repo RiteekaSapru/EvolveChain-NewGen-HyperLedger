@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need permission to access your location to provide better security.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>We need permission to access your location to provide better security.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>We need permission to access your location to provide better security.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -26,7 +32,7 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>We need permission to connect "$(PRODUCT_NAME)" with your Camera so you can use your Camera within the App.</string>
+	<string>We need permission to connect &quot;$(PRODUCT_NAME)&quot; with your Camera so you can use your Camera within the App.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need permission to connect $(PRODUCT_NAME) with your Photo Library so you can use your Photo within the App.</string>
 	<key>UILaunchStoryboardName</key>

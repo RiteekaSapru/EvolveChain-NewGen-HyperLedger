@@ -50,9 +50,9 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
         datePicker?.minimumDate = GlobalMethods.sharedInstance.getDate(year: SignupConfigModel.sharedInstance.maxAge, after: false)
         dateformatter.dateFormat = "dd MMM yyyy"
         tblvwBasic.tableHeaderView = vwMain
-        fillData()
-//        setEmailForDev()
         
+        setEmailForDev()
+//        fillData()
        
         // Do any additional setup after loading the view.
     }
@@ -89,6 +89,9 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
     }
     
     func fillData() {
+        
+        txtfldCountryCode.text = "+" + SignupConfigModel.sharedInstance.selectedCountry.phoneCode
+        
         if BasicDetailsModel.sharedInstance.isBasicDetailsComplete {
             setEmailAndPhone()
             txtfldFName.text = BasicDetailsModel.sharedInstance.fname
@@ -104,18 +107,18 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
           
             
         }
-        else if DocumentModel.sharedInstance.isIdentityDetailsComplete && DocumentModel.sharedInstance.identityType == .TaxationIdentityType{
-            txtfldDOB.text = dateformatter.string(from: DocumentModel.sharedInstance.taxationModel.dob)
-            dateDOB = DocumentModel.sharedInstance.taxationModel.dob
-        }
+//        else if DocumentModel.sharedInstance.isIdentityDetailsComplete && DocumentModel.sharedInstance.identityType == .TaxationIdentityType{
+//            txtfldDOB.text = dateformatter.string(from: DocumentModel.sharedInstance.taxationModel.dob)
+//            dateDOB = DocumentModel.sharedInstance.taxationModel.dob
+//        }
         
-        switch BasicDetailsModel.sharedInstance.countryType {
-        case .India:
-            txtfldCountryCode.text = "+91"
-        case .NorthAmerica:
-            txtfldCountryCode.text = "+1"
-//            txtfldAddressCountry.text = "United States of America"
-        }
+//        switch BasicDetailsModel.sharedInstance.countryType {
+//        case .India:
+//            txtfldCountryCode.text = "+91"
+//        case .NorthAmerica:
+//            txtfldCountryCode.text = "+1"
+////            txtfldAddressCountry.text = "United States of America"
+//        }
     }
     
     func permissionCheckGallery() {
@@ -445,7 +448,7 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
     func APIGetPhoneOtp(countryCode:String,phoneNumner:String) -> Void {
         
         
-        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        GlobalMethods.sharedInstance.showLoader(loadingText: "   Sending OTP...")
         let params = ["mobile":phoneNumner,"country_code":countryCode]
         
         NetworkManager.sharedInstance.generateMobileOTP(params: params, success: { (responseDict) in
@@ -464,7 +467,7 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
     func APIGetEMailOtp(email:String) -> Void {
         
         let params = ["email":email]
-        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        GlobalMethods.sharedInstance.showLoader(loadingText: "   Sending OTP...")
         NetworkManager.sharedInstance.generateEmailOTP(params: params, success: { (responseDict) in
             GlobalMethods.sharedInstance.dismissLoader(complete: {
                 self.moveToEmailOtpVerify()

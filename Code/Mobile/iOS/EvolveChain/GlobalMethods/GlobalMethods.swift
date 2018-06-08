@@ -10,6 +10,8 @@ import UIKit
 import AVFoundation
 import Photos
 import LocalAuthentication
+import CoreTelephony
+import CoreLocation
 
 class GlobalMethods: NSObject {
 
@@ -291,7 +293,7 @@ class GlobalMethods: NSObject {
     
      // MARK: - Pickers
     
-    func getDatePicker(controller:UIViewController,txtFld:UITextField,doneAction:Selector,cancelAction:Selector) -> UIDatePicker {
+    func getDatePicker(controller:Any?,txtFld:UITextField,doneAction:Selector,cancelAction:Selector) -> UIDatePicker {
     
         let datePicker = UIDatePicker.init()
         
@@ -326,54 +328,54 @@ class GlobalMethods: NSObject {
     
      // MARK: - Uploaders
 
-    func uploadBasicDetails() {
-        
-        let filenameArray = ["file[]"]
-         let image = GlobalMethods.sharedInstance.resizeImage(image: BasicDetailsModel.sharedInstance.userImage, targetSize: CGSize.init(width: 200.0, height: 200.0))
-        let imagesArray = [image]
-        
-        NetworkManager.sharedInstance.POSTBasicDetails(params: BasicDetailsModel.sharedInstance.getBasicParamsForSaveKYC(), fileArray: imagesArray, filenameArray: filenameArray, success: { (responseDict) in
-            print(responseDict)
-            print("Basic Details Saved")
-//            self.uploadIdentityDetails()
-        }) { (errorMsg) in
-             GlobalMethods.sharedInstance.showAlert(alertTitle: stringAppName, alertText: errorMsg!)
-        }
-        
-    }
-    
-    func uploadIdentityDetails() {
-        
-        let filenameArray = ["file[]","file[]"]
-
-        NetworkManager.sharedInstance.POSTIdentityDetails(params:DocumentModel.sharedInstance.getIdentityDetailsForKYC() , fileArray: DocumentModel.sharedInstance.getIdentityImagesForKYC(), filenameArray: filenameArray, success: { (responseDict) in
-            print(responseDict)
-            print("Identity Details Saved")
-            self.uploadAddressDetails()
-        }) { (errorMsg) in
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringAppName, alertText: errorMsg!)
-        }
-        
-    }
-    
-   
-    
-    func uploadAddressDetails() {
-        
-        let filenameArray = ["file[]","file[]"]
-        
-        NetworkManager.sharedInstance.POSTAddressDetails(params: DocumentModel.sharedInstance.getAddressDetailsForKYC(), fileArray: DocumentModel.sharedInstance.getAddressImagesForKYC(), filenameArray: filenameArray, success: { (responseDict) in
-            print(responseDict)
-            print("Address Details Saved")
-           
-            self.kycComplete()
-            
-            
-        }) { (errorMsg) in
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringAppName, alertText: errorMsg!)
-        }
-        
-    }
+//    func uploadBasicDetails() {
+//
+//        let filenameArray = ["file[]"]
+//         let image = GlobalMethods.sharedInstance.resizeImage(image: BasicDetailsModel.sharedInstance.userImage, targetSize: CGSize.init(width: 200.0, height: 200.0))
+//        let imagesArray = [image]
+//
+//        NetworkManager.sharedInstance.POSTBasicDetails(params: BasicDetailsModel.sharedInstance.getBasicParamsForSaveKYC(), fileArray: imagesArray, filenameArray: filenameArray, success: { (responseDict) in
+//            print(responseDict)
+//            print("Basic Details Saved")
+////            self.uploadIdentityDetails()
+//        }) { (errorMsg) in
+//             GlobalMethods.sharedInstance.showAlert(alertTitle: stringAppName, alertText: errorMsg!)
+//        }
+//
+//    }
+//
+//    func uploadIdentityDetails() {
+//
+//        let filenameArray = ["file[]","file[]"]
+//
+//        NetworkManager.sharedInstance.POSTIdentityDetails(params:DocumentModel.sharedInstance.getIdentityDetailsForKYC() , fileArray: DocumentModel.sharedInstance.getIdentityImagesForKYC(), filenameArray: filenameArray, success: { (responseDict) in
+//            print(responseDict)
+//            print("Identity Details Saved")
+//            self.uploadAddressDetails()
+//        }) { (errorMsg) in
+//            GlobalMethods.sharedInstance.showAlert(alertTitle: stringAppName, alertText: errorMsg!)
+//        }
+//
+//    }
+//
+//
+//
+//    func uploadAddressDetails() {
+//
+//        let filenameArray = ["file[]","file[]"]
+//
+//        NetworkManager.sharedInstance.POSTAddressDetails(params: DocumentModel.sharedInstance.getAddressDetailsForKYC(), fileArray: DocumentModel.sharedInstance.getAddressImagesForKYC(), filenameArray: filenameArray, success: { (responseDict) in
+//            print(responseDict)
+//            print("Address Details Saved")
+//
+//            self.kycComplete()
+//
+//
+//        }) { (errorMsg) in
+//            GlobalMethods.sharedInstance.showAlert(alertTitle: stringAppName, alertText: errorMsg!)
+//        }
+//
+//    }
     
     func kycComplete() {
         
@@ -622,4 +624,23 @@ class GlobalMethods: NSObject {
         }
         return nil
     }
+    
+    
+    // MARK: - Carrier
+    
+    func getCarrierName() -> String? {
+        let networkInfo = CTTelephonyNetworkInfo()
+        let carrier = networkInfo.subscriberCellularProvider
+        
+        // Get carrier name
+        let carrierName = carrier?.carrierName
+        
+        return carrierName
+    }
+    
+    // MARK: - Location
+    
+//    func <#name#>(<#parameters#>) -> <#return type#> {
+//        <#function body#>
+//    }
 }

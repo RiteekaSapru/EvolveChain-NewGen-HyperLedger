@@ -20,7 +20,8 @@ class DocumentHoldingVC: UIViewController,UIImagePickerControllerDelegate,UINavi
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        filldata()
+        
         // Do any additional setup after loading the view.
     }
 
@@ -31,7 +32,15 @@ class DocumentHoldingVC: UIViewController,UIImagePickerControllerDelegate,UINavi
     
     //MARK: - Custom Actions
     
-    func permissionCheckGallery() {
+    fileprivate func filldata(){
+        lblOTP.text = SignupConfigModel.sharedInstance.verificationCode
+        if BasicDetailsModel.sharedInstance.holdingImage != nil{
+            imgPic.image = BasicDetailsModel.sharedInstance.holdingImage
+            holdingImage = BasicDetailsModel.sharedInstance.holdingImage
+        }
+    }
+    
+    fileprivate func permissionCheckGallery() {
         GlobalMethods.sharedInstance.checkForGalleryPermission(success: {
             DispatchQueue.main.async {
                 self.openGallery()
@@ -39,6 +48,39 @@ class DocumentHoldingVC: UIViewController,UIImagePickerControllerDelegate,UINavi
         }) {
             
         }
+    }
+    
+    fileprivate func showInfoAlert() {
+        
+        let alertInfo = UIAlertController.init(title: "Info", message: stringUpholdingInfo, preferredStyle: .alert)
+        
+        let okAction = UIAlertAction.init(title: "Okay", style: .cancel) { (alert) in
+            
+        }
+        
+        alertInfo.addAction(okAction)
+        
+        self.present(alertInfo, animated: true, completion: nil)
+        
+    }
+    
+    fileprivate func saveDetails(){
+        
+        DispatchQueue.main.async {
+            BasicDetailsModel.sharedInstance.holdingImage = self.holdingImage
+            self.completionHandler(4)
+            GlobalMethods.sharedInstance.popVC()
+        }
+        
+    }
+    
+    fileprivate func checkvalidation() -> Bool{
+        if holdingImage == nil{
+            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringUpholdingMissing)
+            return false
+        }
+        return true
+
     }
     
     func openGallery()
@@ -50,6 +92,16 @@ class DocumentHoldingVC: UIViewController,UIImagePickerControllerDelegate,UINavi
         self.present(imagePicker, animated: true, completion: nil)
     }
     
+    //MARK: - ImagePicker delegate
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        if let pickedImage = info[UIImagePickerControllerOriginalImage] as? UIImage {
+            
+            holdingImage = pickedImage
+            imgPic.image = pickedImage
+        }
+        picker.dismiss(animated: true, completion: nil)
+    }
+    
     //MARK: - Actions
     
     @IBAction func actionSelectImage(_ sender: Any) {
@@ -58,15 +110,27 @@ class DocumentHoldingVC: UIViewController,UIImagePickerControllerDelegate,UINavi
     }
     
     @IBAction func actionSave(_ sender: Any) {
+        if checkvalidation(){
+            upholdingAPI()
+        }
     }
-    /*
-    // MARK: - Navigation
+    
+    @IBAction func actionInfo(_ sender: Any) {
+        showInfoAlert()
+    }
+   
+     //MARK: - Web Services
+    
+    fileprivate func upholdingAPI(){
+        
+         let params = ["step":"face","number":SignupConfigModel.sharedInstance.verificationCode,"substep":"face"]
+        
+        NetworkManager.sharedInstance.POSTUpholdingDetails(params: params, fileArray: [holdingImage!], filenameArray: ["file[]"], success: { (responseJSON) in
+            self.saveDetails()
+        }) { (errorMsg) in
+            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringUpholdingMissing)
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+        }
     }
-    */
 
 }

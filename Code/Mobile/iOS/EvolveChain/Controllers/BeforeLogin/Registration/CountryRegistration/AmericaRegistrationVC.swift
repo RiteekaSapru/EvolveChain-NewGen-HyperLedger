@@ -68,22 +68,32 @@ class AmericaRegistrationVC: UIViewController,UITableViewDelegate,UITableViewDat
     }
     
     func updateTableView() {
-        tblvwData.reloadRows(at: [IndexPath.init(row: indexToUpdate, section: 0),IndexPath.init(row: indexToUpdate+1, section: 0)], with: .automatic)
+        if indexToUpdate == headerArray.count - 1 {
+            tblvwData.reloadRows(at: [IndexPath.init(row: indexToUpdate, section: 0)], with: .automatic)
+        }
+        else{
+            tblvwData.reloadRows(at: [IndexPath.init(row: indexToUpdate, section: 0),IndexPath.init(row: indexToUpdate+1, section: 0)], with: .automatic)
+        }
     }
 
     
     func getStatusForIndex(index:Int) -> Bool {
+//        return true
         switch index {
             case -1: return true
-        case 0:
+        case RegisterDetailsAmericaType.Basic.rawValue:
             return BasicDetailsModel.sharedInstance.isBasicDetailsComplete
-        case 1:
+        case RegisterDetailsAmericaType.Address.rawValue:
             return BasicDetailsModel.sharedInstance.isAddressDetailsComplete
-        case 2:
-            return DocumentModel.sharedInstance.isIdentityDetailsComplete
+        case RegisterDetailsAmericaType.IdentityProof.rawValue:
+            return DocumentManager.sharedInstance.isIdentityDocsUploaded
             
-        case 3:
-            return DocumentModel.sharedInstance.isAddressDetailsComplete
+        case RegisterDetailsAmericaType.AddressProof.rawValue:
+            return DocumentManager.sharedInstance.isAddressDocsUploaded
+            
+        case RegisterDetailsAmericaType.DocumentHolding.rawValue:
+            return BasicDetailsModel.sharedInstance.holdingImage != nil
+            
         default:
             return false
         }
@@ -94,11 +104,19 @@ class AmericaRegistrationVC: UIViewController,UITableViewDelegate,UITableViewDat
             GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringBasicNotSaved)
             return false
         }
-        else if !DocumentModel.sharedInstance.isIdentityDetailsComplete{
+        else if !BasicDetailsModel.sharedInstance.isAddressDetailsComplete{
+            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringAddressNotSaved)
+            return false
+        }
+        else if !DocumentManager.sharedInstance.isIdentityDocsUploaded{
             GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringIdentityNotSaved)
             return false
         }
-        else if !DocumentModel.sharedInstance.isAddressDetailsComplete{
+        else if !DocumentManager.sharedInstance.isAddressDocsUploaded{
+            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringAddressNotSaved)
+            return false
+        }
+        else if BasicDetailsModel.sharedInstance.holdingImage == nil{
             GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringAddressNotSaved)
             return false
         }
@@ -243,29 +261,52 @@ class AmericaRegistrationVC: UIViewController,UITableViewDelegate,UITableViewDat
             
             case RegisterDetailsAmericaType.IdentityProof.rawValue:
                 
-                let documentSelectionObj = self.storyboard?.instantiateViewController(withIdentifier: "DocumentSelectionVC") as! DocumentSelectionVC
-                
-                documentSelectionObj.currentType = .IdentityType
-                
-                GlobalMethods.sharedInstance.pushVC(documentSelectionObj)
-                documentSelectionObj.completionHandler = { index in
-                    self.indexToUpdate = index
-                    self.shouldUpdate = true
+                if DocumentManager.sharedInstance.arrIdentity.count > 0{
+                    let documentSelectionObj = self.storyboard?.instantiateViewController(withIdentifier: "DocumentVC") as! DocumentVC
+                    
+                    documentSelectionObj.currentType = .IdentityType
+                    
+                    GlobalMethods.sharedInstance.pushVC(documentSelectionObj)
+                    documentSelectionObj.completionHandler = { index in
+                        self.indexToUpdate = index
+                        self.shouldUpdate = true
+                    }
+                    
                 }
-                
+              
                 break
             case RegisterDetailsAmericaType.AddressProof.rawValue:
                 
-                let documentSelectionObj = self.storyboard?.instantiateViewController(withIdentifier: "DocumentSelectionVC") as! DocumentSelectionVC
-                
-                documentSelectionObj.currentType = .AddressType
-                
-                GlobalMethods.sharedInstance.pushVC(documentSelectionObj)
-                
-                documentSelectionObj.completionHandler = { index in
-                    self.indexToUpdate = index
-                    self.shouldUpdate = true
+                if DocumentManager.sharedInstance.arrAddress.count > 0{
+                    let documentSelectionObj = self.storyboard?.instantiateViewController(withIdentifier: "DocumentVC") as! DocumentVC
+                    
+                    documentSelectionObj.currentType = .AddressType
+                    
+                    GlobalMethods.sharedInstance.pushVC(documentSelectionObj)
+                    
+                    documentSelectionObj.completionHandler = { index in
+                        self.indexToUpdate = index
+                        self.shouldUpdate = true
+                    }
+                    
                 }
+               
+                break
+            
+            case RegisterDetailsAmericaType.DocumentHolding.rawValue:
+                
+                
+                    let documentHoldingObj = self.storyboard?.instantiateViewController(withIdentifier: "DocumentHoldingVC") as! DocumentHoldingVC
+                    
+                    
+                    GlobalMethods.sharedInstance.pushVC(documentHoldingObj)
+                    
+                    documentHoldingObj.completionHandler = { index in
+                        self.indexToUpdate = index
+                        self.shouldUpdate = true
+                    }
+                    
+                
                 
                 break
                 

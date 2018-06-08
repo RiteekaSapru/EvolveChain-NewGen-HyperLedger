@@ -326,7 +326,7 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     func APIGetPhoneOtp(countryCode:String,phoneNumner:String) -> Void {
         
         
-        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        GlobalMethods.sharedInstance.showLoader(loadingText: "   Sending OTP...")
         let params = ["mobile":phoneNumner,"country_code":countryCode]
         
         NetworkManager.sharedInstance.generateMobileOTP(params: params, success: { (responseDict) in
@@ -345,7 +345,7 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     func APIGetEMailOtp(email:String) -> Void {
         
         let params = ["email":email]
-        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        GlobalMethods.sharedInstance.showLoader(loadingText: "   Sending OTP...")
         NetworkManager.sharedInstance.generateEmailOTP(params: params, success: { (responseDict) in
             GlobalMethods.sharedInstance.dismissLoader(complete: {
                 self.moveToEmailOtpVerify()

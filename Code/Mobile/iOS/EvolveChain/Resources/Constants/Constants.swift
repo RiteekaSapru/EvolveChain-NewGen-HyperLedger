@@ -166,3 +166,6 @@ let stringPinNotMatch = "Pin does not match."
 let stringBasicNotSaved = "Please complete and save Basic details first."
 let stringIdentityNotSaved = "Please complete and save Identity details first."
 let stringAddressNotSaved = "Please complete and save Address details first."
+
+let stringUpholdingInfo = "Make a selfie while holding your identity document that you used to fill in the Verification form.\n\nBefore uploading an image on the Verification form, please make sure to follow photo requirements:\n\nYou are looking straight at the camera.\nYour background has a light, neutral colour.\nYour selfie is in colour.\nNo red eye!\nDO NOT wear sunglasses, a hat or a headband.\nVerification Code must be clearly visible."
+let stringUpholdingMissing = "Please select a picture."

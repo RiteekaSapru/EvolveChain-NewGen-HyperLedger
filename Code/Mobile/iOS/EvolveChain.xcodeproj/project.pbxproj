@@ -13,6 +13,7 @@
 		BD16A3F520BFECC100D38921 /* asdNew1.png in Resources */ = {isa = PBXBuildFile; fileRef = BD16A3F420BFECC000D38921 /* asdNew1.png */; };
 		BD18857120C6A45F006AF1C3 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD18857020C6A45F006AF1C3 /* KeychainService.swift */; };
 		BD1A48BA20C112160054E6A9 /* ChangePinVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD1A48B920C112160054E6A9 /* ChangePinVC.swift */; };
+		BD2F8BD920C93F970067502F /* DocumentVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD2F8BD820C93F970067502F /* DocumentVC.swift */; };
 		BD345C8520AD848B002388A9 /* Country.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD345C8420AD848B002388A9 /* Country.swift */; };
 		BD345C8720AD84A3002388A9 /* countries.json in Resources */ = {isa = PBXBuildFile; fileRef = BD345C8620AD84A3002388A9 /* countries.json */; };
 		BD345C8B20ADA6FF002388A9 /* CustomPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD345C8920ADA6FF002388A9 /* CustomPickerView.swift */; };
@@ -72,6 +73,8 @@
 		BDD559DA20AC547E006D8641 /* TickCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD559D820AC547E006D8641 /* TickCell.swift */; };
 		BDD559DB20AC547E006D8641 /* TickCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = BDD559D920AC547E006D8641 /* TickCell.xib */; };
 		BDD559DF20AD4E49006D8641 /* BasicDetailsAmericaVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD559DE20AD4E49006D8641 /* BasicDetailsAmericaVC.swift */; };
+		BDDE714B20C93A6200840CCF /* TwoImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDDE714920C93A6200840CCF /* TwoImagePicker.swift */; };
+		BDDE714C20C93A6200840CCF /* TwoImagePicker.xib in Resources */ = {isa = PBXBuildFile; fileRef = BDDE714A20C93A6200840CCF /* TwoImagePicker.xib */; };
 		BDF5D7B420BFB40D00D642CE /* SignupConfigModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDF5D7B320BFB40D00D642CE /* SignupConfigModel.swift */; };
 		BDF5D7B720BFB45700D642CE /* CountryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDF5D7B620BFB45700D642CE /* CountryModel.swift */; };
 		BDF5D7B920BFB69F00D642CE /* UtilityBillTypeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDF5D7B820BFB69F00D642CE /* UtilityBillTypeModel.swift */; };
@@ -93,6 +96,7 @@
 		BD16A3F420BFECC000D38921 /* asdNew1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = asdNew1.png; sourceTree = "<group>"; };
 		BD18857020C6A45F006AF1C3 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		BD1A48B920C112160054E6A9 /* ChangePinVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangePinVC.swift; sourceTree = "<group>"; };
+		BD2F8BD820C93F970067502F /* DocumentVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentVC.swift; sourceTree = "<group>"; };
 		BD345C8420AD848B002388A9 /* Country.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Country.swift; sourceTree = "<group>"; };
 		BD345C8620AD84A3002388A9 /* countries.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = countries.json; sourceTree = "<group>"; };
 		BD345C8820AD8C64002388A9 /* EvolveChain-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "EvolveChain-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -158,6 +162,8 @@
 		BDD559D820AC547E006D8641 /* TickCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TickCell.swift; sourceTree = "<group>"; };
 		BDD559D920AC547E006D8641 /* TickCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TickCell.xib; sourceTree = "<group>"; };
 		BDD559DE20AD4E49006D8641 /* BasicDetailsAmericaVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicDetailsAmericaVC.swift; sourceTree = "<group>"; };
+		BDDE714920C93A6200840CCF /* TwoImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwoImagePicker.swift; sourceTree = "<group>"; };
+		BDDE714A20C93A6200840CCF /* TwoImagePicker.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TwoImagePicker.xib; sourceTree = "<group>"; };
 		BDF5D7B320BFB40D00D642CE /* SignupConfigModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupConfigModel.swift; sourceTree = "<group>"; };
 		BDF5D7B620BFB45700D642CE /* CountryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryModel.swift; sourceTree = "<group>"; };
 		BDF5D7B820BFB69F00D642CE /* UtilityBillTypeModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtilityBillTypeModel.swift; sourceTree = "<group>"; };
@@ -521,6 +527,7 @@
 				BDF5D7BE20BFCF3500D642CE /* TermsCell */,
 				BDF5D7C320BFDD1600D642CE /* UserImageCell */,
 				BDF6DF3820C9257E00B9E162 /* TextFieldCell */,
+				BDDE714D20C93A6E00840CCF /* TwoImagePicker */,
 			);
 			path = Cells;
 			sourceTree = "<group>";
@@ -630,6 +637,7 @@
 			isa = PBXGroup;
 			children = (
 				BDD559C520AB0828006D8641 /* AmericaRegistrationVC.swift */,
+				BD2F8BD820C93F970067502F /* DocumentVC.swift */,
 				BD345C9820AEA288002388A9 /* BasicDetails */,
 				BD3E300120C7AD4F00040570 /* Address */,
 				BDD1FF7320BBF25F00BF260F /* Document */,
@@ -639,6 +647,15 @@
 				BDB53ADD20B28EED00C5122C /* BankDetails */,
 			);
 			path = CountryRegistration;
+			sourceTree = "<group>";
+		};
+		BDDE714D20C93A6E00840CCF /* TwoImagePicker */ = {
+			isa = PBXGroup;
+			children = (
+				BDDE714920C93A6200840CCF /* TwoImagePicker.swift */,
+				BDDE714A20C93A6200840CCF /* TwoImagePicker.xib */,
+			);
+			path = TwoImagePicker;
 			sourceTree = "<group>";
 		};
 		BDF5D7B520BFB43B00D642CE /* SignupConfig */ = {
@@ -738,6 +755,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BDDE714C20C93A6200840CCF /* TwoImagePicker.xib in Resources */,
 				BDD1FF7120BBD71100BF260F /* ImageCell.xib in Resources */,
 				BDB45EAF20B594DF008888CF /* OptionsCollectionViewCell.xib in Resources */,
 				BDD559DB20AC547E006D8641 /* TickCell.xib in Resources */,
@@ -784,6 +802,7 @@
 				BDB53ADF20B296EE00C5122C /* BankDetailsModel.swift in Sources */,
 				BDF5D7C120BFDD1000D642CE /* UserImageCell.swift in Sources */,
 				BDD559DA20AC547E006D8641 /* TickCell.swift in Sources */,
+				BD2F8BD920C93F970067502F /* DocumentVC.swift in Sources */,
 				BDB45EA720B54346008888CF /* UtilityBillModel.swift in Sources */,
 				BDBF8E0920C01394009214CD /* ShadowView.swift in Sources */,
 				BDB45E9E20B4042E008888CF /* BackSpaceTextfield.swift in Sources */,
@@ -816,6 +835,7 @@
 				BDB53AEA20B2AEAF00C5122C /* GenerateOtpVC.swift in Sources */,
 				BDF5D7BC20BFCF3100D642CE /* TermsCell.swift in Sources */,
 				BD161CB820AD682B009BBE50 /* BasicDetailsModel.swift in Sources */,
+				BDDE714B20C93A6200840CCF /* TwoImagePicker.swift in Sources */,
 				BD3E300320C7EF0900040570 /* DocumentHoldingVC.swift in Sources */,
 				BD345C8B20ADA6FF002388A9 /* CustomPickerView.swift in Sources */,
 				BD345C9720AE99EE002388A9 /* UIScrollView+KeyboardPresentation.m in Sources */,

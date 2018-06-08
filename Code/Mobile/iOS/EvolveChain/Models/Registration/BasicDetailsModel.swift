@@ -39,8 +39,11 @@ class BasicDetailsModel: NSObject, NSCoding {
     var isPhoneVerified : Bool          = false
     var isBasicDetailsComplete : Bool   = false
     var isAddressDetailsComplete : Bool   = false
+
+    
     var userImageURL : String           =  ""
     
+     var holdingImage : UIImage?
     
     // MARK:- Init
     override init() {
@@ -165,11 +168,28 @@ class BasicDetailsModel: NSObject, NSCoding {
         basicData.append(["Date of Birth",self.dob.getUTCDateStringFromDateString()])
         basicData.append(["Place of Birth",self.placeOfBirth])
 
-        basicData.append(["Address Line 1",self.add1])
+//        basicData.append(["Address Line 1",self.add1])
+//        if self.add2.count > 0 {
+//            basicData.append(["Address Line 2",self.add2])
+//        }
+//
+//        basicData.append(["Street",self.street])
+//        basicData.append(["City",self.city])
+//        basicData.append(["Zip",self.zipCode])
+//        basicData.append(["State",self.state])
+//        basicData.append(["Country",self.country])
+        
+        return basicData
+    }
+    
+    func getAddressDataInArray() -> [[Any]] {
+        
+        var basicData = [["Address Line 1",self.add1]]
+        
         if self.add2.count > 0 {
             basicData.append(["Address Line 2",self.add2])
         }
-       
+        
         basicData.append(["Street",self.street])
         basicData.append(["City",self.city])
         basicData.append(["Zip",self.zipCode])
@@ -177,6 +197,16 @@ class BasicDetailsModel: NSObject, NSCoding {
         basicData.append(["Country",self.country])
         
         return basicData
+    }
+    
+    func getHoldingAsArray() -> [[Any]] {
+        
+        var modelData = [[Any]]()
+        
+        modelData.append(["Holding Image","Holding Image",self.holdingImage])
+        
+        return modelData
+        
     }
     
     func initWithResponse(responseJson:Dictionary<String, Any>)

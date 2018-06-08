@@ -15,17 +15,21 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
     
     var arrHeader : [String] = []
     var arrBasicDetails : [ [Any]] = [[]]
-    var arrIdentityDetails : [ [Any]] = [[]]
     var arrAddressDetails : [ [Any]] = [[]]
+    var arrIdentityDocs : [ [Any]] = [[]]
+    var arrAddressDoc : [ [Any]] = [[]]
+    var arrHoldingImage : [ [Any]] = [[]]
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        arrHeader = ["Basic Details","Identity Details","Address Details"]
+        arrHeader = ["Basic Details","Address Details","Identity Document","Address Document","Document Holding Image"]
         arrBasicDetails = BasicDetailsModel.sharedInstance.getBasicDataInArray()
-        arrIdentityDetails = DocumentModel.sharedInstance.getIdentityDataInArray()
-        arrAddressDetails = DocumentModel.sharedInstance.getAddressDataInArray()
-        
+        arrAddressDetails = BasicDetailsModel.sharedInstance.getAddressDataInArray()
+        arrIdentityDocs = DocumentManager.sharedInstance.selectedIdentityModel.getDataAsArray()
+        arrAddressDoc = DocumentManager.sharedInstance.selectedAddressModel.getDataAsArray()
+        arrHoldingImage = BasicDetailsModel.sharedInstance.getHoldingAsArray()
+            
         tblvwSummary.register(UINib(nibName: "SummaryCell", bundle: nil), forCellReuseIdentifier: "SummaryCell")
         tblvwSummary.register(UINib(nibName: "ImageCell", bundle: nil), forCellReuseIdentifier: "ImageCell")
         tblvwSummary.register(UINib(nibName: "UserImageCell", bundle: nil), forCellReuseIdentifier: "UserImageCell")
@@ -47,10 +51,14 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
         case 0:
             arrModel = arrBasicDetails[row]
         case 1:
-            arrModel = arrIdentityDetails[row]
-        case 2:
             arrModel = arrAddressDetails[row]
-            
+        case 2:
+            arrModel = arrIdentityDocs[row]
+        
+        case 3:
+            arrModel = arrAddressDoc[row]
+        case 4:
+            arrModel = arrHoldingImage[row]
         default:
             break
         }
@@ -63,9 +71,13 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
         case 0:
             return arrBasicDetails
         case 1:
-            return arrIdentityDetails
-        case 2:
             return arrAddressDetails
+        case 2:
+            return arrIdentityDocs
+        case 3:
+            return arrAddressDoc
+        case 4:
+            return arrHoldingImage
         default: return []
             
         }
@@ -87,7 +99,7 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
         alert.addAction(termsAction)
         
         let acceptAction = UIAlertAction.init(title: "I Accept", style: .default) { (alert) in
-             GlobalMethods.sharedInstance.uploadBasicDetails()
+             GlobalMethods.sharedInstance.kycComplete()
         }
         
         alert.addAction(acceptAction)
@@ -119,7 +131,7 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
             if arrModel.count > 2{
                 let cell = tableView.dequeueReusableCell(withIdentifier: "ImageCell", for: indexPath) as! ImageCell
                 
-                cell.setData(imgFront: arrModel[1] as! UIImage, imgBack: arrModel[2] as! UIImage)
+                cell.setData(imgFront: arrModel[1], imgBack: arrModel[2] as! UIImage)
                 
                 return cell;
             }
@@ -146,7 +158,7 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         
         let vwHeader = UIView.init(frame: CGRect.init(x: 0, y: 0, width: _screenSize.width, height: 45.0))
-        vwHeader.backgroundColor = UIColor.clear
+        vwHeader.backgroundColor = UIColor.init(white: 1, alpha: 0.7)
         
         let lblHeader = UILabel.init(frame: CGRect.init(x: 15, y: 0, width: _screenSize.width - 30.0, height: 45))
         lblHeader.font = UIFont.init(name: "AvenirNext-Medium", size: 24)
@@ -154,12 +166,12 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
         lblHeader.text = arrHeader[section]
         vwHeader.addSubview(lblHeader)
         
-        if(section > 0)
-        {
-            let seperatorview = UIView.init(frame: CGRect.init(x: 10, y: 0, width: _screenSize.width - 20.0, height: 1))
-            seperatorview.backgroundColor = UIColor.lightGray
-             vwHeader.addSubview(seperatorview)
-        }
+//        if(section > 0)
+//        {
+//            let seperatorview = UIView.init(frame: CGRect.init(x: 10, y: 0, width: _screenSize.width - 20.0, height: 1))
+//            seperatorview.backgroundColor = UIColor.lightGray
+//             vwHeader.addSubview(seperatorview)
+//        }
         
         return vwHeader
         

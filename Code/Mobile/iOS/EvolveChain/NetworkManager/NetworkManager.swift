@@ -31,7 +31,7 @@ static let sharedInstance = NetworkManager()
     
     func initialiseAPI(success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping (String? )-> Void) {
         
-         GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+         GlobalMethods.sharedInstance.showLoader(loadingText: "   Fetching Documents...")
         let url = kLocalURL+initaliseURL
         var ipAdd = GlobalMethods.sharedInstance.getIFAddresses();
         
@@ -136,7 +136,7 @@ static let sharedInstance = NetworkManager()
         
         let url = kLocalURL+saveKYCDetails+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
         
-         GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+         GlobalMethods.sharedInstance.showLoader(loadingText: "   Saving Basic Info...")
         
         RequestManager.sharedInstance.requestToUploadImagesWithParams(url: url, params: params, images: fileArray, fileNames: filenameArray, method: .POST, success: { (data, response, error, responseJSON) in
             GlobalMethods.sharedInstance.dismissLoader(complete: {
@@ -153,7 +153,7 @@ static let sharedInstance = NetworkManager()
         
         let url = kLocalURL+saveKYCDetails+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
         
-        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        GlobalMethods.sharedInstance.showLoader(loadingText: "   Saving Document...")
         
         RequestManager.sharedInstance.requestToUploadImagesWithParams(url: url, params: params, images: fileArray, fileNames: filenameArray, method: .POST, success: { (data, response, error, responseJSON) in
             GlobalMethods.sharedInstance.dismissLoader(complete: {
@@ -170,7 +170,24 @@ static let sharedInstance = NetworkManager()
         
         let url = kLocalURL+saveKYCDetails+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
         
-        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        GlobalMethods.sharedInstance.showLoader(loadingText: "   Saving Address Doc...")
+        
+        RequestManager.sharedInstance.requestToUploadImagesWithParams(url: url, params: params, images: fileArray, fileNames: filenameArray, method: .POST, success: { (data, response, error, responseJSON) in
+            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                success(responseJSON)
+            })
+        }) { (data, response, error, errorMsg) in
+            GlobalMethods.sharedInstance.dismissLoader(complete: {
+                failure(errorMsg)
+            })
+        }
+    }
+    
+    func POSTUpholdingDetails(params:Dictionary<String,Any>,fileArray:[UIImage],filenameArray:[String],success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping (String? )-> Void) -> Void {
+        
+        let url = kLocalURL+saveKYCDetails+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
+        
+        GlobalMethods.sharedInstance.showLoader(loadingText: "   Saving Upholding Pic...")
         
         RequestManager.sharedInstance.requestToUploadImagesWithParams(url: url, params: params, images: fileArray, fileNames: filenameArray, method: .POST, success: { (data, response, error, responseJSON) in
             GlobalMethods.sharedInstance.dismissLoader(complete: {
@@ -187,7 +204,7 @@ static let sharedInstance = NetworkManager()
         
         let url = kLocalURL+submitKYCDetails//+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
         
-        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        GlobalMethods.sharedInstance.showLoader(loadingText: "   Submiting Form...")
         
         RequestManager.sharedInstance.makeAPICall(url: url, params: params, method: .POST, success: { (data, response, error, responseJSON) in
             GlobalMethods.sharedInstance.dismissLoader(complete: {
@@ -209,7 +226,7 @@ static let sharedInstance = NetworkManager()
         
         let url = kLocalURL+generatePinURL//+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
         
-        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        GlobalMethods.sharedInstance.showLoader(loadingText: "   Sending OTP...")
         RequestManager.sharedInstance.makeAPICall(url: url, params: params, method: .POST, success: { (data, response, error, responseJSON) in
             GlobalMethods.sharedInstance.dismissLoader(complete: {
                 success(responseJSON)
@@ -227,7 +244,7 @@ static let sharedInstance = NetworkManager()
         
         let url = kLocalURL+setPinURL//+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
         
-        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        GlobalMethods.sharedInstance.showLoader(loadingText: "   Saving Pin...")
         RequestManager.sharedInstance.makeAPICall(url: url, params: params, method: .POST, success: { (data, response, error, responseJSON) in
             GlobalMethods.sharedInstance.dismissLoader(complete: {
                 success(responseJSON)
@@ -245,7 +262,7 @@ static let sharedInstance = NetworkManager()
         
         let url = kLocalURL+loginURL//+RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
         
-        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        GlobalMethods.sharedInstance.showLoader(loadingText: "   Logging In...")
         
         RequestManager.sharedInstance.makeAPICall(url: url, params: params, method: .POST, success: { (data, response, error, responseJson) in
             GlobalMethods.sharedInstance.dismissLoader(complete: {
@@ -266,7 +283,7 @@ static let sharedInstance = NetworkManager()
         
         let url = kLocalURL+changePinURL
         
-        GlobalMethods.sharedInstance.showLoader(loadingText: stringLoader)
+        GlobalMethods.sharedInstance.showLoader(loadingText: "   Saving Pin...")
         RequestManager.sharedInstance.makeAPICall(url: url, params: params, method: .POST, success: { (data, response, error, responseJSON) in
             GlobalMethods.sharedInstance.dismissLoader(complete: {
                 success(responseJSON)

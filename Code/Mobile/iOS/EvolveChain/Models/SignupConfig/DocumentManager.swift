@@ -8,6 +8,11 @@
 
 import UIKit
 
+enum DocumentType : String {
+    case  IdentityType
+    case  AddressType
+}
+
 enum CellType : String {
     case  PickerType
     case  SelectionType
@@ -28,10 +33,10 @@ class DocumentManager: NSObject {
     var arrIdentity : [DocModel] = []
     var arrAddress : [DocModel] = []
     
+    var isIdentityDocsUploaded : Bool   = false
+    var isAddressDocsUploaded : Bool   = false
+    
     func sortModel(doc:DocModel)  {
-        
-        arrIdentity.removeAll()
-        arrAddress.removeAll()
         
         switch doc.type{
         case "B":
@@ -48,6 +53,9 @@ class DocumentManager: NSObject {
     
     func initWith(docArray:[Dictionary<String,Any>]) {
         
+        arrIdentity.removeAll()
+        arrAddress.removeAll()
+        
         for dict in docArray{
             let model = DocModel.init()
             model.initWith(model: dict)
@@ -63,12 +71,41 @@ class DocumentManager: NSObject {
         }
     }
     
-    func getFieldArrayForModel(model : DocModel) -> [[FieldsModel]] {
+    func getFieldArrayForModel(model : DocModel,docType : DocumentType) -> [[FieldsModel]] {
         
-        var fieldArray : [[FieldsModel]] = [[]]
+        var fieldArray = [[FieldsModel]]()
+        
+        switch docType {
+        case .IdentityType:
+            var pickerArray = [FieldsModel]()
+            pickerArray.append(FieldsModel.init())
+            
+            for _ in arrIdentity{
+                let obj = FieldsModel.init()
+                obj.type = .SelectionType
+                pickerArray.append(obj)
+            }
+            
+            fieldArray.append(pickerArray)
+            
+        case .AddressType:
+            var pickerArray = [FieldsModel]()
+            pickerArray.append(FieldsModel.init())
+            
+            for _ in arrAddress{
+                let obj = FieldsModel.init()
+                obj.type = .SelectionType
+                pickerArray.append(obj)
+            }
+            
+            fieldArray.append(pickerArray)
+        }
         
         if model.subDocs.count > 0{
-            var pickerArray : [FieldsModel] = []
+            
+            model.isExpiryDate = model.selectedSubType!.isExpiryDate
+            
+            var pickerArray = [FieldsModel]()
             pickerArray.append(FieldsModel.init())
             
             for _ in model.subDocs{
@@ -83,7 +120,7 @@ class DocumentManager: NSObject {
             fieldArray.append([])
         }
         
-        var inputFieldArray : [FieldsModel] = []
+        var inputFieldArray = [FieldsModel]()
         
         let obj1 = FieldsModel.init()
         obj1.type = .TextfieldType
