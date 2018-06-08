@@ -12,7 +12,8 @@ const commonUtility = require('../helpers/CommonUtility');
 const ImageInfo = new Schema({
     name: String,
     contentType: String,
-    encoding: String
+    encoding: String,
+    file_key : String
 });
 
 // const DocInfo = new Schema({
@@ -29,7 +30,8 @@ const GeneralDocument = new Schema({
     number: { type: String },
     expiry_date: { type: String },
     country: { type: String },
-    document_type: { type: String }
+    document_type: { type: String },
+    sub_document_type: { type: String }
 });
 
 const KYCDocument = new Schema({
@@ -60,6 +62,10 @@ const KYCDocument = new Schema({
         images: { type: [ImageInfo] },
     },
     identity_info: {
+        details:{type: GeneralDocument},
+        images: { type: [ImageInfo] },
+    },
+    face_info: {
         details:{type: GeneralDocument},
         images: { type: [ImageInfo] },
     },

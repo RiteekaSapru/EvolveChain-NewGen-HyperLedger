@@ -46,8 +46,8 @@ class CommonUtility {
                 metaDataInfo = {
                     'firstname': 'First Name', 'middlename': 'Middle Name','lastname': 'Last Name', 
                     'dob': 'Date Of Birth', 'place_of_birth': 'Birth Place',
-                    'address1': 'Address 1', 'address2': 'Address 2', 'city': 'City',
-                    'zip': 'Zip', 'state': 'State'
+                    'address1': 'Address 1', 'address2': 'Address 2','street' : 'Street', 'city': 'City',
+                    'zip': 'Zip', 'state': 'State', 'country': 'Country'
                 };
                 break;
             case 'IDENTITY':
@@ -133,7 +133,7 @@ class CommonUtility {
             summaryInfo.DocDetails = JSON.parse(JSON.stringify(details));
 
             for (var j = 0; j < images.length; j++) {
-                let imgUrl = config.base_url + "/kyc/getdocumentimages/" + images[j]._id.toString();
+                let imgUrl = config.base_url + "/kyc/getdocumentimages/" + images[j].file_key.toString();
                 summaryInfo.DocImages.push({ 'url': imgUrl });
             }
         }

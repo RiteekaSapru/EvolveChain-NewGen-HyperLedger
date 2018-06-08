@@ -14,6 +14,7 @@ const log_manager = require('../../helpers/LogManager');
 const base_controller = require('../BaseController');
 
 const app = require('../../models/apps');
+const Country = require('../../models/country');
 
 const kyc_document = require('../../models/kycdocument');
 
@@ -65,21 +66,24 @@ class AppController extends base_controller {
             //Temp work : need to fetch from Database later
             var documentList = config.init_config.DOCUMENT_LIST;
             var iso = body.country_iso.toUpperCase();
-            const countrydocs = documentList.find(c => c.country_iso.findIndex(d => d == iso) > -1).documents;
+            const countryDocs = documentList.filter(c => c.country_iso.findIndex(d => d == iso) > -1);
 
             var App = new app(params);
             var newApp = await App.save();
 
+            let verification_code = common_utility.GenerateOTP(6);
             var kycDocParam = {
                 app_key: newApp.key,
                 isDelete: 0,
+                face_info: {details: {number:verification_code}},
                 last_modified: common_utility.UtcNow()
             }
 
 
             var kycDoc = new kyc_document(kycDocParam);
             var newKycDoc = await kycDoc.save();
-            newApp.documents = countrydocs
+            newApp.documents = countryDocs
+            newApp.verification_code = verification_code;
 
             return this.GetSuccessResponse("Initialize", newApp, res);
 
@@ -103,7 +107,8 @@ class AppController extends base_controller {
                 req.checkBody("email", messages.req_email).notEmpty();
                 break;
             default:
-                return this.GetErrorResponse('user contact type missing!', res);
+                // return this.GetErrorResponse('user contact type missing!', res);
+                return this.SendErrorResponse(res, config.ERROR_CODES.CONTACT_TYPE_MISSING);
                 break;
         }
 
@@ -132,7 +137,7 @@ class AppController extends base_controller {
                     }
                     break;
                 default:
-                    return this.GetErrorResponse('contact type missing!', res);
+                return this.SendErrorResponse(res, config.ERROR_CODES.CONTACT_TYPE_MISSING);
                     break;
             }
 
@@ -145,15 +150,21 @@ class AppController extends base_controller {
                 app_key: App.key,
                 isDelete: 0
             }
-
+            
             var docData = await kyc_document.findOne(con);
 
             if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
+
             //Temp work : need to fetch from Database later
             var documentList = config.init_config.DOCUMENT_LIST;
             var iso = App.country_iso.toUpperCase();
-            const countryDocs = documentList.find(c => c.country_iso.findIndex(d => d == iso) > -1).documents;
+            const countryDocs = documentList.filter(c => c.country_iso.findIndex(d => d == iso) > -1);   
+            
+            //Get the Country details from ISO
+           var countryDetails = await Country.findOne({"iso" : iso});
+
             App.documents = countryDocs;
+            App.countryDetails = countryDetails;
             return this.GetSuccessResubmitInitialize(App, docData, res);
 
         } catch (ex) {
@@ -665,7 +676,8 @@ class AppController extends base_controller {
                     'ip': appEntity.IP,
                     'Server': appEntity.Server,
                     'Refer': appEntity.Refer,
-                    'documents': appEntity.documents
+                    'documents': appEntity.documents,
+                    'verification_code':appEntity.verification_code
                     // 'init_config': config.get('init_config')
                 };
                 break;
@@ -782,6 +794,7 @@ class AppController extends base_controller {
             "AddressInfo": common_utility.GetKycDocumentInfo(docEntity.address_info, "ADDRESS"),
             "IdentityInfo": common_utility.GetKycDocumentInfo(docEntity.identity_info, "IDENTITY"),
             'documents': appEntity.documents,
+            'country_details' : appEntity.countryDetails,
             "result": messages.resubmit_init_success
         }
         return res.status(status.OK).jsonp(response);

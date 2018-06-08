@@ -44,37 +44,76 @@
     "DATE_FORMAT": "yyyy-MM-dd",
     "DOCUMENT_LIST": [
         {
-            "country_iso": ["IN", "US", "CA"],
-            "documents": [
+            "name": "Passport",
+            "code": "PP",
+            "country_iso": [
+                "IN",
+                "US",
+                "CA"
+            ],
+            "type": "B",
+            "expiry_date": true,
+            "sub_docs": []
+        },
+        {
+            "name": "Taxation/PAN",
+            "code": "TT",
+            "country_iso": [
+                "IN",
+                "US",
+                "CA"
+            ],
+            "type": "B",
+            "expiry_date": false,
+            "sub_docs": []
+        },
+        {
+            "name": "Driving License",
+            "code": "DL",
+            "country_iso": [
+                "IN",
+                "US",
+                "CA"
+            ],
+            "type": "B",
+            "expiry_date": true,
+            "sub_docs": []
+        },
+        {
+            "name": "Aadhaar",
+            "code": "AR",
+            "country_iso": [
+                "IN"                
+            ],
+            "type": "B",
+            "expiry_date": true,
+            "sub_docs": []
+        },
+        {
+            "name": "Utility Bills",
+            "code": "UB",
+            "country_iso": [
+                "IN",
+                "US",
+                "CA"
+            ],
+            "type": "A",
+            "expiry_date": false,
+            "sub_docs": [
                 {
-                    "name": "Passport",
-                    "code": "PP",
-                    "type": "B",
-                    "expiry_date": true,
-                    "sub_docs": []
+                    "code": "UB_EB",
+                    "name": "Electricity Bill",
+                    "expiry_date": true
                 },
                 {
-                    "name": "Utility Bills",
-                    "code": "UB",
-                    "type": "A",
-                    "expiry_date": false,
-                    "sub_docs": [
-                        {
-                            "code": "UB_EB",
-                            "name": "Electricity Bill"
-                        },
-                        {
-                            "code": "UB_MB",
-                            "name": "Mobile Bill"
-                        },
-                        {
-                            "code": "UB_IB",
-                            "name": "Internet Bill"
-                        }
-                    ]
+                    "code": "UB_MB",
+                    "name": "Mobile Bill"
+                },
+                {
+                    "code": "UB_IB",
+                    "name": "Internet Bill"
                 }
             ]
         }
-       
     ]
 }
