@@ -25,7 +25,8 @@
         "BASIC_DOCS_MISSING": "E15",
         "IDENTITY_DOCS_MISSING":"E16",
         "ADDRESS_DOCS_MISSING":"E17",
-        "DEVICE_EKYCID_NOT_FOUND": "E18"
+        "DEVICE_EKYCID_NOT_FOUND": "E18",
+        "CONTACT_TYPE_MISSING": "E19"
     },
     "HTTP_STATUS":{
         "OK": 200,
