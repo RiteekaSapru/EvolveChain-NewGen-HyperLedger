@@ -106,7 +106,8 @@ class AppController extends base_controller {
                 req.checkBody("email", messages.req_email).notEmpty();
                 break;
             default:
-                return this.GetErrorResponse('user contact type missing!', res);
+                // return this.GetErrorResponse('user contact type missing!', res);
+                return this.SendErrorResponse(res, config.ERROR_CODES.CONTACT_TYPE_MISSING);
                 break;
         }
 
@@ -135,7 +136,7 @@ class AppController extends base_controller {
                     }
                     break;
                 default:
-                    return this.GetErrorResponse('contact type missing!', res);
+                return this.SendErrorResponse(res, config.ERROR_CODES.CONTACT_TYPE_MISSING);
                     break;
             }
 

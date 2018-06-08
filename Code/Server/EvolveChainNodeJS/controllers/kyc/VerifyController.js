@@ -99,18 +99,13 @@ class VerifyController extends BaseController {
             var action = req.body.action;
 
             var reasonList = req.body.reasonList;
-            let allReasons = await VerificationReasons.find();
-
-            var reasonDefinition = [];
-            for (var j = 0; j < reasonList.length; j++) {
-                for (var i = 0; i < allReasons.length; i++) {
-                    if (reasonList[j] == allReasons[i].code) {
-                        reasonDefinition.push(allReasons[i].reason);
-                    }
-                }
-            }
+            //let allReasons = await VerificationReasons.find();
 
 
+            var reasonDefinition = await VerificationReasons.find(
+                { "code": { $in: reasonList } },
+                { "reason": 1 }
+            );
 
             let isVerified = (action.toUpperCase() == "VERIFY");
 
@@ -157,7 +152,7 @@ class VerifyController extends BaseController {
                 APP_LOGO_URL: config.get('APP_LOGO_URL'),
                 SITE_NAME: config.get('app_name'),
                 CURRENT_YEAR: config.get('current_year'),
-                REASON_LIST:reasonDefinition
+                REASON_LIST:reasonDefinition.map(x => x.reason)
             });
 
             if (isVerified && eKycId != '') {
