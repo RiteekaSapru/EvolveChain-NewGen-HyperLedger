@@ -47,20 +47,6 @@ class VerifyController extends BaseController {
                 allReasons[idx].state = true;
             }
 
-            // for (var j = 0; j < appReasons.length; j++) {               
-            //     for (var i = 0; i < reasonList.length; i++) {
-            //         if (appReasons[j] == reasonList[i].code) {
-            //             var conditions = {
-            //                 code: appReasons[j]
-            //             }
-            //             var setParams = {
-            //                 $set: { state: true }
-            //             }
-            //             await VerificationReasons.update(conditions, setParams);
-            //         }
-            //     }
-            // }
-            // reasonList = await VerificationReasons.find();
 
             let isVerified = (docData.app_data.status == config.APP_STATUSES.VERIFIED);
             let kycData = {
@@ -111,7 +97,20 @@ class VerifyController extends BaseController {
 
             userEmailId = appData.email;
             var action = req.body.action;
+
             var reasonList = req.body.reasonList;
+            let allReasons = await VerificationReasons.find();
+
+            var reasonDefinition = [];
+            for (var j = 0; j < reasonList.length; j++) {
+                for (var i = 0; i < allReasons.length; i++) {
+                    if (reasonList[j] == allReasons[i].code) {
+                        reasonDefinition.push(allReasons[i].reason);
+                    }
+                }
+            }
+
+
 
             let isVerified = (action.toUpperCase() == "VERIFY");
 
@@ -157,7 +156,8 @@ class VerifyController extends BaseController {
                 resubmitPin: resubmitPin,
                 APP_LOGO_URL: config.get('APP_LOGO_URL'),
                 SITE_NAME: config.get('app_name'),
-                CURRENT_YEAR: config.get('current_year')
+                CURRENT_YEAR: config.get('current_year'),
+                REASON_LIST:reasonDefinition
             });
 
             if (isVerified && eKycId != '') {
