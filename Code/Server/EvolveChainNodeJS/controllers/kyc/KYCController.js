@@ -21,16 +21,19 @@ var mongo = require('mongodb');
 const md5 = require('md5');
 const multer = require('multer');
 const authenticator = require('authenticator');
+
 const App = require('../../models/apps');
 const KYCDocument = require('../../models/kycdocument');
 const File = require('../../models/files');
 const Share = require('../../models/shares');
 const Wallet = require('../../models/wallet');
+
 const BASE_PATH = config.get('base_path');
 const PUBLIC_PATH = config.get('PUBLIC_PATH');
-var im = require('imagemagick');
-const EmailTemplatesPath = path.join(__dirname + "/../../public/email_template");
+const EMAILTEMPLATESPATH = path.join(__dirname + "/../../public/email_template");
+
 //var to = config.get('ver_mail_id');
+var im = require('imagemagick');
 
 var bucket;
 mongo.MongoClient.connect(config.get('MONGODB_URL'), function (err, db) {
@@ -336,7 +339,8 @@ class KYCController extends BaseController {
                     number: body.number,
                     expiry_date: body.expiry_date,
                     country: body.country,
-                    document_type: body.substep
+                    document_type: body.substep,
+                    sub_document_type: body.subdoc
                 };
                 setParams.address_info = {};
                 setParams.address_info.details = details;
@@ -348,7 +352,8 @@ class KYCController extends BaseController {
                     number: body.number,
                     expiry_date: body.expiry_date,
                     country: body.country,
-                    document_type: body.substep
+                    document_type: body.substep,
+                    sub_document_type: body.subdoc
                 };
                 setParams.identity_info = {};
                 setParams.identity_info.details = details;
@@ -425,17 +430,16 @@ class KYCController extends BaseController {
             if (docData.address_info.details == undefined || docData.address_info.details == null || docData.address_info.details.document_type == undefined)
                 return this.SendErrorResponse(res, config.ERROR_CODES.ADDRESS_DOCS_MISSING);
 
+            if (docData.face_info.details == undefined || docData.face_info.details == null || docData.face_info.details.document_type == undefined)
+                return this.SendErrorResponse(res, config.ERROR_CODES.FACE_DOCS_MISSING);
+
 
             var basic_images_id = docData.basic_info.images.map(x => mongoose.Types.ObjectId(x.file_key));
             var address_images_id = docData.address_info.images.map(x => mongoose.Types.ObjectId(x.file_key));
             var identity_images_id = docData.identity_info.images.map(x => mongoose.Types.ObjectId(x.file_key));
-            // var basic_images_id = docData.basic_info.images.map(x => x._id.toString());
-            // var address_images_id = docData.address_info.images.map(x => x._id.toString());
-            // var identity_images_id = docData.identity_info.images.map(x => x._id.toString());
+            var face_images_id = docData.identity_info.images.map(x => mongoose.Types.ObjectId(x.file_key));
 
-            //all_image_ids = basic_images_id; all_image_ids.concat(address_images_id); all_image_ids.concat(identity_images_id);
-            var all_image_ids = basic_images_id.concat(address_images_id).concat(identity_images_id);
-
+            var all_image_ids = basic_images_id.concat(address_images_id).concat(identity_images_id).concat(face_images_id);
 
             var result_all = await File.find(
                 { _id: { $in: all_image_ids } },
@@ -444,7 +448,7 @@ class KYCController extends BaseController {
             if ((all_image_ids.length !== result_all.length)) return kycController.GetErrorResponse(messages.file_not_found, res);
 
             //link send through email 
-            var template = fs.readFileSync(EmailTemplatesPath + '/verifyKycRequest.html', {
+            var template = fs.readFileSync(EMAILTEMPLATESPATH + '/verifyKycRequest.html', {
                 encoding: 'utf-8'
             });
 

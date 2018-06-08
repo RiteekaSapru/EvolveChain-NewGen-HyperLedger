@@ -102,7 +102,8 @@
             "sub_docs": [
                 {
                     "code": "UB_EB",
-                    "name": "Electricity Bill"
+                    "name": "Electricity Bill",
+                    "expiry_date": true
                 },
                 {
                     "code": "UB_MB",

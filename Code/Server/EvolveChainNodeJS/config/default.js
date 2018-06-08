@@ -38,7 +38,7 @@ const MAIL_4 = 'admin@'+process.env.COMPANY_DOMAIN;
 // const MAIL_1 = 'gordhan@yudiz.com';
 // const MAIL_2 = 'gordhan.c@yudiz.in';
 
-const approver_email_ids = 'riteeka.sapru@newgen.co.in';
+const approver_email_ids = 'archana.mehta@newgen.co.in,riteeka.sapru@newgen.co.in, abhay.shankar@newgen.co.in';
 
 const web_site = BASE_URL+'/public/web';
 const appLogoUrl = 'https://cdn1.imggmi.com/uploads/2018/5/31/eb3111c644ef4739a7c8c8258f27cb7a-full.png';

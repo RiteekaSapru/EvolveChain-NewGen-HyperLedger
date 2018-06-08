@@ -30,7 +30,8 @@ const GeneralDocument = new Schema({
     number: { type: String },
     expiry_date: { type: String },
     country: { type: String },
-    document_type: { type: String }
+    document_type: { type: String },
+    sub_document_type: { type: String }
 });
 
 const KYCDocument = new Schema({

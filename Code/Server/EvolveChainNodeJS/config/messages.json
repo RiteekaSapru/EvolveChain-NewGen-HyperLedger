@@ -149,6 +149,7 @@
         "E16": "Identity documents missing",
         "E17": "Address documents missing",
         "E18": "Ekyc Id for this device does not exist!",
-        "E19": "User contact type missing!"
+        "E19": "User contact type missing!",
+        "E20": "Face documents missing"
     }
 }
