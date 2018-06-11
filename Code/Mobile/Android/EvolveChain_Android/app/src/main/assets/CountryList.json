@@ -11,6 +11,28 @@
     "banned": null
   },
   {
+    "ISO": "CA",
+    "Country": "Canada",
+    "Capital": "Ottawa",
+    "Continent": "NA",
+    "CurrencyCode": "CAD",
+    "PhoneCode": "1",
+    "ISO2": "CMR",
+    "order": 47,
+    "banned": null
+  },
+  {
+    "ISO": "IN",
+    "Country": "India",
+    "Capital": "New Delhi",
+    "Continent": "AS",
+    "CurrencyCode": "INR",
+    "PhoneCode": "91",
+    "ISO2": "IND",
+    "order": 105,
+    "banned": null
+  },
+  {
     "ISO": "GB",
     "Country": "United Kingdom",
     "Capital": "London",
@@ -503,17 +525,6 @@
     "PhoneCode": "506",
     "ISO2": "CIV",
     "order": 46,
-    "banned": null
-  },
-  {
-    "ISO": "CA",
-    "Country": "Canada",
-    "Capital": "Ottawa",
-    "Continent": "NA",
-    "CurrencyCode": "CAD",
-    "PhoneCode": "1",
-    "ISO2": "CMR",
-    "order": 47,
     "banned": null
   },
   {
@@ -1141,17 +1152,6 @@
     "PhoneCode": "441624",
     "ISO2": "IMN",
     "order": 104,
-    "banned": null
-  },
-  {
-    "ISO": "IN",
-    "Country": "India",
-    "Capital": "New Delhi",
-    "Continent": "AS",
-    "CurrencyCode": "INR",
-    "PhoneCode": "91",
-    "ISO2": "IND",
-    "order": 105,
     "banned": null
   },
   {

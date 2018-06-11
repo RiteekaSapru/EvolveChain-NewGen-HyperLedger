@@ -4,7 +4,7 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -17,6 +17,7 @@
         <activity
             android:name=".uis.activities.StartActivity"
             android:noHistory="true"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,68 +27,106 @@
         </activity>
         <activity
             android:name=".uis.activities.SplashActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="portrait" />
         <activity
-            android:name=".uis.activities.CountrySelectionActivity"
+            android:name=".new_uis.CountrySelectionActivity"
             android:label="Select Country"
+            android:screenOrientation="portrait"
             android:parentActivityName=".uis.activities.SplashActivity" />
         <activity
             android:name=".uis.activities.SignInActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".uis.activities.GeneratePinActivity"
             android:label=" "
+            android:screenOrientation="portrait"
             android:parentActivityName=".uis.activities.SplashActivity" />
         <activity
-            android:name=".uis.activities.OthersRegistrationActivity"
+            android:name=".new_uis.OthersRegistrationActivity"
             android:label="North America"
-            android:parentActivityName=".uis.activities.CountrySelectionActivity" />
+            android:screenOrientation="portrait"
+            android:parentActivityName=".new_uis.CountrySelectionActivity" />
         <activity
             android:name=".uis.activities.BasicDetailsActivity"
             android:label="Basic Details"
-            android:parentActivityName=".uis.activities.OthersRegistrationActivity" />
+            android:screenOrientation="portrait"
+            android:parentActivityName=".new_uis.OthersRegistrationActivity" />
         <activity
             android:name=".uis.activities.EmailActivity"
             android:label="Add Email"
             android:noHistory="true"
+            android:screenOrientation="portrait"
             android:parentActivityName=".uis.activities.BasicDetailsActivity" />
         <activity
             android:name=".uis.activities.OTPActivity"
             android:label="OTP Verification"
+            android:screenOrientation="portrait"
             android:noHistory="true" />
         <activity
             android:name=".uis.activities.PhoneActivity"
             android:label="Add Phone"
             android:noHistory="true"
+            android:screenOrientation="portrait"
             android:parentActivityName=".uis.activities.BasicDetailsActivity" />
         <activity
             android:name=".uis.activities.IdentityActivity"
             android:label="Identity Proof"
-            android:parentActivityName=".uis.activities.OthersRegistrationActivity" />
+            android:screenOrientation="portrait"
+            android:parentActivityName=".new_uis.OthersRegistrationActivity" />
         <activity
             android:name=".uis.activities.AddressActivity"
             android:label="Address Proof"
-            android:parentActivityName=".uis.activities.OthersRegistrationActivity" />
+            android:screenOrientation="portrait"
+            android:parentActivityName=".new_uis.OthersRegistrationActivity" />
         <activity
             android:name=".uis.activities.BankDetailActivity"
             android:label="Bank Details"
-            android:parentActivityName=".uis.activities.OthersRegistrationActivity" />
+            android:screenOrientation="portrait"
+            android:parentActivityName=".new_uis.OthersRegistrationActivity" />
         <activity
-            android:name=".uis.activities.BasicDetailActivity"
+            android:name=".new_uis.BasicDetailActivity"
             android:label="Basic Details"
-            android:parentActivityName=".uis.activities.OthersRegistrationActivity" />
-        <activity android:name=".uis.activities.GeneratePinStep2Activity" />
+            android:screenOrientation="portrait"
+            android:parentActivityName=".new_uis.OthersRegistrationActivity" />
+        <activity
+            android:name=".uis.activities.GeneratePinStep2Activity"
+            android:screenOrientation="portrait"
+            android:label=" " />
         <activity
             android:name=".uis.activities.SummaryActivity"
             android:label="Summary "
+            android:screenOrientation="portrait"
             android:noHistory="true"
-            android:parentActivityName=".uis.activities.OthersRegistrationActivity" />
+            android:parentActivityName=".new_uis.OthersRegistrationActivity" />
         <activity
             android:name=".uis.activities.UserProfileActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
-        <activity android:name=".uis.activities.SettingActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".uis.activities.SettingActivity"
             android:label="Settings"
-            android:parentActivityName=".uis.activities.UserProfileActivity"/>
+            android:screenOrientation="portrait"
+            android:parentActivityName=".uis.activities.UserProfileActivity" />
+        <activity
+            android:name=".uis.activities.ChangePinActivity"
+            android:screenOrientation="portrait"
+            android:label="Change Pin" />
+        <activity android:name=".uxs.AddressDetailActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".uxs.AddressDynamicActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".new_uis.DynamicDocumentActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".new_uis.OthersRegistrationActivity" />
+        <activity android:name=".new_uis.UploadingHeldImageActivity"
+            android:parentActivityName=".new_uis.OthersRegistrationActivity"
+            android:label="Upload holding document photo"
+            android:screenOrientation="portrait" />
+        <activity android:name=".new_uis.EditActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

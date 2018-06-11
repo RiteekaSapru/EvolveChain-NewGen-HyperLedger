@@ -1,4 +1,4 @@
-package com.newgen.evolvechain.uis.activities;
+package com.newgen.evolvechain.new_uis;
 
 import android.content.Intent;
 import android.support.v4.app.NavUtils;
@@ -11,8 +11,10 @@ import android.view.View;
 import com.newgen.evolvechain.CellClickListener;
 import com.newgen.evolvechain.R;
 import com.newgen.evolvechain.adpaters.OptionsAdapter;
+import com.newgen.evolvechain.uis.activities.SummaryActivity;
 import com.newgen.evolvechain.utils.AppManager;
 import com.newgen.evolvechain.utils.DialogsManager;
+import com.newgen.evolvechain.uxs.AddressDetailActivity;
 
 import java.util.ArrayList;
 
@@ -54,13 +56,19 @@ public class OthersRegistrationActivity extends AppCompatActivity implements Cel
 
     private void initUis() {
         optionsList = findViewById(R.id.options);
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(AppManager.getInstance().selectedCountryModel.getName());
+        }
     }
 
     private void makeOptionDataList() {
         optionDataList = new ArrayList<>();
         optionDataList.add("Basic Details");
+        optionDataList.add("Address Details");
         optionDataList.add("Identity Proof");
         optionDataList.add("Address Proof");
+        optionDataList.add("Uploading Holding Document Photo");
     }
 
     @Override
@@ -71,38 +79,47 @@ public class OthersRegistrationActivity extends AppCompatActivity implements Cel
                 startActivity(basicIntent);
                 break;
             case 1:
-                Intent identityIntent = new Intent(this, IdentityActivity.class);
-                startActivity(identityIntent);
+                if (AppManager.getInstance().basicModel != null) {
+                    Intent addressDetailIntent = new Intent(this, AddressDetailActivity.class);
+                    startActivity(addressDetailIntent);
+                }
                 break;
             case 2:
-                Intent addressIntent = new Intent(this, AddressActivity.class);
-                startActivity(addressIntent);
+                if (AppManager.getInstance().basicModel != null && AppManager.getInstance().basicModel.getAddress1() != null) {
+                    Intent identityIntent = new Intent(this, DynamicDocumentActivity.class);
+                    identityIntent.putExtra("type", "Identity");
+                    startActivity(identityIntent);
+                }
                 break;
             case 3:
-                Intent bankIntent = new Intent(this, BankDetailActivity.class);
-                startActivity(bankIntent);
+                if (AppManager.getInstance().identityDocumentModel != null) {
+                    Intent addressIntent = new Intent(this, DynamicDocumentActivity.class);
+                    addressIntent.putExtra("type", "Address");
+                    startActivity(addressIntent);
+                }
+                break;
+            case 4:
+                if (AppManager.getInstance().addressDocumentModel != null) {
+                    Intent intent = new Intent(this, UploadingHeldImageActivity.class);
+                    startActivity(intent);
+                }
                 break;
         }
     }
 
     public void onSaveClick(View view) {
-        int identityType = AppManager.getInstance().identityModelV1.getType();
-        int addressType = AppManager.getInstance().addressModelV1.getType();
 
         if (AppManager.getInstance().basicModel == null) {
             DialogsManager.showErrorDialog(this, "Error", "Please fill basic details");
         } else {
-            if (identityType < 0) {
+            if (AppManager.getInstance().identityDocumentModel == null) {
                 DialogsManager.showErrorDialog(this, "Error", "Please fill identity details");
             } else {
-                if (addressType < 0) {
+                if (AppManager.getInstance().addressDocumentModel == null) {
                     DialogsManager.showErrorDialog(this, "Error", "Please fill address details");
                 } else {
                     Intent intent = new Intent(this, SummaryActivity.class);
-                    intent.putExtra("identity_type", identityType);
-                    intent.putExtra("address_type", addressType);
                     startActivity(intent);
-                    //saveBasicDataToServer(identityType, addressType);
                 }
             }
         }

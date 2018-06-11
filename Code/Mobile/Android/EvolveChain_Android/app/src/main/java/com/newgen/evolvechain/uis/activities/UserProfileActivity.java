@@ -1,5 +1,6 @@
 package com.newgen.evolvechain.uis.activities;
 
+import android.app.Application;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -106,7 +107,10 @@ public class UserProfileActivity extends BaseActivity {
                     phoneImage.setImageResource(R.drawable.ic_create_black_24dp);
                     isEditingPhone = !isEditingPhone;
                 } else {
-                    super.onBackPressed();
+                    Intent intent = new Intent(Intent.ACTION_MAIN);
+                    intent.addCategory(Intent.CATEGORY_HOME);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
                 }
             }
         }
@@ -121,7 +125,7 @@ public class UserProfileActivity extends BaseActivity {
             name = AppUtil.checkNullValue(basicModel.getFirstName()) + " " + basicModel.getMiddleName() +" " + AppUtil.checkNullValue(basicModel.getLastName());
         }
         ((TextView) findViewById(R.id.name)).setText(name);
-        ((TextView) findViewById(R.id.place_text)).setText(basicModel.getState() + " " + basicModel.getCountry());
+        ((TextView) findViewById(R.id.id_text)).setText(AppManager.getInstance().kycId);
         ((TextView) findViewById(R.id.email_text)).setText(basicModel.getEmail());
         ((TextView) findViewById(R.id.phone_text)).setText(basicModel.getPhone());
         ((TextView) findViewById(R.id.dob_text)).setText(basicModel.getDob());
@@ -208,7 +212,7 @@ public class UserProfileActivity extends BaseActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
- 
+
             currentBodyData = object.toString();
             final String urlData = AppConstants.SERVER_ADDRESS + AppConstants.METHOD_NAME + AppConstants.GENERATE_EMAIL_OTP + AppManager.getInstance().loginToken;
 
@@ -444,10 +448,6 @@ public class UserProfileActivity extends BaseActivity {
         switch (verification_type) {
             case AppConstants.VERIFICATION_TYPE_EMAIL:
                 try {
-                    JSONObject object = new JSONObject(new SharedPrefManager(this).getUserDataInString());
-                    object.put("email", emailText.getText().toString());
-                    new SharedPrefManager(this).saveUserData(object.toString());
-
                     verifiedEmail = emailText.getText().toString();
                 }
                 catch (Exception e) {
@@ -456,10 +456,6 @@ public class UserProfileActivity extends BaseActivity {
                 break;
             case AppConstants.VERIFICATION_TYPE_PHONE:
                 try {
-                    JSONObject object = new JSONObject(new SharedPrefManager(this).getUserDataInString());
-                    object.put("phone", phoneText.getText().toString());
-                    new SharedPrefManager(this).saveUserData(object.toString());
-
                     verifiedPhone = phoneText.getText().toString();
                 }
                 catch (Exception e) {

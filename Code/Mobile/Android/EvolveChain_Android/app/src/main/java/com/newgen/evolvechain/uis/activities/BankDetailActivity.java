@@ -10,6 +10,7 @@ import com.newgen.evolvechain.R;
 import com.newgen.evolvechain.models.UserBankModel;
 import com.newgen.evolvechain.utils.AppManager;
 import com.newgen.evolvechain.utils.DialogsManager;
+import com.newgen.evolvechain.new_uis.OthersRegistrationActivity;
 
 public class BankDetailActivity extends AppCompatActivity {
 

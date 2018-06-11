@@ -45,7 +45,7 @@ public class SharedPrefManager {
         AppManager.getInstance().uuid = id;
     }
 
-    public void saveUserData(String userData) {
+    private void saveUserData(String userData) {
         mEditor.putString(AppConstants.USER_DATA_KEY, userData);
         mEditor.commit();
     }
@@ -55,24 +55,25 @@ public class SharedPrefManager {
         mEditor.commit();
     }
 
-    public void savePinMd5(String pin) {
+    private void savePinMd5(String pin) {
+        //AppManager.getInstance().pinMd5 = pin;
         mEditor.putString(AppConstants.PIN_KEY, pin);
         mEditor.commit();
     }
 
-    public UserBasicModel getUserData() {
+    private UserBasicModel getUserData() {
         return AppUtil.getBasicModel(mSharedPreferences.getString(AppConstants.USER_DATA_KEY, ""));
     }
 
-    public String getUserDataInString() {
+    private String getUserDataInString() {
         return mSharedPreferences.getString(AppConstants.USER_DATA_KEY, "");
     }
 
-    public String getKycId() {
+    public   String getKycId() {
         return mSharedPreferences.getString(AppConstants.KYC_ID_KEY, "");
     }
 
-    public String getPinMd5() {
+    private String getPinMd5() {
         return mSharedPreferences.getString(AppConstants.PIN_KEY, "");
     }
 }

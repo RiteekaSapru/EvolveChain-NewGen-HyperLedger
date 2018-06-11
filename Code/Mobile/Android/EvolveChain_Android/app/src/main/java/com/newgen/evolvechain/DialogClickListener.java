@@ -6,5 +6,6 @@ package com.newgen.evolvechain;
 
 public interface DialogClickListener {
     void onTermsLinkClick();
+    void onPrivacyClick();
     void onAcceptClick();
 }

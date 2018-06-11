@@ -53,4 +53,12 @@
     <string name="change_pin">Change Pin</string>
     <string name="basic_info">Basic Info</string>
     <string name="settings">Settings</string>
+    <string name="image_note">*click the picture while holding the document (your face should also be visible)</string>
+    <string name="enter_old_pin">Enter old pin</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="passport_number">Passport Number</string>
+    <string name="selfie_instructions">Make a selfie while holding your identity document that you used to fill in the Verification form. \n\nBefore uploading an image on the Verification form, please make sure to follow photo requirements: \nYou are looking straight at the camera. \nYour background has a light, neutral colour. \nYour selfie is in colour. \nNo red eye! \nDO NOT wear sunglasses, a hat or a headband. \nVerification Code must be clearly visible.</string>
+    <string name="edit_application">Edit Application</string>
 </resources>

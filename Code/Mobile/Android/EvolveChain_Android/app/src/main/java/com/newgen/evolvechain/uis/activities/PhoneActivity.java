@@ -64,7 +64,7 @@ public class PhoneActivity extends AppCompatActivity {
 
             for (int i = 0; i < object.length(); i++) {
                 JSONObject jsonObject = object.getJSONObject(i);
-                CountryCodeModel model = new CountryCodeModel(jsonObject.getString("PhoneCode"), jsonObject.getString("Country"));
+                CountryCodeModel model = new CountryCodeModel(jsonObject.getString("PhoneCode"), jsonObject.getString("Country"), "", "", true);
                 list.add(model);
             }
 

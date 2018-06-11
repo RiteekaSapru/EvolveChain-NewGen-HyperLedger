@@ -115,7 +115,7 @@ public class AppUtil {
                     object.getString("place_of_birth"),
                     object.getString("address1"),
                     object.getString("address2"),
-                    object.getString("address2"),
+                    object.getString("street"),
                     object.getString("city"),
                     object.getString("zip"),
                     object.getString("state"),
@@ -132,14 +132,12 @@ public class AppUtil {
     }
 
     public static void clearUserData(Context context) {
-        AppManager.getInstance().pinMd5 = "";
+        //AppManager.getInstance().pinMd5 = "";
         AppManager.getInstance().kycId = "";
         AppManager.getInstance().basicModelAfterSignIn = null;
 
         SharedPrefManager prefManager = new SharedPrefManager(context);
-        prefManager.savePinMd5("");
         prefManager.saveKycId("");
-        prefManager.saveUserData("");
     }
 
     public static boolean saveSignUpInitData(String result) {
@@ -198,7 +196,7 @@ public class AppUtil {
 
         for (int i = 0; i<countriesArray.length(); i++) {
             JSONObject object = countriesArray.getJSONObject(i);
-            CountryCodeModel model = new CountryCodeModel(object.getString("PHONE_CODE"), object.getString("NAME"));
+            CountryCodeModel model = new CountryCodeModel(object.getString("PHONE_CODE"), object.getString("NAME"), "", "", true);
             codeModels[i] = model;
         }
 

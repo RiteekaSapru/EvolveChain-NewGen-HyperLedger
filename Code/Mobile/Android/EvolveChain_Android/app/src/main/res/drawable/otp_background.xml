@@ -18,7 +18,7 @@
     <!-- PinEntryEditText is focused -->
     <item android:state_focused="true">
         <shape android:shape="rectangle">
-            <solid android:color="#0F75BD"/>
+            <solid android:color="#90a4ae"/>
             <stroke android:color="#666"
                 android:width="2dp"/>
         </shape>
@@ -26,7 +26,7 @@
     <!-- PinEntryEditText is not focused -->
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="#0F75BD"/>
+            <solid android:color="#90a4ae"/>
             <stroke android:color="#eee"
                 android:width="2dp"/>
         </shape>

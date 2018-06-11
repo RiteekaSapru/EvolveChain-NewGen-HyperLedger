@@ -2,6 +2,7 @@ package com.newgen.evolvechain.uis.activities;
 
 import android.content.Intent;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -22,28 +23,27 @@ public class StartActivity extends AppCompatActivity {
         setContentView(R.layout.activity_start);
 
         if (!(new SharedPrefManager(this).getUUID().length() > 0)) {
-            new SharedPrefManager(this).setUUID(UUID.randomUUID().toString());
+            String androidId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+            new SharedPrefManager(this).setUUID(androidId);
         }
         else {
             AppManager.getInstance().uuid = new SharedPrefManager(this).getUUID();
         }
 
         String kycId = new SharedPrefManager(this).getKycId();
-        String pinMd5 = new SharedPrefManager(this).getPinMd5();
-        UserBasicModel basicModel = null;
-        if (new SharedPrefManager(this).getUserDataInString().length() > 0) {
-            basicModel = new SharedPrefManager(this).getUserData();
-        }
+        //String pinMd5 = new SharedPrefManager(this).getPinMd5();
+//        UserBasicModel basicModel = null;
+//        if (new SharedPrefManager(this).getUserDataInString().length() > 0) {
+//            basicModel = new SharedPrefManager(this).getUserData();
+//        }
 
 
         //showTestAlert();
 
 
-        if (kycId.length() > 0 && pinMd5.length() > 0 && !(basicModel == null)) {
+        if (kycId.length() > 0) {
 
-            AppManager.getInstance().basicModelAfterSignIn = basicModel;
             AppManager.getInstance().kycId = kycId;
-            AppManager.getInstance().pinMd5 = pinMd5;
 
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {

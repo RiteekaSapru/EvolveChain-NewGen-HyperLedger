@@ -11,7 +11,9 @@ import com.newgen.evolvechain.R;
 import com.newgen.evolvechain.network_layer.PostTask;
 import com.newgen.evolvechain.network_layer.WebConnectionListener;
 import com.newgen.evolvechain.utils.AppConstants;
+import com.newgen.evolvechain.utils.AppManager;
 import com.newgen.evolvechain.utils.DialogsManager;
+import com.newgen.evolvechain.utils.Utility;
 
 import org.json.JSONObject;
 
@@ -24,6 +26,12 @@ public class GeneratePinActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_generate_pin);
         idText = findViewById(R.id.edit_text_kyc_id);
+        Utility.openKeyBoard(this, idText);
+
+        String kycId = AppManager.getInstance().kycId;
+        if (kycId.length() > 0) {
+            idText.setText(kycId);
+        }
     }
 
     public void onGetOtpClick(View view) {
@@ -61,8 +69,8 @@ public class GeneratePinActivity extends AppCompatActivity {
                                 DialogsManager.showErrorDialog(GeneratePinActivity.this, "Error", object1.getString("error"));
                                 break;
                             case 1:
+                                AppManager.getInstance().kycId = id;
                                 Intent intent = new Intent(GeneratePinActivity.this, GeneratePinStep2Activity.class);
-                                intent.putExtra("kyc_id", id);
                                 startActivity(intent);
                                 break;
                         }

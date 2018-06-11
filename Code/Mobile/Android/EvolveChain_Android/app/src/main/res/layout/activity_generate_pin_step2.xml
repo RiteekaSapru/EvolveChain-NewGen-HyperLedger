@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
+    android:id="@+id/main_layout"
     tools:context=".uis.activities.GeneratePinStep2Activity">
 
     <TextView
@@ -70,6 +71,7 @@
         app:pinBackgroundDrawable="@drawable/otp_background" />
 
     <Button
+        android:id="@+id/change_pin_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"

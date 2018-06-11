@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:padding="16dp"
     android:background="@drawable/splash_background"
-    tools:context=".uis.activities.CountrySelectionActivity">
+    tools:context=".new_uis.CountrySelectionActivity">
 
     <RadioGroup
         android:layout_width="match_parent"

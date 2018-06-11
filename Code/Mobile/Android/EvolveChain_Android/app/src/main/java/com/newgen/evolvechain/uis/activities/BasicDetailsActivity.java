@@ -26,6 +26,7 @@ import com.newgen.evolvechain.R;
 import com.newgen.evolvechain.utils.DialogsManager;
 import com.newgen.evolvechain.utils.SharedPrefManager;
 import com.newgen.evolvechain.utils.Utility;
+import com.newgen.evolvechain.new_uis.OthersRegistrationActivity;
 
 import org.json.JSONObject;
 

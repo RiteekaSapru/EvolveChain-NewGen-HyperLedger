@@ -17,6 +17,8 @@ public class SettingActivity extends BaseActivity {
     }
 
     public void onChangePinClick(View view) {
+        Intent intent = new Intent(this, ChangePinActivity.class);
+        startActivity(intent);
     }
 
     public void onLogoutClick(View view) {

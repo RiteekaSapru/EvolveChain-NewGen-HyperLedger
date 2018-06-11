@@ -129,9 +129,7 @@ public class MultiPartTaskUsingBitmap extends AsyncTask<Void, Void, String>{
                 scaledBitmap = null;
             }
 
-            Iterator<String> keys = params.keySet().iterator();
-            while (keys.hasNext()) {
-                String key = keys.next();
+            for (String key : params.keySet()) {
                 String value = params.get(key);
 
                 outputStream.writeBytes(twoHyphens + boundary + lineEnd);

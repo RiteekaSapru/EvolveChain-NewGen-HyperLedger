@@ -10,14 +10,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.newgen.evolvechain.DialogClickListener;
 import com.newgen.evolvechain.R;
 import com.newgen.evolvechain.adpaters.BasicInfoAdapter;
-import com.newgen.evolvechain.adpaters.DrivingLicenseAdapter;
-import com.newgen.evolvechain.adpaters.PassportAdapter;
-import com.newgen.evolvechain.adpaters.TaxationAdapter;
-import com.newgen.evolvechain.adpaters.UtilityBillAdapter;
+import com.newgen.evolvechain.adpaters.DocumentAdapter;
 import com.newgen.evolvechain.models.UserBasicModel;
 import com.newgen.evolvechain.models.documnets.DrivingLicenseModel;
 import com.newgen.evolvechain.models.documnets.PassportModel;
@@ -26,7 +25,7 @@ import com.newgen.evolvechain.models.documnets.UtilityBillModel;
 import com.newgen.evolvechain.network_layer.MultiPartTaskUsingBitmap;
 import com.newgen.evolvechain.network_layer.PostTask;
 import com.newgen.evolvechain.network_layer.WebConnectionListener;
-import com.newgen.evolvechain.uis.TermsDialog;
+import com.newgen.evolvechain.new_uis.TermsDialog;
 import com.newgen.evolvechain.utils.AppConstants;
 import com.newgen.evolvechain.utils.AppManager;
 import com.newgen.evolvechain.utils.AppUtil;
@@ -40,6 +39,8 @@ import java.util.Map;
 public class SummaryActivity extends AppCompatActivity implements DialogClickListener {
 
     private RecyclerView basicList, identityList, addressList;
+    private TextView codeText;
+    private ImageView imageView;
     private int identityType, addressType;
 
     @Override
@@ -47,7 +48,7 @@ public class SummaryActivity extends AppCompatActivity implements DialogClickLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_summary);
 
-        getIntentData();
+        //getIntentData();
 
         initUis();
         fillLists();
@@ -64,35 +65,14 @@ public class SummaryActivity extends AppCompatActivity implements DialogClickLis
         addressList.setLayoutManager(new LinearLayoutManager(this));
 
         basicList.setAdapter(new BasicInfoAdapter(AppManager.getInstance().basicModel));
-        basicList.setNestedScrollingEnabled(false);
+        basicList.setNestedScrollingEnabled(true);
 
-        switch (identityType) {
-            case -1:
-                break;
-            case AppConstants.DOCUMENT_TYPE_PASSPORT:
-                identityList.setAdapter(new PassportAdapter(AppManager.getInstance().passportModel));
-                break;
-            case AppConstants.DOCUMENT_TYPE_DRIVING_LICENSE:
-                identityList.setAdapter(new DrivingLicenseAdapter(AppManager.getInstance().drivingLicenseModel));
-                break;
-            case AppConstants.DOCUMENT_TYPE_TAXATION:
-                identityList.setAdapter(new TaxationAdapter(AppManager.getInstance().taxationModel));
-                break;
-        }
+        identityList.setAdapter(new DocumentAdapter(AppManager.getInstance().identityDocumentModel));
+        addressList.setAdapter(new DocumentAdapter(AppManager.getInstance().addressDocumentModel));
 
-
-        switch (addressType) {
-            case -1:
-                break;
-            case AppConstants.DOCUMENT_TYPE_PASSPORT:
-                addressList.setAdapter(new PassportAdapter(AppManager.getInstance().passportModel));
-                break;
-            case AppConstants.DOCUMENT_TYPE_DRIVING_LICENSE:
-                addressList.setAdapter(new DrivingLicenseAdapter(AppManager.getInstance().drivingLicenseModel));
-                break;
-            case AppConstants.DOCUMENT_TYPE_UTILITY_BILL:
-                addressList.setAdapter(new UtilityBillAdapter(AppManager.getInstance().utilityBillModel));
-                break;
+        if (AppManager.getInstance().holdingDocumentModel != null) {
+            imageView.setImageURI(AppManager.getInstance().holdingDocumentModel.getUri());
+            codeText.setText(AppManager.getInstance().holdingDocumentModel.getCode());
         }
     }
 
@@ -100,6 +80,8 @@ public class SummaryActivity extends AppCompatActivity implements DialogClickLis
         basicList = findViewById(R.id.basic_info_list);
         identityList = findViewById(R.id.identity_list);
         addressList = findViewById(R.id.address_list);
+        codeText = findViewById(R.id.code_text);
+        imageView = findViewById(R.id.img);
     }
 
     public void onSubmitClick(View view) {
@@ -331,6 +313,9 @@ public class SummaryActivity extends AppCompatActivity implements DialogClickLis
                         DialogsManager.showErrorDialogWithOkHandle(SummaryActivity.this, "Success", "Your data has been submitted please check your email after sometime", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
+                                AppManager.getInstance().identityDocumentModel = null;
+                                AppManager.getInstance().addressDocumentModel = null;
+
                                 Intent intent = new Intent(SummaryActivity.this, SignInActivity.class);
                                 startActivity(intent );
                             }
@@ -354,12 +339,29 @@ public class SummaryActivity extends AppCompatActivity implements DialogClickLis
     //Dialog Listener
     @Override
     public void onTermsLinkClick() {
-        Log.d("terms link", "clicked");
+        try {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://evolvechain.org/terms"));
+            startActivity(browserIntent);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onPrivacyClick() {
+        try {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://evolvechain.org/privacy"));
+            startActivity(browserIntent);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void onAcceptClick() {
         Log.d("accept", "clicked");
-        saveBasicDataToServer(identityType, addressType);
+        callSubmitData();
     }
 }

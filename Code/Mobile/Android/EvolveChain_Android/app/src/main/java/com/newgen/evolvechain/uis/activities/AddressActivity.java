@@ -2,6 +2,7 @@ package com.newgen.evolvechain.uis.activities;
 
 import android.Manifest;
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -28,10 +29,14 @@ import com.newgen.evolvechain.models.documnets.DrivingLicenseModel;
 import com.newgen.evolvechain.models.documnets.PassportModel;
 import com.newgen.evolvechain.models.documnets.UtilityBillModel;
 import com.newgen.evolvechain.models.documnets.UtilityBillTypeModel;
+import com.newgen.evolvechain.network_layer.MultiPartTaskUsingBitmap;
+import com.newgen.evolvechain.network_layer.WebConnectionListener;
 import com.newgen.evolvechain.utils.AppConstants;
 import com.newgen.evolvechain.utils.AppManager;
 import com.newgen.evolvechain.R;
+import com.newgen.evolvechain.utils.AppUtil;
 import com.newgen.evolvechain.utils.DialogsManager;
+import com.newgen.evolvechain.new_uis.OthersRegistrationActivity;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -41,8 +46,10 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 public class AddressActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
@@ -179,8 +186,7 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
                                 } else {
                                     AppManager.getInstance().utilityBillModel = new UtilityBillModel(currentBillType, number, address, uri1, uri2);
                                     AppManager.getInstance().addressModelV1.setType(AppConstants.DOCUMENT_TYPE_UTILITY_BILL);
-                                    Intent intent = new Intent(AddressActivity.this, OthersRegistrationActivity.class);
-                                    startActivity(intent);
+                                    saveAddressDataToServer(AppConstants.DOCUMENT_TYPE_UTILITY_BILL);
                                 }
                             }
                         }
@@ -209,8 +215,7 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
                                 } else {
                                     AppManager.getInstance().passportModel = new PassportModel(identityNumber, expiryDate, country, uri1, uri2);
                                     AppManager.getInstance().addressModelV1 = new AddressModel(AppConstants.DOCUMENT_TYPE_PASSPORT);
-                                    Intent intent = new Intent(AddressActivity.this, OthersRegistrationActivity.class);
-                                    startActivity(intent);
+                                    saveAddressDataToServer(AppConstants.DOCUMENT_TYPE_PASSPORT);
                                 }
                             }
                         }
@@ -240,8 +245,7 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
                                 } else {
                                     AppManager.getInstance().drivingLicenseModel = new DrivingLicenseModel(dlIdentityNumber, dlExpiryDate, dlCountry, uri1, uri2);
                                     AppManager.getInstance().addressModelV1 = new AddressModel(AppConstants.DOCUMENT_TYPE_DRIVING_LICENSE);
-                                    Intent intent = new Intent(AddressActivity.this, OthersRegistrationActivity.class);
-                                    startActivity(intent);
+                                    saveAddressDataToServer(AppConstants.DOCUMENT_TYPE_DRIVING_LICENSE);
                                 }
                             }
                         }
@@ -276,6 +280,7 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
                     MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
         }
     }
+
     private boolean checkForPermission() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
@@ -445,7 +450,7 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
 
             for (int i = 0; i < object.length(); i++) {
                 JSONObject jsonObject = object.getJSONObject(i);
-                CountryCodeModel model = new CountryCodeModel(jsonObject.getString("PhoneCode"), jsonObject.getString("Country"));
+                CountryCodeModel model = new CountryCodeModel(jsonObject.getString("PhoneCode"), jsonObject.getString("Country"), "", "", true);
                 list.add(model);
             }
 
@@ -480,5 +485,86 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
             }
         });
         builder.create().show();
+    }
+
+    private void saveAddressDataToServer(int addressType) {
+        Map<String, String> params = new HashMap<>(5);
+        String[] filePaths = new String[2];
+        Uri[] uris = new Uri[2];
+
+        params.put("step", "address");
+
+        switch (addressType) {
+            case AppConstants.DOCUMENT_TYPE_PASSPORT:
+                params.put("substep", "passport");
+
+                PassportModel model = AppManager.getInstance().passportModel;
+                params.put("number", model.getNumber());
+                params.put("expiry_date", model.getExpiryDate());
+                params.put("country", model.getIssueCountry());
+                params.put("document_type", "");
+
+                filePaths[0] = AppUtil.getPath(this, model.getFrontUri());
+                uris[0] = model.getFrontUri();
+                filePaths[1] = AppUtil.getPath(this, model.getBackUri());
+                uris[1] = model.getBackUri();
+                break;
+            case AppConstants.DOCUMENT_TYPE_DRIVING_LICENSE:
+                params.put("substep", "license");
+
+                DrivingLicenseModel licenseModel = AppManager.getInstance().drivingLicenseModel;
+                params.put("number", licenseModel.getNumber());
+                params.put("expiry_date", licenseModel.getExpiryDate());
+                params.put("country", licenseModel.getIssueCountry());
+                params.put("document_type", "");
+
+                filePaths[0] = AppUtil.getPath(this, licenseModel.getFrontUri());
+                uris[0] = licenseModel.getFrontUri();
+                filePaths[1] = AppUtil.getPath(this, licenseModel.getBackUri());
+                uris[1] = licenseModel.getBackUri();
+                break;
+            case AppConstants.DOCUMENT_TYPE_UTILITY_BILL:
+                params.put("substep", "taxation");
+
+                UtilityBillModel billModel = AppManager.getInstance().utilityBillModel;
+                params.put("number", billModel.getNumber());
+                params.put("expiry_date", "");
+                params.put("country", billModel.getAddress());
+                params.put("document_type", billModel.getType());
+
+                filePaths[0] = AppUtil.getPath(this, billModel.getFrontUri());
+                uris[0] = billModel.getFrontUri();
+                filePaths[1] = AppUtil.getPath(this, billModel.getBackUri());
+                uris[1] = billModel.getBackUri();
+                break;
+
+        }
+
+        String urlToSave = AppConstants.SERVER_ADDRESS + AppConstants.KYC_METHOD_NAME + AppConstants.SAVE_BASIC_INFO + AppManager.getInstance().initToken;
+        String[] fileField = new String[]{"file[]", "file[]"};
+
+
+        new MultiPartTaskUsingBitmap(this, uris, urlToSave, params, filePaths, fileField, "image/jpeg",
+                new WebConnectionListener() {
+                    ProgressDialog dialog;
+
+                    @Override
+                    public void onTaskStart() {
+                        dialog = ProgressDialog.show(AddressActivity.this, "", "Loading...");
+                    }
+
+                    @Override
+                    public void onTaskComplete(String result) {
+                        dialog.dismiss();
+                        boolean isSuccess = AppUtil.isSuccess(result);
+                        if (isSuccess) {
+                            Intent intent = new Intent(AddressActivity.this, OthersRegistrationActivity.class);
+                            startActivity(intent);
+                        }
+                        else {
+                            DialogsManager.showErrorDialog(AddressActivity.this, "Error", "Some error occurred. Please try after some time.");
+                        }
+                    }
+                }).execute();
     }
 }

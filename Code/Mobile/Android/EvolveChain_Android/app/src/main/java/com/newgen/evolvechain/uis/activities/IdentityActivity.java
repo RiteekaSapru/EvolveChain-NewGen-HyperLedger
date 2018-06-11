@@ -2,6 +2,7 @@ package com.newgen.evolvechain.uis.activities;
 
 import android.Manifest;
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -26,10 +27,14 @@ import com.newgen.evolvechain.models.CountryCodeModel;
 import com.newgen.evolvechain.models.documnets.DrivingLicenseModel;
 import com.newgen.evolvechain.models.documnets.PassportModel;
 import com.newgen.evolvechain.models.documnets.TaxationModel;
+import com.newgen.evolvechain.network_layer.MultiPartTaskUsingBitmap;
+import com.newgen.evolvechain.network_layer.WebConnectionListener;
 import com.newgen.evolvechain.utils.AppConstants;
 import com.newgen.evolvechain.utils.AppManager;
 import com.newgen.evolvechain.R;
+import com.newgen.evolvechain.utils.AppUtil;
 import com.newgen.evolvechain.utils.DialogsManager;
+import com.newgen.evolvechain.new_uis.OthersRegistrationActivity;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -39,8 +44,10 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 public class IdentityActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
@@ -271,8 +278,7 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
                                     AppManager.getInstance().passportModel = new PassportModel(identityNumber, expiryDate, issueCountry, frontUri, backUri);
                                     AppManager.getInstance().identityModelV1.setType(AppConstants.DOCUMENT_TYPE_PASSPORT);
                                     //saveDataToServer(AppConstants.DOCUMENT_TYPE_PASSPORT);
-                                    Intent intent = new Intent(this, OthersRegistrationActivity.class);
-                                    startActivity(intent);
+                                    saveIdentityDataToServer(AppConstants.DOCUMENT_TYPE_PASSPORT);
                                 }
                             }
                         }
@@ -298,8 +304,7 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
                                     AppManager.getInstance().drivingLicenseModel = new DrivingLicenseModel(identityNumber, expiryDate, issueCountry, frontUri, backUri);
                                     AppManager.getInstance().identityModelV1.setType(AppConstants.DOCUMENT_TYPE_DRIVING_LICENSE);
                                     //saveDataToServer(AppConstants.DOCUMENT_TYPE_DRIVING_LICENSE);
-                                    Intent intent = new Intent(this, OthersRegistrationActivity.class);
-                                    startActivity(intent);
+                                    saveIdentityDataToServer(AppConstants.DOCUMENT_TYPE_DRIVING_LICENSE);
                                 }
                             }
                         }
@@ -329,8 +334,7 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
                                         AppManager.getInstance().basicModel.setDob(expiryDate);
                                     }
                                     //saveDataToServer(AppConstants.DOCUMENT_TYPE_TAXATION);
-                                    Intent intent = new Intent(this, OthersRegistrationActivity.class);
-                                    startActivity(intent);
+                                    saveIdentityDataToServer(AppConstants.DOCUMENT_TYPE_TAXATION);
                                 }
                             }
                         }
@@ -439,6 +443,84 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
 
     }
 
+    private void saveIdentityDataToServer(int identityType) {
+        Map<String, String> params = new HashMap<>(5);
+        String[] filePaths = new String[2];
+        Uri[] uris = new Uri[2];
+
+        params.put("step", "identity");
+
+        switch (identityType) {
+            case AppConstants.DOCUMENT_TYPE_PASSPORT:
+                params.put("substep", "passport");
+
+                PassportModel model = AppManager.getInstance().passportModel;
+                params.put("number", model.getNumber());
+                params.put("expiry_date", model.getExpiryDate());
+                params.put("country", model.getIssueCountry());
+
+                filePaths[0] = AppUtil.getPath(this, model.getFrontUri());
+                uris[0] = model.getFrontUri();
+                filePaths[1] = AppUtil.getPath(this, model.getBackUri());
+                uris[1] = model.getBackUri();
+                break;
+            case AppConstants.DOCUMENT_TYPE_DRIVING_LICENSE:
+                params.put("substep", "license");
+
+                DrivingLicenseModel licenseModel = AppManager.getInstance().drivingLicenseModel;
+                params.put("number", licenseModel.getNumber());
+                params.put("expiry_date", licenseModel.getExpiryDate());
+                params.put("country", licenseModel.getIssueCountry());
+
+                filePaths[0] = AppUtil.getPath(this, licenseModel.getFrontUri());
+                uris[0] = licenseModel.getFrontUri();
+                filePaths[1] = AppUtil.getPath(this, licenseModel.getBackUri());
+                uris[1] = licenseModel.getBackUri();
+                break;
+            case AppConstants.DOCUMENT_TYPE_TAXATION:
+                params.put("substep", "taxation");
+
+                TaxationModel taxationModel = AppManager.getInstance().taxationModel;
+                params.put("number", taxationModel.getNumber());
+                params.put("expiry_date", taxationModel.getDob());
+                params.put("country", taxationModel.getCountry());
+
+                filePaths[0] = AppUtil.getPath(this, taxationModel.getFrontUri());
+                uris[0] = taxationModel.getFrontUri();
+                filePaths[1] = AppUtil.getPath(this, taxationModel.getBackUri());
+                uris[1] = taxationModel.getBackUri();
+                break;
+
+        }
+
+        String urlToSave = AppConstants.SERVER_ADDRESS + AppConstants.KYC_METHOD_NAME + AppConstants.SAVE_BASIC_INFO + AppManager.getInstance().initToken;
+        String[] fileField = new String[]{"file[]", "file[]"};
+
+
+        new MultiPartTaskUsingBitmap(this, uris, urlToSave, params, filePaths, fileField, "image/jpeg",
+                new WebConnectionListener() {
+                    ProgressDialog dialog;
+
+                    @Override
+                    public void onTaskStart() {
+                        dialog = ProgressDialog.show(IdentityActivity.this, "", "Loading...");
+                    }
+
+                    @Override
+                    public void onTaskComplete(String result) {
+                        dialog.dismiss();
+                        boolean isSuccess = AppUtil.isSuccess(result);
+                        if (isSuccess) {
+                            Intent intent = new Intent(IdentityActivity.this, OthersRegistrationActivity.class);
+                            startActivity(intent);
+                        }
+                        else {
+                            DialogsManager.showErrorDialog(IdentityActivity.this, "Error", "Some error occurred. Please try after some time.");
+                        }
+                    }
+                }).execute();
+    }
+
     public void onIssueCountryClick(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Select your country");
@@ -480,7 +562,7 @@ public class IdentityActivity extends AppCompatActivity implements AdapterView.O
 
             for (int i = 0; i < object.length(); i++) {
                 JSONObject jsonObject = object.getJSONObject(i);
-                CountryCodeModel model = new CountryCodeModel(jsonObject.getString("PhoneCode"), jsonObject.getString("Country"));
+                CountryCodeModel model = new CountryCodeModel(jsonObject.getString("PhoneCode"), jsonObject.getString("Country"), "", "", true);
                 list.add(model);
             }
 

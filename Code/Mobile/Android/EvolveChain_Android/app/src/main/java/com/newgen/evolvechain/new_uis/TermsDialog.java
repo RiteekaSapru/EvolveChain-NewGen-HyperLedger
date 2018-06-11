@@ -1,4 +1,4 @@
-package com.newgen.evolvechain.uis;
+package com.newgen.evolvechain.new_uis;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -34,6 +34,7 @@ public class TermsDialog extends Dialog implements View.OnClickListener {
         findViewById(R.id.terms_link).setOnClickListener(this);
         findViewById(R.id.close_btn).setOnClickListener(this);
         findViewById(R.id.accept_btn).setOnClickListener(this);
+        findViewById(R.id.privacy_link).setOnClickListener(this);
 
     }
 
@@ -48,7 +49,12 @@ public class TermsDialog extends Dialog implements View.OnClickListener {
                 dismiss();
                 break;
             case R.id.terms_link:
+                dismiss();
                 listener.onTermsLinkClick();
+                break;
+            case R.id.privacy_link:
+                dismiss();
+                listener.onPrivacyClick();
                 break;
             case R.id.accept_btn:
                 dismiss();
