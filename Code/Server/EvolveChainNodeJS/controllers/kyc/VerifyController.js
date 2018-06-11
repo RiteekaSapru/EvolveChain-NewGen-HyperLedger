@@ -14,7 +14,7 @@ const BaseController = require('../BaseController');
 const App = require('../../models/apps');
 const KycDocument = require('../../models/kycdocument');
 const VerificationReasons = require('../../models/verificationReason');
-const EmailTemplatesPath = path.join(__dirname + "/../../public/email_template");
+
 
 const messages = config.messages;
 
@@ -98,14 +98,7 @@ class VerifyController extends BaseController {
             userEmailId = appData.email;
             var action = req.body.action;
 
-            var reasonList = req.body.reasonList;
-            //let allReasons = await VerificationReasons.find();
-
-
-            var reasonDefinition = await VerificationReasons.find(
-                { "code": { $in: reasonList } },
-                { "reason": 1 }
-            );
+            var reasonList = req.body.reasonList;           
 
             let isVerified = (action.toUpperCase() == "VERIFY");
 
@@ -113,7 +106,7 @@ class VerifyController extends BaseController {
 
             var eKycId = "";
             var appStatus = config.APP_STATUSES.REJECTED;
-            var emailTemplateHtml = '/kyc_reject.html';
+            var emailTemplateHtml = config.EMAIL_TEMPLATES_PATH + '/kycRejected.html';
             var subject = 'EvolveChain KYC - Rejected';
             var resubmitPin = '';
 
@@ -121,7 +114,7 @@ class VerifyController extends BaseController {
                 //generate eKycId 
                 eKycId = commonUtility.GenerateKYCId(appData.country_iso, basicDetails.firstname);
                 appStatus = config.APP_STATUSES.VERIFIED;
-                emailTemplateHtml = '/kyc_success.html';
+                emailTemplateHtml = config.EMAIL_TEMPLATES_PATH + '/kycApproved.html';
                 subject = 'EvolveChain KYC - Approved';
             }
             else {
@@ -142,10 +135,13 @@ class VerifyController extends BaseController {
                         }
                 }
             //send email 
-            var template = fs.readFileSync(EmailTemplatesPath + emailTemplateHtml, {
+            var template = fs.readFileSync(emailTemplateHtml, {
                 encoding: 'utf-8'
             });
-
+            var reasonDefinition = await VerificationReasons.find(
+                { "code": { $in: reasonList } },
+                { "reason": 1 }
+            );
             var emailBody = ejs.render(template, {
                 eKycId: eKycId,
                 resubmitPin: resubmitPin,

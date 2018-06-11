@@ -193,7 +193,7 @@ class AppController extends base_controller {
             var email_code = common_utility.GenerateOTP(6);
 
             //send verification code email
-            var template = fs.readFileSync(EMAIL_TEMPLATES_PATH + '/email_varified.html', {
+            var template = fs.readFileSync(config.EMAIL_TEMPLATES_PATH + '/verifyEmail.html', {
                 encoding: 'utf-8'
             });
 

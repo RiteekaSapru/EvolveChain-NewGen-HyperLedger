@@ -31,7 +31,6 @@ const ConfigDB = require('../../models/config');
 
 const BASE_PATH = config.get('base_path');
 const PUBLIC_PATH = config.get('PUBLIC_PATH');
-const EMAILTEMPLATESPATH = path.join(__dirname + "/../../public/email_template");
 
 //var to = config.get('ver_mail_id');
 var im = require('imagemagick');
@@ -451,7 +450,7 @@ class KYCController extends BaseController {
             if ((all_image_ids.length !== result_all.length)) return kycController.GetErrorResponse(messages.file_not_found, res);
 
             //link send through email 
-            var template = fs.readFileSync(EMAILTEMPLATESPATH + '/verifyKycRequest.html', {
+            var template = fs.readFileSync(config.EMAIL_TEMPLATES_PATH  + '/verifyKycRequest.html', {
                 encoding: 'utf-8'
             });
 

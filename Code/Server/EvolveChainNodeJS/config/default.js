@@ -12,6 +12,8 @@ const merchant_messages = require('./merchant_messages');
 
 const BASE_PATH = path.join(__dirname + "./../");
 const PUBLIC_PATH = BASE_PATH+'public';
+const EMAIL_TEMPLATES_PATH = BASE_PATH + "templates/emails";
+
 const PORT = process.env.PORT;
 const DB_NAME = process.env.DB_NAME;
 
@@ -68,6 +70,7 @@ module.exports = {
   MONGODB_URL: MONGODB_URL,
   COMPANY_URL: COMPANY_URL,
   PUBLIC_PATH: PUBLIC_PATH,
+  EMAIL_TEMPLATES_PATH:EMAIL_TEMPLATES_PATH,
   TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID,
   TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN,
   TWILIO_MOBILE: process.env.TWILIO_MOBILE,
