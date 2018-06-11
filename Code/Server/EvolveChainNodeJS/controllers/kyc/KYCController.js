@@ -27,6 +27,7 @@ const KYCDocument = require('../../models/kycdocument');
 const File = require('../../models/files');
 const Share = require('../../models/shares');
 const Wallet = require('../../models/wallet');
+const ConfigDB = require('../../models/config');
 
 const BASE_PATH = config.get('base_path');
 const PUBLIC_PATH = config.get('PUBLIC_PATH');
@@ -432,9 +433,9 @@ class KYCController extends BaseController {
             if (docData.address_info.details == undefined || docData.address_info.details == null || docData.address_info.details.document_type == undefined)
                 return this.SendErrorResponse(res, config.ERROR_CODES.ADDRESS_DOCS_MISSING);
 
-            if (docData.face_info.details == undefined || docData.face_info.details == null || docData.face_info.details.document_type == undefined)
+            if (docData.face_info.details == undefined || docData.face_info.details == null)
                 return this.SendErrorResponse(res, config.ERROR_CODES.FACE_DOCS_MISSING);
-
+            
 
             var basic_images_id = docData.basic_info.images.map(x => mongoose.Types.ObjectId(x.file_key));
             var address_images_id = docData.address_info.images.map(x => mongoose.Types.ObjectId(x.file_key));
@@ -454,8 +455,9 @@ class KYCController extends BaseController {
                 encoding: 'utf-8'
             });
 
-            // to = to.toString();
-            let toEmailIds = config.APPROVER_EMAIL_IDS;
+            let configCol  =  await ConfigDB.findOne({}); 
+            let toEmailIds = configCol.approver_emails.join(",")
+
             var emailBody = ejs.render(template, {
                 kyc_verify_url: config.get('base_url') + "/verify/" + docData.app_key,
                 APP_LOGO_URL: config.get('APP_LOGO_URL'),

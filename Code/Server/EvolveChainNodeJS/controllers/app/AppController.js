@@ -141,31 +141,25 @@ class AppController extends base_controller {
                     break;
             }
 
-            var App = await app.findOne(conditions);
+            var appData = await app.findOne(conditions).populate('kycdoc_data').exec();
 
-            if (!App)
+            if (!appData)
                 return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
-
-            var con = {
-                app_key: App.key,
-                isDelete: 0
-            }
             
-            var docData = await kyc_document.findOne(con);
-
+            var docData = appData.kycdoc_data;//await kyc_document.findOne(con);
             if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
 
             //Temp work : need to fetch from Database later
             var documentList = config.init_config.DOCUMENT_LIST;
-            var iso = App.country_iso.toUpperCase();
+            var iso = appData.country_iso.toUpperCase();
             const countryDocs = documentList.filter(c => c.country_iso.findIndex(d => d == iso) > -1);   
             
             //Get the Country details from ISO
            var countryDetails = await Country.findOne({"iso" : iso});
 
-            App.documents = countryDocs;
-            App.countryDetails = countryDetails;
-            return this.GetSuccessResubmitInitialize(App, docData, res);
+           appData.documents = countryDocs;
+           appData.countryDetails = countryDetails;
+           return this.GetSuccessResubmitInitialize(appData, docData, res);
 
         } catch (ex) {
             return this.SendExceptionResponse(res, ex);
@@ -821,8 +815,10 @@ class AppController extends base_controller {
             "BasicInfo": common_utility.GetKycDocumentInfo(docEntity.basic_info, "BASIC"),
             "AddressInfo": common_utility.GetKycDocumentInfo(docEntity.address_info, "ADDRESS"),
             "IdentityInfo": common_utility.GetKycDocumentInfo(docEntity.identity_info, "IDENTITY"),
+            "FaceInfo": common_utility.GetKycDocumentInfo(docEntity.face_info, "IDENTITY"),
             'documents': appEntity.documents,
             'country_details' : appEntity.countryDetails,
+            'verification_code':docEntity.face_info.details.number,
             "result": messages.resubmit_init_success
         }
         return res.status(status.OK).jsonp(response);
