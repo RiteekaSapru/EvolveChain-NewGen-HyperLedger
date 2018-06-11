@@ -606,7 +606,6 @@ class AppController extends base_controller {
             let body = _.pick(req.body, ['ekyc_id', 'pin', 'vendor_uuid']);
 
             var conditions = {
-                isdelete: '0',
                 ekyc_id: body.ekyc_id,
             }
 
@@ -621,23 +620,50 @@ class AppController extends base_controller {
             if (App.pin != body.pin) {
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_PIN);
             }
-
-            var cond = {
-                _id: App._id
+            if (App.status == config.APP_STATUSES.EXPIRED) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.EXPIRED_APP_STATUS);
             }
-            var params = {
-                $set: { last_login_time: Date.now() }
-            }
-
-            await app.update(cond, params);
 
             var con = {
                 app_key: App.key
             }
-
             var docData = await kyc_document.findOne(con);
-
             if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
+
+            var currentUtc = common_utility.UtcNow();
+
+            if (docData.identity_info.details.expiry_date != undefined || docData.identity_info.details.expiry_date != null) {
+                var expireDateIdentity = common_utility.ConvertToUtc(docData.identity_info.details.expiry_date);
+                if (expireDateIdentity < currentUtc){
+                    var conds = { _id: App._id }
+                    var params = {
+                        $set: { status: config.APP_STATUSES.EXPIRED }
+                    }
+                    await app.update(conds, params);
+                    return this.SendErrorResponse(res, config.ERROR_CODES.EXPIRED_APP_STATUS);
+                }
+            }
+
+            if (docData.address_info.details.expiry_date != undefined || docData.address_info.details.expiry_date != null) {
+                var expireDateAddress = common_utility.ConvertToUtc(docData.address_info.details.expiry_date);
+                if (expireDateAddress < currentUtc){
+                    var conds = { _id: App._id }
+                    var params = {
+                        $set: { status: config.APP_STATUSES.EXPIRED }
+                    }
+                    await app.update(conds, params);
+                    return this.SendErrorResponse(res, config.ERROR_CODES.EXPIRED_APP_STATUS);
+                }
+            }
+
+            var cond = {
+                _id: App._id
+            }
+
+            var params = {
+                $set: { last_login_time: common_utility.UtcNow() }
+            }
+            await app.update(cond, params);
 
             return this.GetSuccessLoginResponse(App, docData, res);
 
@@ -645,6 +671,8 @@ class AppController extends base_controller {
             return this.SendExceptionResponse(res, ex);
         }
     }
+
+
 
     FindAndModifyQuery(queryCondition, setParams) {
         const options = {
@@ -756,7 +784,7 @@ class AppController extends base_controller {
     GetSuccessLoginResponse(appEntity, docEntity, res) {
         var response = {
             'success': 1,
-            'now': Date.now(),
+            'now': common_utility.UtcNow(),
             'name': appEntity.name,
             'email': appEntity.email,
             'phone': appEntity.phone,
