@@ -15,6 +15,7 @@ const base_controller = require('../BaseController');
 
 const app = require('../../models/apps');
 const Country = require('../../models/country');
+const ProofDocuments = require('../../models/proofdocuments');
 
 const kyc_document = require('../../models/kycdocument');
 
@@ -63,10 +64,8 @@ class AppController extends base_controller {
 
             common_utility.RemoveNull(params); // remove blank value from array
 
-            //Temp work : need to fetch from Database later
-            var documentList = config.init_config.DOCUMENT_LIST;
-            var iso = body.country_iso.toUpperCase();
-            const countryDocs = documentList.filter(c => c.country_iso.findIndex(d => d == iso) > -1);
+            var iso = body.country_iso.toUpperCase();            
+            const countryDocs  = await ProofDocuments.find({country_iso: { $eq : iso}});
 
             var App = new app(params);
             var newApp = await App.save();
@@ -149,10 +148,8 @@ class AppController extends base_controller {
             var docData = appData.kycdoc_data;//await kyc_document.findOne(con);
             if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
 
-            //Temp work : need to fetch from Database later
-            var documentList = config.init_config.DOCUMENT_LIST;
-            var iso = appData.country_iso.toUpperCase();
-            const countryDocs = documentList.filter(c => c.country_iso.findIndex(d => d == iso) > -1);   
+            var iso = App.country_iso.toUpperCase();
+            const countryDocs  = await ProofDocuments.find({country_iso: { $eq : iso}});
             
             //Get the Country details from ISO
            var countryDetails = await Country.findOne({"iso" : iso});

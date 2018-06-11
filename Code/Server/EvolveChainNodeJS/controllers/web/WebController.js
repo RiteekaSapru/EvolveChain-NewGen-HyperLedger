@@ -20,7 +20,6 @@ class Web  extends baseController{
 
     async GetCountryList(req, res) {
         var countries  = await Country.find();
-        //res.send(countries);
         return res.status(status.OK).jsonp(countries);
     }
    

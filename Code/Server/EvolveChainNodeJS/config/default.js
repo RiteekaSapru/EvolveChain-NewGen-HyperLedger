@@ -4,7 +4,7 @@ const status = require('./status');
 const messages = require('./messages');
 const document_status = require('./document_status');
 const appConfig = require('./app_configurations');
-const init_config = require('./init_configurations');
+// const init_config = require('./init_configurations');
 
 const admin_messages = require('./admin_messages');
 const merchant_messages = require('./merchant_messages');
@@ -60,7 +60,7 @@ module.exports = {
   HTTP_STATUSES: appConfig.HTTP_STATUS,
   APP_STATUSES: appConfig.APP_STATUS,
   VERIFICATION_REASONS: appConfig.VERIFICATION_REASON,
-  init_config:init_config,
+  // init_config:init_config,
   messages: messages,
   FTP_URL: FTP_URL,
   admin_messages: admin_messages,
