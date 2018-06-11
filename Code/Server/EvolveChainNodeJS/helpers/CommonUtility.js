@@ -45,7 +45,7 @@ class CommonUtility {
             case 'BASIC':
                 metaDataInfo = {
                     'firstname': 'First Name', 'middlename': 'Middle Name','lastname': 'Last Name', 
-                    'dob': 'Date Of Birth', 'place_of_birth': 'Birth Place',
+                    'dob': 'Date Of Birth', 'gender' : "Gender", 'place_of_birth': 'Birth Place',
                     'address1': 'Address 1', 'address2': 'Address 2','street' : 'Street', 'city': 'City',
                     'zip': 'Zip', 'state': 'State', 'country': 'Country'
                 };

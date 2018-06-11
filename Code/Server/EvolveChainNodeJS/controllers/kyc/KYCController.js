@@ -116,6 +116,7 @@ class KYCController extends BaseController {
                     case "basic":
                         req.checkBody("firstname", messages.req_firstname).notEmpty();
                         req.checkBody("lastname", messages.req_lastname).notEmpty();
+                        req.checkBody("gender", messages.req_gender).notEmpty();
                         req.checkBody("dob", messages.req_dob).notEmpty();
                         req.checkBody("city", messages.req_city).notEmpty();
                         req.checkBody("address1", messages.req_address).notEmpty();
@@ -318,6 +319,7 @@ class KYCController extends BaseController {
                     firstname: body.firstname,
                     middlename: body.middlename,
                     lastname: body.lastname,
+                    gender: body.gender,
                     dob: body.dob,
                     city: body.city,
                     address1: body.address1,
@@ -437,7 +439,7 @@ class KYCController extends BaseController {
             var basic_images_id = docData.basic_info.images.map(x => mongoose.Types.ObjectId(x.file_key));
             var address_images_id = docData.address_info.images.map(x => mongoose.Types.ObjectId(x.file_key));
             var identity_images_id = docData.identity_info.images.map(x => mongoose.Types.ObjectId(x.file_key));
-            var face_images_id = docData.identity_info.images.map(x => mongoose.Types.ObjectId(x.file_key));
+            var face_images_id = docData.face_info.images.map(x => mongoose.Types.ObjectId(x.file_key));
 
             var all_image_ids = basic_images_id.concat(address_images_id).concat(identity_images_id).concat(face_images_id);
 

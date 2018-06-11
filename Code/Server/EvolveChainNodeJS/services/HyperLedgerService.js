@@ -19,9 +19,9 @@ class HyperLedgerService {
         basicDetailObj.phone = phone;
         basicDetailObj.phone_code = isd_code;
 
-        let eKycInfo = _.pick(basicDetailObj, ['eKYCId', 'email', 'phone', 'phone_code', 'firstname',"middlename", "lastname", 
-        "place_of_birth", "dob", "city", "street", "address1",   "address2","zip", "state", "country"]);
-       
+        let eKycInfo = _.pick(basicDetailObj, ['eKYCId', 'email', 'phone', 'phone_code', 'firstname', "middlename", "lastname",
+            "place_of_birth", "dob", "gender", "city", "street", "address1", "address2", "zip", "state", "country"]);
+
         return GeneralService.PostService(HL_URL_EKYC, eKycInfo);
     }
 

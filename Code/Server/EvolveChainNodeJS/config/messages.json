@@ -58,6 +58,7 @@
     "Identity_data": "Identity Information",
     "req_firstname": "First Name Required!",
     "req_lastname": "Last Name Required!",
+    "req_gender": "Gender Required!",
     "req_dob": "Date Of Birth Required!",
     "req_pob": "Place Of Birth Required!",
     "req_address": "Address Required!",

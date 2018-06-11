@@ -44,6 +44,7 @@ const KYCDocument = new Schema({
             firstname: { type: String },
             middlename: { type: String },
             lastname: { type: String },
+            gender : {type : String},
             dob: { type: String },
             city: { type: String },
             address1: { type: String },
