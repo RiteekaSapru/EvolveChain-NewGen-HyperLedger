@@ -129,6 +129,7 @@
     "phone_missing": "Phone missing!",
     "req_verify_status": "Verify status missing!",
     "file_not_found": "File not found",
+    "doc_expired" : "Documents expired!",
     "ERROR_CODES": {
         "E100": "Exception:",
         "E00": "Error:",
@@ -151,6 +152,7 @@
         "E17": "Address documents missing",
         "E18": "Ekyc Id for this device does not exist!",
         "E19": "User contact type missing!",
-        "E20": "Face documents missing"
+        "E20": "Face documents missing",
+        "E21": "The application is in the expired state!"
     }
 }
