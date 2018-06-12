@@ -32,7 +32,7 @@ class AppController extends base_controller {
         req.checkBody("device_name", messages.req_device_name).notEmpty();
         req.checkBody("os_version", messages.req_os_version).notEmpty();
         req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
-        req.checkBody("country_iso", messages.req_vendor_uuid).notEmpty();
+        req.checkBody("country_iso", messages.req_country_iso).notEmpty();
 
         try {
             let result = await req.getValidationResult();
@@ -42,38 +42,48 @@ class AppController extends base_controller {
                 return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
             }
 
-            let body = _.pick(req.body, ['ip', 'device_type', 'device_name', 'os_version', 'vendor_uuid', 'country_iso']);
+            // let body = _.pick(req.body, ['ip', 'device_type', 'device_name', 'os_version', 'vendor_uuid', 'country_iso', 'latitude', 'longitude', 'network_provider', 'network_country_code', 'mobile_network_code', 'mobile_country_code', 'iso_country_code']);
+            let body = req.body;
 
             body.key = common_utility.GenerateUniqueToken();
             body.SERVER_ADDR = req.connection.localAddress;
             body.REMOTE_ADDR = req.connection.remoteAddress;
 
-            var params = {
-                IP: body.ip,
-                device_type: body.device_type,
-                device_name: body.device_name,
-                os_version: body.os_version,
-                vendor_uuid: body.vendor_uuid,
-                key: body.key,
-                isdelete: '0',
-                Server: body.SERVER_ADDR,
-                Refer: body.REMOTE_ADDR,
-                status: config.APP_STATUSES.PENDING,
-                country_iso: body.country_iso
+            var abc = {
+                
+                    device_info: {
+                        device_name: body.device_name,
+                        device_type: body.device_type,
+                        os_version: body.os_version,
+                        ip: body.ip,
+                        refer: body.REMOTE_ADDR,
+                        server: body.SERVER_ADDR,
+                        latitude : body.latitude,
+                        longitude : body.longitude,
+                        network_provider : body.network_provider,
+                        network_country_code :  body.network_country_code,
+                        mobile_network_code : body.mobile_network_code,
+                        iso_country_code:body.iso_country_code
+                    },
+                    vendor_uuid: body.vendor_uuid,
+                    key: body.key,
+                    status: config.APP_STATUSES.PENDING,
+                    country_iso: body.country_iso
+                
             }
 
-            common_utility.RemoveNull(params); // remove blank value from array
 
-            var iso = body.country_iso.toUpperCase();            
+            common_utility.RemoveNull(abc); // remove blank value from array
+
+            var iso = body.country_iso.toUpperCase();
             const countryDocs  = await ProofDocuments.find({country_iso: { $eq : iso}});
 
-            var App = new app(params);
+            var App = new app(abc);
             var newApp = await App.save();
 
             let verification_code = common_utility.GenerateOTP(6);
             var kycDocParam = {
                 app_key: newApp.key,
-                isDelete: 0,
                 face_info: {details: {number:verification_code}},
                 last_modified: common_utility.UtcNow()
             }
@@ -693,8 +703,6 @@ class AppController extends base_controller {
                     'now': Date.now(),
                     'key': appEntity.key,
                     'ip': appEntity.IP,
-                    'Server': appEntity.Server,
-                    'Refer': appEntity.Refer,
                     'documents': appEntity.documents,
                     'verification_code':appEntity.verification_code
                     // 'init_config': config.get('init_config')
