@@ -4,6 +4,7 @@
     "req_device_name": "Device Name missing!",
     "req_os_version": "OS Version missing!",
     "req_vendor_uuid": "Vendor uuid missing!",
+    "req_country_iso": "Country ISO missing!",
     "req_key": "Key missing!",
     "req_pin": "Pin missing!",
     "permision_denied": "You don't have a permission to access this Route.",
@@ -129,7 +130,7 @@
     "phone_missing": "Phone missing!",
     "req_verify_status": "Verify status missing!",
     "file_not_found": "File not found",
-    "doc_expired" : "Documents expired!",
+
     "ERROR_CODES": {
         "E100": "Exception:",
         "E00": "Error:",
