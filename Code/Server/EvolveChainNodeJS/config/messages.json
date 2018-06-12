@@ -154,6 +154,7 @@
         "E18": "Ekyc Id for this device does not exist!",
         "E19": "User contact type missing!",
         "E20": "Face documents missing",
-        "E21": "The application is in the expired state!"
+        "E21": "The application is in the expired state!",
+        "E22": "An application already exists with the same phone number"
     }
 }
