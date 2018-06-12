@@ -33,14 +33,13 @@ const App = new Schema({
         ip: { type: String },
         refer: { type: String },
         server: { type: String },
-        latitude : {type : Float32Array},
-        longitude : {type : Float32Array},
+        latitude : {type : String},
+        longitude : {type : String},
         network_provider : { type: String },
         network_country_code :  { type: String },
         mobile_network_code : { type: String },
         iso_country_code: { type: String }
     },
-
 
     isdelete: { type: String },
     key: { type: String },
@@ -63,7 +62,6 @@ const App = new Schema({
         otp_expiry_time: { type: Date },
         id: { type: String }
     },
-
 
     pin: { type: String },
     pin_otp: { type: String },
@@ -99,11 +97,11 @@ App.virtual('kycdoc_data', {
     justOne: true // for many-to-1 relationships
 });
 
-
 App.pre('save', function (next) {
     var app = this;
     next();
 });
+
 App.pre('update', function () {
     this.update({}, { $set: { last_modified: commonUtility.UtcNow() } });
 });
