@@ -69,7 +69,7 @@
                                 </table>
                             </div>
                             <div class="col-sm-6">
-                                <h5 class="alert header"> Profile
+                                <h5 class="alert header"> Face
                                     <span class="float-right"></span>
                                 </h5>
                                 <table class="table">
@@ -81,33 +81,42 @@
                                             </td>
 
                                             <% } %>
+                                                <% for(let k = 0; k <  kycData.FaceInfo.DocImages.length; k++) { %>
+
+                                                    <td>
+                                                        <img height="200" width="200" src="<%=kycData.FaceInfo.DocImages[k].url%>" width="100%">
+                                                    </td>
+
+                                                    <% } %>
                                     </tr>
                                 </table>
                                 <table class="table">
+                                    <tr>
+                                        <td>
+                                            Email:
+                                        </td>
+                                        <td>
+                                            <%=kycData.email%>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            Phone:
+                                        </td>
+                                        <td>
+                                            <%=kycData.phone%>
+                                        </td>
+                                    </tr>
+                                    <% for(let j = 0; j < kycData.FaceInfo.DocDetails.length; j++) { %>
                                         <tr>
                                             <td>
-                                                Email:
+                                                <%=kycData.FaceInfo.DocDetails[j].name%>:
                                             </td>
                                             <td>
-                                                <%=kycData.email%>
+                                                <%=kycData.FaceInfo.DocDetails[j].value%>
                                             </td>
                                         </tr>
-                                        <tr>
-                                            <td>
-                                                Phone:
-                                            </td>
-                                            <td>
-                                                <%=kycData.phone%>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                Verification Code:
-                                            </td>
-                                            <td>
-                                                <%=kycData.verification_code%>
-                                            </td>
-                                        </tr>
+                                        <% } %>
                                 </table>
                             </div>
 
@@ -177,29 +186,32 @@
 
                 <table class="table">
                     <tr>
-                    <th>Reasons:</th>
+                        <th>Reasons:</th>
                     </tr>
                     <tr>
                         <td style="display: grid;
                         grid-template-columns: auto auto auto;">
 
                             <% for(let j = 0; j < kycData.reasonList.length; j++) { %>
-                               <label style="
+                                <label style="
                                text-align:left;">
-                            <input  value=<%=kycData.reasonList[j].code%> type="checkbox" name="reasonList" <%=kycData.reasonList[j].state ? 'checked': 'unchecked' %> >  <%=kycData.reasonList[j].reason%></label>
-                            <% } %>
+                                    <input value=<%=kycData.reasonList[j].code%> type="checkbox" name="reasonList"
+                                    <%=kycData.reasonList[j].state ? 'checked': 'unchecked' %> >
+                                        <%=kycData.reasonList[j].reason%>
+                                </label>
+                                <% } %>
                         </td>
                     </tr>
-                
+
                 </table>
 
                 <input type="text" value="<%=kycData.verification_comment%>" class="form-control input-lg" placeholder="Comments" name="textBoxComment"
                 />
                 <hr>
                 <% if(!kycData.is_verified) {%>
-                <input value="Verify" type="submit" name="action" class="btn btn-success">
+                    <input value="Verify" type="submit" name="action" class="btn btn-success">
 
-                <input value="Reject" type="submit" name="action" class="btn btn-danger">
+                    <input value="Reject" type="submit" name="action" class="btn btn-danger">
                     <%}%>
             </div>
 

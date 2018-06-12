@@ -6,7 +6,6 @@ const async = require('async');
 const config = require('config');
 const status = config.get('status');
 const messages = config.get('messages');
-const documentStatus = config.get('document_status');
 const utility = require('../../config/utility');
 const emailService = require('../../services/EmailService')
 const smsService = require('../../services/SMSService')
@@ -312,6 +311,8 @@ class KYCController extends BaseController {
             //last_modified: new Date(Date.now())
         };
 
+       
+
         switch (body.step) {
 
             case "basic":
@@ -337,6 +338,7 @@ class KYCController extends BaseController {
                 break;
 
             case "address":
+
                 details = {
                     number: body.number,
                     expiry_date: body.expiry_date,

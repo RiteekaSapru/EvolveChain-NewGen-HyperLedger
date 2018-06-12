@@ -1,5 +1,4 @@
 const _ = require('lodash');
-const path = require("path");
 const config = require('config');
 const fs = require("fs");
 const ejs = require('ejs');
@@ -13,6 +12,7 @@ const BaseController = require('../BaseController');
 
 const App = require('../../models/apps');
 const KycDocument = require('../../models/kycdocument');
+const ProofDocuments = require('../../models/proofdocuments');
 const VerificationReasons = require('../../models/verificationReason');
 
 
@@ -43,7 +43,7 @@ class VerifyController extends BaseController {
             let allReasons = await VerificationReasons.find();
 
             for (var j = 0; j < appReasons.length; j++) {
-                let idx = allReasons.findIndex(r=>r.code == appReasons[j]);
+                let idx = allReasons.findIndex(r => r.code == appReasons[j]);
                 allReasons[idx].state = true;
             }
 
@@ -59,9 +59,10 @@ class VerifyController extends BaseController {
                 verification_code: docData.app_data.verification_code,
                 email: docData.app_data.email,
                 phone: "+" + docData.app_data.isd_code + "-" + docData.app_data.phone,
-                BasicInfo: this.GetDocumentInfo(docData.basic_info, "BASIC"),
-                IdentityInfo: this.GetDocumentInfo(docData.identity_info, "IDENTITY"),
-                AddressInfo: this.GetDocumentInfo(docData.address_info, "ADDRESS"),
+                BasicInfo: await this.GetDocumentInfo(docData.basic_info, docData.app_data.country_iso, "BASIC"),
+                IdentityInfo: await this.GetDocumentInfo(docData.identity_info, docData.app_data.country_iso, "IDENTITY"),
+                AddressInfo: await this.GetDocumentInfo(docData.address_info, docData.app_data.country_iso, "ADDRESS"),
+                FaceInfo: await this.GetDocumentInfo(docData.face_info, docData.app_data.country_iso, "FACE"),
                 reasonList: allReasons
             }
             res.render('web/verifiyKycDocuments.html', { kycData: kycData });
@@ -98,7 +99,7 @@ class VerifyController extends BaseController {
             userEmailId = appData.email;
             var action = req.body.action;
 
-            var reasonList = req.body.reasonList;           
+            var reasonList = req.body.reasonList;
 
             let isVerified = (action.toUpperCase() == "VERIFY");
 
@@ -108,7 +109,6 @@ class VerifyController extends BaseController {
             var appStatus = config.APP_STATUSES.REJECTED;
             var emailTemplateHtml = config.EMAIL_TEMPLATES_PATH + '/kycRejected.html';
             var subject = 'EvolveChain KYC - Rejected';
-            var resubmitPin = '';
 
             if (isVerified) {
                 //generate eKycId 
@@ -117,10 +117,7 @@ class VerifyController extends BaseController {
                 emailTemplateHtml = config.EMAIL_TEMPLATES_PATH + '/kycApproved.html';
                 subject = 'EvolveChain KYC - Approved';
             }
-            else {
-                //generate resubmit pin
-                resubmitPin = commonUtility.GenerateOTP(6);
-            }
+
             var appSetParams =
                 {
                     $set:
@@ -130,8 +127,8 @@ class VerifyController extends BaseController {
                             verification_comment: req.body.textBoxComment,
                             verification_time: commonUtility.UtcNow(),
                             verification_by: "Admin",//set the email of approver
-                            verification_reasons: reasonList,
-                            resubmit_pin:md5(resubmitPin)
+                            verification_reasons: reasonList
+
                         }
                 }
             //send email 
@@ -144,11 +141,11 @@ class VerifyController extends BaseController {
             );
             var emailBody = ejs.render(template, {
                 eKycId: eKycId,
-                resubmitPin: resubmitPin,
+                expiryDays: '15',
                 APP_LOGO_URL: config.get('APP_LOGO_URL'),
                 SITE_NAME: config.get('app_name'),
                 CURRENT_YEAR: config.get('current_year'),
-                REASON_LIST:reasonDefinition.map(x => x.reason)
+                REASON_LIST: reasonDefinition.map(x => x.reason)
             });
 
             if (isVerified && eKycId != '') {
@@ -179,7 +176,7 @@ class VerifyController extends BaseController {
         return (appSuccess);
     }
 
-    GetDocumentInfo(docInfo, docType) {
+    async GetDocumentInfo(docInfo, countryIso, docType) {
         let summaryInfo = {
             DocDetails: [],
             DocImages: []
@@ -188,11 +185,17 @@ class VerifyController extends BaseController {
         if (docInfo.details != undefined) {
             var details = docInfo.details;
             let images = docInfo.images;
+            var proofDocuments = [];
+            if (docType == "IDENTITY" || docType == "ADDRESS") {
+                proofDocuments = await ProofDocuments.find({ country_iso: countryIso });
+            }
 
             let metaDataInfo = commonUtility.GetKycDocumentMetaDataInfo(docType);
             let detailKeys = Object.keys(details);
             Object.keys(metaDataInfo).forEach(function (key) {
-                //if(detailKeys.hasOwnProperty(key)){
+                if (key == 'document_type') {
+                    details[key] = proofDocuments.find(d => d.code == details[key]).name;
+                }
                 summaryInfo.DocDetails.push({ 'name': metaDataInfo[key], 'value': details[key] });
                 // }
             });

@@ -2,12 +2,10 @@ require("./main").config("configEnv.env");
 const path = require("path");
 const status = require('./status');
 const messages = require('./messages');
-const document_status = require('./document_status');
 const appConfig = require('./app_configurations');
-// const init_config = require('./init_configurations');
 
-const admin_messages = require('./admin_messages');
-const merchant_messages = require('./merchant_messages');
+// const admin_messages = require('./admin_messages');
+// const merchant_messages = require('./merchant_messages');
 
 
 const BASE_PATH = path.join(__dirname + "./../");
@@ -24,7 +22,7 @@ const APP_NAME = process.env.APP_NAME;
 const SITE_IMAGES = BASE_URL+'/public/images/';
 const USER_IMAGE = 'public/images/user/';
 
-const FROM_EMAIL = '"'+APP_NAME+'" <'+process.env.SMTP_FROM+'>'
+const FROM_EMAIL = APP_NAME + ' <'+process.env.SMTP_FROM+'>'
 var d = new Date();
 var current_year = d.getFullYear();
 
@@ -37,7 +35,7 @@ const MAIL_2 = 'joeld@'+process.env.COMPANY_DOMAIN;
 const MAIL_3 = 'webmaster@'+process.env.COMPANY_DOMAIN;
 const MAIL_4 = 'admin@'+process.env.COMPANY_DOMAIN;
 
-const appLogoUrl = 'https://cdn1.imggmi.com/uploads/2018/5/31/eb3111c644ef4739a7c8c8258f27cb7a-full.png';
+const appLogoUrl = 'https://cdn1.imggmi.com/uploads/2018/6/12/17ae56b9e9ca9293bc3d54cd879a816a-full.png';
 //const appLogoUrl = SITE_IMAGES + '/logo.png';
 
 
@@ -49,7 +47,6 @@ module.exports = {
   FROM_EMAIL: FROM_EMAIL, 
   current_year: current_year,
   status: status,
-  document_status:document_status,
   ERROR_CODES: appConfig.ERROR_CODE,
   HTTP_STATUSES: appConfig.HTTP_STATUS,
   APP_STATUSES: appConfig.APP_STATUS,
