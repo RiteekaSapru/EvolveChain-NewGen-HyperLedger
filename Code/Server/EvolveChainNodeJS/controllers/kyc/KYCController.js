@@ -93,130 +93,134 @@ class KYCController extends BaseController {
 
     async SaveKycDocument(req, res) {
 
-        var upload = multer({
-            storage: storage
-        }).array('file[]', 2);
+        // var upload = multer({
+        //     storage: storage
+        // }).array('file[]', 2);
 
-        var kycController = this;//new KYCController();
+        //var kycController = this;//new KYCController();
 
-        upload(req, res, async function (err) {
+        try {
 
-            if (err) {
-                return kycController.SendErrorResponse(res, config.ERROR_CODES.ERROR, err);
+            // await upload(req, res);
+
+            // upload(req, res, async function (err) {
+
+            //     if (err) {
+            //         return kycController.SendErrorResponse(res, config.ERROR_CODES.ERROR, err);
+            //     }
+
+            //     if (!err) 
+            //    var  proofDocuments = await App.findOne();
+
+            req.checkBody("step", messages.req_step).notEmpty();
+            req.checkBody("step", messages.req_valid_step).isIn(['basic', 'address', 'identity', 'face']);
+            //req.checkBody("substep", messages.req_valid_step).isIn(['basic', 'passport', 'taxation', 'license', 'utility_bill']);
+
+            let substep = req.body.substep;
+            switch (req.body.step) {
+                case "basic":
+                    req.checkBody("firstname", messages.req_firstname).notEmpty();
+                    req.checkBody("lastname", messages.req_lastname).notEmpty();
+                    req.checkBody("gender", messages.req_gender).notEmpty();
+                    req.checkBody("dob", messages.req_dob).notEmpty();
+                    req.checkBody("city", messages.req_city).notEmpty();
+                    req.checkBody("address1", messages.req_address).notEmpty();
+                    req.checkBody("zip", messages.req_zip).notEmpty();
+                    req.checkBody("state", messages.req_state).notEmpty();
+                    req.checkBody("street", messages.req_street).notEmpty();
+                    req.checkBody("country", messages.req_country).notEmpty();
+                    req.checkBody("place_of_birth", messages.req_pob).notEmpty();
+                    break;
+                case "address":
+                case "identity":
+                    //if (substep == "passport") { 
+                    req.checkBody("number", messages.req_number).notEmpty();
+                    req.checkBody("country", messages.req_country).notEmpty();
+                    //req.checkBody("expiry_date", messages.req_dob).notEmpty();
+                    //}
+                    break;
+                case "face":
+                    req.checkBody("number", messages.req_number).notEmpty();
+                    break;
+                default:
+                    return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, "Step name missing");
+                    break;
             }
 
-            if (!err) {
-                req.checkBody("step", messages.req_step).notEmpty();
-                req.checkBody("step", messages.req_valid_step).isIn(['basic', 'address', 'identity', 'face']);
-                //req.checkBody("substep", messages.req_valid_step).isIn(['basic', 'passport', 'taxation', 'license', 'utility_bill']);
+            let result = await req.getValidationResult();
 
-                let substep = req.body.substep;
-                switch (req.body.step) {
-                    case "basic":
-                        req.checkBody("firstname", messages.req_firstname).notEmpty();
-                        req.checkBody("lastname", messages.req_lastname).notEmpty();
-                        req.checkBody("gender", messages.req_gender).notEmpty();
-                        req.checkBody("dob", messages.req_dob).notEmpty();
-                        req.checkBody("city", messages.req_city).notEmpty();
-                        req.checkBody("address1", messages.req_address).notEmpty();
-                        req.checkBody("zip", messages.req_zip).notEmpty();
-                        req.checkBody("state", messages.req_state).notEmpty();
-                        req.checkBody("street", messages.req_street).notEmpty();
-                        req.checkBody("country", messages.req_country).notEmpty();
-                        req.checkBody("place_of_birth", messages.req_pob).notEmpty();
-                        break;
-                    case "address":
-                    case "identity":
-                        //if (substep == "passport") { 
-                        req.checkBody("number", messages.req_number).notEmpty();
-                        req.checkBody("country", messages.req_country).notEmpty();
-                        //req.checkBody("expiry_date", messages.req_dob).notEmpty();
-                        //}
-                        break;
-                    case "face":
-                        req.checkBody("number", messages.req_number).notEmpty();
-                        break;
-                    default:
-                        return kycController.SendErrorResponse(res, config.ERROR_CODES.ERROR, "Step name missing");
-                        break;
+            if (!result.isEmpty()) {
+                let error = `SaveKYCDocumnet:Error - ${this.GetErrors(result)}`;
+                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+            }
+
+            var filesBufferObject = {};
+            var imageArrayForDoc = [];
+
+            let body = req.body;
+
+            let key = req.params.key;
+            var conditions = {
+                app_key: key,
+                isDelete: "0"
+            }
+
+            var docData = await KYCDocument.findOne(conditions).populate('app_data');//.exec((error, docData) => {
+
+            // if (error) {
+            //     let error = `SaveKYCDocumnet:Error - ${error}`;
+            //     return kycController.SendErrorResponse(res, config.ERROR_CODES.ERROR, error);
+            // }
+
+            if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
+
+            var app = docData.app_data;
+            if (!app) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
+
+            if (!app.phone || !app.email)
+                return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, "Phone or Email not yet verified");
+
+            let infoType = body.step + "_info";
+            this.SaveDocumentImages(req.files, (response) => {
+                // var response = await this.SaveDocumentImages(req.files);
+
+                if (response.error == true) {
+                    return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, response.message);
                 }
+                else {
 
-                try {
-                    let result = await req.getValidationResult();
+                    var imageArrayForDoc = response.data;
+                    //Saving Document Object
+                    this.SaveDocumentObject(docData, body, imageArrayForDoc).then((updatedDoc) => {
 
-                    if (!result.isEmpty()) {
-                        let error = `SaveKYCDocumnet:Error - ${kycController.GetErrors(result)}`;
-                        return kycController.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
-                    }
+                        this.DeleteDocumentImages(docData, body).then((deletedresult) => {
 
-                    var filesBufferObject = {};
-                    var imageArrayForDoc = [];
-
-                    let body = req.body;
-
-                    let key = req.params.key;
-                    var conditions = {
-                        app_key: key,
-                        isDelete: "0"
-                    }
-
-                    KYCDocument.findOne(conditions).populate('app_data').exec((error, docData) => {
-
-                        if (error) {
-                            let error = `SaveKYCDocumnet:Error - ${error}`;
-                            return kycController.SendErrorResponse(res, config.ERROR_CODES.ERROR, error);
-                        }
-
-                        if (!docData) return kycController.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
-
-                        var app = docData.app_data;
-                        if (!app) return kycController.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
-
-                        if (!app.phone || !app.email)
-                            return kycController.SendErrorResponse(res, config.ERROR_CODES.ERROR, "Phone or Email not yet verified");
-
-                        let infoType = body.step + "_info";
-
-                        kycController.SaveDocumentImages(req.files, function (response) {
-
-                            if (response.error == true) {
-                                return kycController.SendErrorResponse(res, config.ERROR_CODES.ERROR, response.message);
+                            var data = {
+                                'success': 1,
+                                'now': Date.now(),
+                                'result': messages.success
                             }
-                            else {
+                            return res.status(status.OK).jsonp(data);
 
-                                var imageArrayForDoc = response.data;
-                                //Saving Document Object
-                                kycController.SaveDocumentObject(docData, body, imageArrayForDoc).then((updatedDoc) => {
-
-                                    kycController.DeleteDocumentImages(docData, body).then((deletedresult) => {
-
-                                        var data = {
-                                            'success': 1,
-                                            'now': Date.now(),
-                                            'result': messages.success
-                                        }
-                                        return res.status(status.OK).jsonp(data);
-
-                                    }).catch((ex) => {
-                                        return kycController.SendExceptionResponse(res, ex);
-                                    });
-
-                                }).catch((ex) => {
-                                    return kycController.SendExceptionResponse(res, ex);
-                                });
-                            }
+                        }).catch((ex) => {
+                            return this.SendExceptionResponse(res, ex);
                         });
+
+                    }).catch((ex) => {
+                        return this.SendExceptionResponse(res, ex);
                     });
-                    //});
                 }
-                catch (ex) {
-                    return kycController.SendExceptionResponse(res, ex);
-                }
-            }
-        })
+            });
+            // });
+            //});
+        }
+        catch (ex) {
+            return this.SendExceptionResponse(res, ex);
+        }
+
     }
 
-    SaveDocumentImages(filesFrmRequest, callback) {
+    async SaveDocumentImages(filesFrmRequest, callback) {
 
         let response = {
             'error': true,
@@ -225,7 +229,7 @@ class KYCController extends BaseController {
         }
         var imageArrayForDoc = [];
 
-        async.eachSeries(filesFrmRequest, function (file, outerSubCallback) {
+        async.eachSeries(filesFrmRequest, (file, outerSubCallback) => {
 
             var newFileObj;
             newFileObj = {
@@ -249,11 +253,11 @@ class KYCController extends BaseController {
 
                 outerSubCallback(null);
 
-            }).catch(function (error) {
+            }).catch((error) => {
                 outerSubCallback(new Error('Error in image upload' + error));
             });
 
-        }, function (err, results) {
+        }, (err, results) => {
 
             ///Find way to check error here...
             if (err) {
@@ -311,7 +315,7 @@ class KYCController extends BaseController {
             //last_modified: new Date(Date.now())
         };
 
-       
+
 
         switch (body.step) {
 
@@ -436,7 +440,7 @@ class KYCController extends BaseController {
 
             if (docData.face_info.details == undefined || docData.face_info.details == null)
                 return this.SendErrorResponse(res, config.ERROR_CODES.FACE_DOCS_MISSING);
-            
+
 
             var basic_images_id = docData.basic_info.images.map(x => mongoose.Types.ObjectId(x.file_key));
             var address_images_id = docData.address_info.images.map(x => mongoose.Types.ObjectId(x.file_key));
@@ -452,11 +456,11 @@ class KYCController extends BaseController {
             if ((all_image_ids.length !== result_all.length)) return kycController.GetErrorResponse(messages.file_not_found, res);
 
             //link send through email 
-            var template = fs.readFileSync(config.EMAIL_TEMPLATES_PATH  + '/verifyKycRequest.html', {
+            var template = fs.readFileSync(config.EMAIL_TEMPLATES_PATH + '/verifyKycRequest.html', {
                 encoding: 'utf-8'
             });
 
-            let configCol  =  await ConfigDB.findOne({}); 
+            let configCol = await ConfigDB.findOne({});
             let toEmailIds = configCol.approver_emails.join(",")
 
             var emailBody = ejs.render(template, {
