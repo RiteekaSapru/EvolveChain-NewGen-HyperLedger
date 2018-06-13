@@ -55,6 +55,11 @@ const App = new Schema({
         isd_code: { type: Number }
     },
 
+    resubmit_pin: { 
+        otp : {type: String },
+        otp_expiry_time: { type: Date },
+    },
+
     // email: { type: String, validate: {validator: validateEmail, message:'Invalid email address'}},
     email: { type: String },
     email_info: {
@@ -73,13 +78,12 @@ const App = new Schema({
         default: Date.now
     },
 
-    profile: { type: String },
-    hash: { type: String },
+    //profile: { type: String },
+    //hash: { type: String },
     last_modified: { type: Date },
 
     status: { type: String },
-    resubmit_pin: { type: String },
-
+    
     verification_code: { type: String },
     verification_comment: { type: String },
     verification_reasons: [{ type: String }],

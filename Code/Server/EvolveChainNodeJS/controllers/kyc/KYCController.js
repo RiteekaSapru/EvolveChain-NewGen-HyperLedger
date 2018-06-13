@@ -8,6 +8,8 @@ const emailService = require('../../services/EmailService')
 const smsService = require('../../services/SMSService')
 const commonUtility = require('../../helpers/CommonUtility');
 const logManager = require('../../helpers/LogManager');
+const mongoose = require('mongoose');
+
 const BaseController = require('../BaseController');
 
 const App = require('../../models/apps');

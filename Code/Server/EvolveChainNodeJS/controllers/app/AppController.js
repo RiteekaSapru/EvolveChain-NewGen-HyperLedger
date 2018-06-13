@@ -22,6 +22,7 @@ const kyc_document = require('../../models/kycdocument');
 const PUBLIC_PATH = config.get('PUBLIC_PATH');
 const EMAIL_TEMPLATES_PATH = path.join(__dirname + "/../../public/email_template");
 const OTP_EXPIRY_MINS = config.get('OTP_EXPIRY_MINS');
+const APP_EXPIRATION_DAYS = config.get('APP_EXPIRATION_DAYS');
 
 class AppController extends base_controller {
 
@@ -68,9 +69,7 @@ class AppController extends base_controller {
                     key: body.key,
                     status: config.APP_STATUSES.PENDING,
                     country_iso: body.country_iso
-                
             }
-
 
             common_utility.RemoveNull(appParams); // remove blank value from array
 
@@ -101,25 +100,80 @@ class AppController extends base_controller {
         }
     }
 
+    async ResubmitVerification(req, res) {
+
+        req.checkBody("mobile", messages.req_mobile).notEmpty();
+        req.checkBody("isd_code", messages.req_isd_code).notEmpty();
+        req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
+
+        try {
+
+            let result = await req.getValidationResult();
+
+            if (!result.isEmpty()) {
+                let error = this.GetErrors(result);
+                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+            }
+
+            let body = _.pick(req.body, ['mobile', 'isd_code']);
+
+            var conditions = {
+                phone: body.mobile,
+                isd_code: body.isd_code
+            }
+
+            var App = await app.findOne(conditions);
+
+            if (!App) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND, error);
+
+            var status = App.status;
+            var errorMsg = "Your application is in " + status + " status. You cannot resubmit the application.";
+            if (status != config.APP_STATUSES.PENDING && status != config.APP_STATUSES.REJECTED) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, errorMsg);
+            }
+
+            var currentUtc = common_utility.UtcNow();
+            //explicitly needs to convert to UTC, somehow mongodb or node js convert it to local timezone
+            var lastModified = common_utility.ConvertToUtc(App.last_modified);
+            var expiryDate = lastModified.setDate(lastModified.getDate() + APP_EXPIRATION_DAYS);
+
+            if (expiryDate < currentUtc)
+                return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, "Your application has expired. Please sign up again.");
+
+            var phone_code = common_utility.GenerateOTP(6);
+
+            var phone = body.mobile.replace("+", "");
+            var isdCode = body.isd_code.replace("+", "");
+            var msg = 'EvolveChain mobile verification code: ' + phone_code + '.';
+            let toPhone = "+" + isdCode + phone;
+
+            let smsResult = await sms_service.SendSMS(toPhone, msg);
+
+            let md5OTP = md5(phone_code);
+            var expireTime = common_utility.AddMinutesToUtcNow(OTP_EXPIRY_MINS);
+
+            var setParams = {
+                $set: {
+                    resubmit_pin: {
+                        otp: md5OTP,
+                        otp_expiry_time: expireTime,
+                    }
+                }
+            }
+
+            await app.update(conditions, setParams);
+            return this.GetSuccessResponse("ResubmitVerification", null, res);
+
+        } catch (ex) {
+            return this.SendExceptionResponse(res, ex);
+        }
+    }
 
     async ResubmitInitialize(req, res) {
 
         req.checkBody("resubmit_pin", messages.req_resubmit_pin).notEmpty();
-        req.checkBody("user_contact_type", messages.req_user_contact_type).isIn(['email', 'phone']);
-
-        switch (req.body.user_contact_type) {
-            case "phone":
-                req.checkBody("phone", messages.req_mobile).notEmpty();
-                req.checkBody("country_code", messages.req_country_code).notEmpty();
-                break;
-            case "email":
-                req.checkBody("email", messages.req_email).notEmpty();
-                break;
-            default:
-                // return this.GetErrorResponse('user contact type missing!', res);
-                return this.SendErrorResponse(res, config.ERROR_CODES.CONTACT_TYPE_MISSING);
-                break;
-        }
+        req.checkBody("appkey", messages.req_app_key).notEmpty();
+        req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
 
         try {
             let result = await req.getValidationResult();
@@ -129,25 +183,11 @@ class AppController extends base_controller {
                 return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
             }
 
-            let body = _.pick(req.body, ['email', 'phone', 'country_code', 'resubmit_pin', 'user_contact_type']);
+            let body = _.pick(req.body, ['resubmit_pin', 'appkey']);
 
-            switch (req.body.user_contact_type) {
-                case "phone":
-                    var conditions = {
-                        phone: body.phone,
-                        isd_code: body.country_code,
-                        resubmit_pin: body.resubmit_pin
-                    }
-                    break;
-                case "email":
-                    var conditions = {
-                        email: body.email,
-                        resubmit_pin: body.resubmit_pin
-                    }
-                    break;
-                default:
-                    return this.SendErrorResponse(res, config.ERROR_CODES.CONTACT_TYPE_MISSING);
-                    break;
+            var conditions = {
+                key: body.appkey,
+                resubmit_pin: body.resubmit_pin
             }
 
             var appData = await app.findOne(conditions).populate('kycdoc_data').exec();
@@ -155,10 +195,19 @@ class AppController extends base_controller {
             if (!appData)
                 return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
 
+            if (appData.resubmit_pin.otp != body.resubmit_pin)
+                return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_OTP);
+
+            var currentUtc = common_utility.UtcNow();
+            //explicitly needs to convert to UTC, somehow mongodb or node js convert it to local timezone
+            var expireTime = common_utility.ConvertToUtc(appData.resubmit_pin.otp_expiry_time);
+            if (expireTime < currentUtc)
+                return this.SendErrorResponse(res, config.ERROR_CODES.OTP_EXPIRED);
+
             var docData = appData.kycdoc_data;//await kyc_document.findOne(con);
             if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
 
-            var iso = App.country_iso.toUpperCase();
+            var iso = appData.country_iso.toUpperCase();
             const countryDocs = await ProofDocuments.find({ country_iso: { $eq: iso } });
 
             //Get the Country details from ISO
@@ -296,7 +345,7 @@ class AppController extends base_controller {
     async GenerateMobileOTP(req, res) {
 
         req.checkBody("mobile", messages.req_mobile).notEmpty();
-        req.checkBody("country_code", messages.req_country_code).notEmpty();
+        req.checkBody("country_code", messages.req_isd_code).notEmpty();
 
         try {
 
@@ -359,7 +408,7 @@ class AppController extends base_controller {
     async VerifyMobile(req, res) {
 
         req.checkBody("mobile", messages.req_mobile).notEmpty();
-        req.checkBody("country_code", messages.req_country_code).notEmpty();
+        req.checkBody("country_code", messages.req_isd_code).notEmpty();
         req.checkBody("phone_code", messages.req_mobile_code).notEmpty();
 
         try {
@@ -602,7 +651,8 @@ class AppController extends base_controller {
 
     async Login(req, res) {
 
-        req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
+        req.checkBody("mobile", messages.req_mobile).notEmpty();
+        req.checkBody("isd_code", messages.req_isd_code).notEmpty();
         req.checkBody("pin", messages.req_pin).notEmpty();
         req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
 
@@ -613,61 +663,63 @@ class AppController extends base_controller {
                 return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
             }
 
-            let body = _.pick(req.body, ['ekyc_id', 'pin', 'vendor_uuid']);
+            let body = _.pick(req.body, ['mobile', 'isd_code', 'pin', 'vendor_uuid']);
 
             var conditions = {
-                ekyc_id: body.ekyc_id,
+                phone: body.mobile,
+                isd_code: body.isd_code
             }
 
             var App = await app.findOne(conditions);
+            var appData = await app.findOne(conditions).populate('kycdoc_data').exec();
 
-            if (!App) {
-                return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_EKYCID);
+            if (!appData) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
             }
-            if (App.vendor_uuid != body.vendor_uuid) {
+            if (appData.vendor_uuid != body.vendor_uuid) {
                 return this.SendErrorResponse(res, config.ERROR_CODES.DEVICE_MISMATCH);
             }
-            if (App.pin != body.pin) {
+            if (appData.pin != body.pin) {
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_PIN);
             }
-            if (App.status == config.APP_STATUSES.EXPIRED) {
+
+            var status = appData.status;
+            if (status == config.APP_STATUSES.EXPIRED) {
                 return this.SendErrorResponse(res, config.ERROR_CODES.EXPIRED_APP_STATUS);
             }
-
-            var con = {
-                app_key: App.key
+            
+            var errorMsg = "Your application is in " + status + " status. You cannot login the application.";
+            if (status != config.APP_STATUSES.VERIFIED) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, errorMsg);
             }
-            var docData = await kyc_document.findOne(con);
+
+            var docData = appData.kycdoc_data;
             if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
 
             var currentUtc = common_utility.UtcNow();
+            var expired = false;
 
             if (docData.identity_info.details.expiry_date != undefined || docData.identity_info.details.expiry_date != null) {
                 var expireDateIdentity = common_utility.ConvertToUtc(docData.identity_info.details.expiry_date);
                 if (expireDateIdentity < currentUtc) {
-                    var conds = { _id: App._id }
-                    var params = {
-                        $set: { status: config.APP_STATUSES.EXPIRED }
-                    }
-                    await app.update(conds, params);
-                    return this.SendErrorResponse(res, config.ERROR_CODES.EXPIRED_APP_STATUS);
+                    expired = true;
                 }
             }
 
             if (docData.address_info.details.expiry_date != undefined || docData.address_info.details.expiry_date != null) {
                 var expireDateAddress = common_utility.ConvertToUtc(docData.address_info.details.expiry_date);
                 if (expireDateAddress < currentUtc) {
-                    var conds = { _id: App._id }
-                    var params = {
-                        $set: { status: config.APP_STATUSES.EXPIRED }
-                    }
-                    await app.update(conds, params);
-                    return this.SendErrorResponse(res, config.ERROR_CODES.EXPIRED_APP_STATUS);
+                    expired = true;
                 }
             }
 
-            var cond = {
-                _id: App._id
+            var cond = { _id: appData._id }
+            if (expired) {
+                var params = {
+                    $set: { status: config.APP_STATUSES.EXPIRED }
+                }
+                await app.update(cond, params);
+                return this.SendErrorResponse(res, config.ERROR_CODES.EXPIRED_APP_STATUS);
             }
 
             var params = {
@@ -782,6 +834,13 @@ class AppController extends base_controller {
                     'now': Date.now(),
                     'ekyc_id': appEntity.ekyc_id,
                     'result': messages.ekyc_same_device
+                }
+            case "ResubmitVerification":
+                response = {
+                    'success': 1,
+                    'now': Date.now(),
+                    'key': appEntity.key,
+                    'result': messages.success
                 }
                 break;
         }

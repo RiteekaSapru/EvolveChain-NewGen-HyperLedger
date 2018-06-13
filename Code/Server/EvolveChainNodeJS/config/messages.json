@@ -45,6 +45,7 @@
     "verify_phone_code": "Mobile verification OTP sent",
     "req_mobile_code": "Mobile Code missing!",
     "req_country_code": "Country code missing",
+    "req_isd_code": "ISD code missing",
     "invalid_emial_mobile": "Invalid Email and Mobile!",
     "success": "success",
     "req_step": "step name missing!",

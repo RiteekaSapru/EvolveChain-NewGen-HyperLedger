@@ -64,5 +64,6 @@ module.exports = {
   DB_NAME: DB_NAME,
   OTP_EXPIRY_MINS:30,
   APP_LOGO_URL:appLogoUrl ,
-  HL_URL : process.env.HL_URL
+  HL_URL : process.env.HL_URL,
+  APP_EXPIRATION_DAYS : process.env.APP_EXPIRATION_DAYS
 };
