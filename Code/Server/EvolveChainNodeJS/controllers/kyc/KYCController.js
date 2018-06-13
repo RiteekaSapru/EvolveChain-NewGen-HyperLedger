@@ -9,6 +9,7 @@ const smsService = require('../../services/SMSService')
 const commonUtility = require('../../helpers/CommonUtility');
 const logManager = require('../../helpers/LogManager');
 const mongoose = require('mongoose');
+const async = require('async');
 
 const BaseController = require('../BaseController');
 
@@ -16,6 +17,7 @@ const App = require('../../models/apps');
 const KYCDocument = require('../../models/kycdocument');
 const File = require('../../models/files');
 const ConfigDB = require('../../models/config');
+const ProofDocuments = require('../../models/proofdocuments');
 
 const BASE_PATH = config.get('base_path');
 const PUBLIC_PATH = config.get('PUBLIC_PATH');
@@ -53,6 +55,7 @@ class KYCController extends BaseController {
         try {
 
             req.checkBody("step", messages.req_step).notEmpty();
+            req.checkBody("iso", messages.req_country_iso).notEmpty();
             req.checkBody("step", messages.req_valid_step).isIn(['basic', 'address', 'identity', 'face']);
             //req.checkBody("substep", messages.req_valid_step).isIn(['basic', 'passport', 'taxation', 'license', 'utility_bill']);
 
@@ -154,7 +157,7 @@ class KYCController extends BaseController {
 
     }
 
-    async SaveDocumentImages(filesFrmRequest, callback) {
+    SaveDocumentImages(filesFrmRequest, callback) {
 
         let response = {
             'error': true,
