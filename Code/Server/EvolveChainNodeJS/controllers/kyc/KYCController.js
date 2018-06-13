@@ -1,65 +1,22 @@
 const fs = require("fs");
 const ejs = require('ejs');
-const path = require("path");
 const _ = require('lodash');
-const async = require('async');
 const config = require('config');
 const status = config.get('status');
 const messages = config.get('messages');
-const utility = require('../../config/utility');
 const emailService = require('../../services/EmailService')
 const smsService = require('../../services/SMSService')
 const commonUtility = require('../../helpers/CommonUtility');
 const logManager = require('../../helpers/LogManager');
 const BaseController = require('../BaseController');
 
-const mongoose = require('mongoose');
-var ObjectId = require('mongodb').ObjectID;
-var mongo = require('mongodb');
-
-const md5 = require('md5');
-const multer = require('multer');
-const authenticator = require('authenticator');
-
 const App = require('../../models/apps');
 const KYCDocument = require('../../models/kycdocument');
 const File = require('../../models/files');
-const Share = require('../../models/shares');
-const Wallet = require('../../models/wallet');
 const ConfigDB = require('../../models/config');
 
 const BASE_PATH = config.get('base_path');
 const PUBLIC_PATH = config.get('PUBLIC_PATH');
-
-//var to = config.get('ver_mail_id');
-var im = require('imagemagick');
-
-var bucket;
-mongo.MongoClient.connect(config.get('MONGODB_URL'), function (err, db) {
-    if (err) {
-        console.log("Database....." + err);
-    }
-    else {
-        database = db.db(config.get('DB_NAME'));
-        bucket = new mongo.GridFSBucket(database);
-    }
-});
-
-// let storage = multer.diskStorage({
-//     destination: function (req, file, callback) {
-//         var fileMime = file.mimetype.split('/')[0];
-//         if (fileMime == 'image') {
-//             callback(null, config.get('documents_path'));
-//         } else if (fileMime == 'video') {
-//             callback(null, config.get('documents_path'));
-//         }
-//     },
-//     filename: function (req, file, callback) {
-//         callback(null, path.parse(file.originalname).name + '-' + Date.now() + path.extname(file.originalname))
-//     }
-// })
-
-let storage = multer.memoryStorage()
 
 class KYCController extends BaseController {
 
@@ -69,16 +26,14 @@ class KYCController extends BaseController {
             _id: req.params.key
         }
 
-        var kycController = this;
-
         try {
 
             File.findOne(conditions, (error, file) => {
 
                 if (error) {
-                    return kycController.SendErrorResponse(res, config.ERROR_CODES.ERROR, error);
+                    return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, error);
                 }
-                if (!file) return kycController.GetErrorResponse(messages.file_not_found, res);
+                if (!file) return this.GetErrorResponse(messages.file_not_found, res);
 
                 var img = new Buffer(file.data, 'base64');
 
@@ -87,30 +42,13 @@ class KYCController extends BaseController {
             })
         }
         catch (ex) {
-            return kycController.SendExceptionResponse(res, ex);
+            return this.SendExceptionResponse(res, ex);
         }
     }
 
     async SaveKycDocument(req, res) {
 
-        // var upload = multer({
-        //     storage: storage
-        // }).array('file[]', 2);
-
-        //var kycController = this;//new KYCController();
-
         try {
-
-            // await upload(req, res);
-
-            // upload(req, res, async function (err) {
-
-            //     if (err) {
-            //         return kycController.SendErrorResponse(res, config.ERROR_CODES.ERROR, err);
-            //     }
-
-            //     if (!err) 
-            //    var  proofDocuments = await App.findOne();
 
             req.checkBody("step", messages.req_step).notEmpty();
             req.checkBody("step", messages.req_valid_step).isIn(['basic', 'address', 'identity', 'face']);
@@ -167,11 +105,6 @@ class KYCController extends BaseController {
 
             var docData = await KYCDocument.findOne(conditions).populate('app_data');//.exec((error, docData) => {
 
-            // if (error) {
-            //     let error = `SaveKYCDocumnet:Error - ${error}`;
-            //     return kycController.SendErrorResponse(res, config.ERROR_CODES.ERROR, error);
-            // }
-
             if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
 
             var app = docData.app_data;
@@ -211,8 +144,7 @@ class KYCController extends BaseController {
                     });
                 }
             });
-            // });
-            //});
+
         }
         catch (ex) {
             return this.SendExceptionResponse(res, ex);
