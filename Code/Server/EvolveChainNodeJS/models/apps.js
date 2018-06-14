@@ -41,7 +41,7 @@ const App = new Schema({
         iso_country_code: { type: String }
     },
 
-    isdelete: { type: String },
+    isdelete: { type: Boolean, default: false},
     key: { type: String },
     name: { type: String },
 
