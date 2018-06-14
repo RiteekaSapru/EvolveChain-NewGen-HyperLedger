@@ -59,7 +59,7 @@ class RequestManager: NSObject {
     func makeGetAPICall(url: String,params: Dictionary<String, Any>?, method: HttpMethod, success:@escaping ( Data? ,HTTPURLResponse?  , NSError? ,Array<Any>) -> Void, failure: @escaping ( Data? ,HTTPURLResponse?  , NSError?,String? )-> Void) {
         
         if !isConnectedToNetwork() {
-            failure(nil , nil , nil,stringNoInternet)
+            failure(nil , nil , nil,StringConstants.NoInternet)
             return
         }
         
@@ -124,7 +124,7 @@ class RequestManager: NSObject {
     func makeAPICall(url: String,params: Dictionary<String, Any>?, method: HttpMethod, success:@escaping ( Data? ,HTTPURLResponse?  , NSError? ,Dictionary<String,Any>) -> Void, failure: @escaping ( Data? ,HTTPURLResponse?  , NSError?,String? )-> Void) {
         
         if !isConnectedToNetwork() {
-            failure(nil , nil , nil,stringNoInternet)
+            failure(nil , nil , nil,StringConstants.NoInternet)
             return
         }
         
@@ -177,13 +177,24 @@ class RequestManager: NSObject {
                                     
                                     if let errorCode = RawdataConverter.optionalString(jsonDict["error_code"]) {
                                        
-                                        if errorCode == ErrorCode.APP_NOT_FOUND.rawValue{
-                                            GlobalMethods.sharedInstance.logOutUser()
-                                            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: errorString)
+//                                        if errorCode == ErrorCode.APP_NOT_FOUND.rawValue{
+//                                            GlobalMethods.sharedInstance.dismissLoader {
+//                                                GlobalMethods.sharedInstance.logOutUser()
+//                                                GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorString)
+//                                            }
+//                                        }
+                                         if errorCode == ErrorCode.DEVICE_MISMATCH.rawValue{
+                                            GlobalMethods.sharedInstance.dismissLoader {
+                                                GlobalMethods.sharedInstance.deviceMismatch(errorMsg: errorString)
+                                            }
                                         }
-                                        else if errorCode == ErrorCode.DEVICE_MISMATCH.rawValue{
-                                            GlobalMethods.sharedInstance.deviceMismatch(errorMsg: errorString)
-                                        }
+                                         else if errorCode == ErrorCode.EXPIRED_APP_STATUS.rawValue{
+                                            GlobalMethods.sharedInstance.dismissLoader {
+                                                GlobalMethods.sharedInstance.documentExpiredError(errorMsg: errorString)
+//                                                GlobalMethods.sharedInstance.logOutUser()
+//                                                GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorString)
+                                            }
+                                         }
                                         else{
                                             failure(data , response , error as NSError?,errorString)
                                         }
@@ -191,7 +202,7 @@ class RequestManager: NSObject {
                                 }
                             }
                             else{
-                                 failure(data , response , error as NSError?,RawdataConverter.optionalString(jsonDict["error"]))
+                                 failure(data , response , error as NSError?,RawdataConverter.string(jsonDict["error"]))
                             }
                         } else {
                             print("bad json")
@@ -219,7 +230,7 @@ class RequestManager: NSObject {
     func requestToUploadImagesWithParams(url: String,params: Dictionary<String, Any>?, images : [UIImage],fileNames : [String], method: HttpMethod, success:@escaping ( Data? ,HTTPURLResponse?  , NSError? ,Dictionary<String,Any>) -> Void, failure: @escaping ( Data? ,HTTPURLResponse?  , NSError?,String? )-> Void)
     {
         if !isConnectedToNetwork() {
-            failure(nil , nil , nil,stringNoInternet)
+            failure(nil , nil , nil,StringConstants.NoInternet)
             return
         }
         var request = URLRequest(url: URL(string: url)!)
@@ -320,7 +331,7 @@ class RequestManager: NSObject {
                                     
                                     if errorCode == ErrorCode.APP_NOT_FOUND.rawValue{
                                         GlobalMethods.sharedInstance.logOutUser()
-                                        GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: errorString)
+                                        GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorString)
                                     }
                                     else if errorCode == ErrorCode.DEVICE_MISMATCH.rawValue{
                                         GlobalMethods.sharedInstance.deviceMismatch(errorMsg: errorString)

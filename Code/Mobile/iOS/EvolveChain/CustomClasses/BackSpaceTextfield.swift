@@ -29,7 +29,7 @@ class BackSpaceTextfield: NoPasteUITextField {
 
 class NoPasteUITextField: UITextField {
     override public func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
-        if action == #selector(copy(_:)) || action == #selector(paste(_:)) {
+        if action == #selector(copy(_:)) || action == #selector(paste(_:)) || action == #selector(select(_:)){
             return false
         }
         

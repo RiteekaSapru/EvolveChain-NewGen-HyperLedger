@@ -250,7 +250,7 @@ class VerifyOtpVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
         //Call API tp resend
         switch verificationType{
         case .EmailVerification:APIGetEMailOtp(email: stringVerify)
-        case .PhoneVerification:APIGetPhoneOtp(countryCode: stringVerifyCountryCode, phoneNumner: stringVerify)
+        case .PhoneVerification:APIGetPhoneOtp(countryCode: stringVerifyCountryCode, phoneNumner: stringVerify.components(separatedBy: CharacterSet.init(charactersIn: "1234567890").inverted).joined())
             
         }
         
@@ -317,7 +317,7 @@ class VerifyOtpVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
             DispatchQueue.main.async {
                 self.activityIndicatorLoader.stopAnimating()
             }
-//            GlobalMethods.sharedInstance.showAlert(alertTitle: stringAppName, alertText: errorMsg!)
+//            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
         }
     }
     func APIVerifyPhone(otpString:String) -> Void {
@@ -331,7 +331,7 @@ class VerifyOtpVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
             }
             self.saveUserPhone()
         }) { (errorMsg) in
-//            GlobalMethods.sharedInstance.showAlert(alertTitle: stringAppName, alertText: errorMsg!)
+//            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
             DispatchQueue.main.async {
                     self.activityIndicatorLoader.stopAnimating()
                 self.clearAllFields()
@@ -356,7 +356,7 @@ class VerifyOtpVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
             DispatchQueue.main.async {
                 self.activityIndicatorLoader.stopAnimating()
             }
-//            GlobalMethods.sharedInstance.showAlert(alertTitle: stringAppName, alertText: errorMsg!)
+//            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
         }
     }
 }

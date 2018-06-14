@@ -24,6 +24,7 @@ class FlowManager: NSObject {
 //    }
 
     func moveToLogin() -> Void {
+        
         GlobalMethods.sharedInstance.pushVC(getLoginStoryBoard().instantiateViewController(withIdentifier: "LoginVC"))
     }
     
@@ -57,25 +58,35 @@ class FlowManager: NSObject {
         
         let generateVC = getLoginStoryBoard().instantiateViewController(withIdentifier: "GenerateOtpVC") as! GenerateOtpVC
     
-        let setPinVCObj = getLoginStoryBoard().instantiateViewController(withIdentifier: "SetPinVC") as! SetPinVC
+//        let setPinVCObj = getLoginStoryBoard().instantiateViewController(withIdentifier: "SetPinVC") as! SetPinVC
+//
+//        if let kycId = _userDefault.object(forKey: kApplicationKycIdKey) as? String{
+//            generateVC.kycID = kycId
+//            setPinVCObj.stringVerify = kycId
+//        }
+        _navigator.interactivePopGestureRecognizer?.isEnabled = false
+        _navigator.setViewControllers([splashVC,loginVC,generateVC], animated: true)
+    }
+    
+    func resetToEdit() {
+        let splashVC = getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "EntryHomeVC")
         
-        if let kycId = _userDefault.object(forKey: kApplicationKycIdKey) as? String{
-            generateVC.kycID = kycId
-            setPinVCObj.stringVerify = kycId
-        }
+        let editApplicationObj = getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "EditApplicationVC") as! EditApplicationVC
         
-        _navigator.setViewControllers([splashVC,loginVC,generateVC,setPinVCObj], animated: true)
+         _navigator.setViewControllers([splashVC,editApplicationObj], animated: true)
     }
     
     func showPinUI() {
         
+        
         if !(_navigator.topViewController is LoginVC){
             moveToLogin()
+            _navigator.interactivePopGestureRecognizer?.isEnabled = false
         }
     }
 }
 
-extension AppDelegate {
+extension AppDelegate:UIGestureRecognizerDelegate {
     
     //TODO : Check for login and Sesion. Accordingly decide flow , also compare prev and new url
     
@@ -84,6 +95,8 @@ extension AppDelegate {
         
         navigator = UINavigationController.init(rootViewController: UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "EntryHomeVC"))
         navigator?.setNavigationBarHidden(true, animated: false)
+        navigator?.interactivePopGestureRecognizer?.delegate = self ;
+        navigator?.interactivePopGestureRecognizer?.isEnabled = true
         self.window = UIWindow(frame: _screenFrame)
         self.window?.rootViewController = navigator
         self.window?.makeKeyAndVisible()
@@ -93,10 +106,13 @@ extension AppDelegate {
 //            let details = _userDefault.object(forKey: kApplicationUserDetailsKey) as! Dictionary<String, Any>
 //            BasicDetailsModel.sharedInstance.initWithResponse(responseJson: details)
 //            FlowManager.sharedInstance.moveToHome()
+            navigator?.interactivePopGestureRecognizer?.isEnabled = false
             FlowManager.sharedInstance.moveToLogin()
         }
     }
     
-    
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        return navigator!.viewControllers.count > 1
+    }
     
 }

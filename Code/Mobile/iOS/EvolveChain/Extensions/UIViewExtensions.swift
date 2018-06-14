@@ -93,17 +93,19 @@ extension UIImageView {
                 guard let data = data, error == nil else { return }
                 print(response?.suggestedFilename ?? url.lastPathComponent)
                 print("Download Finished")
-                let image = UIImage(data: data)
-                if GlobalMethods.sharedInstance.saveImage(image: image!, fileName: url.lastPathComponent){
-                    print("Saved")
+                if let downloadedImage = UIImage(data: data){
+                    if GlobalMethods.sharedInstance.saveImage(image: downloadedImage, fileName: url.lastPathComponent){
+                        print("Saved")
+                        DispatchQueue.main.async() {
+                            //                    self.removeLoader()
+                            self.image = downloadedImage
+                        }
+                    }
                 }
                 else{
                     print("Not Saved")
                 }
-                DispatchQueue.main.async() {
-//                    self.removeLoader()
-                    self.image = image
-                }
+                
             }
         }
     }
@@ -136,5 +138,32 @@ extension UIRefreshControl {
             scrollView.setContentOffset(CGPoint(x: 0, y: scrollView.contentOffset.y - frame.height), animated: true)
         }
         beginRefreshing()
+    }
+}
+
+extension StringProtocol where Index == String.Index {
+    func index<T: StringProtocol>(of string: T, options: String.CompareOptions = []) -> Index? {
+        return range(of: string, options: options)?.lowerBound
+    }
+    func endIndex<T: StringProtocol>(of string: T, options: String.CompareOptions = []) -> Index? {
+        return range(of: string, options: options)?.upperBound
+    }
+    func indexes<T: StringProtocol>(of string: T, options: String.CompareOptions = []) -> [Index] {
+        var result: [Index] = []
+        var start = startIndex
+        while start < endIndex, let range = range(of: string, options: options, range: start..<endIndex) {
+            result.append(range.lowerBound)
+            start = range.lowerBound < range.upperBound ? range.upperBound : index(range.lowerBound, offsetBy: 1, limitedBy: endIndex) ?? endIndex
+        }
+        return result
+    }
+    func ranges<T: StringProtocol>(of string: T, options: String.CompareOptions = []) -> [Range<Index>] {
+        var result: [Range<Index>] = []
+        var start = startIndex
+        while start < endIndex, let range = range(of: string, options: options, range: start..<endIndex) {
+            result.append(range)
+            start = range.lowerBound < range.upperBound  ? range.upperBound : index(range.lowerBound, offsetBy: 1, limitedBy: endIndex) ?? endIndex
+        }
+        return result
     }
 }

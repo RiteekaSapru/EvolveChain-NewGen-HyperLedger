@@ -33,6 +33,12 @@ class AddressVC: UIViewController,UITextFieldDelegate {
         // Dispose of any resources that can be recreated.
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        txtfldAddress1.becomeFirstResponder()
+    }
+    
     // MARK: - Methods
     func fillData() {
         if BasicDetailsModel.sharedInstance.isBasicDetailsComplete {
@@ -51,41 +57,41 @@ class AddressVC: UIViewController,UITextFieldDelegate {
     
     func checkValidation() -> Bool {
         if txtfldAddress1.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringAdd1Empty)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.Add1Empty)
             txtfldAddress1.becomeFirstResponder()
             return false;
         }
             //        else if txtfldAddress2.text?.count == 0{
-            //            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringAdd2Empty)
+            //            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.Add2Empty)
             //            return false;
             //        }
         else if txtfldStreet.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringAddStreetEmpty)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AddStreetEmpty)
             txtfldStreet.becomeFirstResponder()
             return false;
         }
         else if txtfldCity.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringCityEmpty)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.CityEmpty)
             txtfldCity.becomeFirstResponder()
             return false;
         }
         else if txtfldState.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringStateEmpty)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.StateEmpty)
             txtfldState.becomeFirstResponder()
             return false;
         }
         else if txtfldAreaCode.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringAreaCodeEmpty)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AreaCodeEmpty)
             txtfldAreaCode.becomeFirstResponder()
             return false;
         }
         else if (txtfldAreaCode.text?.count)! < 4{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringAreaCodeIncorrect)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AreaCodeIncorrect)
             txtfldAreaCode.becomeFirstResponder()
             return false;
         }
         else if txtfldAddressCountry.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringCountryEmpty)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.CountryEmpty)
             actionPickerAddCountry(UIButton())
             return false;
         }
@@ -183,7 +189,7 @@ class AddressVC: UIViewController,UITextFieldDelegate {
             GlobalMethods.sharedInstance.popVC()
 
         }) { (errorMsg) in
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringAppName, alertText: errorMsg!)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
         }
         
     }

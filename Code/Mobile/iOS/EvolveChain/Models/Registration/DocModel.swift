@@ -104,25 +104,25 @@ class DocModel: NSObject {
     func validateModel() -> (isValid:Bool,indexPath:IndexPath?){
         
         if self.value.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringNumberEmpty)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.NumberEmpty)
 //            txtfldNumberIdentity.becomeFirstResponder()
             return (false,IndexPath.init(row: 0, section: 2));
         }
         else if self.value.count < 8{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringNumberIncorrect)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.NumberIncorrect)
 //            txtfldNumberIdentity.becomeFirstResponder()
             return (false,IndexPath.init(row: 0, section: 2));
         }
         else if self.isExpiryDate && self.date == nil{
-             GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringIdentityExpiryEmpty)
+             GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityExpiryEmpty)
              return (false,IndexPath.init(row: 2, section: 2));
         }
         else if self.frontImage == nil{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringIdentityFrontPicEmpty)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityFrontPicEmpty)
             return (false,IndexPath.init(row: 3, section: 2))
         }
         else if self.backImage == nil {
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringIdentityBackPicEmpty)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityBackPicEmpty)
             return (false,IndexPath.init(row: 3, section: 2))
         }
         return (true,nil)
@@ -162,6 +162,8 @@ class DocModel: NSObject {
              params.updateValue("", forKey: "document_type")
         }
         
+        params.updateValue(SignupConfigModel.sharedInstance.selectedCountry.iso, forKey: "iso")
+        
         return params
     }
     
@@ -186,7 +188,7 @@ class DocModel: NSObject {
         modelData.append(["Number",self.value])
         modelData.append(["Issuing Country",SignupConfigModel.sharedInstance.selectedCountry.name])
         if self.isExpiryDate {
-            modelData.append(["Expiry Date",self.date?.dateWithStringFormat("MMM, dd yyyy") ?? ""])
+            modelData.append(["Expiry Date",self.date?.dateWithStringFormat("MMM dd, yyyy") ?? ""])
         }
         
         

@@ -35,7 +35,7 @@ class ProfileType1Cell: UITableViewCell {
     func setupCell() {
         var line1 = BasicDetailsModel.sharedInstance.add1
         if BasicDetailsModel.sharedInstance.add2.count > 0 {
-            line1.append(BasicDetailsModel.sharedInstance.add2)
+            line1.append(", " + BasicDetailsModel.sharedInstance.add2)
         }
         
         lbladd1.text = line1

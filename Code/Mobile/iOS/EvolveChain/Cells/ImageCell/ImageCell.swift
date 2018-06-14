@@ -12,6 +12,7 @@ class ImageCell: UITableViewCell {
 
     @IBOutlet weak var imgImageLeft: UIImageView!
     @IBOutlet weak var imgImageRight: UIImageView!
+    @IBOutlet weak var heightContraint: NSLayoutConstraint!
     
     @IBOutlet weak var widthRightImageLayout: NSLayoutConstraint!
     @IBOutlet weak var widthLeftImageLayout: NSLayoutConstraint!
@@ -36,6 +37,8 @@ class ImageCell: UITableViewCell {
             imgImageLeft.image = imgFront as? UIImage
             widthRightImageLayout.constant = (_screenSize.width - 30 - 10) / 2
             widthLeftImageLayout.constant = (_screenSize.width - 30 - 10) / 2
+            
+             heightContraint.constant = 100
         }
         else{
             
@@ -43,6 +46,7 @@ class ImageCell: UITableViewCell {
             widthRightImageLayout.constant = _screenSize.width - 30
             widthLeftImageLayout.constant = 0
 
+            heightContraint.constant = 150
             
            
         }

@@ -52,7 +52,7 @@ class DocumentHoldingVC: UIViewController,UIImagePickerControllerDelegate,UINavi
     
     fileprivate func showInfoAlert() {
         
-        let alertInfo = UIAlertController.init(title: "Info", message: stringUpholdingInfo, preferredStyle: .alert)
+        let alertInfo = UIAlertController.init(title: "Info", message: StringConstants.UpholdingInfo, preferredStyle: .alert)
         
         let okAction = UIAlertAction.init(title: "Okay", style: .cancel) { (alert) in
             
@@ -76,7 +76,7 @@ class DocumentHoldingVC: UIViewController,UIImagePickerControllerDelegate,UINavi
     
     fileprivate func checkvalidation() -> Bool{
         if holdingImage == nil{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringUpholdingMissing)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.UpholdingMissing)
             return false
         }
         return true
@@ -123,12 +123,12 @@ class DocumentHoldingVC: UIViewController,UIImagePickerControllerDelegate,UINavi
     
     fileprivate func upholdingAPI(){
         
-         let params = ["step":"face","number":SignupConfigModel.sharedInstance.verificationCode,"substep":"face"]
+        let params = ["step":"face","number":SignupConfigModel.sharedInstance.verificationCode,"substep":"face","iso":SignupConfigModel.sharedInstance.selectedCountry.iso]
         
         NetworkManager.sharedInstance.POSTUpholdingDetails(params: params, fileArray: [holdingImage!], filenameArray: ["file[]"], success: { (responseJSON) in
             self.saveDetails()
         }) { (errorMsg) in
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringUpholdingMissing)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.UpholdingMissing)
 
         }
     }

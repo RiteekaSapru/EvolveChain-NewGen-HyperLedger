@@ -286,7 +286,7 @@ class DocumentVC: UIViewController,UITableViewDelegate,UITableViewDataSource,Tex
             print("Document Details Saved")
             self.saveData()
         }) { (errorMsg) in
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringAppName, alertText: errorMsg!)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
         }
         
     }

@@ -28,6 +28,7 @@ class EntryHomeVC: UIViewController {
         super.viewDidAppear(animated)
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now()+1.0) {
             self.animateUI()
+            self.getCountryList()
         }
         
     }
@@ -48,8 +49,7 @@ class EntryHomeVC: UIViewController {
             }
         }
     }
-    
-    //MARK: - Actions
+    //MARK: - Custom Actions
     
     fileprivate func moveToRegister() {
         let countrySelectionVC = self.storyboard?.instantiateViewController(withIdentifier: "CountrySelectionVC")
@@ -57,16 +57,67 @@ class EntryHomeVC: UIViewController {
         GlobalMethods.sharedInstance.pushVC(countrySelectionVC!)
     }
     
+    func processResponse(response:Array<Any>){
+        
+        SignupConfigModel.sharedInstance.initCountryList(response: response)
+
+    }
+    
+    fileprivate func moveToEdit(arrCountry:[CountryModel]) {
+        let editApplicationObj = self.storyboard?.instantiateViewController(withIdentifier: "EditApplicationVC") as! EditApplicationVC
+        
+        editApplicationObj.countryArray = arrCountry
+        
+        GlobalMethods.sharedInstance.pushVC(editApplicationObj)
+    }
+    
+    func openTermsLink() {
+        let safariVC = SFSafariViewController(url: URL.init(string: terms_url)!)
+        present(safariVC, animated: true, completion: nil)
+    }
+    
+    func openPrivacyLink() {
+        let safariVC = SFSafariViewController(url: URL.init(string: privacy_url)!)
+        present(safariVC, animated: true, completion: nil)
+    }
+    
+    func askTermsAndCondition() {
+        
+        let alert = UIAlertController.init(title: StringConstants.AppName, message: "By accepting, you agree to our Terms & Conditions and Privacy Policy.", preferredStyle: .alert)
+        
+        let termsAction = UIAlertAction.init(title: "Terms & Conditions", style: .default) { (alert) in
+            self.openTermsLink()
+        }
+        
+        alert.addAction(termsAction)
+        
+        let policyAction = UIAlertAction.init(title: "Privacy Policy", style: .default) { (alert) in
+            self.openPrivacyLink()
+        }
+        
+        alert.addAction(policyAction)
+        
+        let acceptAction = UIAlertAction.init(title: "I Accept", style: .default) { (alert) in
+            self.moveToRegister()
+        }
+        
+        alert.addAction(acceptAction)
+        
+        let cancelAction = UIAlertAction.init(title: "Cancel", style: .destructive) { (alert) in
+            
+        }
+        
+        alert.addAction(cancelAction)
+        
+        _navigator.present(alert, animated: true, completion: nil)
+    }
+    //MARK: - Actions
+    
     @IBAction func actionRegister(_ sender: UIButton) {
         
-//        FlowManager.sharedInstance.initialiseKey(success: {
-//            DispatchQueue.main.async {
-//                self.moveToRegister()
-//            }
-//        }) { (errorMsg) in
-//            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: errorMsg!)
-//        }
-        self.moveToRegister()
+        askTermsAndCondition()
+        
+        
     }
     
     @IBAction func actionLogin(_ sender: Any) {
@@ -74,5 +125,29 @@ class EntryHomeVC: UIViewController {
          FlowManager.sharedInstance.moveToLogin()
     }
     
-
+    @IBAction func actionEdit(_ sender: Any) {
+        
+//       getCountryList()
+        let editApplicationObj = self.storyboard?.instantiateViewController(withIdentifier: "EditApplicationVC") as! EditApplicationVC
+        
+      GlobalMethods.sharedInstance.pushVC(editApplicationObj)
+        
+    }
+    
+    //MARK: - Web Service
+    
+    func getCountryList() {
+//        GlobalMethods.sharedInstance.showLoader(loadingText: "   Fetching Countries...")
+        NetworkManager.sharedInstance.countryListAPI(success: { (response) in
+//            GlobalMethods.sharedInstance.dismissLoader {
+                self.processResponse(response: response)
+//            }
+        }) { (errorMsg) in
+//            GlobalMethods.sharedInstance.dismissLoader {
+//                GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+//            }
+            
+        }
+    }
+    
 }

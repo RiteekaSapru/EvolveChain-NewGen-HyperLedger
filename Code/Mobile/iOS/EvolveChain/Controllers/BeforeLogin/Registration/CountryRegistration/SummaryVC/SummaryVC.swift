@@ -23,7 +23,7 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        arrHeader = ["Basic Details","Address Details","Identity Document","Address Document","Document Holding Image"]
+        arrHeader = ["Basic Details","Address Details","Identity Proof","Address Proof","Document Holding Photo"]
         arrBasicDetails = BasicDetailsModel.sharedInstance.getBasicDataInArray()
         arrAddressDetails = BasicDetailsModel.sharedInstance.getAddressDataInArray()
         arrIdentityDocs = DocumentManager.sharedInstance.selectedIdentityModel.getDataAsArray()
@@ -88,18 +88,29 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
         present(safariVC, animated: true, completion: nil)
     }
     
+    func openPrivacyLink() {
+        let safariVC = SFSafariViewController(url: URL.init(string: privacy_url)!)
+        present(safariVC, animated: true, completion: nil)
+    }
+    
     func askTermsAndCondition() {
         
-        let alert = UIAlertController.init(title: "Terms and Conditions", message: "Do you accept the Terms and Conditions?", preferredStyle: .alert)
+        let alert = UIAlertController.init(title: StringConstants.AppName, message: "By accepting, you agree to our Terms & Conditions and Privacy Policy.", preferredStyle: .alert)
         
-        let termsAction = UIAlertAction.init(title: "Terms and Conditions", style: .default) { (alert) in
+        let termsAction = UIAlertAction.init(title: "Terms & Conditions", style: .default) { (alert) in
             self.openTermsLink()
         }
         
         alert.addAction(termsAction)
         
+        let policyAction = UIAlertAction.init(title: "Privacy Policy", style: .default) { (alert) in
+            self.openPrivacyLink()
+        }
+        
+        alert.addAction(policyAction)
+        
         let acceptAction = UIAlertAction.init(title: "I Accept", style: .default) { (alert) in
-             GlobalMethods.sharedInstance.kycComplete()
+             self.kycComplete()
         }
         
         alert.addAction(acceptAction)
@@ -163,6 +174,8 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
         let lblHeader = UILabel.init(frame: CGRect.init(x: 15, y: 0, width: _screenSize.width - 30.0, height: 45))
         lblHeader.font = UIFont.init(name: "AvenirNext-Medium", size: 24)
         lblHeader.textColor = UIColor.black
+//        lblHeader.adjustsFontSizeToFitWidth = true
+//        lblHeader.minimumScaleFactor = 0.5
         lblHeader.text = arrHeader[section]
         vwHeader.addSubview(lblHeader)
         
@@ -187,7 +200,33 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
     // MARK: - Actions
     
     @IBAction func actionSubmit(_ sender: Any) {
-        askTermsAndCondition()
+        self.kycComplete()
         
+    }
+    
+    // MARK: - Web Services
+    
+    fileprivate func moveToSuccessScreen() {
+        //mve to nxt screen
+        GlobalMethods.sharedInstance.cleanUpRegistrationData()
+        DispatchQueue.main.async {
+            let successfullVC = FlowManager.sharedInstance.getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "SuccessfullVC") as! SuccessfullVC
+            
+            _navigator.setViewControllers([_navigator.viewControllers.first!,successfullVC], animated: true)
+            
+//            GlobalMethods.sharedInstance.pushVC(successfullVC)
+        }
+    }
+    
+    func kycComplete() {
+        
+        let params = ["app_key":RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))]
+        
+        NetworkManager.sharedInstance.POSTKYCComplete(params: params, success: { (responseObject) in
+            self.moveToSuccessScreen()
+            
+        }) { (errorMsg) in
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
+        }
     }
 }

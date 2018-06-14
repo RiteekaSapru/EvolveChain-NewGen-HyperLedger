@@ -75,9 +75,8 @@ class TextFieldCell: UITableViewCell,UITextFieldDelegate {
             datePicker?.maximumDate = nil
 //            datePicker?.maximumDate = GlobalMethods.sharedInstance.getDate(year: SignupConfigModel.sharedInstance.selectedCountry.minAge, after: false)
 //            datePicker?.minimumDate = GlobalMethods.sharedInstance.getDate(year: SignupConfigModel.sharedInstance.selectedCountry.maxAge, after: false)
-            
         }
-       
+      
     }
     
     // MARK: - Textfield Delegates
@@ -103,7 +102,7 @@ class TextFieldCell: UITableViewCell,UITextFieldDelegate {
             return true
         }
         else{
-            let result = string.trimmingCharacters(in: CharacterSet.alphanumerics)
+            let result = string.components(separatedBy: CharacterSet.alphanumerics).joined()
             return result.count == 0
         }
     }

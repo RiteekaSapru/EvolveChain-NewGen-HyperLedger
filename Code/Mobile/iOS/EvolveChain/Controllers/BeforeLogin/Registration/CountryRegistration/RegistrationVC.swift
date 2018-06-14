@@ -16,7 +16,7 @@ enum RegisterDetailsAmericaType : Int {
 
 import UIKit
 
-class AmericaRegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UICollectionViewDelegateFlowLayout {
+class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UICollectionViewDelegateFlowLayout {
    
 
     @IBOutlet weak var tblvwData: UITableView!
@@ -29,22 +29,12 @@ class AmericaRegistrationVC: UIViewController,UITableViewDelegate,UITableViewDat
     @IBOutlet weak var lblTitle: UILabel!
     @IBOutlet weak var colvwData: UICollectionView!
     
+   
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        headerArray = ["Basic Details","Address Details","Identity Proof","Address Proof","Upload Holding Photo"]
-        tblvwData.register(UINib(nibName: "TickCell", bundle: nil), forCellReuseIdentifier: "TickCell")
-        tblvwData.delegate = self
-        tblvwData.dataSource = self
-        tblvwData.rowHeight = 60;
-        
+        setUpTableview()        
         updateUI()
-//        lblTitle.text = titleString
-//        colvwData.register(UINib(nibName: "OptionsCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "OptionsCollectionViewCell")
-
-//        colvwData.register(UINib(nibName: "OptionsCollectionViewCell", bundle: nil), forCellReuseIdentifier: "OptionsCollectionViewCell")
-//        colvwData.delegate = self
-//        colvwData.dataSource = self
-        
         // Do any additional setup after loading the view.
     }
 
@@ -63,19 +53,50 @@ class AmericaRegistrationVC: UIViewController,UITableViewDelegate,UITableViewDat
     }
     // MARK: - Custom Methods
 
+    fileprivate func setUpTableview() {
+        headerArray = ["Basic Details","Address Details","Identity Proof","Address Proof","Document Holding Photo"]
+        tblvwData.register(UINib(nibName: "TickCell", bundle: nil), forCellReuseIdentifier: "TickCell")
+        tblvwData.delegate = self
+        tblvwData.dataSource = self
+    }
+    
     func updateUI() {
         lblTitle.text = SignupConfigModel.sharedInstance.selectedCountry.name
     }
     
     func updateTableView() {
         if indexToUpdate == headerArray.count - 1 {
-            tblvwData.reloadRows(at: [IndexPath.init(row: indexToUpdate, section: 0)], with: .automatic)
+            updateCellImage(row: indexToUpdate)
+//            tblvwData.reloadRows(at: [IndexPath.init(row: indexToUpdate, section: 0)], with: .automatic)
         }
         else{
-            tblvwData.reloadRows(at: [IndexPath.init(row: indexToUpdate, section: 0),IndexPath.init(row: indexToUpdate+1, section: 0)], with: .automatic)
+            updateCellImage(row: indexToUpdate)
+            updateCellTextColor(row: indexToUpdate + 1)
+//            tblvwData.reloadRows(at: [IndexPath.init(row: indexToUpdate, section: 0),IndexPath.init(row: indexToUpdate+1, section: 0)], with: .automatic)
         }
     }
 
+    func updateCellImage(row:Int) {
+        
+        let cell = tblvwData.cellForRow(at: IndexPath.init(row: row, section: 0)) as! TickCell
+        
+        UIView.transition(with: cell.imgTick, duration: 0.3, options: .transitionCrossDissolve, animations: {
+            cell.imgTick.image = UIImage.init(named: "ic_tick")
+        }, completion: nil)
+        
+        
+    }
+    
+    func updateCellTextColor(row:Int) {
+        
+        let cell = tblvwData.cellForRow(at: IndexPath.init(row: row, section: 0)) as! TickCell
+        
+        UIView.transition(with: cell.lblText, duration: 0.3, options: .transitionCrossDissolve, animations: {
+            cell.lblText.textColor = UIColor.black
+        }, completion: nil)
+        
+        
+    }
     
     func getStatusForIndex(index:Int) -> Bool {
 //        return true
@@ -101,23 +122,23 @@ class AmericaRegistrationVC: UIViewController,UITableViewDelegate,UITableViewDat
     
     func checkValidation() -> Bool {
         if !BasicDetailsModel.sharedInstance.isBasicDetailsComplete{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringBasicNotSaved)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.BasicNotSaved)
             return false
         }
         else if !BasicDetailsModel.sharedInstance.isAddressDetailsComplete{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringAddressNotSaved)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AddressNotSaved)
             return false
         }
         else if !DocumentManager.sharedInstance.isIdentityDocsUploaded{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringIdentityNotSaved)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityNotSaved)
             return false
         }
         else if !DocumentManager.sharedInstance.isAddressDocsUploaded{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringAddressNotSaved)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AddressNotSaved)
             return false
         }
         else if BasicDetailsModel.sharedInstance.holdingImage == nil{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringAddressNotSaved)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AddressNotSaved)
             return false
         }
 //        else {
@@ -125,17 +146,17 @@ class AmericaRegistrationVC: UIViewController,UITableViewDelegate,UITableViewDat
 //            switch DocumentModel.sharedInstance.identityType{
 //            case .DrivingLicenceIdentityType:
 //                if !DocumentModel.sharedInstance.drivingModel.iscomplete{
-//                    GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringIdentityNotSaved)
+//                    GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityNotSaved)
 //                    return false
 //                }
 //            case .PassportIdentityType:
 //                if !DocumentModel.sharedInstance.passportModel.iscomplete{
-//                    GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringIdentityNotSaved)
+//                    GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityNotSaved)
 //                    return false
 //                }
 //            case .TaxationIdentityType:
 //                if !DocumentModel.sharedInstance.taxationModel.iscomplete{
-//                    GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringIdentityNotSaved)
+//                    GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityNotSaved)
 //                    return false
 //                }
 //            }
@@ -143,17 +164,17 @@ class AmericaRegistrationVC: UIViewController,UITableViewDelegate,UITableViewDat
 //            switch DocumentModel.sharedInstance.addressType{
 //            case .DrivingLicenceAddressType:
 //                if !DocumentModel.sharedInstance.drivingModel.iscomplete{
-//                    GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringAddressNotSaved)
+//                    GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AddressNotSaved)
 //                    return false
 //                }
 //            case .PassportAddressType:
 //                if !DocumentModel.sharedInstance.passportModel.iscomplete{
-//                    GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringAddressNotSaved)
+//                    GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AddressNotSaved)
 //                    return false
 //                }
 //            case .UtilityAddressType:
 //                if !DocumentModel.sharedInstance.utilityModel.iscomplete{
-//                    GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringAddressNotSaved)
+//                    GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AddressNotSaved)
 //                    return false
 //                }
 //            }
@@ -182,24 +203,7 @@ class AmericaRegistrationVC: UIViewController,UITableViewDelegate,UITableViewDat
         _navigator.present(alert, animated: true, completion: nil)
     }
     
-    func checkIfDataPresent() -> Bool {
-        if BasicDetailsModel.sharedInstance.isBasicDetailsComplete {
-            return true
-        }
-        else if BasicDetailsModel.sharedInstance.isEmailVerified{
-            return true
-        }
-        else if BasicDetailsModel.sharedInstance.isPhoneVerified{
-            return true
-        }
-        else if DocumentModel.sharedInstance.passportModel.iscomplete || DocumentModel.sharedInstance.drivingModel.iscomplete || DocumentModel.sharedInstance.taxationModel.iscomplete || DocumentModel.sharedInstance.utilityModel.iscomplete{
-            return true
-        }
-        else {
-            return false
-        }
-        
-    }
+   
     
     fileprivate func popVC() {
         GlobalMethods.sharedInstance.cleanUpRegistrationData()
@@ -343,7 +347,7 @@ class AmericaRegistrationVC: UIViewController,UITableViewDelegate,UITableViewDat
     @IBAction func actionNext(_ sender: UIButton) {
         
         if checkValidation() {
-            
+        
             let summaryObj = self.storyboard?.instantiateViewController(withIdentifier: "SummaryVC")
             GlobalMethods.sharedInstance.pushVC(summaryObj!)
             

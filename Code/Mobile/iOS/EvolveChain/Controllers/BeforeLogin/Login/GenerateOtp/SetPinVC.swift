@@ -116,19 +116,19 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
     func checkValidations() -> Bool {
         
         if txtfld1.text?.count == 0 || txtfld2.text?.count == 0 || txtfld3.text?.count == 0 || txtfld4.text?.count == 0 || txtfld5.text?.count == 0 || txtfld6.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: "Please enter OTP")
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter OTP")
             return false;
         }
         else if txtfld7.text?.count == 0 || txtfld8.text?.count == 0 || txtfld9.text?.count == 0 || txtfld10.text?.count == 0 || txtfld11.text?.count == 0 || txtfld12.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: "Please enter new pin.")
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter new pin.")
             return false;
         }
         else if txtfld13.text?.count == 0 || txtfld14.text?.count == 0 || txtfld15.text?.count == 0 || txtfld16.text?.count == 0 || txtfld17.text?.count == 0 || txtfld18.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: "Please  re enter new pin.")
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: "Please  re enter new pin.")
             return false;
         }
         else if getNewPin() != getNewPinReEnter(){
-//            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: "Pins do not match.")
+//            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: "Pins do not match.")
             clearPins()
             shakeView(viewToShake: vwPinHolder)
             shakeView(viewToShake: vwRePinHolder)
@@ -191,12 +191,11 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
     
     func moveToLogin() {
         
-        
-        
         _userDefault.removeObject(forKey: kApplicationKycIdKey)
         var viewControllers = _navigator.viewControllers
         viewControllers.removeLast(2) // views to pop
         navigationController?.setViewControllers(viewControllers, animated: true)
+        _navigator.interactivePopGestureRecognizer?.isEnabled = true
     }
     
     func processResponse(data:Data,errorMsg:String) {
@@ -222,7 +221,7 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
                     self.shakeView(viewToShake: self.vwOTPHolder)
                     self.shakeView(viewToShake: self.vwRePinHolder)
                     self.txtfld1.becomeFirstResponder()
-                    GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: errorMsg)
+                    GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
                 }
             }
             else{
@@ -314,7 +313,7 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
     @IBAction func actionResend(_ sender: Any) {
         //Call API tp resend
         self.view.endEditing(true)
-        clearOTP()
+        self.clearPins()
        self.generateOTP()
     }
 
@@ -344,7 +343,7 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
 //            self.shakeView(viewToShake: self.vwOTPHolder)
 //            self.shakeView(viewToShake: self.vwPinHolder)
 //            self.shakeView(viewToShake: self.vwRePinHolder)
-//            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: errorMsg!)
+//            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
             self.processResponse(data: data!, errorMsg: errorMsg!)
         }
     }
@@ -352,12 +351,12 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
     
     
     func generateOTP()  {
-        let params = ["ekyc_id":stringVerify]
+        let params = ["ekyc_id":stringVerify.uppercased]
         
         NetworkManager.sharedInstance.generateOtpForKydId(params: params, success: { (responseJson) in
             self.startTimer()
         }) { (errorMsg) in
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: errorMsg!)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
         }
     }
     

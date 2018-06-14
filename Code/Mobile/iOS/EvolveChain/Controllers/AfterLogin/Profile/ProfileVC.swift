@@ -67,7 +67,7 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
         
         lblUserName.text = BasicDetailsModel.sharedInstance.getCompleteName()
         
-        lblUserAddressCompact.text = _userDefault.object(forKey: kApplicationKycIdKey) as? String
+        lblUserAddressCompact.text =  BasicDetailsModel.sharedInstance.kycId + "\n" + BasicDetailsModel.sharedInstance.gender
         
         lblEmail.text = BasicDetailsModel.sharedInstance.email
         lblPhone.text = BasicDetailsModel.sharedInstance.getCompletePhoneNumber()
@@ -103,13 +103,13 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     func checkEmailValidations() -> Bool {
         
         if txtfldEmail.text?.count == 0 {
-//            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringEmailEmpty)
+//            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.EmailEmpty)
             hideEmailView()
             self.view.endEditing(true)
             return false;
         }
         else if !GlobalMethods.sharedInstance.isValidEmail(testStr: txtfldEmail.text!){
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringEmailInvalid)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.EmailInvalid)
             return false;
         }
         else if BasicDetailsModel.sharedInstance.email == txtfldEmail.text{
@@ -126,12 +126,12 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     func checkPhoneValidations() -> Bool {
         
         if txtfldPhone.text?.count == 0 {
-//            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringPhoneEmpty)
+//            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneEmpty)
             hidePhoneView()
             self.view.endEditing(true)
             return false;
         }
-        else if BasicDetailsModel.sharedInstance.contactNumber == txtfldPhone.text && BasicDetailsModel.sharedInstance.countryCode == txtfldCountryCode.text{
+        else if BasicDetailsModel.sharedInstance.contactNumber == txtfldPhone.text && BasicDetailsModel.sharedInstance.countryCode == txtfldCountryCode.text?.trimmingCharacters(in: CharacterSet.init(charactersIn: "1234567890").inverted){
             hidePhoneView()
             self.view.endEditing(true)
             return false;
@@ -326,7 +326,7 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     func APIGetPhoneOtp(countryCode:String,phoneNumner:String) -> Void {
         
         
-        GlobalMethods.sharedInstance.showLoader(loadingText: "   Sending OTP...")
+        GlobalMethods.sharedInstance.showLoader(loadingText: StringConstants.OTPLoader)
         let params = ["mobile":phoneNumner,"country_code":countryCode]
         
         NetworkManager.sharedInstance.generateMobileOTP(params: params, success: { (responseDict) in
@@ -336,7 +336,7 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
             
         }) { (errorMsg) in
             GlobalMethods.sharedInstance.dismissLoader(complete: {
-                GlobalMethods.sharedInstance.showAlert(alertTitle: stringAppName, alertText: errorMsg!)
+                GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
             })
             
         }
@@ -345,7 +345,7 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     func APIGetEMailOtp(email:String) -> Void {
         
         let params = ["email":email]
-        GlobalMethods.sharedInstance.showLoader(loadingText: "   Sending OTP...")
+        GlobalMethods.sharedInstance.showLoader(loadingText: StringConstants.OTPLoader)
         NetworkManager.sharedInstance.generateEmailOTP(params: params, success: { (responseDict) in
             GlobalMethods.sharedInstance.dismissLoader(complete: {
                 self.moveToEmailOtpVerify()
@@ -353,7 +353,7 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
             
         }) { (errorMsg) in
             GlobalMethods.sharedInstance.dismissLoader(complete: {
-                GlobalMethods.sharedInstance.showAlert(alertTitle: stringAppName, alertText: errorMsg!)
+                GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
             })
         }
     }

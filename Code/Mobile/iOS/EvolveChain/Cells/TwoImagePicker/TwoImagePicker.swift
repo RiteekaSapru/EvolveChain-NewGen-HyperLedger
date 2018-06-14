@@ -32,7 +32,11 @@ class TwoImagePicker: UITableViewCell,UIImagePickerControllerDelegate,UINavigati
      func setModel(mdl:DocModel,cellType:CellType) {
         self.model = mdl
         
-        let placeHolderImage = UIImage.init(named: "ic_img_placeholder")!
+        var placeHolderImage = UIImage.init(named: "ic_upload_doc")!
+        
+        if mdl.code == "UB"{
+            placeHolderImage = UIImage.init(named: "sample-Utility")!
+        }
         
         if  model.frontImage != nil {
             imgFront.image = model.frontImage

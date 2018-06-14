@@ -84,19 +84,19 @@ class ChangePinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
     func checkValidations() -> Bool {
         
         if txtfld1.text?.count == 0 || txtfld2.text?.count == 0 || txtfld3.text?.count == 0 || txtfld4.text?.count == 0 || txtfld5.text?.count == 0 || txtfld6.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: "Please enter previous pin")
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter previous pin")
             return false;
         }
         else if txtfld7.text?.count == 0 || txtfld8.text?.count == 0 || txtfld9.text?.count == 0 || txtfld10.text?.count == 0 || txtfld11.text?.count == 0 || txtfld12.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: "Please enter new pin.")
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter new pin.")
             return false;
         }
         else if txtfld13.text?.count == 0 || txtfld14.text?.count == 0 || txtfld15.text?.count == 0 || txtfld16.text?.count == 0 || txtfld17.text?.count == 0 || txtfld18.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: "Please  re enter new pin.")
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: "Please  re enter new pin.")
             return false;
         }
         else if getNewPin() != getNewPinReEnter(){
-            //            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: "Pins do not match.")
+            //            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: "Pins do not match.")
             clearPins()
             shakeView(viewToShake: vwPinHolder)
             shakeView(viewToShake: vwRePinHolder)
@@ -174,7 +174,7 @@ class ChangePinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
                     self.txtfld1.becomeFirstResponder()
                 }
                 else{
-                    GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: errorMsg)
+                    GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
                     self.clearOldPin()
                     self.clearPins()
                     self.shakeView(viewToShake: self.vwOldPinHolder)

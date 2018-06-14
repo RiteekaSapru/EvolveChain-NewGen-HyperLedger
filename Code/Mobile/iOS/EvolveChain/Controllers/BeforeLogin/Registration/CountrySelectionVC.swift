@@ -38,6 +38,11 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
         // Dispose of any resources that can be recreated.
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        GlobalMethods.sharedInstance.initialiseLocation()
+    }
     // MARK: - Custom Methods
     
     @objc func refresh() {
@@ -72,7 +77,7 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
         SignupConfigModel.sharedInstance.verificationCode = RawdataConverter.string(response["verification_code"])
         
         
-        let regVC = self.storyboard?.instantiateViewController(withIdentifier: "AmericaRegistrationVC") as! AmericaRegistrationVC
+        let regVC = self.storyboard?.instantiateViewController(withIdentifier: "AmericaRegistrationVC") as! RegistrationVC
         GlobalMethods.sharedInstance.pushVC(regVC)
     }
     
@@ -126,20 +131,22 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
                 self.refreshControl.endRefreshing()
             }
             
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: errorMsg!)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
         }
     }
     
     fileprivate func intialiseAPI() {
+    
         SignupConfigModel.sharedInstance.selectedCountry = countryArray[selectedIndex]
         
         NetworkManager.sharedInstance.initialiseAPI(success: { (responseJson) in
             DispatchQueue.main.async {
+                GlobalMethods.sharedInstance.stopLocation()
                  self.processToRegister(response: responseJson)
             }
            
         }) { (errorMsg) in
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: errorMsg!)
+            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
         }
     }
 }
