@@ -42,9 +42,11 @@ class VerifyController extends BaseController {
             let appReasons = docData.app_data.verification_reasons;
             let allReasons = await VerificationReasons.find();
 
-            for (var j = 0; j < appReasons.length; j++) {
-                let idx = allReasons.findIndex(r => r.code == appReasons[j]);
-                allReasons[idx].state = true;
+            if (appReasons) {
+                for (var j = 0; j < appReasons.length; j++) {
+                    let idx = allReasons.findIndex(r => r.code == appReasons[j]);
+                    allReasons[idx].state = true;
+                }
             }
 
 

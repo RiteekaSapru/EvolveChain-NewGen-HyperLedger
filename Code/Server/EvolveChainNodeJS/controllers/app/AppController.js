@@ -854,6 +854,7 @@ class AppController extends base_controller {
             'now': common_utility.UtcNow(),
             'name': appEntity.name,
             'email': appEntity.email,
+            "kyc_id":appEntity.kyc_id,
             'phone': appEntity.phone,
             'appkey': appEntity.key,
             'country_code': appEntity.isd_code,
@@ -879,7 +880,7 @@ class AppController extends base_controller {
     GetSuccessResubmitInitialize(appEntity, docEntity, res) {
         var response = {
             "success": 1,
-            "now": Date.now(),
+            "now": Date.now(),          
             "name": appEntity.name,
             "email": appEntity.email,
             "phone": appEntity.phone,
