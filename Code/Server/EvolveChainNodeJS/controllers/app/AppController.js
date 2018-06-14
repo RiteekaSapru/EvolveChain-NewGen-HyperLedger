@@ -124,7 +124,7 @@ class AppController extends base_controller {
 
             var App = await app.findOne(conditions);
 
-            if (!App) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND, error);
+            if (!App) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
 
             var status = App.status;
             var errorMsg = "Your application is in " + status + " status. You cannot resubmit the application.";
@@ -135,9 +135,9 @@ class AppController extends base_controller {
             var currentUtc = common_utility.UtcNow();
             //explicitly needs to convert to UTC, somehow mongodb or node js convert it to local timezone
             var lastModified = common_utility.ConvertToUtc(App.last_modified);
-            var expiryDate = lastModified.setDate(lastModified.getDate() + APP_EXPIRATION_DAYS);
+            var expiryDate = common_utility.AddDaysToUtcNow(-APP_EXPIRATION_DAYS);
 
-            if (expiryDate < currentUtc)
+            if (expiryDate > lastModified)
                 return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, "Your application has expired. Please sign up again.");
 
             var phone_code = common_utility.GenerateOTP(6);
@@ -162,7 +162,7 @@ class AppController extends base_controller {
             }
 
             await app.update(conditions, setParams);
-            return this.GetSuccessResponse("ResubmitVerification", null, res);
+            return this.GetSuccessResponse("ResubmitVerification", App, res);
 
         } catch (ex) {
             return this.SendExceptionResponse(res, ex);
@@ -854,23 +854,12 @@ class AppController extends base_controller {
             'now': common_utility.UtcNow(),
             'name': appEntity.name,
             'email': appEntity.email,
-            "kyc_id":appEntity.kyc_id,
+            "kyc_id":appEntity.ekyc_id,
             'phone': appEntity.phone,
             'appkey': appEntity.key,
             'country_code': appEntity.isd_code,
-            "firstname": docEntity.basic_info.details.firstname,
-            "middlename": docEntity.basic_info.details.middlename,
-            "lastname": docEntity.basic_info.details.lastname,
-            "dob": docEntity.basic_info.details.dob,
-            "city": docEntity.basic_info.details.city,
-            "address1": docEntity.basic_info.details.address1,
-            "address2": docEntity.basic_info.details.address2,
-            "street": docEntity.basic_info.details.street,
-            "place_of_birth": docEntity.basic_info.details.place_of_birth,
-            "zip": docEntity.basic_info.details.zip,
-            "state": docEntity.basic_info.details.state,
-            "country": docEntity.basic_info.details.country,
-            "profile_pic": config.base_url + "/kyc/getdocumentimages/" + docEntity.basic_info.images[0]._id.toString(),
+            "basic_details" : docEntity.basic_info.details,
+            "profile_pic": config.base_url + "/kyc/getdocumentimages/" + docEntity.basic_info.images[0].file_key.toString(),
             "result": messages.login_success
         }
         return res.status(status.OK).jsonp(response);

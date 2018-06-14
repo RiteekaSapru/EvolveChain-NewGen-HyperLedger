@@ -22,6 +22,12 @@ class CommonUtility {
         return dateFormat(newDate, "isoUtcDateTime");
     }
 
+    AddDaysToUtcNow(days) {
+        var minsInADay = 1440; // 24*60
+        var newDate = new Date(Date.now() + days * minsInADay * 60000);
+        return dateFormat(newDate, "isoUtcDateTime");
+    }
+
     ReplaceData(shortcodearr, strbody) {
         if (shortcodearr != null) {
             for (key in shortcodearr) {
