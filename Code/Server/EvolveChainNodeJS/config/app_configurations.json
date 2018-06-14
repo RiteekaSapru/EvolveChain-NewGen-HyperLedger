@@ -3,7 +3,8 @@
         "PENDING": "Pending",
         "IN_PROCESS": "InProcess",
         "VERIFIED": "Verified",
-        "REJECTED": "Rejected"
+        "REJECTED": "Rejected",
+        "EXPIRED": "Expired"
     },
     "ERROR_CODE": {
         "ERROR": "E00",
@@ -27,7 +28,9 @@
         "ADDRESS_DOCS_MISSING":"E17",
         "DEVICE_EKYCID_NOT_FOUND": "E18",
         "CONTACT_TYPE_MISSING": "E19",
-        "FACE_DOCS_MISSING":"E20"
+        "FACE_DOCS_MISSING":"E20",
+        "EXPIRED_APP_STATUS":"E21",
+        "DUPLICATE_PHONE":"E22"
     },
     "HTTP_STATUS":{
         "OK": 200,

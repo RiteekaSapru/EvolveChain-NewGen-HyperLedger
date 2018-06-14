@@ -4,6 +4,7 @@
     "req_device_name": "Device Name missing!",
     "req_os_version": "OS Version missing!",
     "req_vendor_uuid": "Vendor uuid missing!",
+    "req_country_iso": "Country ISO missing!",
     "req_key": "Key missing!",
     "req_pin": "Pin missing!",
     "permision_denied": "You don't have a permission to access this Route.",
@@ -44,6 +45,7 @@
     "verify_phone_code": "Mobile verification OTP sent",
     "req_mobile_code": "Mobile Code missing!",
     "req_country_code": "Country code missing",
+    "req_isd_code": "ISD code missing",
     "invalid_emial_mobile": "Invalid Email and Mobile!",
     "success": "success",
     "req_step": "step name missing!",
@@ -58,6 +60,7 @@
     "Identity_data": "Identity Information",
     "req_firstname": "First Name Required!",
     "req_lastname": "Last Name Required!",
+    "req_gender": "Gender Required!",
     "req_dob": "Date Of Birth Required!",
     "req_pob": "Place Of Birth Required!",
     "req_address": "Address Required!",
@@ -128,6 +131,7 @@
     "phone_missing": "Phone missing!",
     "req_verify_status": "Verify status missing!",
     "file_not_found": "File not found",
+
     "ERROR_CODES": {
         "E100": "Exception:",
         "E00": "Error:",
@@ -150,6 +154,8 @@
         "E17": "Address documents missing",
         "E18": "Ekyc Id for this device does not exist!",
         "E19": "User contact type missing!",
-        "E20": "Face documents missing"
+        "E20": "Face documents missing",
+        "E21": "The application is in the expired state!",
+        "E22": "An application already exists with the same phone number"
     }
 }

@@ -22,6 +22,12 @@ class CommonUtility {
         return dateFormat(newDate, "isoUtcDateTime");
     }
 
+    AddDaysToUtcNow(days) {
+        var minsInADay = 1440; // 24*60
+        var newDate = new Date(Date.now() + days * minsInADay * 60000);
+        return dateFormat(newDate, "isoUtcDateTime");
+    }
+
     ReplaceData(shortcodearr, strbody) {
         if (shortcodearr != null) {
             for (key in shortcodearr) {
@@ -44,15 +50,18 @@ class CommonUtility {
         switch (document_type) { //set to UPPER case
             case 'BASIC':
                 metaDataInfo = {
-                    'firstname': 'First Name', 'middlename': 'Middle Name','lastname': 'Last Name', 
-                    'dob': 'Date Of Birth', 'place_of_birth': 'Birth Place',
-                    'address1': 'Address 1', 'address2': 'Address 2','street' : 'Street', 'city': 'City',
+                    'firstname': 'First Name', 'middlename': 'Middle Name', 'lastname': 'Last Name',
+                    'dob': 'Date Of Birth', 'gender': "Gender", 'place_of_birth': 'Birth Place',
+                    'address1': 'Address 1', 'address2': 'Address 2', 'street': 'Street', 'city': 'City',
                     'zip': 'Zip', 'state': 'State', 'country': 'Country'
                 };
                 break;
             case 'IDENTITY':
             case 'ADDRESS':
-                metaDataInfo = { 'document_type': 'Title', 'number': 'Number', 'expiry_date': 'Expiry Date'};
+                metaDataInfo = { 'document_type': 'Title', 'number': 'Number', 'expiry_date': 'Expiry Date' };
+                break;
+            case 'FACE':
+                metaDataInfo = { 'number': 'Code'};
                 break;
         }
         return metaDataInfo;

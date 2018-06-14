@@ -37,13 +37,14 @@ const GeneralDocument = new Schema({
 const KYCDocument = new Schema({
     app_key: { type: String },
    // app_data:{ type: String, field:'key', ref:'apps' },
-    isDelete: { type: Boolean },
+    isDelete: { type: Boolean,  default: false },
     //docInfo: { type: [DocInfo] },
     basic_info: {
         details: {
             firstname: { type: String },
             middlename: { type: String },
             lastname: { type: String },
+            gender : {type : String},
             dob: { type: String },
             city: { type: String },
             address1: { type: String },
