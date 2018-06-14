@@ -444,7 +444,7 @@ class AppController extends base_controller {
                 return this.SendErrorResponse(res, config.ERROR_CODES.OTP_EXPIRED);
 
             if (App.phone_info.otp != phoneOtp)
-                return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_OTP);
+                return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_OTP);
 
             var sameMobileOtherApp = await app.findOne({ key: { $ne: appKey }, phone: phone, isd_code: isdCode });
             if (sameMobileOtherApp) {
@@ -452,7 +452,7 @@ class AppController extends base_controller {
             }
 
             var setParams = {
-                $set: { phone: mobilenumber, isd_code: isdCode }
+                $set: { phone: phone, isd_code: isdCode }
             }
 
             await app.update(conditions, setParams);
