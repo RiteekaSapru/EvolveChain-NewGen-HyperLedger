@@ -878,7 +878,7 @@ class AppController extends base_controller {
             "BasicInfo": common_utility.GetKycDocumentInfo(docEntity.basic_info, "BASIC"),
             "AddressInfo": common_utility.GetKycDocumentInfo(docEntity.address_info, "ADDRESS"),
             "IdentityInfo": common_utility.GetKycDocumentInfo(docEntity.identity_info, "IDENTITY"),
-            "FaceInfo": common_utility.GetKycDocumentInfo(docEntity.face_info, "IDENTITY"),
+            "FaceInfo": common_utility.GetKycDocumentInfo(docEntity.face_info, "FACE"),
             'documents': appEntity.documents,
             'country_details': appEntity.countryDetails,
             'verification_code': docEntity.face_info.details.number,

@@ -138,7 +138,7 @@ class KYCController extends BaseController {
             let key = req.params.key;
             var conditions = {
                 app_key: key,
-                isDelete: "0"
+                isDelete: false
             }
 
             var docData = await KYCDocument.findOne(conditions).populate('app_data');//.exec((error, docData) => {
