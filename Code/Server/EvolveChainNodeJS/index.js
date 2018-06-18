@@ -36,6 +36,7 @@ app.engine('html', require('ejs').renderFile);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(expressValidator());
+app.use(express.static('dist'));
 app.use(express.static(__dirname + '/public'));
 app.use('/public', express.static(__dirname + '/public'));
 
@@ -43,7 +44,9 @@ app.use('/public', express.static(__dirname + '/public'));
 // API & Web Routes
 app.use("/app/", routes.app);
 app.use("/kyc/", routes.kyc);
+
 app.use("/web/", routes.web);
+
 
 // Return 404 Response in Json for APIs
 app.use("/api/*", (req, res) => {

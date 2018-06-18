@@ -10,7 +10,7 @@ web.post("/login", WebController.Login.bind(WebController));
 
 web.get("/verify/:key", VerifyController.GetKYCVerificationInfo.bind(VerifyController));
 web.post("/verifyKyc/:key", VerifyController.VerifyKyc.bind(VerifyController));
-web.get("/", WebController.index);
+//web.get("/", WebController.index);
 web.get("/web/getcountrylist", WebController.GetCountryList);
 web.get("/company/about", WebController.about);
 web.get("/company/contact", WebController.contact);
