@@ -102,6 +102,39 @@ class KYCController extends BaseController {
 
             let body = req.body;
 
+
+            var iso = body.iso.toUpperCase();
+            var proofDocument = [];
+            var proofDocumentCodes =[];
+            if (body.step == "identity" || body.step == "address") {
+                proofDocument = await ProofDocuments.find({country_iso: { $eq : iso}},{code:1});
+                // for (var j = 0; j < proofDocument.length; j++) {
+                //     proofDocumentCodes.push(proofDocument[j].code);
+                // }
+                proofDocumentCodes = proofDocument.map(function(value){
+                   return value.code;
+                });
+            }
+
+            switch (body.step) {
+                case "address":
+                    var idx = proofDocumentCodes.indexOf(body.substep);
+                    if(idx==-1)
+                        return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, "Invalid Address Document type!");
+
+                    break;
+
+                case "identity":
+                    var idx = proofDocumentCodes.indexOf(body.substep);
+                    if(idx==-1)
+                        return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, "Invalid Identity Document type!");
+                    break;
+
+                default:
+                    break;
+            }
+
+
             let key = req.params.key;
             var conditions = {
                 app_key: key,
