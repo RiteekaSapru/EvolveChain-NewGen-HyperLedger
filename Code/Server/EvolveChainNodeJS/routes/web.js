@@ -6,6 +6,8 @@ const WebController = require("../controllers/web/WebController");
 const AuthMiddleware = require("../middlewares/CheckAuth");
 
 
+web.post("/login", WebController.Login.bind(WebController));
+
 web.get("/verify/:key", VerifyController.GetKYCVerificationInfo.bind(VerifyController));
 web.post("/verifyKyc/:key", VerifyController.VerifyKyc.bind(VerifyController));
 web.get("/", WebController.index);
@@ -14,7 +16,7 @@ web.get("/company/about", WebController.about);
 web.get("/company/contact", WebController.contact);
 web.get("/download", WebController.download);
 
-// serach routes
+// search routes
 web.get("/search/email/:email", SearchController.email);
 web.get("/search/phone/:phone", SearchController.phone);
 

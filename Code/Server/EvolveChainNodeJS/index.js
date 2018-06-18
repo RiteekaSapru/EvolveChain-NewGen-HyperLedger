@@ -43,7 +43,7 @@ app.use('/public', express.static(__dirname + '/public'));
 // API & Web Routes
 app.use("/app/", routes.app);
 app.use("/kyc/", routes.kyc);
-app.use("", routes.web);
+app.use("/web/", routes.web);
 
 // Return 404 Response in Json for APIs
 app.use("/api/*", (req, res) => {
