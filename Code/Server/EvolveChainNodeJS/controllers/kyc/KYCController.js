@@ -55,6 +55,7 @@ class KYCController extends BaseController {
         try {
 
             req.checkBody("step", messages.req_step).notEmpty();
+            req.checkBody("substep", messages.req_valid_sub_step).notEmpty();
             req.checkBody("iso", messages.req_country_iso).notEmpty();
             req.checkBody("step", messages.req_valid_step).isIn(['basic', 'address', 'identity', 'face']);
             //req.checkBody("substep", messages.req_valid_step).isIn(['basic', 'passport', 'taxation', 'license', 'utility_bill']);
@@ -118,22 +119,14 @@ class KYCController extends BaseController {
 
             switch (body.step) {
                 case "address":
-                    var idx = proofDocumentCodes.indexOf(body.substep);
-                    if(idx==-1)
-                        return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, "Invalid Address Document type!");
-
-                    break;
-
                 case "identity":
                     var idx = proofDocumentCodes.indexOf(body.substep);
                     if(idx==-1)
-                        return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, "Invalid Identity Document type!");
+                        return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, "Invalid Address Document type!");
                     break;
-
                 default:
                     break;
             }
-
 
             let key = req.params.key;
             var conditions = {

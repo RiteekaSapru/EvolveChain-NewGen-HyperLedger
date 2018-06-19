@@ -186,8 +186,7 @@ class AppController extends base_controller {
             let body = _.pick(req.body, ['resubmit_pin', 'appkey']);
 
             var conditions = {
-                key: body.appkey,
-                resubmit_pin: body.resubmit_pin
+                key: body.appkey
             }
 
             var appData = await app.findOne(conditions).populate('kycdoc_data').exec();

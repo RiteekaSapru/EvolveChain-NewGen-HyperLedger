@@ -50,6 +50,7 @@
     "success": "success",
     "req_step": "step name missing!",
     "req_valid_step": "Step name not valid!",
+    "req_valid_sub_step": "Sub step or document type not valid!",
     "kyc_document_not_found": "not found kyc documents!",
     "basic_data": "Basic Information",
     "Address_data": "Address Information",
