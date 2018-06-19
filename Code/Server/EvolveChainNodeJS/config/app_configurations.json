@@ -30,7 +30,8 @@
         "CONTACT_TYPE_MISSING": "E19",
         "FACE_DOCS_MISSING":"E20",
         "EXPIRED_APP_STATUS":"E21",
-        "DUPLICATE_PHONE":"E22"
+        "DUPLICATE_PHONE":"E22",
+        "ADMIN_NOT_FOUND": "E23"
     },
     "HTTP_STATUS":{
         "OK": 200,

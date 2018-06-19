@@ -93,3 +93,8 @@ db.proofdocuments.insertMany([
 		]
 	}
 ]);
+
+db.admins.insertMany([
+	{ email_id: "riteeka.sapru@newgen.co.in", password: "123#", token: "a2612230946767fff0ab6b46db07ad6d", phone: "9650011117", isd_code: "91" },
+	{ email_id: "ngoyal@newgen.co.in", password: "7789@", token: "77bed3beecb56a3bdfc786fcc3a0f4de", phone: "9811181812", isd_code: "91" }
+]);
