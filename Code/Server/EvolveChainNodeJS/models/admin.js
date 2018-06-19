@@ -7,7 +7,6 @@ const commonUtility = require('../helpers/CommonUtility');
 
 
 const Admin = new Schema({
-    id: { type: String },
     email_id: { type: String },
     password: { type: String },
     token: { type: String },

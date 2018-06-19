@@ -52,6 +52,8 @@
     "req_valid_step": "Step name not valid!",
     "req_valid_sub_step": "Sub step or document type not valid!",
     "kyc_document_not_found": "not found kyc documents!",
+    "req_status": "Status missing!",
+    "req_admin_token" :"Token missing!",
     "basic_data": "Basic Information",
     "Address_data": "Address Information",
     "holding_data": "Holding Image Information",
@@ -157,6 +159,7 @@
         "E19": "User contact type missing!",
         "E20": "Face documents missing",
         "E21": "The application is in the expired state!",
-        "E22": "An application already exists with the same phone number"
+        "E22": "An application already exists with the same phone number",
+        "E23": "Admin not found: Invalid token"
     }
 }

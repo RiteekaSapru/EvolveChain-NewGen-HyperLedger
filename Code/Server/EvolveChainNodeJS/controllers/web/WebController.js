@@ -93,6 +93,82 @@ class Web  extends baseController{
         }
         return res.status(status.OK).jsonp(response);
     }
+
+    async GetApplication(req, res) {
+
+        //  req.checkBody("status", messages.req_status).notEmpty();
+        req.checkBody("token", messages.req_admin_token).notEmpty();
+
+        try {
+            let result = await req.getValidationResult();
+            if (!result.isEmpty()) {
+                let error = this.GetErrors(result);
+                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+            }
+
+            let body = req.body;
+
+            var conditions = {
+                token: body.token
+            }
+
+            var Adm = await Admin.findOne(conditions);
+
+            if (!Adm) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.ADMIN_NOT_FOUND);
+            }
+
+            var appData;
+
+            if(body.status == null || body.status==undefined)
+            {
+                appData = await App.find();
+            }
+
+            if(body.status!= null && body.status!=undefined){
+                var conditions = {
+                    status : body.status
+                }
+                appData = await App.find(conditions);
+            }
+
+            if (!appData) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
+            }
+
+            var appDetails=[];
+
+            for (var j = 0; j < appData.length; j++) {
+                appDetails.push({
+                    'email': appData[j].email,
+                    'phone':appData[j].phone,
+                    'isd_code':appData[j].isd_code,
+                    'key':appData[j].key,
+                    'ekyc_id':appData[j].ekyc_id,
+                    'country_iso':appData[j].country_iso,
+                    'name':appData[j].name,
+                    'status':appData[j].status
+                 });
+            }
+
+            console.log(appDetails);
+
+            return this.GetSuccessAppResponse(appDetails, res);
+
+        } catch (ex) {
+            return this.SendExceptionResponse(res, ex);
+        }
+    }
+
+    GetSuccessAppResponse(appEntity, res) {
+        var response = {
+            'success': 1,
+            'now': commonUtility.UtcNow(),
+            'appDetails': appEntity
+        }
+        return res.status(status.OK).jsonp(response);
+    }
+
     async index(req, res) {
         try {
             fs.readFile("./views/web/index.html", function (err, data) {
@@ -184,4 +260,4 @@ class Web  extends baseController{
 
 }
 
-module.exports = new Web();
+ module.exports = new Web();
