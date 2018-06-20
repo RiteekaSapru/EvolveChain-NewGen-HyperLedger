@@ -173,8 +173,14 @@ class VerifyController extends BaseController {
 
 
     async NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams) {
-        var emailSuccess = await emailService.SendEmail(userEmailId, subject, emailBody);
         var appSuccess = await App.update({ 'key': appKey }, appSetParams);
+        try {
+            var emailSuccess = await emailService.SendEmail(userEmailId, subject, emailBody);
+
+        } catch (ex) {
+            logManager.Log(`Email Notification-Exception: ${ex.message}`);
+            //add in notification list for schedular to pickup
+        }
         return (appSuccess);
     }
 
