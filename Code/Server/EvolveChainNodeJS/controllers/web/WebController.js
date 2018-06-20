@@ -169,6 +169,93 @@ class Web  extends baseController{
         return res.status(status.OK).jsonp(response);
     }
 
+
+
+    async GetAppSummary(req, res) {
+
+        req.checkBody("token", messages.req_admin_token).notEmpty();
+
+        try {
+            let result = await req.getValidationResult();
+            if (!result.isEmpty()) {
+                let error = this.GetErrors(result);
+                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+            }
+
+            let body = req.body;
+
+            var conditions = {
+                token: body.token
+            }
+
+            var Adm = await Admin.findOne(conditions);
+
+            if (!Adm) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.ADMIN_NOT_FOUND);
+            }
+
+            var countStatus = await App.aggregate([{"$group" : {_id:"$status", count:{$sum:1}}}])
+
+            console.log(countStatus);
+
+            return this.GetAppSummarySuccessResponse(countStatus, res);
+
+        } catch (ex) {
+            return this.SendExceptionResponse(res, ex);
+        }
+    }
+
+    GetAppSummarySuccessResponse(count, res) {
+        var response = {
+            'success': 1,
+            'now': commonUtility.UtcNow(),
+            'Count': count
+        }
+        return res.status(status.OK).jsonp(response);
+    }
+
+    async GetAppByCountry(req, res) {
+
+        req.checkBody("token", messages.req_admin_token).notEmpty();
+
+        try {
+            let result = await req.getValidationResult();
+            if (!result.isEmpty()) {
+                let error = this.GetErrors(result);
+                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+            }
+
+            let body = req.body;
+
+            var conditions = {
+                token: body.token
+            }
+
+            var Adm = await Admin.findOne(conditions);
+
+            if (!Adm) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.ADMIN_NOT_FOUND);
+            }
+
+            var countCountry = await App.aggregate([{"$group" : {_id:"$country_iso", count:{$sum:1}}}])
+
+            return this.GetAppByCountrySuccessResponse(countCountry, res);
+
+        } catch (ex) {
+            return this.SendExceptionResponse(res, ex);
+        }
+    }
+
+    GetAppByCountrySuccessResponse(count, res) {
+        var response = {
+            'success': 1,
+            'now': commonUtility.UtcNow(),
+            'Count': count
+        }
+        return res.status(status.OK).jsonp(response);
+    }
+
+
     async index(req, res) {
         try {
             fs.readFile("./views/web/index.html", function (err, data) {
