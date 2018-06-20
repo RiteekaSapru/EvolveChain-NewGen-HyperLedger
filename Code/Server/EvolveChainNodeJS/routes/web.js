@@ -6,6 +6,7 @@ const WebController = require("../controllers/web/WebController");
 const AuthMiddleware = require("../middlewares/CheckAuth");
 
 
+web.post("/web/GetAppDetails", WebController.GetAppDetails.bind(WebController));
 web.post("/web/GetAppByCountry", WebController.GetAppByCountry.bind(WebController));
 web.post("/web/GetAppSummary", WebController.GetAppSummary.bind(WebController));
 web.post("/web/GetApplication", WebController.GetApplication.bind(WebController));

@@ -196,7 +196,11 @@ class Web  extends baseController{
 
             var countStatus = await App.aggregate([{"$group" : {_id:"$status", count:{$sum:1}}}])
 
-            console.log(countStatus);
+            if (!countStatus) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
+            }
+
+            // console.log(countStatus);
 
             return this.GetAppSummarySuccessResponse(countStatus, res);
 
@@ -209,7 +213,7 @@ class Web  extends baseController{
         var response = {
             'success': 1,
             'now': commonUtility.UtcNow(),
-            'Count': count
+            'countByStatus': count
         }
         return res.status(status.OK).jsonp(response);
     }
@@ -239,6 +243,10 @@ class Web  extends baseController{
 
             var countCountry = await App.aggregate([{"$group" : {_id:"$country_iso", count:{$sum:1}}}])
 
+            if (!countCountry) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
+            }
+
             return this.GetAppByCountrySuccessResponse(countCountry, res);
 
         } catch (ex) {
@@ -250,11 +258,83 @@ class Web  extends baseController{
         var response = {
             'success': 1,
             'now': commonUtility.UtcNow(),
-            'Count': count
+            'countByCountry': count
         }
         return res.status(status.OK).jsonp(response);
     }
 
+    async GetAppDetails(req, res) {
+
+
+        req.checkBody("token", messages.req_admin_token).notEmpty();
+        req.checkBody("key", messages.req_key).notEmpty();
+
+        try {
+            let result = await req.getValidationResult();
+
+            if (!result.isEmpty()) {
+                let error = this.GetErrors(result);
+                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+            }
+
+            let body = req.body;
+
+            var conditions = {
+                token: body.token
+            }
+
+            var Adm = await Admin.findOne(conditions);
+
+            if (!Adm) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.ADMIN_NOT_FOUND);
+            }
+
+            var condition = {
+                key: body.key
+            }
+
+            var appData = await App.findOne(condition).populate('kycdoc_data').exec();
+
+            if (!appData)
+                return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
+
+            var docData = appData.kycdoc_data;//await kyc_document.findOne(con);
+            if (!docData) return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_NOT_FOUND);
+
+            var iso = appData.country_iso.toUpperCase();
+            const countryDocs = await ProofDocuments.find({ country_iso: { $eq: iso } });
+
+            //Get the Country details from ISO
+            var countryDetails = await Country.findOne({ "iso": iso });
+
+            appData.documents = countryDocs;
+            appData.countryDetails = countryDetails;
+            return this.GetAppDetailsSuccessResponse(appData, docData, res);
+
+        } catch (ex) {
+            return this.SendExceptionResponse(res, ex);
+        }
+    }
+
+    GetAppDetailsSuccessResponse(appEntity, docEntity, res) {
+        var response = {
+            "success": 1,
+            'now': commonUtility.UtcNow(),
+            "name": appEntity.name,
+            "email": appEntity.email,
+            "phone": appEntity.phone,
+            'country_code': appEntity.isd_code,
+            'app_key': appEntity.key,
+            "BasicInfo": commonUtility.GetKycDocumentInfo(docEntity.basic_info, "BASIC"),
+            "AddressInfo": commonUtility.GetKycDocumentInfo(docEntity.address_info, "ADDRESS"),
+            "IdentityInfo": commonUtility.GetKycDocumentInfo(docEntity.identity_info, "IDENTITY"),
+            "FaceInfo": commonUtility.GetKycDocumentInfo(docEntity.face_info, "FACE"),
+            'documents': appEntity.documents,
+            'country_details': appEntity.countryDetails,
+            'verification_code': docEntity.face_info.details.number,
+        }
+        return res.status(status.OK).jsonp(response);
+    }
 
     async index(req, res) {
         try {
