@@ -120,7 +120,7 @@ class Web  extends baseController{
 
             var appData;
 
-            if(body.status == null || body.status==undefined)
+            if(body.status == null || body.status==undefined|| body.status=="")
             {
                 appData = await App.find();
             }
