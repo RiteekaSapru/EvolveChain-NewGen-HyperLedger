@@ -50,7 +50,7 @@ class AppController extends base_controller {
             body.SERVER_ADDR = req.connection.localAddress;
             body.REMOTE_ADDR = req.connection.remoteAddress;
 
-            var appParams = {                
+            var appParams = {
                     device_info: {
                         device_name: body.device_name,
                         device_type: body.device_type,
@@ -138,7 +138,7 @@ class AppController extends base_controller {
             var expiryDate = common_utility.AddDaysToUtcNow(-APP_EXPIRATION_DAYS);
 
             if (expiryDate > lastModified)
-                return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, "Your application has expired. Please sign up again.");
+                return this.SendErrorResponse(res, config.ERROR_CODES.EXPIRED_APPLICATION);
 
             var phone_code = common_utility.GenerateOTP(6);
 
@@ -765,7 +765,6 @@ class AppController extends base_controller {
                     'ip': appEntity.IP,
                     'documents': appEntity.documents,
                     'verification_code': appEntity.verification_code
-                    // 'init_config': config.get('init_config')
                 };
                 break;
             case "GeneratePin":
@@ -810,7 +809,7 @@ class AppController extends base_controller {
                 response = {
                     'success': 1,
                     'now': Date.now(),
-                    'result': 'Email verified successfully!'
+                    'result': messages.verify_email_success
                 }
                 break;
             case "GenerateMobileOTP":
@@ -868,7 +867,7 @@ class AppController extends base_controller {
     GetSuccessResubmitInitialize(appEntity, docEntity, res) {
         var response = {
             "success": 1,
-            "now": Date.now(),          
+            'now': common_utility.UtcNow(),
             "name": appEntity.name,
             "email": appEntity.email,
             "phone": appEntity.phone,
