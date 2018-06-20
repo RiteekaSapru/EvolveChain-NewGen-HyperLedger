@@ -73,6 +73,8 @@
     "set_pin_success": "Pin has been set successfully!",
     "change_pin_success": "Pin has been changed successfully!",
     "verify_mobile_success": "Phone verified successfully!",
+    "verify_email_success": "Email verified successfully!",
+    "email_phone_not_verified":"Phone or Email not yet verified",
     "login_success": "Login successful!",
     "ekyc_same_device": "Ekyc Id exist for this device",
     "resubmit_init_success": "Resubmit initialize successful!",
@@ -135,6 +137,7 @@
     "req_verify_status": "Verify status missing!",
     "file_not_found": "File not found",
 
+
     "ERROR_CODES": {
         "E100": "Exception:",
         "E00": "Error:",
@@ -160,6 +163,10 @@
         "E20": "Face documents missing",
         "E21": "The application is in the expired state!",
         "E22": "An application already exists with the same phone number",
-        "E23": "Admin not found: Invalid token"
+        "E23": "Admin not found: Invalid token",
+        "E24": "Phone or Email not yet verified",
+        "E25": "Your application has expired. Please sign up again.",
+        "E26": "Step name missing",
+        "E27": "Invalid Address Document type!"
     }
 }

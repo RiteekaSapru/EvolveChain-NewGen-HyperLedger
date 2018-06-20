@@ -8,7 +8,7 @@
     },
     "ERROR_CODE": {
         "ERROR": "E00",
-        "EXCEPTION": "E100",  
+        "EXCEPTION": "E100",
         "DEVICE_MISMATCH": "E01",
         "INCORRECT_PIN": "E02",
         "INCORRECT_OTP": "E03",
@@ -31,7 +31,11 @@
         "FACE_DOCS_MISSING":"E20",
         "EXPIRED_APP_STATUS":"E21",
         "DUPLICATE_PHONE":"E22",
-        "ADMIN_NOT_FOUND": "E23"
+        "ADMIN_NOT_FOUND": "E23",
+        "EMAIL_PHONE_NOT_VERIFIED": "E24",
+        "EXPIRED_APPLICATION": "E25",
+        "STEP_NAME_MISSING": "E26",
+        "INVALID_ADDRESS_DOCUMENT_TYPE": "E27"
     },
     "HTTP_STATUS":{
         "OK": 200,
