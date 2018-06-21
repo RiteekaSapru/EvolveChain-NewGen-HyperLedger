@@ -484,11 +484,22 @@ class AppController extends base_controller {
             if (!App)
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_EKYCID);
 
+
+            var status = App.status;
+            if (status == config.APP_STATUSES.EXPIRED) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.EXPIRED_APP_STATUS);
+            }
+
+            var errorMsg = "Your application is in " + status + " status. You cannot generate the pin.";
+            if (status != config.APP_STATUSES.VERIFIED) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, errorMsg);
+            }
+
             //Email verification
             var email = App.email.toLowerCase();
             var ver_code = common_utility.GenerateOTP(6);
 
-            var template = fs.readFileSync(EMAIL_TEMPLATES_PATH + '/email_varified.html', {
+            var template = fs.readFileSync(config.EMAIL_TEMPLATES_PATH + '/verifyEmail.html', {
                 encoding: 'utf-8'
             });
 
@@ -557,6 +568,23 @@ class AppController extends base_controller {
                     pin: targetPin,
                     vendor_uuid: body.vendor_uuid
                 }
+            }
+
+            var appData = await app.findOne(conditions);
+
+            if (!appData) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
+            }
+
+            var status = appData.status;
+            if (status == config.APP_STATUSES.EXPIRED) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.EXPIRED_APP_STATUS);
+            }
+
+            var errorMsg = "Your application is in " + status + " status. You cannot set the pin.";
+
+            if (status != config.APP_STATUSES.VERIFIED) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, errorMsg);
             }
 
             var updatedApp = await this.FindAndModifyQuery(conditions, setParams);
