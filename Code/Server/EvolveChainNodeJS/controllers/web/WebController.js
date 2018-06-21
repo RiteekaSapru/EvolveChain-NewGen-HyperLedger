@@ -423,7 +423,22 @@ class Web  extends baseController{
             return res.status(status.InternalServerError).json({ message: messages.error, error: err });
         }
     }
+    async WelcomeApi(req, res) {
 
+        try {
+        
+            // var response = {
+            //     "success": 1,
+            //     "message":"Welcome to EvolveChain"
+            // }
+            var response= "Welcome To EvolveChain";
+            return res.status(status.OK).jsonp(response);
+
+
+        } catch (ex) {
+            return this.SendExceptionResponse(res, ex);
+        }
+    }
 
 }
 
