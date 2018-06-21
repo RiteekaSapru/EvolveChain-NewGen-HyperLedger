@@ -82,7 +82,6 @@ class AppController extends base_controller {
             let verification_code = common_utility.GenerateOTP(6);
             var kycDocParam = {
                 app_key: newApp.key,
-                isDelete: 0,
                 face_info: { details: { number: verification_code } },
                 last_modified: common_utility.UtcNow()
             }
