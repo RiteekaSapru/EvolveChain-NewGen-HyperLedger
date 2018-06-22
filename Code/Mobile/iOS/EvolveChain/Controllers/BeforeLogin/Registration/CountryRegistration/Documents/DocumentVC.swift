@@ -52,7 +52,7 @@ class DocumentVC: UIViewController,UITableViewDelegate,UITableViewDataSource,Tex
 
         }
         
-        arrFieldArray = DocumentManager.sharedInstance.getFieldArrayForModel(model: selectedDocModel,docType:currentType )
+        arrFieldArray = DocumentManager.shared.getFieldArrayForModel(model: selectedDocModel,docType:currentType )
         
         tblvwDoc.register(UINib(nibName: "RadioSelectionCell", bundle: nil), forCellReuseIdentifier: "RadioSelectionCell")
         tblvwDoc.register(UINib(nibName: "TwoImagePicker", bundle: nil), forCellReuseIdentifier: "TwoImagePicker")
@@ -66,15 +66,15 @@ class DocumentVC: UIViewController,UITableViewDelegate,UITableViewDataSource,Tex
     
     fileprivate func setupIdentity() {
         lblTitle.text = "Identity Proof"
-        arrDocArray = DocumentManager.sharedInstance.arrIdentity
-        selectedDocModel = DocumentManager.sharedInstance.selectedIdentityModel.getCopy()
+        arrDocArray = DocumentManager.shared.arrIdentity
+        selectedDocModel = DocumentManager.shared.selectedIdentityModel.getCopy()
 
     }
     
     fileprivate func setupAddress() {
         lblTitle.text = "Address Proof"
-        arrDocArray = DocumentManager.sharedInstance.arrAddress
-        selectedDocModel = DocumentManager.sharedInstance.selectedAddressModel.getCopy()
+        arrDocArray = DocumentManager.shared.arrAddress
+        selectedDocModel = DocumentManager.shared.selectedAddressModel.getCopy()
 
     }
     // MARK: - Data Handling
@@ -82,16 +82,16 @@ class DocumentVC: UIViewController,UITableViewDelegate,UITableViewDataSource,Tex
     fileprivate func saveData() {
         switch currentType {
         case .IdentityType:
-            DocumentManager.sharedInstance.selectedIdentityModel.saveData(model: selectedDocModel)
-             DocumentManager.sharedInstance.isIdentityDocsUploaded = true
+            DocumentManager.shared.selectedIdentityModel.saveData(model: selectedDocModel)
+             DocumentManager.shared.isIdentityDocsUploaded = true
             self.completionHandler(2)
         case .AddressType:
-            DocumentManager.sharedInstance.selectedAddressModel.saveData(model: selectedDocModel)
-            DocumentManager.sharedInstance.isAddressDocsUploaded = true
+            DocumentManager.shared.selectedAddressModel.saveData(model: selectedDocModel)
+            DocumentManager.shared.isAddressDocsUploaded = true
             self.completionHandler(3)
         }
         
-        _navigator.popViewController(animated: true)
+        GlobalMethods.shared.popVC()
     }
     
     fileprivate func validateData(){
@@ -232,20 +232,20 @@ class DocumentVC: UIViewController,UITableViewDelegate,UITableViewDataSource,Tex
                 if selectedDocModel.code != arrDocArray[indexPath.row - 1].code{
                     switch currentType {
                     case .IdentityType:
-                        DocumentManager.sharedInstance.selectedIdentityModel = arrDocArray[indexPath.row - 1]
+                        DocumentManager.shared.selectedIdentityModel = arrDocArray[indexPath.row - 1]
                     case .AddressType:
-                        DocumentManager.sharedInstance.selectedAddressModel = arrDocArray[indexPath.row - 1]
+                        DocumentManager.shared.selectedAddressModel = arrDocArray[indexPath.row - 1]
                     }
 //                    selectedDocModel.eraseData()
                     selectedDocModel = arrDocArray[indexPath.row - 1].getCopy()
-                    arrFieldArray = DocumentManager.sharedInstance.getFieldArrayForModel(model: selectedDocModel,docType:currentType )
+                    arrFieldArray = DocumentManager.shared.getFieldArrayForModel(model: selectedDocModel,docType:currentType )
                 }
                 tableView.reloadSections(IndexSet(integersIn: 0...arrFieldArray.count - 1), with: .automatic)
             }
             else {
                 if selectedDocModel.selectedSubType?.code != selectedDocModel.subDocs[indexPath.row - 1].code{
                     selectedDocModel.selectedSubType = selectedDocModel.subDocs[indexPath.row - 1]
-                    arrFieldArray = DocumentManager.sharedInstance.getFieldArrayForModel(model: selectedDocModel,docType:currentType )
+                    arrFieldArray = DocumentManager.shared.getFieldArrayForModel(model: selectedDocModel,docType:currentType )
 
                 }
                 tableView.reloadSections(IndexSet([indexPath.section,tblvwDoc.numberOfSections - 1]), with: .automatic)
@@ -261,7 +261,7 @@ class DocumentVC: UIViewController,UITableViewDelegate,UITableViewDataSource,Tex
     
     @IBAction func actionBack(_ sender: Any) {
         self.view.endEditing(true)
-        _navigator.popViewController(animated: true)
+        GlobalMethods.shared.popVC()
     }
     
     // MARK: - Next Textfield Delegate
@@ -281,12 +281,12 @@ class DocumentVC: UIViewController,UITableViewDelegate,UITableViewDataSource,Tex
         
         let filenameArray = ["file[]","file[]"]
         
-        NetworkManager.sharedInstance.POSTIdentityDetails(params:selectedDocModel.getModelAsDictionary(type: currentType) , fileArray: selectedDocModel.getImagesForKYC(), filenameArray: filenameArray, success: { (responseDict) in
+        NetworkManager.shared.POSTIdentityDetails(params:selectedDocModel.getModelAsDictionary(type: currentType) , fileArray: selectedDocModel.getImagesForKYC(), filenameArray: filenameArray, success: { (responseDict) in
             print(responseDict)
             print("Document Details Saved")
             self.saveData()
         }) { (errorMsg) in
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
         }
         
     }

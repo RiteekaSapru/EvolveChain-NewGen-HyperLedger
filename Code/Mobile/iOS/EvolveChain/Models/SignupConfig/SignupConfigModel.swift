@@ -9,7 +9,7 @@
 import UIKit
 
 class SignupConfigModel: NSObject {
- static let sharedInstance = SignupConfigModel()
+ static let shared = SignupConfigModel()
     
     var maxAge: Int             = 90
     var minAge: Int                   = 11
@@ -63,6 +63,15 @@ class SignupConfigModel: NSObject {
         }
     }
     
+    func getCountryListArray() -> [String] {
+        var list = [String]()
+        
+        for item in arrCountryList{
+            
+            list.append(item.name + " (+" + item.phoneCode + ")")
+        }
+        return list
+    }
 
     func initWithDocDictionary(docDict:Dictionary<String, Any>) {
         

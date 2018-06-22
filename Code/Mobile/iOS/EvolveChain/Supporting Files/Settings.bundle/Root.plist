@@ -10,21 +10,21 @@
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 			<key>Title</key>
-			<string>Group</string>
+			<string>Application base URL</string>
 		</dict>
 		<dict>
 			<key>Type</key>
 			<string>PSTextFieldSpecifier</string>
 			<key>Title</key>
-			<string>URL</string>
+			<string>Current URL</string>
 			<key>Key</key>
 			<string>app_url_settings</string>
 			<key>DefaultValue</key>
-			<string>http://192.168.60.130:4600/</string>
+			<string></string>
 			<key>IsSecure</key>
 			<false/>
 			<key>KeyboardType</key>
-			<string>Alphabet</string>
+			<string>URL</string>
 			<key>AutocapitalizationType</key>
 			<string>None</string>
 			<key>AutocorrectionType</key>

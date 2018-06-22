@@ -69,6 +69,9 @@ class VerifyOtpVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
 
     }
     
+     // MARK: - Custom Methods
+    
+    
     func startTimer() -> Void {
         timerOtp?.invalidate()
         timerOtp = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateResendBtn), userInfo: nil, repeats: true)
@@ -130,6 +133,8 @@ class VerifyOtpVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
         
     }
     
+     // MARK: - Save
+    
     func saveData() -> Void {
         switch verificationType{
         case .EmailVerification: saveUserEmail()
@@ -139,19 +144,21 @@ class VerifyOtpVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
     }
     func saveUserEmail() -> Void {
         //Save email to model
-        BasicDetailsModel.sharedInstance.isEmailVerified  = true
-        BasicDetailsModel.sharedInstance.email  = stringVerify
+        BasicDetailsModel.shared.isEmailVerified  = true
+        BasicDetailsModel.shared.email  = stringVerify
         moveToBasic()
     }
     
     func saveUserPhone() -> Void {
         //Save email to model
-        BasicDetailsModel.sharedInstance.isPhoneVerified  = true
-        BasicDetailsModel.sharedInstance.contactNumber  = stringVerify
-        BasicDetailsModel.sharedInstance.countryCode  = stringVerifyCountryCode.trimmingCharacters(in: CharacterSet.init(charactersIn: "1234567890").inverted)
+        BasicDetailsModel.shared.isPhoneVerified  = true
+        BasicDetailsModel.shared.contactNumber  = stringVerify
+        BasicDetailsModel.shared.countryCode  = stringVerifyCountryCode.trimmingCharacters(in: CharacterSet.init(charactersIn: "1234567890").inverted)
 
         moveToBasic()
     }
+    
+     // MARK: - Validate
     
     func validateAllFields() -> Void {
         let otpStr = txtfld1.text!+txtfld2.text!+txtfld3.text!+txtfld4.text!+txtfld5.text!+txtfld6.text!
@@ -159,8 +166,8 @@ class VerifyOtpVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
         if otpStr.count == 6 {
             //call API
             switch verificationType{
-                case .EmailVerification:APIVerifyEmail(otpString: GlobalMethods.sharedInstance.convertToMD5(string: otpStr))
-                case .PhoneVerification:APIVerifyPhone(otpString: GlobalMethods.sharedInstance.convertToMD5(string: otpStr))
+                case .EmailVerification:APIVerifyEmail(otpString: GlobalMethods.shared.convertToMD5(string: otpStr))
+                case .PhoneVerification:APIVerifyPhone(otpString: GlobalMethods.shared.convertToMD5(string: otpStr))
             }
         }
     }
@@ -175,16 +182,16 @@ class VerifyOtpVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
         txtfld1.becomeFirstResponder()
     }
     
-    func shakeView()  {
-        let animation = CABasicAnimation(keyPath: "position")
-        animation.duration = 0.07
-        animation.repeatCount = 4
-        animation.autoreverses = true
-        animation.fromValue = NSValue(cgPoint: CGPoint(x: vwPinHolder.center.x - 2, y: vwPinHolder.center.y))
-        animation.toValue = NSValue(cgPoint: CGPoint(x: vwPinHolder.center.x + 2, y: vwPinHolder.center.y))
-        
-        vwPinHolder.layer.add(animation, forKey: "position")
-    }
+//    func shakeView()  {
+//        let animation = CABasicAnimation(keyPath: "position")
+//        animation.duration = 0.07
+//        animation.repeatCount = 4
+//        animation.autoreverses = true
+//        animation.fromValue = NSValue(cgPoint: CGPoint(x: vwPinHolder.center.x - 2, y: vwPinHolder.center.y))
+//        animation.toValue = NSValue(cgPoint: CGPoint(x: vwPinHolder.center.x + 2, y: vwPinHolder.center.y))
+//        
+//        vwPinHolder.layer.add(animation, forKey: "position")
+//    }
     // MARK: - Textfield
     
     func textFieldDidDelete(textfield: UITextField) {
@@ -226,6 +233,9 @@ class VerifyOtpVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
             
             return false
         }
+        else if textField.text!.count > 0  && string.count > 0 {
+            return false
+        }
 //        else if textField.text!.count >= 1  && string.count == 0{
 //            // on deleting value from Textfield
 //            let previousTag = textField.tag - 1
@@ -249,11 +259,11 @@ class VerifyOtpVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
     @IBAction func actionResend(_ sender: Any) {
         //Call API tp resend
         switch verificationType{
-        case .EmailVerification:APIGetEMailOtp(email: stringVerify)
+        case .EmailVerification:APIGetEMailOtp(email: stringVerify.lowercased())
         case .PhoneVerification:APIGetPhoneOtp(countryCode: stringVerifyCountryCode, phoneNumner: stringVerify.components(separatedBy: CharacterSet.init(charactersIn: "1234567890").inverted).joined())
             
         }
-        
+        btnResend.isUserInteractionEnabled = false
         
         
     }
@@ -263,8 +273,8 @@ class VerifyOtpVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
             //Call API
 //             self.view.endEditing(true)
 //            switch verificationType{
-//            case .EmailVerification:APIVerifyEmail(otpString: GlobalMethods.sharedInstance.convertToMD5(string: txtfldOtp.text!))
-//            case .PhoneVerification:APIVerifyPhone(otpString: GlobalMethods.sharedInstance.convertToMD5(string: txtfldOtp.text!))
+//            case .EmailVerification:APIVerifyEmail(otpString: GlobalMethods.shared.convertToMD5(string: txtfldOtp.text!))
+//            case .PhoneVerification:APIVerifyPhone(otpString: GlobalMethods.shared.convertToMD5(string: txtfldOtp.text!))
 //
 //            }
            
@@ -285,39 +295,44 @@ class VerifyOtpVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
     
  // MARK: - WebService
     func APIVerifyEmail(otpString:String) -> Void {
+        btnResend.isUserInteractionEnabled = false
         let params = ["email":stringVerify,"email_code":otpString]
        activityIndicatorLoader.startAnimating()
-        NetworkManager.sharedInstance.verifyEmailOTP(params: params, success: { (responseDict) in
+        NetworkManager.shared.verifyEmailOTP(params: params, success: { [weak self] (responseDict) in
             DispatchQueue.main.async {
-                self.activityIndicatorLoader.stopAnimating()
+                self?.activityIndicatorLoader.stopAnimating()
+                self?.btnResend.isUserInteractionEnabled = true
             }
-            self.saveUserEmail()
-        }) { (errorMsg) in
+            self?.saveUserEmail()
+        }) { [weak self] (errorMsg) in
             DispatchQueue.main.async {
-                self.activityIndicatorLoader.stopAnimating()
-                self.clearAllFields()
-                self.shakeView()
+                self?.activityIndicatorLoader.stopAnimating()
+                self?.clearAllFields()
+                self?.vwPinHolder.shakeView()
+                self?.btnResend.isUserInteractionEnabled = true
             }
         }
     }
     
     func APIGetPhoneOtp(countryCode:String,phoneNumner:String) -> Void {
         
+        
         let result = countryCode.trimmingCharacters(in: CharacterSet.init(charactersIn: "1234567890").inverted)
         
         let params = ["mobile":phoneNumner,"country_code":result]
         activityIndicatorLoader.startAnimating()
-        NetworkManager.sharedInstance.generateMobileOTP(params: params, success: { (responseDict) in
+        NetworkManager.shared.generateMobileOTP(params: params, success: { (responseDict) in
             DispatchQueue.main.async {
                 self.activityIndicatorLoader.stopAnimating()
                 self.startTimer()
             }
             
-        }) { (errorMsg) in
+        }) { [weak self] (errorMsg) in
             DispatchQueue.main.async {
-                self.activityIndicatorLoader.stopAnimating()
+                self?.activityIndicatorLoader.stopAnimating()
+                self?.btnResend.isUserInteractionEnabled = true
             }
-//            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
+//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
         }
     }
     func APIVerifyPhone(otpString:String) -> Void {
@@ -325,17 +340,20 @@ class VerifyOtpVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
 
         let params = ["mobile":stringVerify,"phone_code":otpString,"country_code":result]
         activityIndicatorLoader.startAnimating()
-        NetworkManager.sharedInstance.verifyMobileOTP(params: params, success: { (responseDict) in
+         btnResend.isUserInteractionEnabled = false
+        NetworkManager.shared.verifyMobileOTP(params: params, success: { [weak self] (responseDict) in
             DispatchQueue.main.async {
-                self.activityIndicatorLoader.stopAnimating()
+                self?.activityIndicatorLoader.stopAnimating()
+                self?.btnResend.isUserInteractionEnabled = true
             }
-            self.saveUserPhone()
-        }) { (errorMsg) in
-//            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
+            self?.saveUserPhone()
+        }) { [weak self] (errorMsg) in
+//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
             DispatchQueue.main.async {
-                    self.activityIndicatorLoader.stopAnimating()
-                self.clearAllFields()
-                self.shakeView()
+                    self?.activityIndicatorLoader.stopAnimating()
+                self?.clearAllFields()
+                self?.vwPinHolder.shakeView()
+                self?.btnResend.isUserInteractionEnabled = true
             }
          
            
@@ -346,17 +364,18 @@ class VerifyOtpVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
         
         let params = ["email":email]
         activityIndicatorLoader.startAnimating()
-        NetworkManager.sharedInstance.generateEmailOTP(params: params, success: { (responseDict) in
+        NetworkManager.shared.generateEmailOTP(params: params, success: { [weak self] (responseDict) in
             DispatchQueue.main.async {
-                self.activityIndicatorLoader.stopAnimating()
-                self.startTimer()
+                self?.activityIndicatorLoader.stopAnimating()
+                self?.startTimer()
             }
             
-        }) { (errorMsg) in
+        }) { [weak self] (errorMsg) in
             DispatchQueue.main.async {
-                self.activityIndicatorLoader.stopAnimating()
+                self?.activityIndicatorLoader.stopAnimating()
+                self?.btnResend.isUserInteractionEnabled = true
             }
-//            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
+//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
         }
     }
 }

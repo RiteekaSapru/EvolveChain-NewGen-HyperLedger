@@ -36,7 +36,7 @@ class TextFieldCell: UITableViewCell,UITextFieldDelegate {
     
     func setModel(mdl:DocModel,cellType:CellType) {
         self.model = mdl
-        dateformatter.dateFormat = "MMM, dd yyyy"
+        dateformatter.dateFormat = "MMM dd, yyyy"
         if cellType == .TextfieldType{
              txtfldInput.placeholder = "Number"
             txtfldInput.delegate = self
@@ -52,7 +52,7 @@ class TextFieldCell: UITableViewCell,UITextFieldDelegate {
         }
         else if cellType == .LabelType{
              txtfldInput.placeholder = "Country"
-            txtfldInput.text = SignupConfigModel.sharedInstance.selectedCountry.name
+            txtfldInput.text = SignupConfigModel.shared.selectedCountry.name
             txtfldInput.isUserInteractionEnabled = false
             txtfldInput.delegate = nil
             txtfldInput.inputView = nil
@@ -70,11 +70,11 @@ class TextFieldCell: UITableViewCell,UITextFieldDelegate {
             txtfldInput.isUserInteractionEnabled = true
             txtfldInput.delegate = nil
             
-            datePicker = GlobalMethods.sharedInstance.getDatePicker(controller:self,txtFld: txtfldInput, doneAction: #selector(doneMethod), cancelAction: #selector(cancelMethod))
+            datePicker = GlobalMethods.shared.getDatePicker(controller:self,txtFld: txtfldInput, doneAction: #selector(doneMethod), cancelAction: #selector(cancelMethod))
             datePicker?.minimumDate = Date()
             datePicker?.maximumDate = nil
-//            datePicker?.maximumDate = GlobalMethods.sharedInstance.getDate(year: SignupConfigModel.sharedInstance.selectedCountry.minAge, after: false)
-//            datePicker?.minimumDate = GlobalMethods.sharedInstance.getDate(year: SignupConfigModel.sharedInstance.selectedCountry.maxAge, after: false)
+//            datePicker?.maximumDate = GlobalMethods.shared.getDate(year: SignupConfigModel.shared.selectedCountry.minAge, after: false)
+//            datePicker?.minimumDate = GlobalMethods.shared.getDate(year: SignupConfigModel.shared.selectedCountry.maxAge, after: false)
         }
       
     }

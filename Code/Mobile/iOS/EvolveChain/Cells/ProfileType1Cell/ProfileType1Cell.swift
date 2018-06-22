@@ -31,17 +31,18 @@ class ProfileType1Cell: UITableViewCell {
 
         // Configure the view for the selected state
     }
-    
+    // MARK: - Custom Methods
+
     func setupCell() {
-        var line1 = BasicDetailsModel.sharedInstance.add1
-        if BasicDetailsModel.sharedInstance.add2.count > 0 {
-            line1.append(", " + BasicDetailsModel.sharedInstance.add2)
+        var line1 = BasicDetailsModel.shared.add1
+        if BasicDetailsModel.shared.add2.count > 0 {
+            line1.append(", " + BasicDetailsModel.shared.add2)
         }
         
         lbladd1.text = line1
-        lbladd2.text = BasicDetailsModel.sharedInstance.street + ", " + BasicDetailsModel.sharedInstance.city + ", " + BasicDetailsModel.sharedInstance.zipCode
+        lbladd2.text = BasicDetailsModel.shared.street + ", " + BasicDetailsModel.shared.city + ", " + BasicDetailsModel.shared.zipCode
         
-        lblstreet.text = BasicDetailsModel.sharedInstance.state + ", " + BasicDetailsModel.sharedInstance.country
+        lblstreet.text = BasicDetailsModel.shared.state + ", " + BasicDetailsModel.shared.country
         lblCity.text = ""
         lblZip.text = ""
         lblState.text = ""

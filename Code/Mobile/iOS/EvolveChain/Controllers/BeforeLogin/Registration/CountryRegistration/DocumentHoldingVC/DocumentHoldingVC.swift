@@ -33,15 +33,15 @@ class DocumentHoldingVC: UIViewController,UIImagePickerControllerDelegate,UINavi
     //MARK: - Custom Actions
     
     fileprivate func filldata(){
-        lblOTP.text = SignupConfigModel.sharedInstance.verificationCode
-        if BasicDetailsModel.sharedInstance.holdingImage != nil{
-            imgPic.image = BasicDetailsModel.sharedInstance.holdingImage
-            holdingImage = BasicDetailsModel.sharedInstance.holdingImage
+        lblOTP.text = SignupConfigModel.shared.verificationCode
+        if BasicDetailsModel.shared.holdingImage != nil{
+            imgPic.image = BasicDetailsModel.shared.holdingImage
+            holdingImage = BasicDetailsModel.shared.holdingImage
         }
     }
     
     fileprivate func permissionCheckGallery() {
-        GlobalMethods.sharedInstance.checkForGalleryPermission(success: {
+        GlobalMethods.shared.checkForGalleryPermission(success: {
             DispatchQueue.main.async {
                 self.openGallery()
             }
@@ -54,29 +54,28 @@ class DocumentHoldingVC: UIViewController,UIImagePickerControllerDelegate,UINavi
         
         let alertInfo = UIAlertController.init(title: "Info", message: StringConstants.UpholdingInfo, preferredStyle: .alert)
         
-        let okAction = UIAlertAction.init(title: "Okay", style: .cancel) { (alert) in
+        let okAction = UIAlertAction.init(title: StringConstants.okText, style: .cancel) { (alert) in
             
         }
         
         alertInfo.addAction(okAction)
-        
-        self.present(alertInfo, animated: true, completion: nil)
+        GlobalMethods.shared.presentVC(alertInfo)
         
     }
     
     fileprivate func saveDetails(){
         
         DispatchQueue.main.async {
-            BasicDetailsModel.sharedInstance.holdingImage = self.holdingImage
+            BasicDetailsModel.shared.holdingImage = self.holdingImage
             self.completionHandler(4)
-            GlobalMethods.sharedInstance.popVC()
+            GlobalMethods.shared.popVC()
         }
         
     }
     
     fileprivate func checkvalidation() -> Bool{
         if holdingImage == nil{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.UpholdingMissing)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.UpholdingMissing)
             return false
         }
         return true
@@ -89,7 +88,7 @@ class DocumentHoldingVC: UIViewController,UIImagePickerControllerDelegate,UINavi
         imagePicker.delegate = self
         imagePicker.sourceType = UIImagePickerControllerSourceType.photoLibrary
         imagePicker.allowsEditing = false
-        self.present(imagePicker, animated: true, completion: nil)
+        GlobalMethods.shared.presentVC(imagePicker)
     }
     
     //MARK: - ImagePicker delegate
@@ -123,12 +122,12 @@ class DocumentHoldingVC: UIViewController,UIImagePickerControllerDelegate,UINavi
     
     fileprivate func upholdingAPI(){
         
-        let params = ["step":"face","number":SignupConfigModel.sharedInstance.verificationCode,"substep":"face","iso":SignupConfigModel.sharedInstance.selectedCountry.iso]
+        let params = ["step":"face","number":SignupConfigModel.shared.verificationCode,"substep":"face","iso":SignupConfigModel.shared.selectedCountry.iso]
         
-        NetworkManager.sharedInstance.POSTUpholdingDetails(params: params, fileArray: [holdingImage!], filenameArray: ["file[]"], success: { (responseJSON) in
+        NetworkManager.shared.POSTUpholdingDetails(params: params, fileArray: [holdingImage!], filenameArray: ["file[]"], success: { (responseJSON) in
             self.saveDetails()
         }) { (errorMsg) in
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.UpholdingMissing)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.UpholdingMissing)
 
         }
     }

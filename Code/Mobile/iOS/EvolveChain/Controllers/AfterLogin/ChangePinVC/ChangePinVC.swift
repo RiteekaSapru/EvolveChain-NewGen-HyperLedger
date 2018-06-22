@@ -84,22 +84,22 @@ class ChangePinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
     func checkValidations() -> Bool {
         
         if txtfld1.text?.count == 0 || txtfld2.text?.count == 0 || txtfld3.text?.count == 0 || txtfld4.text?.count == 0 || txtfld5.text?.count == 0 || txtfld6.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter previous pin")
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter previous pin")
             return false;
         }
         else if txtfld7.text?.count == 0 || txtfld8.text?.count == 0 || txtfld9.text?.count == 0 || txtfld10.text?.count == 0 || txtfld11.text?.count == 0 || txtfld12.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter new pin.")
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter new pin.")
             return false;
         }
         else if txtfld13.text?.count == 0 || txtfld14.text?.count == 0 || txtfld15.text?.count == 0 || txtfld16.text?.count == 0 || txtfld17.text?.count == 0 || txtfld18.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: "Please  re enter new pin.")
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please  re enter new pin.")
             return false;
         }
         else if getNewPin() != getNewPinReEnter(){
-            //            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: "Pins do not match.")
+            //            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Pins do not match.")
             clearPins()
-            shakeView(viewToShake: vwPinHolder)
-            shakeView(viewToShake: vwRePinHolder)
+            vwPinHolder.shakeView()
+            vwRePinHolder.shakeView()
             txtfld7.becomeFirstResponder()
             return false;
         }
@@ -137,29 +137,32 @@ class ChangePinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
         txtfld18.text = ""
     }
     
-    func shakeView(viewToShake:UIView)  {
-        let animation = CABasicAnimation(keyPath: "position")
-        animation.duration = 0.07
-        animation.repeatCount = 4
-        animation.autoreverses = true
-        animation.fromValue = NSValue(cgPoint: CGPoint(x: viewToShake.center.x - 5, y: viewToShake.center.y))
-        animation.toValue = NSValue(cgPoint: CGPoint(x: viewToShake.center.x + 5, y: viewToShake.center.y))
-        
-        viewToShake.layer.add(animation, forKey: "position")
-    }
+//    func shakeView(viewToShake:UIView)  {
+//        let animation = CABasicAnimation(keyPath: "position")
+//        animation.duration = 0.07
+//        animation.repeatCount = 4
+//        animation.autoreverses = true
+//        animation.fromValue = NSValue(cgPoint: CGPoint(x: viewToShake.center.x - 5, y: viewToShake.center.y))
+//        animation.toValue = NSValue(cgPoint: CGPoint(x: viewToShake.center.x + 5, y: viewToShake.center.y))
+//
+//        viewToShake.layer.add(animation, forKey: "position")
+//    }
     
     func pinGenerated(msg:String) {
-        let alert = UIAlertController.init(title: nil, message: msg, preferredStyle: .alert)
-        let defaultAction = UIAlertAction.init(title: "Okay", style: .cancel) { (alert: UIAlertAction!) in
-            self.savePin()
+        let alert = UIAlertController.init(title: nil, message: msg + StringConstants.PinChangeText, preferredStyle: .alert)
+        let defaultAction = UIAlertAction.init(title: StringConstants.okText, style: .cancel) { (alert: UIAlertAction!) in
+            GlobalMethods.shared.cleanUpRegistrationData()
+            GlobalMethods.shared.removeTempImages()
+            self.resetToLogin()
         }
         alert.addAction(defaultAction)
-        _navigator.present(alert, animated: true, completion: nil)
+        GlobalMethods.shared.presentVC(alert)
+
     }
     
-    func savePin() {
+    func resetToLogin() {
         DispatchQueue.main.async {
-            GlobalMethods.sharedInstance.popVC()
+            FlowManager.shared.resetToLogin()
         }
     }
     
@@ -170,21 +173,21 @@ class ChangePinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
                 
                 if errorCode == ErrorCode.INCORRECT_PIN.rawValue{
                     self.clearOldPin()
-                    self.shakeView(viewToShake: self.vwOldPinHolder)
+                    self.vwOldPinHolder.shakeView()
                     self.txtfld1.becomeFirstResponder()
                 }
                 else{
-                    GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
+                    GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
                     self.clearOldPin()
                     self.clearPins()
-                    self.shakeView(viewToShake: self.vwOldPinHolder)
-                    self.shakeView(viewToShake: self.vwPinHolder)
-                    self.shakeView(viewToShake: self.vwRePinHolder)
+                    self.vwOldPinHolder.shakeView()
+                    self.vwPinHolder.shakeView()
+                    self.vwRePinHolder.shakeView()
                     self.txtfld1.becomeFirstResponder()
                 }
             }
             else{
-                
+                GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please retry.")
             }
         }
         catch let error as NSError {
@@ -258,6 +261,9 @@ class ChangePinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
             
             return false
         }
+        else if textField.text!.count > 0  && string.count > 0{
+            return false
+        }
         return true
         
     }
@@ -278,13 +284,13 @@ class ChangePinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
     
     func changePin() {
         
-        let params = ["ekyc_id":RawdataConverter.string(_userDefault.object(forKey: kApplicationKycIdKey)),"pin":GlobalMethods.sharedInstance.convertToMD5(string: getOldPin()),"new_pin":GlobalMethods.sharedInstance.convertToMD5(string:getNewPin())]
+        let params = ["ekyc_id":BasicDetailsModel.shared.kycId,"pin":GlobalMethods.shared.convertToMD5(string: getOldPin()),"new_pin":GlobalMethods.shared.convertToMD5(string:getNewPin()),"vendor_uuid":GlobalMethods.shared.getUniqueIdForDevice()]
         
-        NetworkManager.sharedInstance.changePinAPI(params: params, success: { (responseJson) in
-            _userDefault.set(GlobalMethods.sharedInstance.convertToMD5(string: self.getNewPin()), forKey: kApplicationPinKey)
+        NetworkManager.shared.changePinAPI(params: params, success: { (responseJson) in
+            _userDefault.set(GlobalMethods.shared.convertToMD5(string: self.getNewPin()), forKey: kApplicationPinKey)
             self.pinGenerated(msg: RawdataConverter.string(responseJson["result"]))
-        }) { (errorMsg,data) in
-           
+        }) { [weak self] (errorMsg,data) in
+            self?.processResponse(data: data!, errorMsg: errorMsg!)
         }
     }
 }

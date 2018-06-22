@@ -61,7 +61,7 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
     }
     
     func updateUI() {
-        lblTitle.text = SignupConfigModel.sharedInstance.selectedCountry.name
+        lblTitle.text = SignupConfigModel.shared.selectedCountry.name
     }
     
     func updateTableView() {
@@ -103,17 +103,17 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
         switch index {
             case -1: return true
         case RegisterDetailsAmericaType.Basic.rawValue:
-            return BasicDetailsModel.sharedInstance.isBasicDetailsComplete
+            return BasicDetailsModel.shared.isBasicDetailsComplete
         case RegisterDetailsAmericaType.Address.rawValue:
-            return BasicDetailsModel.sharedInstance.isAddressDetailsComplete
+            return BasicDetailsModel.shared.isAddressDetailsComplete
         case RegisterDetailsAmericaType.IdentityProof.rawValue:
-            return DocumentManager.sharedInstance.isIdentityDocsUploaded
+            return DocumentManager.shared.isIdentityDocsUploaded
             
         case RegisterDetailsAmericaType.AddressProof.rawValue:
-            return DocumentManager.sharedInstance.isAddressDocsUploaded
+            return DocumentManager.shared.isAddressDocsUploaded
             
         case RegisterDetailsAmericaType.DocumentHolding.rawValue:
-            return BasicDetailsModel.sharedInstance.holdingImage != nil
+            return BasicDetailsModel.shared.holdingImage != nil
             
         default:
             return false
@@ -121,66 +121,27 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
     }
     
     func checkValidation() -> Bool {
-        if !BasicDetailsModel.sharedInstance.isBasicDetailsComplete{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.BasicNotSaved)
+        if !BasicDetailsModel.shared.isBasicDetailsComplete{
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.RegisterNotComplete)
             return false
         }
-        else if !BasicDetailsModel.sharedInstance.isAddressDetailsComplete{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AddressNotSaved)
+        else if !BasicDetailsModel.shared.isAddressDetailsComplete{
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.RegisterNotComplete)
             return false
         }
-        else if !DocumentManager.sharedInstance.isIdentityDocsUploaded{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityNotSaved)
+        else if !DocumentManager.shared.isIdentityDocsUploaded{
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.RegisterNotComplete)
             return false
         }
-        else if !DocumentManager.sharedInstance.isAddressDocsUploaded{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AddressNotSaved)
+        else if !DocumentManager.shared.isAddressDocsUploaded{
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.RegisterNotComplete)
             return false
         }
-        else if BasicDetailsModel.sharedInstance.holdingImage == nil{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AddressNotSaved)
+        else if BasicDetailsModel.shared.holdingImage == nil{
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.RegisterNotComplete)
             return false
         }
-//        else {
-//
-//            switch DocumentModel.sharedInstance.identityType{
-//            case .DrivingLicenceIdentityType:
-//                if !DocumentModel.sharedInstance.drivingModel.iscomplete{
-//                    GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityNotSaved)
-//                    return false
-//                }
-//            case .PassportIdentityType:
-//                if !DocumentModel.sharedInstance.passportModel.iscomplete{
-//                    GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityNotSaved)
-//                    return false
-//                }
-//            case .TaxationIdentityType:
-//                if !DocumentModel.sharedInstance.taxationModel.iscomplete{
-//                    GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityNotSaved)
-//                    return false
-//                }
-//            }
-//
-//            switch DocumentModel.sharedInstance.addressType{
-//            case .DrivingLicenceAddressType:
-//                if !DocumentModel.sharedInstance.drivingModel.iscomplete{
-//                    GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AddressNotSaved)
-//                    return false
-//                }
-//            case .PassportAddressType:
-//                if !DocumentModel.sharedInstance.passportModel.iscomplete{
-//                    GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AddressNotSaved)
-//                    return false
-//                }
-//            case .UtilityAddressType:
-//                if !DocumentModel.sharedInstance.utilityModel.iscomplete{
-//                    GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AddressNotSaved)
-//                    return false
-//                }
-//            }
-//
-//            return true
-//        }
+
         return true
     }
     
@@ -199,15 +160,14 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
         let defaultAction = UIAlertAction.init(title: "Cancel", style: .cancel) { (alert: UIAlertAction!) in
         }
         alert.addAction(defaultAction)
-        
-        _navigator.present(alert, animated: true, completion: nil)
+        GlobalMethods.shared.presentVC(alert)
     }
     
    
     
     fileprivate func popVC() {
-        GlobalMethods.sharedInstance.cleanUpRegistrationData()
-        _navigator.popViewController(animated: true)
+        GlobalMethods.shared.cleanUpRegistrationData()
+        GlobalMethods.shared.popVC()
     }
     
     // MARK: - Tableview
@@ -245,7 +205,7 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
             case RegisterDetailsAmericaType.Basic.rawValue:
                 
                 let basicDetailsObj = self.storyboard?.instantiateViewController(withIdentifier: "BasicDetailsAmericaVC") as! BasicDetailsAmericaVC
-                GlobalMethods.sharedInstance.pushVC(basicDetailsObj)
+                GlobalMethods.shared.pushVC(basicDetailsObj)
                 
                 basicDetailsObj.completionHandler = { index in
                     self.indexToUpdate = index
@@ -256,7 +216,7 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
             case RegisterDetailsAmericaType.Address.rawValue:
                 let addressObj = self.storyboard?.instantiateViewController(withIdentifier: "AddressVC") as! AddressVC
                 
-                GlobalMethods.sharedInstance.pushVC(addressObj)
+                GlobalMethods.shared.pushVC(addressObj)
                 addressObj.completionHandler = { index in
                     self.indexToUpdate = index
                     self.shouldUpdate = true
@@ -265,12 +225,12 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
             
             case RegisterDetailsAmericaType.IdentityProof.rawValue:
                 
-                if DocumentManager.sharedInstance.arrIdentity.count > 0{
+                if DocumentManager.shared.arrIdentity.count > 0{
                     let documentSelectionObj = self.storyboard?.instantiateViewController(withIdentifier: "DocumentVC") as! DocumentVC
                     
                     documentSelectionObj.currentType = .IdentityType
                     
-                    GlobalMethods.sharedInstance.pushVC(documentSelectionObj)
+                    GlobalMethods.shared.pushVC(documentSelectionObj)
                     documentSelectionObj.completionHandler = { index in
                         self.indexToUpdate = index
                         self.shouldUpdate = true
@@ -281,12 +241,12 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
                 break
             case RegisterDetailsAmericaType.AddressProof.rawValue:
                 
-                if DocumentManager.sharedInstance.arrAddress.count > 0{
+                if DocumentManager.shared.arrAddress.count > 0{
                     let documentSelectionObj = self.storyboard?.instantiateViewController(withIdentifier: "DocumentVC") as! DocumentVC
                     
                     documentSelectionObj.currentType = .AddressType
                     
-                    GlobalMethods.sharedInstance.pushVC(documentSelectionObj)
+                    GlobalMethods.shared.pushVC(documentSelectionObj)
                     
                     documentSelectionObj.completionHandler = { index in
                         self.indexToUpdate = index
@@ -303,7 +263,7 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
                     let documentHoldingObj = self.storyboard?.instantiateViewController(withIdentifier: "DocumentHoldingVC") as! DocumentHoldingVC
                     
                     
-                    GlobalMethods.sharedInstance.pushVC(documentHoldingObj)
+                    GlobalMethods.shared.pushVC(documentHoldingObj)
                     
                     documentHoldingObj.completionHandler = { index in
                         self.indexToUpdate = index
@@ -349,7 +309,7 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
         if checkValidation() {
         
             let summaryObj = self.storyboard?.instantiateViewController(withIdentifier: "SummaryVC")
-            GlobalMethods.sharedInstance.pushVC(summaryObj!)
+            GlobalMethods.shared.pushVC(summaryObj!)
             
         }
         

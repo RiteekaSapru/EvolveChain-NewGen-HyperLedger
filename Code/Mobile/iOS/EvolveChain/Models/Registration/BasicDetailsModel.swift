@@ -14,14 +14,14 @@ enum CountryType : String {
 
 class BasicDetailsModel: NSObject, NSCoding {
 
-    static let sharedInstance = BasicDetailsModel()
+    static let shared = BasicDetailsModel()
     
     var countryType: CountryType             = .India
     var countryCode: String             = ""
     var fname: String                   = ""
     var mname: String                   = ""
     var lname: String                   = ""
-    var dob: Date                       = Date()
+    var dob: Date?                       = Date()
     var placeOfBirth: String            = ""
     var gender: String                  = ""
     
@@ -140,9 +140,12 @@ class BasicDetailsModel: NSObject, NSCoding {
         isBasicDetailsComplete  = false
         add1                    = ""
         add2                    = ""
+        street                  = ""
         gender                    = ""
         isAddressDetailsComplete = false
-        
+        zipCode = ""
+        state = ""
+        country = ""
          kycId                   = ""
         
         
@@ -156,8 +159,8 @@ class BasicDetailsModel: NSObject, NSCoding {
     
     func getBasicParamsForSaveKYC() -> Dictionary<String, Any> {
        
-        let params = ["step":"basic","firstname":self.fname,"lastname":self.lname,"dob": self.dob.getUTCDateStringFromDateString(),"place_of_birth":self.placeOfBirth,"address1":self.add1,"address2":self.add2,"street":self.street,"city":self.city,"zip":self.zipCode,"state":self.state,"country":self.country,"middlename":self.mname,"substep":"basic","gender":self.gender,"iso":SignupConfigModel.sharedInstance.selectedCountry.iso]
-        //        basicData.append(["iso",SignupConfigModel.sharedInstance.selectedCountry.iso])
+        let params : Dictionary<String, Any> = ["step":"basic","firstname":self.fname,"lastname":self.lname,"dob": self.dob?.getUTCDateStringFromDateString() ?? " ","place_of_birth":self.placeOfBirth,"address1":self.add1,"address2":self.add2,"street":self.street,"city":self.city,"zip":self.zipCode,"state":self.state,"country":self.country,"middlename":self.mname,"substep":"basic","gender":self.gender,"iso":SignupConfigModel.shared.selectedCountry.iso]
+        //        basicData.append(["iso",SignupConfigModel.shared.selectedCountry.iso])
 
         return params
     }
@@ -177,10 +180,10 @@ class BasicDetailsModel: NSObject, NSCoding {
         }
         
         basicData.append(["Last Name",self.lname])
-        basicData.append(["Date of Birth",self.dob.dateWithStringFormat("MMM, dd yyyy")])
+        basicData.append(["Date of Birth",self.dob?.dateWithStringFormat("MMM dd, yyyy") ?? " "])
         basicData.append(["Place of Birth",self.placeOfBirth])
         basicData.append(["Gender",self.gender])
-//        basicData.append(["iso",SignupConfigModel.sharedInstance.selectedCountry.iso])
+//        basicData.append(["iso",SignupConfigModel.shared.selectedCountry.iso])
 //        basicData.append(["Address Line 1",self.add1])
 //        if self.add2.count > 0 {
 //            basicData.append(["Address Line 2",self.add2])
@@ -208,7 +211,7 @@ class BasicDetailsModel: NSObject, NSCoding {
         basicData.append(["Zip",self.zipCode])
         basicData.append(["State",self.state])
         basicData.append(["Country",self.country])
-//        basicData.append(["iso",SignupConfigModel.sharedInstance.selectedCountry.iso])
+//        basicData.append(["iso",SignupConfigModel.shared.selectedCountry.iso])
         
         return basicData
     }
@@ -216,7 +219,7 @@ class BasicDetailsModel: NSObject, NSCoding {
     func getHoldingAsArray() -> [[Any]] {
         
         var modelData = [[Any]]()
-        
+        modelData.append(["Code",SignupConfigModel.shared.verificationCode])
         modelData.append(["Holding Image","Holding Image",self.holdingImage])
         
         return modelData
@@ -257,6 +260,7 @@ class BasicDetailsModel: NSObject, NSCoding {
         
         isBasicDetailsComplete  = true
         isAddressDetailsComplete = true
+        
         
        
     }
@@ -318,7 +322,7 @@ class BasicDetailsModel: NSObject, NSCoding {
         mname                   = RawdataConverter.string(basicDetails["middlename"])
         lname                   = RawdataConverter.string(basicDetails["lastname"])
         
-        dob                     = Date.dateFromFormatted3_String(RawdataConverter.string(basicDetails["dob"]))!
+        dob                     = Date.dateFromFormatted3_String(RawdataConverter.string(basicDetails["dob"]))
         
         placeOfBirth            = RawdataConverter.string(basicDetails["place_of_birth"])
         

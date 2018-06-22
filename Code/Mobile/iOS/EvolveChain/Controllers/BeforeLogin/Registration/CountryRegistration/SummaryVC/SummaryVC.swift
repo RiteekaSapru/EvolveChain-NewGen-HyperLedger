@@ -24,11 +24,11 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
         super.viewDidLoad()
 
         arrHeader = ["Basic Details","Address Details","Identity Proof","Address Proof","Document Holding Photo"]
-        arrBasicDetails = BasicDetailsModel.sharedInstance.getBasicDataInArray()
-        arrAddressDetails = BasicDetailsModel.sharedInstance.getAddressDataInArray()
-        arrIdentityDocs = DocumentManager.sharedInstance.selectedIdentityModel.getDataAsArray()
-        arrAddressDoc = DocumentManager.sharedInstance.selectedAddressModel.getDataAsArray()
-        arrHoldingImage = BasicDetailsModel.sharedInstance.getHoldingAsArray()
+        arrBasicDetails = BasicDetailsModel.shared.getBasicDataInArray()
+        arrAddressDetails = BasicDetailsModel.shared.getAddressDataInArray()
+        arrIdentityDocs = DocumentManager.shared.selectedIdentityModel.getDataAsArray()
+        arrAddressDoc = DocumentManager.shared.selectedAddressModel.getDataAsArray()
+        arrHoldingImage = BasicDetailsModel.shared.getHoldingAsArray()
             
         tblvwSummary.register(UINib(nibName: "SummaryCell", bundle: nil), forCellReuseIdentifier: "SummaryCell")
         tblvwSummary.register(UINib(nibName: "ImageCell", bundle: nil), forCellReuseIdentifier: "ImageCell")
@@ -36,6 +36,10 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
 
         tblvwSummary.delegate = self
         tblvwSummary.dataSource = self
+        let footer = UIView.init(frame: CGRect.init(x: 0, y: 0, width: _screenSize.width, height: 25))
+        footer.backgroundColor = UIColor.clear
+        tblvwSummary.tableFooterView = footer
+        
         // Do any additional setup after loading the view.
     }
 
@@ -43,6 +47,8 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+     // MARK: - Custom Methods
     
     func getArrayModelFor(section:Int,row:Int) -> [Any] {
         var arrModel :[Any] = []
@@ -83,47 +89,7 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
         }
     }
     
-    func openTermsLink() {
-        let safariVC = SFSafariViewController(url: URL.init(string: terms_url)!)
-        present(safariVC, animated: true, completion: nil)
-    }
-    
-    func openPrivacyLink() {
-        let safariVC = SFSafariViewController(url: URL.init(string: privacy_url)!)
-        present(safariVC, animated: true, completion: nil)
-    }
-    
-    func askTermsAndCondition() {
-        
-        let alert = UIAlertController.init(title: StringConstants.AppName, message: "By accepting, you agree to our Terms & Conditions and Privacy Policy.", preferredStyle: .alert)
-        
-        let termsAction = UIAlertAction.init(title: "Terms & Conditions", style: .default) { (alert) in
-            self.openTermsLink()
-        }
-        
-        alert.addAction(termsAction)
-        
-        let policyAction = UIAlertAction.init(title: "Privacy Policy", style: .default) { (alert) in
-            self.openPrivacyLink()
-        }
-        
-        alert.addAction(policyAction)
-        
-        let acceptAction = UIAlertAction.init(title: "I Accept", style: .default) { (alert) in
-             self.kycComplete()
-        }
-        
-        alert.addAction(acceptAction)
-        
-        let cancelAction = UIAlertAction.init(title: "Cancel", style: .destructive) { (alert) in
-            
-        }
-        
-        alert.addAction(cancelAction)
-        
-        _navigator.present(alert, animated: true, completion: nil)
-    }
-    
+   
     // MARK: - Tableview
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -166,6 +132,7 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return 45.0
     }
+    
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         
         let vwHeader = UIView.init(frame: CGRect.init(x: 0, y: 0, width: _screenSize.width, height: 45.0))
@@ -208,13 +175,13 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
     
     fileprivate func moveToSuccessScreen() {
         //mve to nxt screen
-        GlobalMethods.sharedInstance.cleanUpRegistrationData()
+        GlobalMethods.shared.cleanUpRegistrationData()
         DispatchQueue.main.async {
-            let successfullVC = FlowManager.sharedInstance.getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "SuccessfullVC") as! SuccessfullVC
+            let successfullVC = FlowManager.shared.getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "SuccessfullVC") as! SuccessfullVC
             
             _navigator.setViewControllers([_navigator.viewControllers.first!,successfullVC], animated: true)
             
-//            GlobalMethods.sharedInstance.pushVC(successfullVC)
+//            GlobalMethods.shared.pushVC(successfullVC)
         }
     }
     
@@ -222,11 +189,11 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
         
         let params = ["app_key":RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))]
         
-        NetworkManager.sharedInstance.POSTKYCComplete(params: params, success: { (responseObject) in
+        NetworkManager.shared.POSTKYCComplete(params: params, success: { (responseObject) in
             self.moveToSuccessScreen()
             
         }) { (errorMsg) in
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
         }
     }
 }

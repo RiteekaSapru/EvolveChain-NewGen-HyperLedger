@@ -10,8 +10,9 @@ import UIKit
 
 class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
    
+    @IBOutlet weak var vwNextHolder: UIView!
     @IBOutlet weak var tableviewCountry: UITableView!
-    var selectedIndex : Int = 0
+    var selectedIndex : Int = -1
     var countryArray : [CountryModel] = []
     
     var refreshControl = UIRefreshControl()
@@ -41,7 +42,8 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        GlobalMethods.sharedInstance.initialiseLocation()
+        GlobalMethods.shared.initialiseLocation()
+        
     }
     // MARK: - Custom Methods
     
@@ -58,6 +60,11 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
             model.initWithDictionary(countryDict: RawdataConverter.dictionary(item)!)
             countryArray.append(model)
         }
+        
+        if countryArray.count > 0{
+            selectedIndex = 0
+        }
+        
         DispatchQueue.main.async {
             self.refreshControl.endRefreshing()
             self.tableviewCountry.reloadSections(IndexSet.init(integer: 0), with: .top)
@@ -65,20 +72,25 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
     }
     
     fileprivate func popVC() {
-        GlobalMethods.sharedInstance.cleanUpRegistrationData()
-        _navigator.popViewController(animated: true)
+        GlobalMethods.shared.cleanUpRegistrationData()
+        GlobalMethods.shared.popVC()
     }
     
     func processToRegister(response:Dictionary<String,Any>) {
         
-        DocumentManager.sharedInstance.initWith(docArray: RawdataConverter.array(response["documents"]) as! [Dictionary<String, Any>])
+        DocumentManager.shared.initWith(docArray: RawdataConverter.array(response["documents"]) as! [Dictionary<String, Any>])
         
         _userDefault.set(response["key"], forKey: kApplicationKey)
-        SignupConfigModel.sharedInstance.verificationCode = RawdataConverter.string(response["verification_code"])
+        SignupConfigModel.shared.verificationCode = RawdataConverter.string(response["verification_code"])
         
-        
-        let regVC = self.storyboard?.instantiateViewController(withIdentifier: "AmericaRegistrationVC") as! RegistrationVC
-        GlobalMethods.sharedInstance.pushVC(regVC)
+        if DocumentManager.shared.arrAddress.count > 0 && DocumentManager.shared.arrIdentity.count > 0 {
+            let regVC = self.storyboard?.instantiateViewController(withIdentifier: "AmericaRegistrationVC") as! RegistrationVC
+            GlobalMethods.shared.pushVC(regVC)
+        }
+        else{
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Documents not available.")
+        }
+      
     }
     
     // MARK: - Tableview
@@ -105,14 +117,31 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
         tableviewCountry.reloadData()
     }
     
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        let noInternetLabel = UILabel.init(frame: CGRect.init(x: 0, y: 0, width: _screenSize.width, height: 60.0))
+        
+        noInternetLabel.backgroundColor = .clear
+        noInternetLabel.textColor = UIColor.darkGray
+        noInternetLabel.textAlignment = .center
+        noInternetLabel.font = UIFont.init(name: "Avenir-Light", size: 12)
+        
+        noInternetLabel.text = RequestManager.shared.isConnectedToNetwork() ? refreshControl.isRefreshing ? "Retrieving country list..." : "No Countries available right now." : StringConstants.NoInternet
+        
+        return noInternetLabel
+    }
     
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return countryArray.count == 0 ? 60.0 : 0
+    }
     // MARK: - Actions
     
    
     
     @IBAction func actionNext(_ sender: UIButton) {
-        
-        intialiseAPI()
+        if selectedIndex > -1{
+            vwNextHolder.loadingIndicator(show: true)
+            intialiseAPI()
+        }
     }
     
     
@@ -124,29 +153,32 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
     // MARK: - Web Service
     
     func getCountryList() {
-        NetworkManager.sharedInstance.countryListAPI(success: { (response) in
+        NetworkManager.shared.countryListAPI(success: { (response) in
             self.processResponse(response: response)
-        }) { (errorMsg) in
+        }) { [weak self] (errorMsg)  in
             DispatchQueue.main.async {
-                self.refreshControl.endRefreshing()
+                self?.refreshControl.endRefreshing()
+                self?.tableviewCountry.reloadData()
             }
             
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
         }
     }
     
     fileprivate func intialiseAPI() {
     
-        SignupConfigModel.sharedInstance.selectedCountry = countryArray[selectedIndex]
+        SignupConfigModel.shared.selectedCountry = countryArray[selectedIndex]
         
-        NetworkManager.sharedInstance.initialiseAPI(success: { (responseJson) in
+        NetworkManager.shared.initialiseAPI(success: { (responseJson) in
             DispatchQueue.main.async {
-                GlobalMethods.sharedInstance.stopLocation()
+                self.vwNextHolder.loadingIndicator(show: false)
+                GlobalMethods.shared.stopLocation()
                  self.processToRegister(response: responseJson)
             }
            
         }) { (errorMsg) in
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+            self.vwNextHolder.loadingIndicator(show: false)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
         }
     }
 }

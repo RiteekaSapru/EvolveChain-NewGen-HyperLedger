@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITextFieldDelegate {
+class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITextFieldDelegate,BackSpaceTextFieldDelegate {
     
     
     @IBOutlet weak var tblvwProfile: UITableView!
@@ -21,7 +21,7 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     @IBOutlet var arrView: [UIView]!
     
     @IBOutlet weak var vwPhone: UIView!
-    @IBOutlet weak var txtfldPhone: UITextField!
+    @IBOutlet weak var txtfldPhone: NoCursorTextfield!
     @IBOutlet weak var vwEmail: UIView!
     @IBOutlet weak var bottomEmailView: NSLayoutConstraint!
     @IBOutlet weak var lblDob: UILabel!
@@ -33,25 +33,41 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     @IBOutlet weak var bottomPhoneView: NSLayoutConstraint!
     @IBOutlet weak var txtfldCountryCode: UITextField!
     
-    var selectedCountry : Country?
+    @IBOutlet weak var btnGetCountry: UIButton!
+
+    
+    var selectedCountry : CountryModel?
+    
+    var countryArray : [CountryModel] = []
+    
+    var pickerClass : PickerClass = PickerClass.init()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         tblvwProfile.register(UINib(nibName: "ProfileType1Cell", bundle: nil), forCellReuseIdentifier: "ProfileType1Cell")
         tblvwProfile.delegate = self
         tblvwProfile.dataSource = self
-        
+        txtfldPhone.backDelegate = self
         // Do any additional setup after loading the view.
         addShadow(viewToChange: arrView.first!)
         addShadow(viewToChange: arrView.last!)
         
         updateUI()
+        
+        if SignupConfigModel.shared.arrCountryList.count > 0{
+            countryArray = SignupConfigModel.shared.arrCountryList
+            self.btnGetCountry.isUserInteractionEnabled = false
+            self.setupCountryCode()
+        }
+        else{
+            getCountryList()
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
        
-        lblPhone.text = BasicDetailsModel.sharedInstance.getCompletePhoneNumber()
+        lblPhone.text = BasicDetailsModel.shared.getCompletePhoneNumber()
         
        
     }
@@ -64,26 +80,93 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
      // MARK: - Custom Methods
     
     func updateUI()  {
+//        getCountryList()
+//        countryArray = Country.getCountryList()
+//        setupCountryCode()
         
-        lblUserName.text = BasicDetailsModel.sharedInstance.getCompleteName()
+        lblUserName.text = BasicDetailsModel.shared.getCompleteName()
         
-        lblUserAddressCompact.text =  BasicDetailsModel.sharedInstance.kycId + "\n" + BasicDetailsModel.sharedInstance.gender
+        lblUserAddressCompact.text =  BasicDetailsModel.shared.kycId + "\n" + BasicDetailsModel.shared.gender
         
-        lblEmail.text = BasicDetailsModel.sharedInstance.email
-        lblPhone.text = BasicDetailsModel.sharedInstance.getCompletePhoneNumber()
-        txtfldCountryCode.text = "+" + BasicDetailsModel.sharedInstance.countryCode
-//        lblEmail.text = "abhay.shankar@newgen.co.in"
+        lblEmail.text = BasicDetailsModel.shared.email
+        lblPhone.text = BasicDetailsModel.shared.getCompletePhoneNumber()
+        txtfldCountryCode.text = "+" + BasicDetailsModel.shared.countryCode
+        if BasicDetailsModel.shared.dob != nil{
+            lblDob.text = BasicDetailsModel.shared.dob?.localDateWithStringFormat("MMM dd, yyyy")
+
+        }
+        else{
+            lblDob.text = ""
+        }
         
-        lblDob.text = BasicDetailsModel.sharedInstance.dob.localDateWithStringFormat("dd-MM-yyyy")
+        lblPOB.text = BasicDetailsModel.shared.placeOfBirth
         
-        lblPOB.text = BasicDetailsModel.sharedInstance.placeOfBirth
-        
-        if let url = URL(string: BasicDetailsModel.sharedInstance.userImageURL) {
+        if let url = URL(string: BasicDetailsModel.shared.userImageURL) {
            imgUser.downloadImage(url: url)
             imgUserBg.downloadImage(url: url)
         }
         
     }
+    
+    
+    func setupCountryCode()  {
+        
+        self.selectedCountry = self.countryArray[0]
+        self.txtfldCountryCode.text = "+" + self.selectedCountry!.phoneCode
+        
+        var arrList = [String]()
+        
+        for item in countryArray{
+            arrList.append(item.name + " (+" + item.phoneCode + ")")
+        }
+        
+        txtfldCountryCode.inputView = pickerClass.setUpPicker(customList: arrList)
+        txtfldCountryCode.inputAccessoryView = pickerClass.setUpToolbar()
+        
+        pickerClass.doneBlock = {
+            (index ) in
+            if self.selectedCountry?.iso !=  self.countryArray[index].iso{
+                self.txtfldCountryCode.text = "+" + self.countryArray[index].phoneCode
+                self.selectedCountry = self.countryArray[index]
+                if self.txtfldPhone.text!.count > 0{
+                    let text = String.init(stringLiteral: self.txtfldPhone.text!)
+                    self.txtfldPhone.text = ""
+                    self.txtfldPhone.text = self.changeTextFormatting(newString: text)
+                }
+            }
+            self.txtfldCountryCode.resignFirstResponder()
+            
+            self.txtfldPhone.becomeFirstResponder()
+        }
+        
+        pickerClass.cancelBlock = {
+            self.txtfldCountryCode.resignFirstResponder()
+        }
+    }
+    
+    func changeTextFormatting(newString:String) -> String {
+
+        var text = txtfldPhone.text!
+        let formatText = selectedCountry?.phoneFormat
+        let result = newString.components(separatedBy: CharacterSet.init(charactersIn: "1234567890").inverted).joined()
+
+        for (index, char) in result.enumerated() {
+
+            if text.count < formatText!.count{
+                text.append(char)
+                if text.count < formatText!.count{
+                    let indexNext = formatText?.index((formatText?.startIndex)!, offsetBy: text.count )
+
+                    if formatText![indexNext!] == "-"{
+                        text.append("-")
+                    }
+                }
+            }
+        }
+
+        return text
+    }
+
     
     func addShadow(viewToChange:UIView)  {
         viewToChange.clipsToBounds = false
@@ -100,19 +183,24 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
         viewToChange.layer.insertSublayer(shadowLayer, at: 0)
     }
     
+    // MARK: - Validation Methods
+
+    
     func checkEmailValidations() -> Bool {
         
-        if txtfldEmail.text?.count == 0 {
-//            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.EmailEmpty)
-            hideEmailView()
-            self.view.endEditing(true)
+        if txtfldEmail.text!.isEmpty {
+//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.EmailEmpty)
+//            hideEmailView()
+//            self.view.endEditing(true)
+            txtfldEmail.animatePlaceholderColor()
+            txtfldEmail.becomeFirstResponder()
             return false;
         }
-        else if !GlobalMethods.sharedInstance.isValidEmail(testStr: txtfldEmail.text!){
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.EmailInvalid)
+        else if !GlobalMethods.shared.isValidEmail(testStr: txtfldEmail.text!){
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.EmailInvalid)
             return false;
         }
-        else if BasicDetailsModel.sharedInstance.email == txtfldEmail.text{
+        else if BasicDetailsModel.shared.email == txtfldEmail.text?.lowercased(){
             hideEmailView()
             self.view.endEditing(true)
             return false;
@@ -125,15 +213,26 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     
     func checkPhoneValidations() -> Bool {
         
-        if txtfldPhone.text?.count == 0 {
-//            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneEmpty)
+        if selectedCountry == nil{
+            getCountryList()
+            return false;
+        }
+        else if txtfldPhone.text!.isEmpty {
+//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneEmpty)
+//            hidePhoneView()
+//            self.view.endEditing(true)
+            txtfldPhone.animatePlaceholderColor()
+            txtfldPhone.becomeFirstResponder()
+
+            return false;
+        }
+        else if BasicDetailsModel.shared.contactNumber == txtfldPhone.text && BasicDetailsModel.shared.countryCode == txtfldCountryCode.text?.trimmingCharacters(in: CharacterSet.init(charactersIn: "1234567890").inverted){
             hidePhoneView()
             self.view.endEditing(true)
             return false;
         }
-        else if BasicDetailsModel.sharedInstance.contactNumber == txtfldPhone.text && BasicDetailsModel.sharedInstance.countryCode == txtfldCountryCode.text?.trimmingCharacters(in: CharacterSet.init(charactersIn: "1234567890").inverted){
-            hidePhoneView()
-            self.view.endEditing(true)
+        else if txtfldPhone.text!.count < selectedCountry!.phoneFormat.count {
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneInvalid)
             return false;
         }
         else{
@@ -141,19 +240,22 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
         }
     }
     
+    // MARK: - Navigation Methods
+
+    
     func moveToPhoneOtpVerify() -> Void {
         
-        let verifyOtpObj = FlowManager.sharedInstance.getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "VerifyOtpVC") as! VerifyOtpVC
+        let verifyOtpObj = FlowManager.shared.getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "VerifyOtpVC") as! VerifyOtpVC
         verifyOtpObj.verificationType = .PhoneVerification
         verifyOtpObj.stringVerifyCountryCode = txtfldCountryCode.text!
         verifyOtpObj.stringVerify = txtfldPhone.text!
         verifyOtpObj.modalPresentationStyle = .overCurrentContext
-        _navigator.present(verifyOtpObj, animated: true, completion: nil)
+        GlobalMethods.shared.presentVC(verifyOtpObj)
         
         verifyOtpObj.completionHandler = {
             () -> Void in
             DispatchQueue.main.async {
-                self.lblPhone.text = BasicDetailsModel.sharedInstance.getCompletePhoneNumber()
+                self.lblPhone.text = BasicDetailsModel.shared.getCompletePhoneNumber()
                 self.hidePhoneView()
             }
         }
@@ -161,45 +263,142 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     
     func moveToEmailOtpVerify() -> Void {
         
-        let verifyOtpObj = FlowManager.sharedInstance.getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "VerifyOtpVC") as! VerifyOtpVC
+        let verifyOtpObj = FlowManager.shared.getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "VerifyOtpVC") as! VerifyOtpVC
         verifyOtpObj.verificationType = .EmailVerification
         verifyOtpObj.stringVerify = txtfldEmail.text!
         verifyOtpObj.modalPresentationStyle = .overCurrentContext
-        
-        _navigator.present(verifyOtpObj, animated: true, completion: nil)
+        GlobalMethods.shared.presentVC(verifyOtpObj)
+
         
         verifyOtpObj.completionHandler = {
             () -> Void in
             DispatchQueue.main.async {
-                self.lblEmail.text = BasicDetailsModel.sharedInstance.email
+                self.lblEmail.text = BasicDetailsModel.shared.email
                 self.hideEmailView()
             }
         }
     }
     
-    func openCountryCodePicker() -> Void {
-        self.view.endEditing(true)
-        let customPicker = CustomPickerView.instanceFromNib() as CustomPickerView
+//    func openCountryCodePicker() -> Void {
+//        self.view.endEditing(true)
+//
+//        if SignupConfigModel.shared.arrCountryList.count == 0 {
+//            getCountryList()
+//            return
+//        }
+//        let customPicker = CustomPickerView.instanceFromNib() as CustomPickerView
+//
+//        customPicker.frame = CGRect(x: 0, y: 0, width: _screenFrame.width, height: _screenFrame.height)
+//
+//        let window = UIApplication.shared.keyWindow!
+//
+//        window.addSubview(customPicker)
+//
+//        window.bringSubview(toFront: customPicker)
+//
+//        customPicker.showView()
+//
+//        customPicker.setUpView(custom: false, customList: [],arrCountry: Country.getCountryList())
+//
+//        customPicker.completionCountry = {
+//            (country ) in
+//            self.selectedCountry = country
+//            self.txtfldCountryCode.text = "+" + country.phoneCode
+//            self.txtfldPhone.becomeFirstResponder()
+//        }
+//    }
+    
+    // MARK: - Process Methods
+
+    
+    func processCountryResponse(responseJson:Array<Any>)  {
         
-        customPicker.frame = CGRect(x: 0, y: 0, width: _screenFrame.width, height: _screenFrame.height)
+        SignupConfigModel.shared.initCountryList(response: responseJson)
         
-        let window = UIApplication.shared.keyWindow!
+        countryArray = SignupConfigModel.shared.arrCountryList
         
-        window.addSubview(customPicker)
-        
-        window.bringSubview(toFront: customPicker)
-        
-        customPicker.showView()
-        
-        customPicker.setUpView(custom: false, customList: [],arrCountry: Country.getCountryList())
-        
-        customPicker.completionCountry = {
-            (country ) in
-            self.selectedCountry = country
-            self.txtfldCountryCode.text = "+" + country.phoneCode
-            self.txtfldPhone.becomeFirstResponder()
+        if countryArray.count > 0{
+            DispatchQueue.main.async {
+                self.btnGetCountry.isUserInteractionEnabled = false
+                self.setupCountryCode()
+                if ((_userDefault.object(forKey: kApplicationPinKey)) != nil)
+                {
+                    if let isdCode = _userDefault.object(forKey: kUserISDCodeKey) as? String{
+                        for country in self.countryArray{
+                            if isdCode == country.phoneCode{
+                                self.selectedCountry = country
+                                self.txtfldCountryCode.text = "+" + (self.selectedCountry?.phoneCode)!
+                            }
+                        }
+                    }
+                }
+                else{
+                    //                    self.txtfldCountryCode.becomeFirstResponder()
+                }
+            }
         }
     }
+    
+    //MARK: - Textfield
+    
+    func textFieldDidDelete(textfield: UITextField) {
+
+        if textfield.tag == 10 {
+            var text = textfield.text
+
+            if text?.last == "-" {
+                text?.removeLast()
+                textfield.text = text
+                //                textfield.text = changeTextToStar(stringToChange: kycIdText)
+            }
+        }
+    }
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        
+        if textField.tag == 10 {
+            
+            if string == "" || selectedCountry == nil{
+                return true
+            }
+            
+            let formatText = selectedCountry?.phoneFormat
+            
+            if formatText?.count == 0{
+                return true
+            }
+            if textField.text?.count == formatText?.count{
+                return false
+            }
+            
+            if string.count == 1{
+                
+                if "1234567890".contains(string.first!){
+                    var text = textField.text! + string
+                    
+                    if text.count < (formatText?.count)!{
+                        let indexNext = formatText?.index((formatText?.startIndex)!, offsetBy: text.count )
+                        
+                        if formatText![indexNext!] == "-"{
+                            text.append("-")
+                        }
+                    }
+                    txtfldPhone.text = text
+                    
+                }
+            }
+            else{
+                txtfldPhone.text = changeTextFormatting(newString: string)
+            }
+            
+            
+            return false
+        }
+        
+       
+        return true
+        
+    }
+    
     // MARK: - Tableview
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -282,18 +481,18 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     @IBAction func actionSettings(_ sender: Any) {
         
         let settingsVC = self.storyboard?.instantiateViewController(withIdentifier: "SettingsVC")
-        GlobalMethods.sharedInstance.pushVC(settingsVC!)
+        GlobalMethods.shared.pushVC(settingsVC!)
     }
     
     @IBAction func actionEditEmail(_ sender: Any) {
         showEmailView()
-//        GlobalMethods.sharedInstance.underDevelopmentAlert()
+//        GlobalMethods.shared.underDevelopmentAlert()
     }
     
     @IBAction func actionAddEmail(_ sender: Any) {
         if checkEmailValidations(){
             self.view.endEditing(true)
-            APIGetEMailOtp(email: txtfldEmail.text!)
+            APIGetEMailOtp(email: txtfldEmail.text!.lowercased())
         }
     }
     
@@ -313,30 +512,40 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
         if checkPhoneValidations(){
             self.view.endEditing(true)
             let result = txtfldCountryCode.text?.trimmingCharacters(in: CharacterSet.init(charactersIn: "1234567890").inverted)
-            
-            APIGetPhoneOtp(countryCode: result!,phoneNumner: txtfldPhone.text!)
+           let phone = (txtfldPhone.text?.components(separatedBy: CharacterSet.init(charactersIn: "1234567890").inverted).joined())!
+            APIGetPhoneOtp(countryCode: result!,phoneNumner: phone)
         }
     }
     
     @IBAction func actionSelectCountryCode(_ sender: Any) {
-        openCountryCodePicker()
+        self.view.endEditing(true)
+        
+        if SignupConfigModel.shared.arrCountryList.count == 0 {
+            getCountryList()
+
+        }
+        else{
+            txtfldCountryCode.becomeFirstResponder()
+        }
+
     }
+    
     // MARK: - Webservice
     
     func APIGetPhoneOtp(countryCode:String,phoneNumner:String) -> Void {
         
         
-        GlobalMethods.sharedInstance.showLoader(loadingText: StringConstants.OTPLoader)
+        GlobalMethods.shared.showLoader(loadingText: StringConstants.OTPLoader)
         let params = ["mobile":phoneNumner,"country_code":countryCode]
         
-        NetworkManager.sharedInstance.generateMobileOTP(params: params, success: { (responseDict) in
-            GlobalMethods.sharedInstance.dismissLoader(complete: {
+        NetworkManager.shared.generateMobileOTP(params: params, success: { (responseDict) in
+            GlobalMethods.shared.dismissLoader(complete: {
                 self.moveToPhoneOtpVerify()
             })
             
         }) { (errorMsg) in
-            GlobalMethods.sharedInstance.dismissLoader(complete: {
-                GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
+            GlobalMethods.shared.dismissLoader(complete: {
+                GlobalMethods.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
             })
             
         }
@@ -345,16 +554,25 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     func APIGetEMailOtp(email:String) -> Void {
         
         let params = ["email":email]
-        GlobalMethods.sharedInstance.showLoader(loadingText: StringConstants.OTPLoader)
-        NetworkManager.sharedInstance.generateEmailOTP(params: params, success: { (responseDict) in
-            GlobalMethods.sharedInstance.dismissLoader(complete: {
+        GlobalMethods.shared.showLoader(loadingText: StringConstants.OTPLoader)
+        NetworkManager.shared.generateEmailOTP(params: params, success: { (responseDict) in
+            GlobalMethods.shared.dismissLoader(complete: {
                 self.moveToEmailOtpVerify()
             })
             
         }) { (errorMsg) in
-            GlobalMethods.sharedInstance.dismissLoader(complete: {
-                GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
+            GlobalMethods.shared.dismissLoader(complete: {
+                GlobalMethods.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
             })
+        }
+    }
+    
+    func getCountryList() {
+
+        NetworkManager.shared.countryListAPI(success: { (response) in
+                self.processCountryResponse(responseJson: response)
+        }) { (errorMsg) in
+                GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
         }
     }
     

@@ -72,15 +72,26 @@ extension UIView {
         }
     }
     
+    
+    func shakeView()  {
+        let animation = CABasicAnimation(keyPath: "position")
+        animation.duration = 0.07
+        animation.repeatCount = 4
+        animation.autoreverses = true
+        animation.fromValue = NSValue(cgPoint: CGPoint(x: self.center.x - 5, y: self.center.y))
+        animation.toValue = NSValue(cgPoint: CGPoint(x: self.center.x + 5, y: self.center.y))
+        
+        self.layer.add(animation, forKey: "position")
+    }
 }
 
 extension UIImageView {
     
     func downloadImage(url: URL) {
 //       addLoader()
-        if GlobalMethods.sharedInstance.checkIfFileExists(fileName: url.lastPathComponent){
+        if GlobalMethods.shared.checkIfFileExists(fileName: url.lastPathComponent){
              print("File Exists")
-            let image = GlobalMethods.sharedInstance.getLocallySavedImage(fileName: url.lastPathComponent)
+            let image = GlobalMethods.shared.getLocallySavedImage(fileName: url.lastPathComponent)
             DispatchQueue.main.async() {
 //                self.removeLoader()
                 self.image = image
@@ -89,12 +100,12 @@ extension UIImageView {
         else{
 //            addLoader()
              print("Download Started")
-            RequestManager.sharedInstance.getDataFromUrl(url: url) { data, response, error in
+            RequestManager.shared.getDataFromUrl(url: url) { data, response, error in
                 guard let data = data, error == nil else { return }
                 print(response?.suggestedFilename ?? url.lastPathComponent)
                 print("Download Finished")
                 if let downloadedImage = UIImage(data: data){
-                    if GlobalMethods.sharedInstance.saveImage(image: downloadedImage, fileName: url.lastPathComponent){
+                    if GlobalMethods.shared.saveImage(image: downloadedImage, fileName: url.lastPathComponent){
                         print("Saved")
                         DispatchQueue.main.async() {
                             //                    self.removeLoader()
@@ -167,3 +178,90 @@ extension StringProtocol where Index == String.Index {
         return result
     }
 }
+
+extension UITextField{
+    func animatePlaceholderColor() {
+        self.setPlaceHolderColor(color: UIColor.init(red: 1.0, green: 0, blue: 0, alpha: 0.4))
+        
+//        UIView.animate(withDuration: 2.0, animations: {
+//            self.setPlaceHolderColor(color: UIColor.init(red: 1.0, green: 0, blue: 0, alpha: 0.4))
+//
+//        }) { (status) in
+//            if status{
+//                self.setPlaceHolderColor(color: .lightGray)
+//
+//            }
+//        }
+    }
+    
+    func setPlaceHolderColor(color:UIColor){
+        self.attributedPlaceholder = NSAttributedString(string: self.placeholder!, attributes: [.foregroundColor : color])
+    }
+}
+
+extension UIView{
+    func loadingIndicator(show:Bool) {
+        let tag = 9768
+        
+        if show{
+            GlobalMethods.shared.isLoading = true
+            self.isUserInteractionEnabled = false
+            _navigator.interactivePopGestureRecognizer?.isEnabled = false
+            let activityIndicator = UIActivityIndicatorView()
+            activityIndicator.activityIndicatorViewStyle = .white
+            activityIndicator.hidesWhenStopped = true
+            
+            let viewHolder = UIView.init(frame: self.bounds)
+            viewHolder.backgroundColor = self.backgroundColor
+            viewHolder.tag = tag
+            
+//            viewHolder.frame = self.frame
+            viewHolder.alpha = 0
+            activityIndicator.center = viewHolder.center
+            viewHolder.addSubview(activityIndicator)
+            
+            self.addSubview(viewHolder)
+            self.bringSubview(toFront: viewHolder)
+            activityIndicator.startAnimating()
+            
+            UIView.animate(withDuration: 0.3) {
+                viewHolder.alpha = 1.0
+            }
+        }
+        else{
+            GlobalMethods.shared.isLoading = false
+            _navigator.interactivePopGestureRecognizer?.isEnabled = true
+            if let viewHolder = self.viewWithTag(tag){
+                UIView.animate(withDuration: 0.3, animations: {
+                    viewHolder.alpha = 0.0
+                }) { (status) in
+                    if status{
+                        
+                        self.isUserInteractionEnabled = true
+                        viewHolder.removeFromSuperview()
+                    }
+                }
+            }
+        }
+    }
+}
+
+extension UIColor{
+    class var themeColor:UIColor {
+        return UIColor.init(red: 15.0/255.0, green: 117.0/255.0, blue: 189.0/255.0, alpha: 1.0)
+    }
+    
+    convenience init(red: Int, green: Int, blue: Int, alpha: CGFloat) {
+         self.init(red: CGFloat(red) / 255.0, green: CGFloat(green) / 255.0, blue: CGFloat(blue) / 255.0, alpha: alpha)
+    }
+
+    convenience init(rgbHex: Int, alpha: CGFloat = 1.0) {
+        self.init(
+            red: (rgbHex >> 16) & 0xFF,
+            green: (rgbHex >> 8) & 0xFF,
+            blue: rgbHex & 0xFF,
+            alpha: alpha
+        )
+    }
+}
+

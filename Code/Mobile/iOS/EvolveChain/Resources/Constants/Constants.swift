@@ -13,6 +13,12 @@ class Constants: NSObject {
     
 }
 
+func print(_ items: Any..., separator: String = " ", terminator: String = "\n") {
+     #if DEBUG
+    Swift.print(items[0], separator:separator, terminator: terminator)
+    #endif
+}
+
 // MARK: - Error Codes
 
 enum ErrorCode : String {
@@ -44,23 +50,12 @@ let _application    = UIApplication.shared
 let service = "EvolveService"
 let account = "EvolveAccount"
 
-// MARK: Application Details
-
-let app_store_ID        = "123456"
-let app_iTunes_URL      = "https://itunes.apple.com/us/app/id\(app_store_ID)"
-
-let support_and_feedback_page_url  = "https://evolvechain.org/support/index"
-
-let website_url  = "https://evolvechain.org"
-
-let terms_url  = "https://evolvechain.org/terms"
-
-let privacy_url  = "https://evolvechain.org/privacy"
 
 // MARK: User Default keys
 let kDeviceTokenKey        =        "kDeviceTokenKey"
 let kApplicationURL        =        "app_url"
-let kApplicationSettingsURL        =        "app_url_settings"
+let kSettingsBundleURL        =     "app_url_settings"
+
 let kApplicationKey       =        "kApplicationKey"
 
 let kApplicationKycIdKey       =        "kApplicationKycIdKey"
@@ -72,35 +67,15 @@ let kUserISDCodeKey       =        "kUserISDCodeKey"
 
 
 //MARK : URLs
-let kLocalURL                     = "http://192.168.60.130:4600"
-
-let countryListURL = "/web/getcountrylist"
-
-let initaliseURL = "/app/initialize"
-
-let generateEmailOtpURL = "/app/generateEmailOtp/"
-let verifyEmailOtpURL = "/app/verifyemail/"
-let generateMobileOtpURL = "/app/generateMobileOTP/"
-let verifyMobileOtpURL = "/app/verifymobile/"
-let saveKYCDetails = "/kyc/saveKycDocument/"
-let submitKYCDetails = "/kyc/SubmitKycDocument/"
+//let kLocalURL : String = {
+//    if _userDefault.object(forKey: kApplicationURL) != nil{
+//        return RawdataConverter.string(_userDefault.object(forKey: kApplicationURL))
+//    }
+//    else{
+//        return "http://192.168.60.130:4600"
+//    }
+//}()
 
 
-let generatePinURL = "/app/GeneratePin"
-let setPinURL = "/app/SetPin"
-let loginURL = "/app/Login"
-let getKycIdURL = "/app/GetEkycId"
 
-
-let changePinURL = "/app/ChangePin"
-
-let getEditOTPURL = "/app/resubmitverification"
-let resubmitEditOTPURL = "/app/resubmitinitialize"
-
-
-// MARK : Colors
-
-let color_green = UIColor.init(red: 5.0/255.0, green: 104.0/255, blue: 57.0/255.0, alpha: 1.0)
-let color_blue = UIColor.init(red: 15.0/255.0, green: 117.0/255.0, blue: 189.0/255.0, alpha: 1.0)
-
-
+var BaseURL = RawdataConverter.string(_userDefault.object(forKey: kApplicationURL))

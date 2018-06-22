@@ -18,6 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         
         self.initNavigationManager();
+        SettingsBundleHelper.shared.checkForURLChange()
         return true
     }
 
@@ -34,11 +35,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillEnterForeground(_ application: UIApplication) {
         // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
         
+        //check for URL change from Settings bundle
+        
+        SettingsBundleHelper.shared.checkForURLChange()
+        
         //Check Pin
         
         if ((_userDefault.object(forKey: kApplicationPinKey)) != nil)
         {
-            FlowManager.sharedInstance.showPinUI()
+            FlowManager.shared.showPinUI()
         }
     }
 

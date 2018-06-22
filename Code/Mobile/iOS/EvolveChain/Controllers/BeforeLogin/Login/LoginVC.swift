@@ -46,13 +46,15 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
         txtfld5.backDelegate = self
         txtfld6.backDelegate = self
         txtfldPhone.backDelegate = self
+        
+//        self.setNeedsStatusBarAppearanceUpdate()
 //        txtfldKYCId.backDelegate = self
         
 //        setupCountryCode()
         
 //        txtfldKYCId.text = changeTextToStar(stringToChange: (_userDefault.object(forKey: kApplicationKycIdKey) as? String)!)
         
-//        if (BasicDetailsModel.sharedInstance.isBasicDetailsComplete)
+//        if (BasicDetailsModel.shared.isBasicDetailsComplete)
 //        {
 //            setupForPinCheck()
 //        }
@@ -64,10 +66,11 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
                 txtfldPhone.text = phone
             }
         }
-        if SignupConfigModel.sharedInstance.arrCountryList.count > 0{
-            countryArray = SignupConfigModel.sharedInstance.arrCountryList
+        if SignupConfigModel.shared.arrCountryList.count > 0{
+            countryArray = SignupConfigModel.shared.arrCountryList
             self.btnGetCountry.isUserInteractionEnabled = false
             self.setupCountryCode()
+            txtfldPhone.becomeFirstResponder()
         }
         else{
             getCountryList()
@@ -94,6 +97,7 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
 //            txtfldPhone.becomeFirstResponder()
         }
     }
+    
     
      // MARK: - Custom Methods
     
@@ -196,35 +200,39 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
         return otpStr
     }
     
-    func shakeView(viewToShake:UIView)  {
-        let animation = CABasicAnimation(keyPath: "position")
-        animation.duration = 0.07
-        animation.repeatCount = 4
-        animation.autoreverses = true
-        animation.fromValue = NSValue(cgPoint: CGPoint(x: viewToShake.center.x - 5, y: viewToShake.center.y))
-        animation.toValue = NSValue(cgPoint: CGPoint(x: viewToShake.center.x + 5, y: viewToShake.center.y))
-        
-        viewToShake.layer.add(animation, forKey: "position")
-    }
+//    func shakeView(viewToShake:UIView)  {
+//        let animation = CABasicAnimation(keyPath: "position")
+//        animation.duration = 0.07
+//        animation.repeatCount = 4
+//        animation.autoreverses = true
+//        animation.fromValue = NSValue(cgPoint: CGPoint(x: viewToShake.center.x - 5, y: viewToShake.center.y))
+//        animation.toValue = NSValue(cgPoint: CGPoint(x: viewToShake.center.x + 5, y: viewToShake.center.y))
+//        
+//        viewToShake.layer.add(animation, forKey: "position")
+//    }
+    
+    // MARK: - Validation
+
     
     func checkValidation() -> Bool {
         if selectedCountry == nil{
             getCountryList()
             return false;
         }
-        else if txtfldPhone.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText:StringConstants.PhoneEmpty)
+        else if txtfldPhone.text!.isEmpty{
+            txtfldPhone.animatePlaceholderColor()
+//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText:StringConstants.PhoneEmpty)
             txtfldPhone.becomeFirstResponder()
             return false;
         }
         else if txtfldPhone.text!.count < selectedCountry!.phoneFormat.count {
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneInvalid)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneInvalid)
             return false;
         }
         else if getPIN().count < 6{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PinEmpty)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PinEmpty)
             self.clearPin()
-            self.shakeView(viewToShake: self.vwPinHolder)
+            self.vwPinHolder.shakeView()
             self.txtfld1.becomeFirstResponder()
             return false;
         }
@@ -236,12 +244,15 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
     func checkPin() {
         
 
-        let pin = GlobalMethods.sharedInstance.convertToMD5(string: getPIN())
+        let pin = GlobalMethods.shared.convertToMD5(string: getPIN())
         let mobile = txtfldPhone.text?.components(separatedBy: CharacterSet.init(charactersIn: "1234567890").inverted).joined()
 
         loginAPI(mobile!, pin)
 
     }
+    
+    // MARK: - Process Response
+
     
     func processResponse(data:Data,errorMsg:String) {
         do {
@@ -256,11 +267,11 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
                 }
                 else if errorCode == ErrorCode.INCORRECT_PIN.rawValue{
                     self.clearPin()
-                    self.shakeView(viewToShake: self.vwPinHolder)
+                    self.vwPinHolder.shakeView()
                     self.txtfld1.becomeFirstResponder()
                 }
                 else{
-                   GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
+                   GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
                 }
             }
             else{
@@ -276,9 +287,9 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
     
     func processCountryResponse(responseJson:Array<Any>)  {
         
-         SignupConfigModel.sharedInstance.initCountryList(response: responseJson)
+         SignupConfigModel.shared.initCountryList(response: responseJson)
         
-        countryArray = SignupConfigModel.sharedInstance.arrCountryList
+        countryArray = SignupConfigModel.shared.arrCountryList
         
         if countryArray.count > 0{
             DispatchQueue.main.async {
@@ -321,12 +332,12 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
     @IBAction func actionGeneratePin(_ sender: Any) {
         let generateObj = self.storyboard?.instantiateViewController(withIdentifier: "GenerateOtpVC") as! GenerateOtpVC
 //        generateObj.kycID = kycIdText
-        GlobalMethods.sharedInstance.pushVC(generateObj)
+        GlobalMethods.shared.pushVC(generateObj)
         
     }
 
     @IBAction func actionBack(_ sender: Any) {
-        GlobalMethods.sharedInstance.popVC()
+        GlobalMethods.shared.popVC()
     }
     //MARK: - Textfield
     
@@ -372,7 +383,7 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
         
         if textField.tag == 0 {
             
-            if string == "" {
+            if string == "" || selectedCountry == nil{
                 return true
             }
             
@@ -398,6 +409,9 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
                         }
                     }
                     txtfldPhone.text = text
+                    if txtfldPhone.text!.count == (formatText?.count)!{
+                        txtfld1.becomeFirstResponder()
+                    }
                 }
             }
             else{
@@ -438,6 +452,9 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
             
             return false
         }
+        else if textField.text!.count > 0  && string.count > 0 {
+            return false
+        }
         return true
         
     }
@@ -446,12 +463,12 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
     
     func loginAPI(_ mobile:String, _ pinHash:String) {
         
-        let param = ["mobile":mobile,"isd_code":selectedCountry?.phoneCode,"pin":pinHash,"vendor_uuid":GlobalMethods.sharedInstance.getUniqueIdForDevice()] as [String : Any]
+        let param = ["mobile":mobile,"isd_code":selectedCountry?.phoneCode,"pin":pinHash,"vendor_uuid":GlobalMethods.shared.getUniqueIdForDevice()] as [String : Any]
 //        param.updateValue("25794606-8288-4C41-B1E9-79619C86914C", forKey: "vendor_uuid")
         
-        NetworkManager.sharedInstance.loginAPI(params: param, success: { (responseJson) in
+        NetworkManager.shared.loginAPI(params: param, success: { (responseJson) in
 
-          GlobalMethods.sharedInstance.loginUser(details: responseJson, pin: pinHash)
+          GlobalMethods.shared.loginUser(details: responseJson, pin: pinHash)
         }) { (errorMsg,response) in
             
             _userDefault.removeObject(forKey: kApplicationKycIdKey)
@@ -460,20 +477,20 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
     }
     
     func getCountryList() {
-        NetworkManager.sharedInstance.countryListAPI(success: { (response) in
+        NetworkManager.shared.countryListAPI(success: { (response) in
             self.processCountryResponse(responseJson: response)
         }) { (errorMsg) in
             DispatchQueue.main.async {
                self.btnGetCountry.isUserInteractionEnabled = true
             }
             
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
         }
     }
     
 //    func getKycId()  {
-//        //GlobalMethods.sharedInstance.getUniqueIdForDevice()
-//        NetworkManager.sharedInstance.getKycIdAPI(params: ["vendor_uuid":GlobalMethods.sharedInstance.getUniqueIdForDevice()], success: { (responseJSON) in
+//        //GlobalMethods.shared.getUniqueIdForDevice()
+//        NetworkManager.shared.getKycIdAPI(params: ["vendor_uuid":GlobalMethods.shared.getUniqueIdForDevice()], success: { (responseJSON) in
 //            DispatchQueue.main.async {
 //                self.processKYCId(responseJSON: responseJSON)
 //            }

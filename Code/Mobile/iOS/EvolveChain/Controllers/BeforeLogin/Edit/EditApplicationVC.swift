@@ -48,8 +48,8 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
         txtfld6.backDelegate = self
         txtfldPhone.backDelegate = self
         vwOTP.alpha = 0;
-        if SignupConfigModel.sharedInstance.arrCountryList.count > 0{
-            countryArray = SignupConfigModel.sharedInstance.arrCountryList
+        if SignupConfigModel.shared.arrCountryList.count > 0{
+            countryArray = SignupConfigModel.shared.arrCountryList
             self.btnGetCountry.isUserInteractionEnabled = false
             self.setupCountryCode()
         }
@@ -65,7 +65,14 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        self.vwOTP.alpha = 0.0
+        self.stopTimer()
+        self.clearPin()
+        btnSend.isEnabled = true
+    }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -84,12 +91,12 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
 //            countryArray.append(model)
 //        }
         
-        SignupConfigModel.sharedInstance.initCountryList(response: responseJson)
+        SignupConfigModel.shared.initCountryList(response: responseJson)
         
-        countryArray = SignupConfigModel.sharedInstance.arrCountryList
+        countryArray = SignupConfigModel.shared.arrCountryList
 
         
-        if SignupConfigModel.sharedInstance.arrCountryList.count > 0{
+        if SignupConfigModel.shared.arrCountryList.count > 0{
             DispatchQueue.main.async {
                 self.btnGetCountry.isUserInteractionEnabled = false
                 self.setupCountryCode()
@@ -204,6 +211,8 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
     //MARK: - Timer
     
     func startTimer() -> Void {
+        btnResend.isUserInteractionEnabled = false
+        btnResend.backgroundColor = UIColor.init(red: 74.0/255.0, green: 177.0/255.0, blue: 157.0/255.0, alpha: 1.0)
         timerOtp?.invalidate()
         timerOtp = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateResendBtn), userInfo: nil, repeats: true)
     }
@@ -242,9 +251,9 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
     
     func checkPinValidation() -> Bool {
          if getPIN().count < 6{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PinEmpty)
+//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PinEmpty)
             self.clearPin()
-            self.shakeView(viewToShake: self.vwOTPHolder)
+            self.vwOTPHolder.shakeView()
             self.txtfld1.becomeFirstResponder()
             return false;
         }
@@ -256,13 +265,14 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
             getCountryList()
             return false;
         }
-        else if txtfldPhone.text?.count == 0 {
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneEmpty)
+        else if txtfldPhone.text!.isEmpty {
+//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneEmpty)
+            txtfldPhone.animatePlaceholderColor()
             txtfldPhone.becomeFirstResponder()
             return false;
         }
         else if txtfldPhone.text!.count < selectedCountry!.phoneFormat.count {
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneInvalid)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneInvalid)
             return false;
         }
         else{
@@ -320,7 +330,7 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
         
         if textField.tag == 0 {
             changeVisibility(alpha: 0.0)
-            if string == "" {
+            if string == "" || selectedCountry == nil{
                 return true
             }
             
@@ -346,6 +356,9 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
                         }
                     }
                     txtfldPhone.text = text
+                    if txtfldPhone.text!.count == (formatText?.count)!{
+//                        txtfld1.becomeFirstResponder()
+                    }
                 }
             }
             else{
@@ -382,6 +395,9 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
             }
             
             
+            return false
+        }
+        else if textField.text!.count > 0  && string.count > 0 {
             return false
         }
         return true
@@ -428,7 +444,7 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
         
 //        DispatchQueue.gl
         DispatchQueue.global(qos: .default).async {
-             GlobalMethods.sharedInstance.processEditResponse(responesJSON: responseJSON)
+             GlobalMethods.shared.processEditResponse(responesJSON: responseJSON)
         }
     }
     
@@ -436,42 +452,42 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
 
     func generateOTP() {
         
-        let params = ["mobile":txtfldPhone.text!,"isd_code":selectedCountry!.phoneCode,"vendor_uuid":GlobalMethods.sharedInstance.getUniqueIdForDevice()] as [String : Any]
+        let params = ["mobile":txtfldPhone.text!,"isd_code":selectedCountry!.phoneCode,"vendor_uuid":GlobalMethods.shared.getUniqueIdForDevice()] as [String : Any]
         
-        NetworkManager.sharedInstance.getEditOTPAPI(params: params, success: { (responseJSON) in
+        NetworkManager.shared.getEditOTPAPI(params: params, success: { (responseJSON) in
             DispatchQueue.main.async {
                 self.processGetOTP(responseJSON: responseJSON)
             }
         }) { (errorMsg, data) in
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
 
         }
     }
     
     func resubmitInitialiseOTP() {
         
-        let params = ["resubmit_pin":GlobalMethods.sharedInstance.convertToMD5(string: getPIN()),"vendor_uuid":GlobalMethods.sharedInstance.getUniqueIdForDevice(),"appkey":appKey]
+        let params = ["resubmit_pin":GlobalMethods.shared.convertToMD5(string: getPIN()),"vendor_uuid":GlobalMethods.shared.getUniqueIdForDevice(),"appkey":appKey]
         
-        NetworkManager.sharedInstance.verifyEditOTPAPI(params: params, success: { (responseJSON) in
+        NetworkManager.shared.verifyEditOTPAPI(params: params, success: { (responseJSON) in
             DispatchQueue.main.async {
-                GlobalMethods.sharedInstance.showLoader(loadingText: "   Loading Data...")
+                GlobalMethods.shared.showLoader(loadingText: "   Loading Data...")
                 self.processResubmitResponse(responseJSON: responseJSON)
             }
         }) { (errorMsg, data) in
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
 
         }
     }
     
     func getCountryList() {
-        NetworkManager.sharedInstance.countryListAPI(success: { (response) in
+        NetworkManager.shared.countryListAPI(success: { (response) in
             self.processCountryResponse(responseJson: response)
         }) { (errorMsg) in
             DispatchQueue.main.async {
                 self.btnGetCountry.isUserInteractionEnabled = true
             }
             
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
         }
     }
 }

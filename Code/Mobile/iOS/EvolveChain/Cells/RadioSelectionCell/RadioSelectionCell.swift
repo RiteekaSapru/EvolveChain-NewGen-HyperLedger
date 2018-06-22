@@ -22,7 +22,8 @@ class RadioSelectionCell: UITableViewCell {
 
         // Configure the view for the selected state
     }
-    
+    // MARK: - Custom Methods
+
     func setupCell(text:String,isSelected:Bool) -> Void {
         
         self.btnRadio.isUserInteractionEnabled = false

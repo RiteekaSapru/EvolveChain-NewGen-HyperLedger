@@ -179,5 +179,13 @@ class Country: NSObject , NSCopying,NSMutableCopying{
         }
         return countries
     }
+    
+    class func getCountryArrayAsString(arrCountryList:[Country]) -> [String]?{
+        var countries : [String] = []
+        for item in arrCountryList{
+            countries.append(item.name + " (+" + item.phoneCode + ")")
+        }
+        return countries
+    }
 }
 

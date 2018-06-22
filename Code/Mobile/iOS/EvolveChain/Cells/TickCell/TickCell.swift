@@ -24,6 +24,9 @@ class TickCell: UITableViewCell {
         // Configure the view for the selected state
     }
     
+    // MARK: - Custom Methods
+
+    
     func setUpCell(title:String,sideImage:String,textColor:UIColor) -> Void {
         lblText.text = title
         imgTick.image = UIImage.init(named: sideImage)

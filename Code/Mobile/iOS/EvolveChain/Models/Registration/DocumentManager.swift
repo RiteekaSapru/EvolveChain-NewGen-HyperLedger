@@ -24,7 +24,7 @@ enum CellType : String {
 
 class DocumentManager: NSObject {
     
-    static let sharedInstance               = DocumentManager()
+    static let shared               = DocumentManager()
     
     var selectedIdentityModel : DocModel = DocModel.init()
     var selectedAddressModel : DocModel = DocModel.init()
@@ -193,6 +193,16 @@ class DocumentManager: NSObject {
                         selectedIdentityModel = model!
                         isIdentityDocsUploaded = true
                         
+                        if let subDocType = RawdataConverter.optionalString(docDetails["sub_document_type"]){
+                            if model!.subDocs.count > 0{
+                                for item in model!.subDocs{
+                                    if item.code == subDocType{
+                                        model?.selectedSubType = item
+                                    }
+                                }
+                            }
+                        }
+                        
                         if let docImages = RawdataConverter.array(identityDict["DocImages"]){
                             if docImages.count > 1{
                                 if let frontImageDict = RawdataConverter.dictionary(docImages[0]){
@@ -241,6 +251,16 @@ class DocumentManager: NSObject {
                     model?.isSavedComplete = true
                     selectedAddressModel = model!
                     isAddressDocsUploaded = true
+                    if let subDocType = RawdataConverter.optionalString(docDetails["sub_document_type"]){
+                        if model!.subDocs.count > 0{
+                            for item in model!.subDocs{
+                                if item.code == subDocType{
+                                    model?.selectedSubType = item
+                                }
+                            }
+                        }
+                    }
+                   
                     
                     if let docImages = RawdataConverter.array(addressDict["DocImages"]){
                         if docImages.count > 1{

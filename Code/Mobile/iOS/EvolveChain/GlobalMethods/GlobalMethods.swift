@@ -15,18 +15,42 @@ import CoreLocation
 
 class GlobalMethods: NSObject,CLLocationManagerDelegate {
 
-    static let sharedInstance = GlobalMethods()
+    static let shared = GlobalMethods()
+    
+    var isLoading : Bool = false
     
     var locationManager : CLLocationManager?
     
      // MARK: - Navigation
-    
+//    private func setStatusBarColor(){
+//        if _navigator.topViewController is EntryHomeVC{
+//            _navigator.navigationBar.barStyle = .black
+//        }
+//        else{
+//            _navigator.navigationBar.barStyle = .
+//        }
+//    }
     func pushVC(_ controller : UIViewController) -> Void{
-        _navigator.pushViewController(controller, animated: true)
+        if !self.isLoading{
+            _navigator.pushViewController(controller, animated: true)
+//            setStatusBarColor()
+        }
+        
+    }
+    
+    func presentVC(_ controller : UIViewController) -> Void{
+        if !self.isLoading{
+            _navigator.present(controller, animated: true, completion: nil)
+        }
+        
     }
     
     func popVC() -> Void{
-        _navigator.popViewController(animated: true)
+        if !self.isLoading{
+            _navigator.popViewController(animated: true)
+//            setStatusBarColor()
+        }
+        
     }
     
      // MARK: - Alerts
@@ -35,12 +59,11 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
         DispatchQueue.main.async {
             let alert = UIAlertController.init(title: alertTitle, message: alertText, preferredStyle: .alert)
             
-            let defaultAction = UIAlertAction.init(title: "OK", style: .default) { (alert: UIAlertAction!) in
+            let defaultAction = UIAlertAction.init(title: StringConstants.okText, style: .default) { (alert: UIAlertAction!) in
                 
             }
             alert.addAction(defaultAction)
-            
-            _navigator.present(alert, animated: true, completion: nil)
+            self.presentVC(alert)
         }
     }
     
@@ -65,8 +88,7 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
             success(-1)
         }
         alert.addAction(defaultAction)
-        
-        _navigator.present(alert, animated: true, completion: nil)
+        self.presentVC(alert)
         
     }
     
@@ -153,8 +175,7 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
             
         }
         alert.addAction(defaultAction)
-        
-        _navigator.present(alert, animated: true, completion: nil)
+        self.presentVC(alert)
     }
     
     func checkForGalleryPermission(success:@escaping () -> Void, failure: @escaping ()-> Void) -> Void {
@@ -210,16 +231,39 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
             loadingIndicator.startAnimating();
             
             alert.view.addSubview(loadingIndicator)
-            _navigator.present(alert, animated: true, completion: nil)
+            
+//            let circularProgress = CircularProgressView.init(frame: CGRect.init(x: 10, y: 10, width: 20, height: 20))
+//
+//            circularProgress.addCircularLayer()
+//            alert.view.addSubview(circularProgress)
+            
+            self.presentVC(alert)
+            
+//            NetworkManager.shared.progressComplete = { [unowned weakProgress = circularProgress] progress in
+            
+//                weakProgress.animateProgress(fractionComplete: progress / 100.0)
+                
+//                let attribProgressText = NSMutableAttributedString.init(string: " (\(progress)%)")
+//                attribProgressText.addAttribute(.font, value: UIFont.init(name: "AvenirNext-Regular", size: 14)!, range: NSMakeRange(0, attribProgressText.string.count))
+                
+//                weakAlert.setValue(attribLoadingText.append(attribProgressText), forKey: "attributedMessage")
+                
+//            }
         }
         
     }
     
     func dismissLoader(complete:@escaping (   ) -> Void) -> Void {
         DispatchQueue.main.async {
-            _navigator.presentedViewController?.dismiss(animated: true, completion: {
+            if _navigator.presentedViewController != nil{
+                _navigator.presentedViewController?.dismiss(animated: true, completion: {
+                    complete()
+                })
+            }
+            else{
                 complete()
-            })
+            }
+          
         }
       
     }
@@ -339,15 +383,15 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
 //    func uploadBasicDetails() {
 //
 //        let filenameArray = ["file[]"]
-//         let image = GlobalMethods.sharedInstance.resizeImage(image: BasicDetailsModel.sharedInstance.userImage, targetSize: CGSize.init(width: 200.0, height: 200.0))
+//         let image = GlobalMethods.shared.resizeImage(image: BasicDetailsModel.shared.userImage, targetSize: CGSize.init(width: 200.0, height: 200.0))
 //        let imagesArray = [image]
 //
-//        NetworkManager.sharedInstance.POSTBasicDetails(params: BasicDetailsModel.sharedInstance.getBasicParamsForSaveKYC(), fileArray: imagesArray, filenameArray: filenameArray, success: { (responseDict) in
+//        NetworkManager.shared.POSTBasicDetails(params: BasicDetailsModel.shared.getBasicParamsForSaveKYC(), fileArray: imagesArray, filenameArray: filenameArray, success: { (responseDict) in
 //            print(responseDict)
 //            print("Basic Details Saved")
 ////            self.uploadIdentityDetails()
 //        }) { (errorMsg) in
-//             GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
+//             GlobalMethods.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
 //        }
 //
 //    }
@@ -356,12 +400,12 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
 //
 //        let filenameArray = ["file[]","file[]"]
 //
-//        NetworkManager.sharedInstance.POSTIdentityDetails(params:DocumentModel.sharedInstance.getIdentityDetailsForKYC() , fileArray: DocumentModel.sharedInstance.getIdentityImagesForKYC(), filenameArray: filenameArray, success: { (responseDict) in
+//        NetworkManager.shared.POSTIdentityDetails(params:DocumentModel.shared.getIdentityDetailsForKYC() , fileArray: DocumentModel.shared.getIdentityImagesForKYC(), filenameArray: filenameArray, success: { (responseDict) in
 //            print(responseDict)
 //            print("Identity Details Saved")
 //            self.uploadAddressDetails()
 //        }) { (errorMsg) in
-//            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
+//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
 //        }
 //
 //    }
@@ -372,7 +416,7 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
 //
 //        let filenameArray = ["file[]","file[]"]
 //
-//        NetworkManager.sharedInstance.POSTAddressDetails(params: DocumentModel.sharedInstance.getAddressDetailsForKYC(), fileArray: DocumentModel.sharedInstance.getAddressImagesForKYC(), filenameArray: filenameArray, success: { (responseDict) in
+//        NetworkManager.shared.POSTAddressDetails(params: DocumentModel.shared.getAddressDetailsForKYC(), fileArray: DocumentModel.shared.getAddressImagesForKYC(), filenameArray: filenameArray, success: { (responseDict) in
 //            print(responseDict)
 //            print("Address Details Saved")
 //
@@ -380,7 +424,7 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
 //
 //
 //        }) { (errorMsg) in
-//            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
+//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
 //        }
 //
 //    }
@@ -390,14 +434,14 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
       // MARK: - Data Erasing
     
     func cleanUpRegistrationData() {
-        BasicDetailsModel.sharedInstance.eraseData()
-        DocumentManager.sharedInstance.eraseData()
+        BasicDetailsModel.shared.eraseData()
+        DocumentManager.shared.eraseData()
         
         _userDefault.removeObject(forKey: kApplicationPinKey)
         _userDefault.removeObject(forKey: kApplicationUserDetailsKey)
         _userDefault.removeObject(forKey: kApplicationKycIdKey)
         
-        GlobalMethods.sharedInstance.stopLocation()
+        GlobalMethods.shared.stopLocation()
     }
     
     func removeTempImages()  {
@@ -428,15 +472,14 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
             
         }
         alert.addAction(defaultAction)
-        
-        _navigator.present(alert, animated: true, completion: nil)
+        self.presentVC(alert)
     }
     
     func logOutUser() {
 
         cleanUpRegistrationData()
         removeTempImages()
-        FlowManager.sharedInstance.resetToSplash()
+        FlowManager.shared.resetToSplash()
     }
       // MARK: - Log In
     
@@ -449,32 +492,32 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
         _userDefault.set(details["appkey"], forKey: kApplicationKey)
 
 //         let pin = _userDefault.object(forKey: kApplicationPinKey) as! String
-        if BasicDetailsModel.sharedInstance.isBasicDetailsComplete {
-            BasicDetailsModel.sharedInstance.initWithResponse(responseJson: details)
-            GlobalMethods.sharedInstance.popVC()
+        if BasicDetailsModel.shared.isBasicDetailsComplete {
+            BasicDetailsModel.shared.initWithResponse(responseJson: details)
+            GlobalMethods.shared.popVC()
             _navigator.interactivePopGestureRecognizer?.isEnabled = true
 
         }
         else{
-            BasicDetailsModel.sharedInstance.initWithResponse(responseJson: details)
-            FlowManager.sharedInstance.moveToHome()
+            BasicDetailsModel.shared.initWithResponse(responseJson: details)
+            FlowManager.shared.moveToHome()
         }
-        _userDefault.set(BasicDetailsModel.sharedInstance.contactNumber, forKey: kUserPhoneKey)
-        _userDefault.set(BasicDetailsModel.sharedInstance.countryCode, forKey: kUserISDCodeKey)
+        _userDefault.set(BasicDetailsModel.shared.contactNumber, forKey: kUserPhoneKey)
+        _userDefault.set(BasicDetailsModel.shared.countryCode, forKey: kUserISDCodeKey)
     }
     
     fileprivate func APIGeneratePin(errorMsg:String) {
         let params = ["ekyc_id":_userDefault.object(forKey: kApplicationKycIdKey)]
         
-        NetworkManager.sharedInstance.generateOtpForKydId(params: params, success: { (responseJson) in
+        NetworkManager.shared.generateOtpForKydId(params: params, success: { (responseJson) in
             DispatchQueue.main.async {
-                FlowManager.sharedInstance.resetToGeneratePin()
-                GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
+                FlowManager.shared.resetToGeneratePin()
+                GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
             }
         }) { (errorMsg2) in
             _userDefault.removeObject(forKey: kApplicationKycIdKey)
             let msg = errorMsg + ". " + errorMsg2!
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: msg)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: msg)
         }
     }
     
@@ -484,8 +527,8 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
         
         self.cleanUpRegistrationData()
         DispatchQueue.main.async {
-            FlowManager.sharedInstance.resetToGeneratePin()
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
+            FlowManager.shared.resetToGeneratePin()
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
         }
         
 //        if  (_navigator.presentedViewController != nil){
@@ -507,7 +550,7 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
     func getDateStringFromUTCString(dateUTC:String,stringFormat:String) -> String {
         
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = SignupConfigModel.sharedInstance.dateFormat
+        dateFormatter.dateFormat = SignupConfigModel.shared.dateFormat
         dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
         
         let date = dateFormatter.date(from: dateUTC)
@@ -522,7 +565,7 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
     
     func initConfig(){
        let config =  _userDefault.object(forKey: kApplicationInitConfigKey) as! Dictionary<String,Any>
-        SignupConfigModel.sharedInstance.initWithDictionary(configDict: config)
+        SignupConfigModel.shared.initWithDictionary(configDict: config)
     }
     
     func getUniqueIdForDevice() -> String{
@@ -680,7 +723,12 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
                 return (0.0,0.0)
             case .authorizedAlways, .authorizedWhenInUse:
                 print("Access")
-                return ((locationManager?.location?.coordinate.latitude)!,(locationManager?.location?.coordinate.longitude)!)
+                if let location = locationManager?.location{
+                    return ((location.coordinate.latitude),(location.coordinate.longitude))
+                }
+                else{
+                    return (0.0,0.0)
+                }
                 
             case .notDetermined:
                 print("not determined")
@@ -701,7 +749,7 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
             case .authorizedAlways, .authorizedWhenInUse:
                 print("Access")
                 startLocation()
-//                GlobalMethods.sharedInstance.showLoader(loadingText: "   Please wait...")
+//                GlobalMethods.shared.showLoader(loadingText: "   Please wait...")
                 
             case .notDetermined:
                 print("not determined")
@@ -725,7 +773,7 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if locations.count > 0 {
-//            GlobalMethods.sharedInstance.dismissLoader {
+//            GlobalMethods.shared.dismissLoader {
 //
 //            }
         }
@@ -735,13 +783,13 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
         switch status{
         case .restricted, .denied:
             print("No access")
-//            GlobalMethods.sharedInstance.dismissLoader {
+//            GlobalMethods.shared.dismissLoader {
 //
 //            }
         case .authorizedAlways, .authorizedWhenInUse:
             print("Access")
             locationManager?.startUpdatingLocation()
-//            GlobalMethods.sharedInstance.showLoader(loadingText: "   Fetching Location...")
+//            GlobalMethods.shared.showLoader(loadingText: "   Fetching Location...")
         case .notDetermined:
             print("not determined")
             locationManager?.requestWhenInUseAuthorization()
@@ -750,7 +798,7 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("location failed")
-//        GlobalMethods.sharedInstance.dismissLoader {
+//        GlobalMethods.shared.dismissLoader {
 //
 //        }
     }
@@ -763,15 +811,14 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
         
         let alert = UIAlertController.init(title: StringConstants.Error, message: errorMsg, preferredStyle: .alert)
         
-        let okAction = UIAlertAction.init(title: "Okay", style: .default) { (alert: UIAlertAction!) in
+        let okAction = UIAlertAction.init(title: StringConstants.okText, style: .default) { (alert: UIAlertAction!) in
            
             DispatchQueue.main.async {
-                FlowManager.sharedInstance.resetToEdit()
+                FlowManager.shared.resetToEdit()
             }
         }
         alert.addAction(okAction)
-        
-        _navigator.present(alert, animated: true, completion: nil)
+        self.presentVC(alert)
         
     }
     
@@ -779,41 +826,41 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
         // process selected country
        
         guard let countryJSON = RawdataConverter.dictionary(responesJSON["country_details"]) else {
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: "Country Details Missing.")
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Country Details Missing.")
             return
         }
         let selectedCountry = CountryModel.init()
         selectedCountry.initWithDictionary(countryDict: countryJSON)
         
-        SignupConfigModel.sharedInstance.selectedCountry = selectedCountry
+        SignupConfigModel.shared.selectedCountry = selectedCountry
         
         
         //documents
         
         guard let docArray = RawdataConverter.array(responesJSON["documents"] ) as? [Dictionary<String, Any>] else {
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: "Doc Array Missing.")
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Doc Array Missing.")
             return
         }
-        DocumentManager.sharedInstance.initWith(docArray: docArray)
+        DocumentManager.shared.initWith(docArray: docArray)
         
         //basic details, email, phone, isd code,
         
-        BasicDetailsModel.sharedInstance.initWithResponseEdit(responseJson: responesJSON)
+        BasicDetailsModel.shared.initWithResponseEdit(responseJson: responesJSON)
         
         //verification code, app key
-        SignupConfigModel.sharedInstance.verificationCode = RawdataConverter.string(responesJSON["verification_code"])
+        SignupConfigModel.shared.verificationCode = RawdataConverter.string(responesJSON["verification_code"])
         _userDefault.set(responesJSON["appkey"], forKey: kApplicationKey)
         
         //identity, address, face
         
-        DocumentManager.sharedInstance.initWithResponesEdit(responseJSON: responesJSON)
+        DocumentManager.shared.initWithResponesEdit(responseJSON: responesJSON)
         
-        BasicDetailsModel.sharedInstance.initUpholdingDocEdit(response: responesJSON)
+        BasicDetailsModel.shared.initUpholdingDocEdit(response: responesJSON)
         
         DispatchQueue.main.async {
-            GlobalMethods.sharedInstance.dismissLoader {
-                let regVC = FlowManager.sharedInstance.getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "AmericaRegistrationVC") as! RegistrationVC
-                GlobalMethods.sharedInstance.pushVC(regVC)
+            GlobalMethods.shared.dismissLoader {
+                let regVC = FlowManager.shared.getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "AmericaRegistrationVC") as! RegistrationVC
+                GlobalMethods.shared.pushVC(regVC)
             }
            
         }

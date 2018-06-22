@@ -116,22 +116,22 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
     func checkValidations() -> Bool {
         
         if txtfld1.text?.count == 0 || txtfld2.text?.count == 0 || txtfld3.text?.count == 0 || txtfld4.text?.count == 0 || txtfld5.text?.count == 0 || txtfld6.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter OTP")
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter OTP")
             return false;
         }
         else if txtfld7.text?.count == 0 || txtfld8.text?.count == 0 || txtfld9.text?.count == 0 || txtfld10.text?.count == 0 || txtfld11.text?.count == 0 || txtfld12.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter new pin.")
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter new pin.")
             return false;
         }
         else if txtfld13.text?.count == 0 || txtfld14.text?.count == 0 || txtfld15.text?.count == 0 || txtfld16.text?.count == 0 || txtfld17.text?.count == 0 || txtfld18.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: "Please  re enter new pin.")
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please  re enter new pin.")
             return false;
         }
         else if getNewPin() != getNewPinReEnter(){
-//            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: "Pins do not match.")
+//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Pins do not match.")
             clearPins()
-            shakeView(viewToShake: vwPinHolder)
-            shakeView(viewToShake: vwRePinHolder)
+            vwPinHolder.shakeView()
+            vwRePinHolder.shakeView()
             txtfld7.becomeFirstResponder()
             return false;
         }
@@ -169,24 +169,25 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
         txtfld18.text = ""
     }
     
-    func shakeView(viewToShake:UIView)  {
-        let animation = CABasicAnimation(keyPath: "position")
-        animation.duration = 0.07
-        animation.repeatCount = 4
-        animation.autoreverses = true
-        animation.fromValue = NSValue(cgPoint: CGPoint(x: viewToShake.center.x - 5, y: viewToShake.center.y))
-        animation.toValue = NSValue(cgPoint: CGPoint(x: viewToShake.center.x + 5, y: viewToShake.center.y))
-        
-        viewToShake.layer.add(animation, forKey: "position")
-    }
+//    func shakeView(viewToShake:UIView)  {
+//        let animation = CABasicAnimation(keyPath: "position")
+//        animation.duration = 0.07
+//        animation.repeatCount = 4
+//        animation.autoreverses = true
+//        animation.fromValue = NSValue(cgPoint: CGPoint(x: viewToShake.center.x - 5, y: viewToShake.center.y))
+//        animation.toValue = NSValue(cgPoint: CGPoint(x: viewToShake.center.x + 5, y: viewToShake.center.y))
+//
+//        viewToShake.layer.add(animation, forKey: "position")
+//    }
     
     func pinGenerated(msg:String) {
         let alert = UIAlertController.init(title: nil, message: msg, preferredStyle: .alert)
-        let defaultAction = UIAlertAction.init(title: "Okay", style: .cancel) { (alert: UIAlertAction!) in
+        let defaultAction = UIAlertAction.init(title: StringConstants.okText, style: .cancel) { (alert: UIAlertAction!) in
             self.moveToLogin()
         }
         alert.addAction(defaultAction)
-        _navigator.present(alert, animated: true, completion: nil)
+        GlobalMethods.shared.presentVC(alert)
+
     }
     
     func moveToLogin() {
@@ -206,7 +207,7 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
                 if errorCode == ErrorCode.INCORRECT_OTP.rawValue{
                     
                     self.clearOTP()
-                    self.shakeView(viewToShake: self.vwOTPHolder)
+                    self.vwOTPHolder.shakeView()
                     self.txtfld1.becomeFirstResponder()
                 }
 //                else if errorCode == ErrorCode.INCORRECT_PIN.rawValue{
@@ -217,11 +218,11 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
                 else{
                      self.clearOTP()
                     self.clearPins()
-                     self.shakeView(viewToShake: self.vwPinHolder)
-                    self.shakeView(viewToShake: self.vwOTPHolder)
-                    self.shakeView(viewToShake: self.vwRePinHolder)
+                     self.vwPinHolder.shakeView()
+                    self.vwOTPHolder.shakeView()
+                    self.vwRePinHolder.shakeView()
                     self.txtfld1.becomeFirstResponder()
-                    GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
+                    GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
                 }
             }
             else{
@@ -329,12 +330,12 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
     
     func generatePin() {
         
-        let params = ["ekyc_id":stringVerify,"pin_otp":GlobalMethods.sharedInstance.convertToMD5(string: getOTP()),"pin":GlobalMethods.sharedInstance.convertToMD5(string: getNewPin()),"vendor_uuid":GlobalMethods.sharedInstance.getUniqueIdForDevice()]
+        let params = ["ekyc_id":stringVerify,"pin_otp":GlobalMethods.shared.convertToMD5(string: getOTP()),"pin":GlobalMethods.shared.convertToMD5(string: getNewPin()),"vendor_uuid":GlobalMethods.shared.getUniqueIdForDevice()]
         
-        NetworkManager.sharedInstance.setPinForKydId(params: params, success: { (responseJson) in
+        NetworkManager.shared.setPinForKydId(params: params, success: { (responseJson) in
             if ((_userDefault.object(forKey: kApplicationPinKey)) != nil)
             {
-                _userDefault.set(GlobalMethods.sharedInstance.convertToMD5(string: self.getNewPin()), forKey: kApplicationPinKey)
+                _userDefault.set(GlobalMethods.shared.convertToMD5(string: self.getNewPin()), forKey: kApplicationPinKey)
             }
             self.pinGenerated(msg: RawdataConverter.string(responseJson["result"]))
         }) { (errorMsg,data) in
@@ -343,7 +344,7 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
 //            self.shakeView(viewToShake: self.vwOTPHolder)
 //            self.shakeView(viewToShake: self.vwPinHolder)
 //            self.shakeView(viewToShake: self.vwRePinHolder)
-//            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
             self.processResponse(data: data!, errorMsg: errorMsg!)
         }
     }
@@ -351,12 +352,12 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
     
     
     func generateOTP()  {
-        let params = ["ekyc_id":stringVerify.uppercased]
+        let params = ["ekyc_id":stringVerify.uppercased()]
         
-        NetworkManager.sharedInstance.generateOtpForKydId(params: params, success: { (responseJson) in
+        NetworkManager.shared.generateOtpForKydId(params: params, success: { (responseJson) in
             self.startTimer()
         }) { (errorMsg) in
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
         }
     }
     

@@ -10,26 +10,25 @@ import UIKit
 
 class FlowManager: NSObject {
 
-    static let sharedInstance = FlowManager()
+    static let shared = FlowManager()
     
-//    func initialiseKey(success:@escaping (  ) -> Void, failure: @escaping (String? )-> Void) -> Void {
-//        NetworkManager.sharedInstance.initialiseAPI(success: { (responseJSON) in
-//            _userDefault.set(responseJSON["key"], forKey: kApplicationKey)
-//            _userDefault.set(responseJSON["init_config"], forKey: kApplicationInitConfigKey)
-//            GlobalMethods.sharedInstance.initConfig()
-//            success()
-//        }) { (errorMsg) in
-//            failure(errorMsg)
-//        }
-//    }
+    // MARK: - Custom Methods
 
-    func moveToLogin() -> Void {
-        
-        GlobalMethods.sharedInstance.pushVC(getLoginStoryBoard().instantiateViewController(withIdentifier: "LoginVC"))
-    }
+    
+//    func moveToLogin() -> Void {
+//
+//        GlobalMethods.shared.pushVC(getLoginStoryBoard().instantiateViewController(withIdentifier: "LoginVC"))
+//    }
     
     func moveToHome() -> Void {
-        GlobalMethods.sharedInstance.pushVC(getHomeStoryBoard().instantiateViewController(withIdentifier: "ProfileVC"))
+        GlobalMethods.shared.pushVC(getHomeStoryBoard().instantiateViewController(withIdentifier: "ProfileVC"))
+    }
+    
+    func resetToLogin() {
+        let splashVC = getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "EntryHomeVC")
+
+        let loginVC = getLoginStoryBoard().instantiateViewController(withIdentifier: "LoginVC")
+        _navigator.setViewControllers([splashVC,loginVC], animated: true)
     }
     
     func getLoginStoryBoard() -> UIStoryboard {
@@ -46,7 +45,9 @@ class FlowManager: NSObject {
     }
     
     func resetToSplash() {
-        
+        if _navigator.topViewController is EntryHomeVC {
+            return
+        }
         _navigator.setViewControllers([ getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "EntryHomeVC")], animated: true)
     }
     
@@ -80,7 +81,7 @@ class FlowManager: NSObject {
         
         
         if !(_navigator.topViewController is LoginVC){
-            moveToLogin()
+            GlobalMethods.shared.pushVC(getLoginStoryBoard().instantiateViewController(withIdentifier: "LoginVC"))
             _navigator.interactivePopGestureRecognizer?.isEnabled = false
         }
     }
@@ -104,10 +105,10 @@ extension AppDelegate:UIGestureRecognizerDelegate {
         if ((_userDefault.object(forKey: kApplicationPinKey)) != nil)
         {
 //            let details = _userDefault.object(forKey: kApplicationUserDetailsKey) as! Dictionary<String, Any>
-//            BasicDetailsModel.sharedInstance.initWithResponse(responseJson: details)
-//            FlowManager.sharedInstance.moveToHome()
+//            BasicDetailsModel.shared.initWithResponse(responseJson: details)
+//            FlowManager.shared.moveToHome()
             navigator?.interactivePopGestureRecognizer?.isEnabled = false
-            FlowManager.sharedInstance.moveToLogin()
+            GlobalMethods.shared.pushVC(FlowManager.shared.getLoginStoryBoard().instantiateViewController(withIdentifier: "LoginVC"))
         }
     }
     

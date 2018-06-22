@@ -53,8 +53,6 @@ class DocModel: NSObject {
                     self.isExpiryDate = self.selectedSubType!.isExpiryDate
 //                }
             }
-            
-           
         }
     }
     
@@ -104,25 +102,25 @@ class DocModel: NSObject {
     func validateModel() -> (isValid:Bool,indexPath:IndexPath?){
         
         if self.value.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.NumberEmpty)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.NumberEmpty)
 //            txtfldNumberIdentity.becomeFirstResponder()
             return (false,IndexPath.init(row: 0, section: 2));
         }
         else if self.value.count < 8{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.NumberIncorrect)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.NumberIncorrect)
 //            txtfldNumberIdentity.becomeFirstResponder()
             return (false,IndexPath.init(row: 0, section: 2));
         }
         else if self.isExpiryDate && self.date == nil{
-             GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityExpiryEmpty)
+             GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityExpiryEmpty)
              return (false,IndexPath.init(row: 2, section: 2));
         }
         else if self.frontImage == nil{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityFrontPicEmpty)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityFrontPicEmpty)
             return (false,IndexPath.init(row: 3, section: 2))
         }
         else if self.backImage == nil {
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityBackPicEmpty)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityBackPicEmpty)
             return (false,IndexPath.init(row: 3, section: 2))
         }
         return (true,nil)
@@ -154,22 +152,22 @@ class DocModel: NSObject {
             params.updateValue("", forKey: "expiry_date")
         }
         
-        params.updateValue(SignupConfigModel.sharedInstance.selectedCountry.iso, forKey: "country")
+        params.updateValue(SignupConfigModel.shared.selectedCountry.iso, forKey: "country")
         if self.subDocs.count > 0 {
-            params.updateValue(self.selectedSubType!.code, forKey: "document_type")
+            params.updateValue(self.selectedSubType!.code, forKey: "subdoc")
         }
         else{
-             params.updateValue("", forKey: "document_type")
+             params.updateValue("", forKey: "subdoc")
         }
         
-        params.updateValue(SignupConfigModel.sharedInstance.selectedCountry.iso, forKey: "iso")
+        params.updateValue(SignupConfigModel.shared.selectedCountry.iso, forKey: "iso")
         
         return params
     }
     
     func getImagesForKYC() -> [UIImage] {
         
-       let imagesArray = [GlobalMethods.sharedInstance.resizeImage(image: self.frontImage!, targetSize: CGSize.init(width: 1000.0, height: 1000.0)),GlobalMethods.sharedInstance.resizeImage(image: self.backImage!, targetSize: CGSize.init(width: 1000.0, height: 1000.0))]
+       let imagesArray = [GlobalMethods.shared.resizeImage(image: self.frontImage!, targetSize: CGSize.init(width: 1000.0, height: 1000.0)),GlobalMethods.shared.resizeImage(image: self.backImage!, targetSize: CGSize.init(width: 1000.0, height: 1000.0))]
         
          return imagesArray
 
@@ -186,9 +184,9 @@ class DocModel: NSObject {
             modelData.append(["Bill Type",self.selectedSubType?.name ?? ""])
         }
         modelData.append(["Number",self.value])
-        modelData.append(["Issuing Country",SignupConfigModel.sharedInstance.selectedCountry.name])
+        modelData.append(["Issuing Country",SignupConfigModel.shared.selectedCountry.name])
         if self.isExpiryDate {
-            modelData.append(["Expiry Date",self.date?.dateWithStringFormat("MMM dd, yyyy") ?? ""])
+            modelData.append(["Expiry Date",self.date?.dateWithStringFormat("MMM dd, yyyy") ?? " "])
         }
         
         

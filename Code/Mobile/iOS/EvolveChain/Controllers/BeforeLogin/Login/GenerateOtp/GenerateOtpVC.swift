@@ -41,8 +41,10 @@ class GenerateOtpVC: UIViewController,BackSpaceTextFieldDelegate,UITextFieldDele
 
     func checkValidations() -> Bool {
         
-        if txtFldKycId.text?.count == 0 {
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.KYCIDEmpty)
+        if txtFldKycId.text!.isEmpty {
+            txtFldKycId.animatePlaceholderColor()
+            txtFldKycId.becomeFirstResponder()
+//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.KYCIDEmpty)
             return false;
         }
         else{
@@ -55,7 +57,7 @@ class GenerateOtpVC: UIViewController,BackSpaceTextFieldDelegate,UITextFieldDele
         
         let setPinVCObj = self.storyboard?.instantiateViewController(withIdentifier: "SetPinVC") as! SetPinVC
         setPinVCObj.stringVerify = txtFldKycId.text!
-        GlobalMethods.sharedInstance.pushVC(setPinVCObj)
+        GlobalMethods.shared.pushVC(setPinVCObj)
     }
 
      // MARK: - Actions
@@ -121,7 +123,7 @@ class GenerateOtpVC: UIViewController,BackSpaceTextFieldDelegate,UITextFieldDele
             //                passwordText.insert(newChar!, at: offsetToUpdate)
 //            let indexEnd = string.index(string.startIndex, offsetBy: 18 - kycIdText.count )
 //            kycIdText.append(String(string[..<indexEnd]))
-            for (index, char) in result.enumerated() {
+            for (_, char) in result.enumerated() {
 
                 if textField.text!.count < 18{
                     textField.text!.append(char)
@@ -147,10 +149,10 @@ class GenerateOtpVC: UIViewController,BackSpaceTextFieldDelegate,UITextFieldDele
         
         let params = ["ekyc_id":txtFldKycId.text!.uppercased()]
         
-        NetworkManager.sharedInstance.generateOtpForKydId(params: params, success: { (responseJson) in
+        NetworkManager.shared.generateOtpForKydId(params: params, success: { (responseJson) in
             self.moveToOtpVerify()
         }) { (errorMsg) in
-            GlobalMethods.sharedInstance.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
         }
     }
 }

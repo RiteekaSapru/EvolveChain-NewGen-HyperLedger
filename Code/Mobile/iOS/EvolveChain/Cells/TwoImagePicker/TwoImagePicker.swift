@@ -29,6 +29,9 @@ class TwoImagePicker: UITableViewCell,UIImagePickerControllerDelegate,UINavigati
         // Configure the view for the selected state
     }
     
+    // MARK: - Custom Methods
+
+    
      func setModel(mdl:DocModel,cellType:CellType) {
         self.model = mdl
         
@@ -56,7 +59,7 @@ class TwoImagePicker: UITableViewCell,UIImagePickerControllerDelegate,UINavigati
     }
     
     func permissionCheckGallery() {
-        GlobalMethods.sharedInstance.checkForGalleryPermission(success: {
+        GlobalMethods.shared.checkForGalleryPermission(success: {
             DispatchQueue.main.async {
                 self.openGallery()
             }
@@ -71,9 +74,11 @@ class TwoImagePicker: UITableViewCell,UIImagePickerControllerDelegate,UINavigati
         imagePicker.delegate = self
         imagePicker.sourceType = UIImagePickerControllerSourceType.photoLibrary
         imagePicker.allowsEditing = false
-        _navigator.present(imagePicker, animated: true, completion: nil)
+        GlobalMethods.shared.presentVC(imagePicker)
     }
     
+    // MARK: - Actions
+
     @IBAction func actionBackImage(_ sender: Any) {
         currentImageIndex = 1
         permissionCheckGallery()
