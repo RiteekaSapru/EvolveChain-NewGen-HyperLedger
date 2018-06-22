@@ -50,7 +50,7 @@ class AppController extends base_controller {
             body.SERVER_ADDR = req.connection.localAddress;
             body.REMOTE_ADDR = req.connection.remoteAddress;
 
-            var appParams = {                
+            var appParams = {
                     device_info: {
                         device_name: body.device_name,
                         device_type: body.device_type,
@@ -82,7 +82,6 @@ class AppController extends base_controller {
             let verification_code = common_utility.GenerateOTP(6);
             var kycDocParam = {
                 app_key: newApp.key,
-                isDelete: 0,
                 face_info: { details: { number: verification_code } },
                 last_modified: common_utility.UtcNow()
             }
@@ -138,7 +137,7 @@ class AppController extends base_controller {
             var expiryDate = common_utility.AddDaysToUtcNow(-APP_EXPIRATION_DAYS);
 
             if (expiryDate > lastModified)
-                return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, "Your application has expired. Please sign up again.");
+                return this.SendErrorResponse(res, config.ERROR_CODES.EXPIRED_APPLICATION);
 
             var phone_code = common_utility.GenerateOTP(6);
 
@@ -186,8 +185,7 @@ class AppController extends base_controller {
             let body = _.pick(req.body, ['resubmit_pin', 'appkey']);
 
             var conditions = {
-                key: body.appkey,
-                resubmit_pin: body.resubmit_pin
+                key: body.appkey
             }
 
             var appData = await app.findOne(conditions).populate('kycdoc_data').exec();
@@ -196,7 +194,7 @@ class AppController extends base_controller {
                 return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
 
             if (appData.resubmit_pin.otp != body.resubmit_pin)
-                return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_OTP);
+                return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_OTP);
 
             var currentUtc = common_utility.UtcNow();
             //explicitly needs to convert to UTC, somehow mongodb or node js convert it to local timezone
@@ -464,7 +462,8 @@ class AppController extends base_controller {
     }
 
     async GeneratePin(req, res) {
-
+        
+        //Using the e-KYC ID as the User have to knw his EKYC ID for generating the PIN..
         req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
 
         try {
@@ -486,11 +485,22 @@ class AppController extends base_controller {
             if (!App)
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_EKYCID);
 
+
+            var status = App.status;
+            if (status == config.APP_STATUSES.EXPIRED) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.EXPIRED_APP_STATUS);
+            }
+
+            var errorMsg = "Your application is in " + status + " status. You cannot generate the pin.";
+            if (status != config.APP_STATUSES.VERIFIED) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, errorMsg);
+            }
+
             //Email verification
             var email = App.email.toLowerCase();
             var ver_code = common_utility.GenerateOTP(6);
 
-            var template = fs.readFileSync(EMAIL_TEMPLATES_PATH + '/email_varified.html', {
+            var template = fs.readFileSync(config.EMAIL_TEMPLATES_PATH + '/verifyEmail.html', {
                 encoding: 'utf-8'
             });
 
@@ -559,6 +569,23 @@ class AppController extends base_controller {
                     pin: targetPin,
                     vendor_uuid: body.vendor_uuid
                 }
+            }
+
+            var appData = await app.findOne(conditions);
+
+            if (!appData) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
+            }
+
+            var status = appData.status;
+            if (status == config.APP_STATUSES.EXPIRED) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.EXPIRED_APP_STATUS);
+            }
+
+            var errorMsg = "Your application is in " + status + " status. You cannot set the pin.";
+
+            if (status != config.APP_STATUSES.VERIFIED) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, errorMsg);
             }
 
             var updatedApp = await this.FindAndModifyQuery(conditions, setParams);
@@ -766,7 +793,6 @@ class AppController extends base_controller {
                     'ip': appEntity.IP,
                     'documents': appEntity.documents,
                     'verification_code': appEntity.verification_code
-                    // 'init_config': config.get('init_config')
                 };
                 break;
             case "GeneratePin":
@@ -811,7 +837,7 @@ class AppController extends base_controller {
                 response = {
                     'success': 1,
                     'now': Date.now(),
-                    'result': 'Email verified successfully!'
+                    'result': messages.verify_email_success
                 }
                 break;
             case "GenerateMobileOTP":
@@ -869,7 +895,7 @@ class AppController extends base_controller {
     GetSuccessResubmitInitialize(appEntity, docEntity, res) {
         var response = {
             "success": 1,
-            "now": Date.now(),          
+            'now': common_utility.UtcNow(),
             "name": appEntity.name,
             "email": appEntity.email,
             "phone": appEntity.phone,
@@ -878,7 +904,7 @@ class AppController extends base_controller {
             "BasicInfo": common_utility.GetKycDocumentInfo(docEntity.basic_info, "BASIC"),
             "AddressInfo": common_utility.GetKycDocumentInfo(docEntity.address_info, "ADDRESS"),
             "IdentityInfo": common_utility.GetKycDocumentInfo(docEntity.identity_info, "IDENTITY"),
-            "FaceInfo": common_utility.GetKycDocumentInfo(docEntity.face_info, "IDENTITY"),
+            "FaceInfo": common_utility.GetKycDocumentInfo(docEntity.face_info, "FACE"),
             'documents': appEntity.documents,
             'country_details': appEntity.countryDetails,
             'verification_code': docEntity.face_info.details.number,

@@ -55,6 +55,7 @@ class KYCController extends BaseController {
         try {
 
             req.checkBody("step", messages.req_step).notEmpty();
+            req.checkBody("substep", messages.req_valid_sub_step).notEmpty();
             req.checkBody("iso", messages.req_country_iso).notEmpty();
             req.checkBody("step", messages.req_valid_step).isIn(['basic', 'address', 'identity', 'face']);
             //req.checkBody("substep", messages.req_valid_step).isIn(['basic', 'passport', 'taxation', 'license', 'utility_bill']);
@@ -86,7 +87,7 @@ class KYCController extends BaseController {
                     req.checkBody("number", messages.req_number).notEmpty();
                     break;
                 default:
-                    return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, "Step name missing");
+                    return this.SendErrorResponse(res, config.ERROR_CODES.STEP_NAME_MISSING);
                     break;
             }
 
@@ -102,10 +103,35 @@ class KYCController extends BaseController {
 
             let body = req.body;
 
+
+            var iso = body.iso.toUpperCase();
+            var proofDocument = [];
+            var proofDocumentCodes =[];
+            if (body.step == "identity" || body.step == "address") {
+                proofDocument = await ProofDocuments.find({country_iso: { $eq : iso}},{code:1});
+                // for (var j = 0; j < proofDocument.length; j++) {
+                //     proofDocumentCodes.push(proofDocument[j].code);
+                // }
+                proofDocumentCodes = proofDocument.map(function(value){
+                   return value.code;
+                });
+            }
+
+            switch (body.step) {
+                case "address":
+                case "identity":
+                    var idx = proofDocumentCodes.indexOf(body.substep);
+                    if(idx==-1)
+                        return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_ADDRESS_DOCUMENT_TYPE);
+                    break;
+                default:
+                    break;
+            }
+
             let key = req.params.key;
             var conditions = {
                 app_key: key,
-                isDelete: "0"
+                isDelete: false
             }
 
             var docData = await KYCDocument.findOne(conditions).populate('app_data');//.exec((error, docData) => {
@@ -116,7 +142,7 @@ class KYCController extends BaseController {
             if (!app) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
 
             if (!app.phone || !app.email)
-                return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, "Phone or Email not yet verified");
+                return this.SendErrorResponse(res, config.ERROR_CODES.EMAIL_PHONE_NOT_VERIFIED);
 
             let infoType = body.step + "_info";
             this.SaveDocumentImages(req.files, (response) => {
@@ -392,7 +418,7 @@ class KYCController extends BaseController {
             );
             if ((all_image_ids.length !== result_all.length)) return kycController.GetErrorResponse(messages.file_not_found, res);
 
-            //link send through email 
+            //link send through email
             var template = fs.readFileSync(config.EMAIL_TEMPLATES_PATH + '/verifyKycRequest.html', {
                 encoding: 'utf-8'
             });

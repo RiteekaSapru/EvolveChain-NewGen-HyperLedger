@@ -36,27 +36,29 @@ app.engine('html', require('ejs').renderFile);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(expressValidator());
-app.use(express.static(__dirname + '/public'));
+app.use(express.static('dist'));
+//app.use(express.static(__dirname + '/public'));
 app.use('/public', express.static(__dirname + '/public'));
 
 
 // API & Web Routes
 app.use("/app/", routes.app);
 app.use("/kyc/", routes.kyc);
+// app.use("/web/", routes.web);
 app.use("", routes.web);
 
 // Return 404 Response in Json for APIs
-app.use("/api/*", (req, res) => {
-    res.status(status.NotFound).json({ message: "Page not Found." });
-});
+// app.use("/api/*", (req, res) => {
+//     res.status(status.NotFound).json({ message: "Page not Found." });
+// });
 
-// 404 Page for Web 
-app.use("*", (req, res) => {
+app.use("*", (req, res) => {  
     let data = {
         SITE_NAME: config.get('app_name'),
         BASE_URL: config.get('base_url')
     };
     return res.render("shared/404.html", data);
+//    res.sendfile('./dist/index.html');
 });
 
 // connect to mongo database

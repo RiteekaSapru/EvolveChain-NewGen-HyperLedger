@@ -28,7 +28,7 @@ class VerifyController extends BaseController {
 
             let document_query = {
                 app_key: appKey,
-                isDelete: 0
+                isDelete: false
             }
 
             var docData = await KycDocument.findOne(document_query).populate('app_data').exec();// => {
@@ -83,7 +83,7 @@ class VerifyController extends BaseController {
             var userEmailId = "";
             let app_query = {
                 key: appKey,
-                isdelete: 0
+                isdelete: false
             }
 
             var appData = await App.findOne(app_query).populate('kycdoc_data').exec();
@@ -173,8 +173,14 @@ class VerifyController extends BaseController {
 
 
     async NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams) {
-        var emailSuccess = await emailService.SendEmail(userEmailId, subject, emailBody);
         var appSuccess = await App.update({ 'key': appKey }, appSetParams);
+        try {
+            var emailSuccess = await emailService.SendEmail(userEmailId, subject, emailBody);
+
+        } catch (ex) {
+            logManager.Log(`Email Notification-Exception: ${ex.message}`);
+            //add in notification list for schedular to pickup
+        }
         return (appSuccess);
     }
 

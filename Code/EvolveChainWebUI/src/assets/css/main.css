@@ -1,0 +1,251 @@
+
+
+/*Default CSS*/
+body{
+	/*height:100vh;*/
+	background:#fff;
+}
+p,li{
+	font-size:18px;
+	line-height:32px;
+	color:#6e7072;
+	margin-bottom: 26px;
+}
+li{
+	margin-bottom: 10px;
+}
+a{
+	color:#0E74BE;
+}
+a:hover,a:active,a:focus{
+	color:#0E74BE;
+}
+h1,h2,h3,h4,h5,h6{
+	color:#0E74BE;
+	margin-bottom: 20px;
+	line-height: 1.5;
+}
+
+/*Default CSS*/
+/*Header  CSS*/
+.evolvechain-logo img{
+	width:40px;
+}
+/*Header  CSS*/
+/*============================Login Page CSS starts here=======================================*/
+.login-main-bg{
+	height:100%;
+	/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#0e74bc+0,13b3f2+100 */
+/*background: rgb(14,116,188);
+background: -moz-linear-gradient(top, rgba(14,116,188,1) 0%, rgba(19,179,242,1) 100%); 
+background: -webkit-linear-gradient(top, rgba(14,116,188,1) 0%,rgba(19,179,242,1) 100%);
+background: linear-gradient(to bottom, rgba(14,116,188,1) 0%,rgba(19,179,242,1) 100%); 
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0e74bc', endColorstr='#13b3f2',GradientType=0 );*/
+
+background-attachment: fixed;
+background-size:100% 100%;
+}
+.login-form-cover{
+	display:table-cell;
+	vertical-align:middle;
+	
+}
+
+.login-form-cover-wrapper{
+	display: table;
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    max-width: 560px;
+}
+.login-form-wrapper{
+	padding: 0px 40px;
+	border-radius:4px;	
+}
+.login-form-cover-wrapper .login-logo{
+	width: 100%;
+    max-width: 70px;
+    margin: 0 auto 20px;
+}
+.button-blue,.button-blue:hover,.button-blue:active,.button-blue:focus{
+	background-color: #1174B9;
+	color:#fff;
+}
+.button-blue:hover{
+	opacity:0.8;
+}
+.popup-login-logo img{
+	    width: 49px;
+}
+.popup-login-logo strong{
+	display:block;
+}
+.login-form-wrapper{
+	margin-bottom: 30px;
+}
+/*============================Login Page CSS ends here=======================================*/
+
+
+
+/*============================About Page CSS starts here=======================================*/
+.evolvechain-header{
+	background: #fff;
+	padding: 7px 0;
+	position: fixed;
+	top:0;
+	left:0;
+	width:100%;
+	z-index: 1;
+	-webkit-box-shadow: 0 5px 37px 0px rgba(0,0,0,0.4);
+box-shadow: 0 5px 37px 0px rgba(0,0,0,0.4);
+}
+
+.evolvechain-header + .evolvechain-header-sibling,.banner-section{
+	padding-top:55px;
+}
+.evolvechain-logo img,.evolvechain-logo strong{
+	display:inline-block;
+	line-height: 20px;
+    vertical-align: middle;
+    font-size: 20px;
+}
+.header-nav ul{ 
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+	padding-top: 4px;
+}
+.header-nav ul li{
+	display: inline-block;
+	margin-bottom: 0;
+}
+.header-nav ul li a{
+	color:#0E74BE;
+	display:inline-block;
+	padding:5px 8px;
+	font-weight:500;
+	border-radius:4px;
+	font-size:14px;
+	line-height:14px;
+}
+.header-nav ul li a:hover{
+	color:#fff;
+	background: #0E74BE;
+}
+.evolvechain-about{
+	max-width:960px;
+}
+.about-us{
+	padding: 60px 0;
+}
+.about-us-img{
+	-webkit-box-shadow: 1px 1px 20px 0 rgba(0,0,0,0.1);
+box-shadow: 1px 1px 20px 0 rgba(0,0,0,0.1);
+}
+/*============================About Page CSS ends here=======================================*/
+/*============================Contact Page CSS ends here=======================================*/
+.contact-us{
+	background: #ececf4;
+}
+.contact-form-wrapper input{
+	width:100%;
+	display:block;
+	margin-bottom: 15px;
+	padding: 10px;
+	border-radius:6px;
+	border:0;
+	-webkit-box-shadow: 1px 1px 20px 0 rgba(0,0,0,0.1);
+box-shadow: 1px 1px 20px 0 rgba(0,0,0,0.1);
+}
+.contact-form-wrapper input[type="submit"]{
+	background:#0E74BE;
+	color:#fff;
+	width:140px;
+	font-weight:700;
+	text-transform: uppercase;
+}
+.contact-form-wrapper input[type="submit"]:hover{
+	opacity:0.8;
+}
+.contact-us.parallax-window{
+	height:auto;
+}
+.contact-us address{
+	color:#fff;
+	text-shadow: 1px 1px 10px #000;
+}
+/*============================Contact Page CSS ends here=======================================*/
+/*============================Footer CSS starts here=======================================*/
+.evolvechain-footer{
+	background:#0E74BE;
+	padding: 10px 0;
+	color:#fff;
+}
+.copyright{
+	margin-top: 6px;
+}
+/*============================Footer CSS ends here=======================================*/
+/*============================Welcome Page CSS starts here=======================================*/
+
+.app-icon{
+	display:inline-block;
+}
+.app-icon img:hover{
+	-moz-transform: scale(0.9);
+-webkit-transform: scale(0.9);
+-o-transform: scale(0.9);
+-ms-transform: scale(0.9);
+transform: scale(0.9);
+}
+.app-icon img{
+	width: 28px;
+	height:auto;
+	-moz-transform: scale(1);
+-webkit-transform: scale(1);
+-o-transform: scale(1);
+-ms-transform: scale(1);
+transform: scale(1);
+	-webkit-transition: all 0.2s ease-in;
+-moz-transition: all 0.2s ease-in;
+-ms-transition: all 0.2s ease-in;
+-o-transition: all 0.2s ease-in;
+transition: all 0.2s ease-in;
+margin: 0 5px;
+}
+
+/*============================Welcome Page CSS ends here=======================================*/
+/*============================Banner CSS Starts==========================================*/
+.parallax-window {
+	min-height:480px;
+    height: 100vh;
+    background: transparent;
+}
+.banner-content-cover{
+	display:table;
+	    width: 100%;
+    height: 100%;
+}
+.banner-content{
+	    display: table-cell;
+    vertical-align: middle;
+}
+.banner-content h1,.banner-content p,.banner-content h2{
+	color:#fff;
+	text-shadow: 1px 1px 10px #000;
+}
+.banner-content h1{
+	font-size:60px;
+}
+.banner-content p{
+	font-size:20px;
+}
+.banner-container{
+	padding: 0 10% ;
+}
+/*============================Banner CSS Ends==========================================*/
+/*===============================PopUp CSS===========================================*/
+
+.modal.popup-model .modal-dialog{
+	margin: 8% auto;
+}
+/*===============================PopUp CSS===========================================*/
