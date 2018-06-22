@@ -1,73 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:weightSum="4"
+    android:background="@drawable/splash_background"
     tools:context="com.newgen.evolvechain.new_uis.EditActivity">
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorDarkGray"
-        android:layout_alignParentBottom="true"
-        android:text="Next"
-        android:onClick="onSaveClick"
-        android:textColor="@color/colorButtonText"
-        android:textAllCaps="false"/>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="@dimen/_16sdp">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <RadioGroup
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/radio_group">
+            android:padding="@dimen/_10sdp"
+            android:text="@string/edit_phone_info" />
 
-            <RadioButton
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/_10sdp">
+
+            <LinearLayout
+                android:id="@+id/isd_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/e_mail"
-                android:id="@+id/radio_email"
-                android:checked="true"
-                android:onClick="onEmailClick"/>
+                android:onClick="onIsdClick"
+                android:background="@drawable/ractangular_background"
+                android:orientation="horizontal"
+                android:padding="@dimen/_6sdp">
 
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/contact_number"
-                android:id="@+id/radio_phone"
-                android:onClick="onPhoneClick"/>
-        </RadioGroup>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+"
+                    android:textAppearance="?android:textAppearanceMedium" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/isd_code"
+                    android:textAppearance="?android:textAppearanceMedium" />
+            </LinearLayout>
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_10sdp"
-            android:hint="@string/e_mail"
-            android:id="@+id/contact_text_wrapper">
-
-            <EditText
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/contact_text"/>
-        </android.support.design.widget.TextInputLayout>
+                android:layout_alignBottom="@+id/isd_layout"
+                android:layout_alignTop="@+id/isd_layout"
+                android:layout_marginStart="-1dp"
+                android:layout_toEndOf="@id/isd_layout"
+                android:gravity="bottom"
+                android:background="@drawable/ractangular_background">
 
+                <ImageView
+                    android:id="@+id/btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:rotation="90"
+                    android:tint="@color/colorPrimary"
+                    android:onClick="onNextClick"
+                    android:src="@drawable/ic_address_black_24dp" />
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_10sdp"
-            android:hint="Code">
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/code_text"
-                android:inputType="number"/>
-        </android.support.design.widget.TextInputLayout>
+                <EditText
+                    android:id="@+id/contact_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:inputType="phone"
+                    android:layout_margin="@dimen/_1sdp"
+                    android:paddingStart="@dimen/_2sdp"
+                    android:background="#fff"
+                    android:layout_alignParentBottom="true"
+                    android:layout_toStartOf="@+id/btn" />
+            </RelativeLayout>
+        </RelativeLayout>
     </LinearLayout>
-</RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:visibility="gone"
+        android:id="@+id/otp_layout"
+        android:padding="@dimen/_16sdp"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/enter_otp"/>
+
+        <com.newgen.evolvechain.utils.PinText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:cursorVisible="false"
+            android:digits="1234567890"
+            android:inputType="number"
+            android:maxLength="6"
+            android:paddingLeft="@dimen/_16sdp"
+            android:paddingRight="@dimen/_16sdp"
+            android:textColor="#FFF"
+            android:textSize="@dimen/_20sdp"
+            app:pinBackgroundDrawable="@drawable/otp_background"
+            android:id="@+id/otp_text"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_10sdp"
+            android:text="@string/resend"
+            android:enabled="false"
+            android:id="@+id/resend_btn"
+            android:onClick="onResendClick"
+            android:textAllCaps="false"/>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_10sdp"
+            android:text="@string/continues"
+            android:id="@+id/cont_btn"
+            android:onClick="onContClick"
+            android:background="@color/colorPrimary"
+            android:textColor="@color/colorButtonText"
+            android:textAllCaps="false"/>
+    </LinearLayout>
+</LinearLayout>

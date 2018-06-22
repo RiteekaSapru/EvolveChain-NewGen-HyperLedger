@@ -19,15 +19,15 @@ import com.newgen.evolvechain.models.DocumentModel;
 public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocumentViewHolder> {
 
     private DocumentModel documentModel;
-    private int size = 5;
+    private int size = 6;
 
     public DocumentAdapter(DocumentModel documentModel) {
         this.documentModel = documentModel;
 
-        if (documentModel.getExpiryDate().length() == 0) {
+        if (documentModel.getExpiryDate() == null || documentModel.getExpiryDate().length() == 0) {
             size = size - 1;
         }
-        if (documentModel.getSubTypeCode().length() == 0) {
+        if (documentModel.getSubTypeCode() == null ||documentModel.getSubTypeCode().length() == 0) {
             size = size - 1;
         }
     }
@@ -41,33 +41,39 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.Docume
     @Override
     public void onBindViewHolder(DocumentViewHolder holder, int position) {
         switch (size) {
-            case 5:
+            case 6:
                 switch (position) {
                     case 0:
+                        holder.contentLayout.setVisibility(View.VISIBLE);
+                        holder.imageLayout.setVisibility(View.GONE);
+                        holder.title.setText("Document Type");
+                        holder.value.setText(documentModel.getType());
+                        break;
+                    case 1:
                         holder.contentLayout.setVisibility(View.VISIBLE);
                         holder.imageLayout.setVisibility(View.GONE);
                         holder.title.setText("Bill Type");
                         holder.value.setText(documentModel.getSubType());
                         break;
-                    case 1:
+                    case 2:
                         holder.contentLayout.setVisibility(View.VISIBLE);
                         holder.imageLayout.setVisibility(View.GONE);
-                        holder.title.setText(documentModel.getType() + " Number");
+                        holder.title.setText("Number");
                         holder.value.setText(documentModel.getNumber());
                         break;
-                    case 2:
+                    case 3:
                         holder.contentLayout.setVisibility(View.VISIBLE);
                         holder.imageLayout.setVisibility(View.GONE);
                         holder.title.setText("Expiry Date");
                         holder.value.setText(documentModel.getExpiryDate());
                         break;
-                    case 3:
+                    case 4:
                         holder.contentLayout.setVisibility(View.VISIBLE);
                         holder.imageLayout.setVisibility(View.GONE);
                         holder.title.setText("Issue Country");
                         holder.value.setText(documentModel.getIssueCountry());
                         break;
-                    case 4:
+                    case 5:
                         holder.contentLayout.setVisibility(View.GONE);
                         holder.imageLayout.setVisibility(View.VISIBLE);
                         holder.frontImage.setImageURI(documentModel.getFrontUri());
@@ -75,28 +81,34 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.Docume
                         break;
                 }
                 break;
-            case 4:
-                if (documentModel.getSubType().length() == 0 && documentModel.getExpiryDate().length() > 0) {
+            case 5:
+                if (documentModel.getSubTypeCode().length() == 0 && documentModel.getExpiryDate().length() > 0) {
                     switch (position) {
                         case 0:
                             holder.contentLayout.setVisibility(View.VISIBLE);
                             holder.imageLayout.setVisibility(View.GONE);
-                            holder.title.setText(documentModel.getType() + " Number");
-                            holder.value.setText(documentModel.getNumber());
+                            holder.title.setText("Document Type");
+                            holder.value.setText(documentModel.getType());
                             break;
                         case 1:
+                            holder.contentLayout.setVisibility(View.VISIBLE);
+                            holder.imageLayout.setVisibility(View.GONE);
+                            holder.title.setText("Number");
+                            holder.value.setText(documentModel.getNumber());
+                            break;
+                        case 2:
                             holder.contentLayout.setVisibility(View.VISIBLE);
                             holder.imageLayout.setVisibility(View.GONE);
                             holder.title.setText("Expiry Date");
                             holder.value.setText(documentModel.getExpiryDate());
                             break;
-                        case 2:
+                        case 3:
                             holder.contentLayout.setVisibility(View.VISIBLE);
                             holder.imageLayout.setVisibility(View.GONE);
                             holder.title.setText("Issue Country");
                             holder.value.setText(documentModel.getIssueCountry());
                             break;
-                        case 3:
+                        case 4:
                             holder.contentLayout.setVisibility(View.GONE);
                             holder.imageLayout.setVisibility(View.VISIBLE);
                             holder.frontImage.setImageURI(documentModel.getFrontUri());
@@ -109,22 +121,28 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.Docume
                         case 0:
                             holder.contentLayout.setVisibility(View.VISIBLE);
                             holder.imageLayout.setVisibility(View.GONE);
-                            holder.title.setText("Bill Type");
-                            holder.value.setText(documentModel.getSubType());
+                            holder.title.setText("Document Type");
+                            holder.value.setText(documentModel.getType());
                             break;
                         case 1:
                             holder.contentLayout.setVisibility(View.VISIBLE);
                             holder.imageLayout.setVisibility(View.GONE);
-                            holder.title.setText(documentModel.getType() + " Number");
-                            holder.value.setText(documentModel.getNumber());
+                            holder.title.setText("Bill Type");
+                            holder.value.setText(documentModel.getSubType());
                             break;
                         case 2:
+                            holder.contentLayout.setVisibility(View.VISIBLE);
+                            holder.imageLayout.setVisibility(View.GONE);
+                            holder.title.setText("Number");
+                            holder.value.setText(documentModel.getNumber());
+                            break;
+                        case 3:
                             holder.contentLayout.setVisibility(View.VISIBLE);
                             holder.imageLayout.setVisibility(View.GONE);
                             holder.title.setText("Issue Country");
                             holder.value.setText(documentModel.getIssueCountry());
                             break;
-                        case 3:
+                        case 4:
                             holder.contentLayout.setVisibility(View.GONE);
                             holder.imageLayout.setVisibility(View.VISIBLE);
                             holder.frontImage.setImageURI(documentModel.getFrontUri());
@@ -133,21 +151,27 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.Docume
                     }
                 }
                 break;
-            case 3:
+            case 4:
                 switch (position) {
                     case 0:
                         holder.contentLayout.setVisibility(View.VISIBLE);
                         holder.imageLayout.setVisibility(View.GONE);
-                        holder.title.setText(documentModel.getType() + " Number");
-                        holder.value.setText(documentModel.getNumber());
+                        holder.title.setText("Document Type");
+                        holder.value.setText(documentModel.getType());
                         break;
                     case 1:
+                        holder.contentLayout.setVisibility(View.VISIBLE);
+                        holder.imageLayout.setVisibility(View.GONE);
+                        holder.title.setText("Number");
+                        holder.value.setText(documentModel.getNumber());
+                        break;
+                    case 2:
                         holder.contentLayout.setVisibility(View.VISIBLE);
                         holder.imageLayout.setVisibility(View.GONE);
                         holder.title.setText("Issue Country");
                         holder.value.setText(documentModel.getIssueCountry());
                         break;
-                    case 2:
+                    case 3:
                         holder.contentLayout.setVisibility(View.GONE);
                         holder.imageLayout.setVisibility(View.VISIBLE);
                         holder.frontImage.setImageURI(documentModel.getFrontUri());

@@ -3,7 +3,7 @@ package com.newgen.evolvechain;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 
-import com.newgen.evolvechain.uis.activities.SignInActivity;
+import com.newgen.evolvechain.new_uis.SignInActivity;
 
 /**
  * Created by onkar.gupta on 5/30/2018.

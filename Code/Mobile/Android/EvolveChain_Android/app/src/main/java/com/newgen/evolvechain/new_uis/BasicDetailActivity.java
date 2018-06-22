@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -55,7 +56,7 @@ import java.util.UUID;
 public class BasicDetailActivity extends AppCompatActivity {
 
     private ImageView image, emailImage, phoneImage;
-    private EditText emailText, phoneText, firstNameText, middleNameText, lastNameText, dobText, birthPlaceText;
+    private EditText emailText, phoneText, firstNameText, middleNameText, lastNameText, dobText, birthPlaceText, genderText;
     private Button resendButton, saveButton;
     private PinText otpText;
     private TextView isdCode;
@@ -89,16 +90,21 @@ public class BasicDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_basic_detail);
 
 
-        //getMinMaxDate();
+        getMinMaxDate();
         //getCountryData();
         initUIs();
         setUpDatePicker();
     }
 
     private void getMinMaxDate() {
-
-        int minAge = Integer.parseInt(AppManager.getInstance().minAge);
-        int maxAge = Integer.parseInt(AppManager.getInstance().maxAge);
+        int minAge = 18;
+        if(AppManager.getInstance().minAge != null) {
+            minAge = Integer.parseInt(AppManager.getInstance().minAge);
+        }
+        int maxAge = 80;
+        if (AppManager.getInstance().maxAge != null) {
+            maxAge = Integer.parseInt(AppManager.getInstance().maxAge);
+        }
 
         minCalendar.set(myCalendar.get(Calendar.YEAR) - maxAge, myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH));
 
@@ -176,10 +182,10 @@ public class BasicDetailActivity extends AppCompatActivity {
     }
 
     private void updateLabel() {
-        String myFormat = "dd-MMM-yyyy"; //In which you need put here
+        String myFormat = "yyyy-MM-dd"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        ((EditText) findViewById(R.id.edit_text_dob)).setText(sdf.format(myCalendar.getTime()));
+        ((EditText) findViewById(R.id.edit_text_dob)).setText(formattedDate(sdf.format(myCalendar.getTime())));
     }
 
     private boolean checkForPermission() {
@@ -252,10 +258,11 @@ public class BasicDetailActivity extends AppCompatActivity {
         firstNameText = findViewById(R.id.edit_text_first_name);
         middleNameText = findViewById(R.id.edit_text_middle_name);
         lastNameText = findViewById(R.id.edit_text_last_name);
+        genderText = findViewById(R.id.edit_text_gender);
 
         dobText = findViewById(R.id.edit_text_dob);
         if (AppManager.getInstance().birthDateString.length() > 0) {
-            dobText.setText(AppManager.getInstance().birthDateString);
+            dobText.setText(formattedDate(AppManager.getInstance().birthDateString));
         }
 
         birthPlaceText = findViewById(R.id.edit_text_birth_state);
@@ -277,10 +284,13 @@ public class BasicDetailActivity extends AppCompatActivity {
             firstNameText.setText(basicModel.getFirstName());
             middleNameText.setText(basicModel.getMiddleName());
             lastNameText.setText(basicModel.getLastName());
+            genderText.setText(basicModel.getGender());
 
-            dobText.setText(basicModel.getDob());
+            dobText.setText(formattedDate(basicModel.getDob()));
             birthPlaceText.setText(basicModel.getPlaceBirth());
         }
+
+
 
         if (phoneText.getText().toString().length() > 0) {
             isEditingPhone = false;
@@ -675,7 +685,8 @@ public class BasicDetailActivity extends AppCompatActivity {
         String firstName = firstNameText.getText().toString();
         String lastName = lastNameText.getText().toString();
         String middleName = middleNameText.getText().toString();
-        String dob = dobText.getText().toString();
+        String gender = genderText.getText().toString();
+        String dob = formatDateForServer(dobText.getText().toString());
         String birthPlace = birthPlaceText.getText().toString();
 //        String address1 = address1Text.getText().toString();
 //        String address2 = address2Text.getText().toString();
@@ -715,39 +726,43 @@ public class BasicDetailActivity extends AppCompatActivity {
                             lastNameText.requestFocus();
                             lastNameText.setError("Please fill last name");
                         } else {
-                            if (dob.length() <= 0) {
-                                //DialogsManager.showErrorDialog(this, "Error", "Please fill Date of birth");
-                                dobText.requestFocus();
-                                dobText.setError("Please fill date of birth");
+                            if (gender.length() <= 0) {
+                                genderText.setError("Please fill gender");
                             } else {
-                                if (birthPlace.length() <= 0) {
-                                    //DialogsManager.showErrorDialog(this, "Error", "Please fill place of birth");
-                                    birthPlaceText.requestFocus();
-                                    birthPlaceText.setError("Please fill place of birth");
+                                if (dob.length() <= 0) {
+                                    //DialogsManager.showErrorDialog(this, "Error", "Please fill Date of birth");
+                                    dobText.requestFocus();
+                                    dobText.setError("Please fill date of birth");
                                 } else {
-                                    if (AppManager.getInstance().basicModel == null) {
-                                        AppManager.getInstance().basicModel = new UserBasicModel(
-                                                verifiedEmail, verifiedPhone, isd,
-                                                firstName, middleName, lastName,
-                                                dob, birthPlace,
-                                                uri);
+                                    if (birthPlace.length() <= 0) {
+                                        //DialogsManager.showErrorDialog(this, "Error", "Please fill place of birth");
+                                        birthPlaceText.requestFocus();
+                                        birthPlaceText.setError("Please fill place of birth");
+                                    } else {
+                                        if (AppManager.getInstance().basicModel == null) {
+                                            AppManager.getInstance().basicModel = new UserBasicModel(
+                                                    verifiedEmail, verifiedPhone, isd,
+                                                    firstName, middleName, lastName, gender,
+                                                    dob, birthPlace,
+                                                    uri);
+                                        } else {
+                                            AppManager.getInstance().basicModel.setEmail(verifiedEmail);
+                                            AppManager.getInstance().basicModel.setPhone(verifiedPhone);
+                                            AppManager.getInstance().basicModel.setIsd(isd);
+                                            AppManager.getInstance().basicModel.setFirstName(firstName);
+                                            AppManager.getInstance().basicModel.setMiddleName(middleName);
+                                            AppManager.getInstance().basicModel.setLastName(lastName);
+                                            AppManager.getInstance().basicModel.setGender(gender);
+                                            AppManager.getInstance().basicModel.setDob(dob);
+                                            AppManager.getInstance().basicModel.setPlaceBirth(birthPlace);
+                                            AppManager.getInstance().basicModel.setUri(uri);
+                                        }
+                                        AppManager.getInstance().birthDateString = dob;
+                                        if (AppManager.getInstance().taxationModel != null) {
+                                            AppManager.getInstance().taxationModel.setDob(dob);
+                                        }
+                                        sendBasicData();
                                     }
-                                    else {
-                                        AppManager.getInstance().basicModel.setEmail(verifiedEmail);
-                                        AppManager.getInstance().basicModel.setPhone(verifiedPhone);
-                                        AppManager.getInstance().basicModel.setIsd(isd);
-                                        AppManager.getInstance().basicModel.setFirstName(firstName);
-                                        AppManager.getInstance().basicModel.setMiddleName(middleName);
-                                        AppManager.getInstance().basicModel.setLastName(lastName);
-                                        AppManager.getInstance().basicModel.setDob(dob);
-                                        AppManager.getInstance().basicModel.setPlaceBirth(birthPlace);
-                                        AppManager.getInstance().basicModel.setUri(uri);
-                                    }
-                                    AppManager.getInstance().birthDateString = dob;
-                                    if (AppManager.getInstance().taxationModel != null) {
-                                        AppManager.getInstance().taxationModel.setDob(dob);
-                                    }
-                                    sendBasicData();
                                 }
                             }
                         }
@@ -763,6 +778,7 @@ public class BasicDetailActivity extends AppCompatActivity {
             @Override
             public void succeed() {
                 Intent intent = new Intent(BasicDetailActivity.this, OthersRegistrationActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
             }
 
@@ -773,6 +789,31 @@ public class BasicDetailActivity extends AppCompatActivity {
             }
         });
     }
+
+    private String formattedDate(String dateString) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat showDateFormat = new SimpleDateFormat("MMM dd, yyyy");
+        try {
+            Date date = dateFormat.parse(dateString);
+            return showDateFormat.format(date);
+        }
+        catch (Exception e) {
+            return dateString;
+        }
+    }
+
+    private String formatDateForServer(String dateString) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy");
+        SimpleDateFormat showDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date date = dateFormat.parse(dateString);
+            return showDateFormat.format(date);
+        }
+        catch (Exception e) {
+            return dateString;
+        }
+    }
+
     public void onPhoneChangeImageClick(View view) {
         ImageView imageView = (ImageView) view;
         if (isEditingPhone) {
@@ -819,5 +860,24 @@ public class BasicDetailActivity extends AppCompatActivity {
         }
 
         isEditingEmail = !isEditingEmail;
+    }
+
+    public void onGenderClick(View view) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Choose Gender");
+        final String[] genders = new String[]{"Female", "Male", "Others"};
+        builder.setItems(genders, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                genderText.setText(genders[i]);
+            }
+        });
+        builder.create().show();
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        Utility.hideKeyBoard(this, birthPlaceText);
     }
 }

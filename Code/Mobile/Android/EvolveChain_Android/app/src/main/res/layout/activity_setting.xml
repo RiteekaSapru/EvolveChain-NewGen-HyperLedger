@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".uis.activities.SettingActivity">
+    android:background="@drawable/splash_background"
+    tools:context=".new_uis.SettingActivity">
 
 
     <Button

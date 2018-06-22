@@ -58,4 +58,8 @@ public class DocumentModel {
     public String getTypeCode() {
         return typeCode;
     }
+
+    public void setSubType(String subType) {
+        this.subType = subType;
+    }
 }

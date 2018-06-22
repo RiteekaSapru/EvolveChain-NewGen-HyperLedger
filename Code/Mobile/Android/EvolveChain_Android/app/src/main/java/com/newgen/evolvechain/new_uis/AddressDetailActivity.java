@@ -1,4 +1,4 @@
-package com.newgen.evolvechain.uxs;
+package com.newgen.evolvechain.new_uis;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,6 +14,7 @@ import com.newgen.evolvechain.models.UserBasicModel;
 import com.newgen.evolvechain.new_uis.OthersRegistrationActivity;
 import com.newgen.evolvechain.utils.AppConstants;
 import com.newgen.evolvechain.utils.AppManager;
+import com.newgen.evolvechain.utils.Utility;
 import com.newgen.evolvechain.utils.networks.SendBasicData;
 
 public class AddressDetailActivity extends AppCompatActivity {
@@ -135,9 +136,22 @@ public class AddressDetailActivity extends AppCompatActivity {
 
             @Override
             public void failed() {
+                AppManager.getInstance().basicModel.setAddress1(null);
+                AppManager.getInstance().basicModel.setAddress2(null);
+                AppManager.getInstance().basicModel.setStreet(null);
+                AppManager.getInstance().basicModel.setCity(null);
+                AppManager.getInstance().basicModel.setState(null);
+                AppManager.getInstance().basicModel.setCountry(null);
+                AppManager.getInstance().basicModel.setZip(null);
                 Intent intent = new Intent(AddressDetailActivity.this, OthersRegistrationActivity.class);
                 startActivity(intent);
             }
         });
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        Utility.hideKeyBoard(this, stateText);
     }
 }

@@ -103,14 +103,16 @@ public class AppUtil {
         UserBasicModel userBasicModel = null;
 
         try {
-            JSONObject object = new JSONObject(result);
+            JSONObject mainObject = new JSONObject(result);
+            JSONObject object = mainObject.getJSONObject("basic_details");
             userBasicModel = new UserBasicModel(
-                    object.getString("email"),
-                    object.getString("phone"),
-                    object.getString("country_code"),
+                    mainObject.getString("email"),
+                    mainObject.getString("phone"),
+                    mainObject.getString("country_code"),
                     object.getString("firstname"),
                     object.getString("middlename"),
                     object.getString("lastname"),
+                    object.getString("gender"),
                     object.getString("dob"),
                     object.getString("place_of_birth"),
                     object.getString("address1"),
@@ -120,10 +122,10 @@ public class AppUtil {
                     object.getString("zip"),
                     object.getString("state"),
                     object.getString("country"),
-                    Uri.parse(object.getString("profile_pic"))
+                    Uri.parse(mainObject.getString("profile_pic"))
             );
 
-            AppManager.getInstance().loginToken = object.getString("appkey");
+            AppManager.getInstance().loginToken = mainObject.getString("appkey");
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -134,6 +136,9 @@ public class AppUtil {
     public static void clearUserData(Context context) {
         //AppManager.getInstance().pinMd5 = "";
         AppManager.getInstance().kycId = "";
+        AppManager.getInstance().phone = "";
+        AppManager.getInstance().isd = "";
+        new SharedPrefManager(context).saveContactNumber("", "");
         AppManager.getInstance().basicModelAfterSignIn = null;
 
         SharedPrefManager prefManager = new SharedPrefManager(context);
@@ -201,5 +206,12 @@ public class AppUtil {
         }
 
         AppManager.getInstance().countryCodeModels = codeModels;
+    }
+
+    public static void clearNewCache(){
+        AppManager.getInstance().holdingDocumentModel = null;
+        AppManager.getInstance().identityDocumentModel = null;
+        AppManager.getInstance().addressDocumentModel = null;
+        AppManager.getInstance().basicModel = null;
     }
 }

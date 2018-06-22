@@ -4,7 +4,8 @@
     android:id="@+id/profile_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".uis.activities.UserProfileActivity">
+    android:background="@drawable/splash_background"
+    tools:context=".new_uis.UserProfileActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -46,7 +47,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/_5sdp"
                         android:maxLines="1"
-                        android:text="Onkar Gupta"
+                        android:ellipsize="end"
                         android:textAppearance="?android:textAppearanceMedium"
                         android:textColor="#FFF" />
 
@@ -57,7 +58,16 @@
                         android:layout_below="@+id/name"
                         android:layout_marginStart="@dimen/_5sdp"
                         android:maxLines="1"
-                        android:text="IND-1234-4567-6789"
+                        android:textAppearance="?android:textAppearanceSmall"
+                        android:textColor="#FFF" />
+                    <TextView
+                        android:id="@+id/gender_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/id_text"
+                        android:layout_marginStart="@dimen/_5sdp"
+                        android:maxLines="1"
+                        android:text=""
                         android:textAppearance="?android:textAppearanceSmall"
                         android:textColor="#FFF" />
                 </RelativeLayout>
@@ -117,7 +127,7 @@
                                 android:focusable="false"
                                 android:focusableInTouchMode="false"
                                 android:inputType="textEmailAddress"
-                                android:text="onkar.gupta@newgen.co.in"
+                                android:layout_marginStart="@dimen/_1sdp"
                                 android:textAppearance="?android:textAppearanceMedium" />
 
                             <ImageView
@@ -177,7 +187,6 @@
                                 android:focusable="false"
                                 android:focusableInTouchMode="false"
                                 android:inputType="phone"
-                                android:text="9953787854"
                                 android:textAppearance="?android:textAppearanceMedium" />
 
                             <ImageView
@@ -225,7 +234,6 @@
                                 android:id="@+id/dob_text"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="29-May-1993"
                                 android:textAppearance="?android:textAppearanceMedium" />
                         </LinearLayout>
 
@@ -247,7 +255,6 @@
                                 android:id="@+id/place_birth_text"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="Azamgarh"
                                 android:textAppearance="?android:textAppearanceMedium" />
                         </LinearLayout>
                     </LinearLayout>
@@ -277,7 +284,6 @@
                             android:id="@+id/address_text"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="B501, Maxblis white house"
                             android:layout_below="@+id/address_label"
                             android:textAppearance="?android:textAppearanceMedium" />
 
@@ -285,7 +291,6 @@
                             android:id="@+id/street_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Sector 75"
                             android:layout_below="@+id/address_text"
                             android:textAppearance="?android:textAppearanceMedium" />
 
@@ -293,7 +298,6 @@
                             android:id="@+id/city_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Noida"
                             android:layout_marginStart="@dimen/_5sdp"
                             android:layout_toRightOf="@+id/street_text"
                             android:layout_below="@+id/address_text"
@@ -303,7 +307,6 @@
                             android:id="@+id/zip_text"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="201301"
                             android:layout_marginStart="@dimen/_5sdp"
                             android:layout_toRightOf="@+id/city_text"
                             android:layout_below="@id/address_text"
@@ -313,7 +316,6 @@
                             android:id="@+id/state_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Uttar Pradesh"
                             android:layout_below="@+id/city_text"
                             android:textAppearance="?android:textAppearanceMedium" />
 
@@ -321,7 +323,6 @@
                             android:id="@+id/country_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="India"
                             android:layout_below="@+id/city_text"
                             android:layout_marginStart="@dimen/_5sdp"
                             android:layout_toRightOf="@+id/state_text"

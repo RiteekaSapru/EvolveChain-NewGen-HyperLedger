@@ -11,10 +11,10 @@ import java.io.Serializable;
 
 public class UserBasicModel implements Serializable{
     private Uri uri;
-    private String email, phone, isd, firstName, middleName, lastName, dob, placeBirth, address1, address2, street, city, zip, state, country;
+    private String email, phone, isd, firstName, middleName, lastName, gender, dob, placeBirth, address1, address2, street, city, zip, state, country;
 
     public UserBasicModel(String email, String phone, String isd,
-                          String firstName, String middleName, String lastName,
+                          String firstName, String middleName, String lastName, String gender,
                           String dob, String placeBirth,
                           Uri uri) {
         this.email = email;
@@ -23,13 +23,20 @@ public class UserBasicModel implements Serializable{
         this.firstName = firstName;
         this.middleName = middleName;
         this.lastName = lastName;
+        this.gender = gender;
         this.dob = dob;
         this.placeBirth = placeBirth;
         this.uri = uri;
     }
 
+    public UserBasicModel(String email, String phone, String isd) {
+        this.email =email;
+        this.phone = phone;
+        this.isd = isd;
+    }
+
     public UserBasicModel(String email, String phone, String isd,
-                          String firstName, String middleName, String lastName,
+                          String firstName, String middleName, String lastName, String gender,
                           String dob, String placeBirth,
                           String address1, String address2,
                           String street, String  city, String zip,
@@ -41,6 +48,7 @@ public class UserBasicModel implements Serializable{
         this.firstName = firstName;
         this.middleName = middleName;
         this.lastName = lastName;
+        this.gender = gender;
         this.dob = dob;
         this.placeBirth = placeBirth;
         this.uri = uri;
@@ -51,6 +59,14 @@ public class UserBasicModel implements Serializable{
         this.zip = zip;
         this.state = state;
         this.country = country;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public void setUri(Uri uri) {

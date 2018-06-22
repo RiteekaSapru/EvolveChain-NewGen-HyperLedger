@@ -1,11 +1,18 @@
 package com.newgen.evolvechain.new_uis;
 
+import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.RadioButton;
@@ -28,16 +35,22 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class CountrySelectionActivity extends AppCompatActivity {
     private RadioGroup radioGroup;
     CountryCodeModel[] codeModels;
+    double[] latlon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_country_selection);
         initUis();
+        Location location = getLastKnownLocation();
+        if (location != null) {
+            latlon = new double[]{location.getLatitude(), location.getLongitude()};
+        }
     }
 
     private void initUis() {
@@ -119,6 +132,28 @@ public class CountrySelectionActivity extends AppCompatActivity {
         }
     }
 
+    private Location getLastKnownLocation() {
+        LocationManager mLocationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
+        assert mLocationManager != null;
+        List<String> providers = mLocationManager.getProviders(true);
+        Location bestLocation = null;
+        for (String provider : providers) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                Location l = mLocationManager.getLastKnownLocation(provider);
+
+                if (l == null) {
+                    continue;
+                }
+                if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                    // Found best last known location: %s", l);
+                    bestLocation = l;
+                }
+            }
+        }
+
+        return bestLocation;
+    }
+
     private void getInitToken(final int i) {
         String ip = Utility.getIPAddress(true);
         String uniqueId = AppManager.getInstance().uuid;
@@ -133,6 +168,16 @@ public class CountrySelectionActivity extends AppCompatActivity {
             bodyJson.put("os_version", Build.VERSION.RELEASE);
             bodyJson.put("vendor_uuid", uniqueId);
             bodyJson.put("country_iso", codeModels[i].getIso());
+
+            if (latlon != null) {
+                bodyJson.put("latitude", latlon[0]);
+                bodyJson.put("longitude", latlon[1]);
+            }
+            TelephonyManager manager = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
+            if (manager != null) {
+                bodyJson.put("network_provider", manager.getNetworkOperatorName());
+                bodyJson.put("iso_country_code", manager.getNetworkCountryIso());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -153,7 +198,10 @@ public class CountrySelectionActivity extends AppCompatActivity {
                     JSONObject object = new JSONObject(result);
                     int successCode = object.getInt("success");
                     if (successCode == 1) {
+                        AppUtil.clearNewCache();
                         String initToken = object.getString("key");
+                        String verificationToken = object.getString("verification_code");
+                        AppManager.getInstance().verificationCode = verificationToken;
                         new SharedPrefManager(CountrySelectionActivity.this).setInitToken(initToken);
 //                        AppUtil.saveSignUpInitData(result);
                         AppManager.getInstance().selectedCountryModel = codeModels[i];

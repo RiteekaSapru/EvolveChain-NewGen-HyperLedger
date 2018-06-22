@@ -6,7 +6,9 @@ import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
@@ -28,17 +30,22 @@ import com.newgen.evolvechain.models.DocTypeModel;
 import com.newgen.evolvechain.models.DocumentModel;
 import com.newgen.evolvechain.utils.AppManager;
 import com.newgen.evolvechain.utils.DialogsManager;
+import com.newgen.evolvechain.utils.Utility;
 import com.newgen.evolvechain.utils.networks.SendDocumentData;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
 public class DynamicDocumentActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     private EditText optionChooser, numberText, dateText, countryText;
+    private TextInputLayout dateLayer;
+    private TextInputLayout optionLayer;
     private TextInputLayout numberLayer;
     private TextInputLayout countryLayer;
     private ImageView frontImage, backImage;
@@ -70,7 +77,7 @@ public class DynamicDocumentActivity extends AppCompatActivity implements Adapte
         setUpSpinner();
         setUpFields();
         setUpDatePicker();
-        handleSaveData();
+        //handleSaveData();
     }
 
     private void getData() {
@@ -100,9 +107,9 @@ public class DynamicDocumentActivity extends AppCompatActivity implements Adapte
         countryText = findViewById(R.id.country_text);
         countryText.setText(country);
 
-        TextInputLayout optionLayer = findViewById(R.id.option_choose_layer);
+        optionLayer = findViewById(R.id.option_choose_layer);
         numberLayer = findViewById(R.id.number_layer);
-        TextInputLayout dateLayer = findViewById(R.id.date_layer);
+        dateLayer = findViewById(R.id.date_layer);
         countryLayer = findViewById(R.id.country_layer);
 
         if (showOptionChooser) {
@@ -124,6 +131,32 @@ public class DynamicDocumentActivity extends AppCompatActivity implements Adapte
             dateLayer.setVisibility(View.GONE);
         }
 
+        switch (docType) {
+            case "Identity":
+                if (AppManager.getInstance().identityDocumentModel != null) {
+                    DocumentModel identityModel = AppManager.getInstance().identityDocumentModel;
+                    setData(identityModel);
+                }
+                break;
+            case "Address":
+                if (AppManager.getInstance().addressDocumentModel != null) {
+                    DocumentModel addressModel = AppManager.getInstance().addressDocumentModel;
+                    setData(addressModel);
+                }
+                break;
+        }
+
+    }
+
+    private void setData(DocumentModel documentModel) {
+        //SetUpSpinner
+        String typeCode = documentModel.getTypeCode();
+
+        for (int i = 0; i < docTypes.size(); i++) {
+            if (typeCode.equals(docTypes.get(i).getCode())) {
+                spinner.setSelection(i);
+            }
+        }
     }
 
     private void handleSaveData() {
@@ -203,10 +236,11 @@ public class DynamicDocumentActivity extends AppCompatActivity implements Adapte
     }
 
     private void updateLabel() {
-        String myFormat = "dd-MMM-yyyy"; //In which you need put here
+        String myFormat = "yyyy-MM-dd"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        dateText.setText(sdf.format(myCalendar.getTime()));
+        dateText.setText(formattedDate(sdf.format(myCalendar.getTime())));
+
     }
 
     // Onclick from UI
@@ -228,9 +262,12 @@ public class DynamicDocumentActivity extends AppCompatActivity implements Adapte
         Snackbar snackbar = Snackbar.make(findViewById(R.id.base_view), "Please provide read file permission to pick image", Snackbar.LENGTH_LONG);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             snackbar.dismiss();
-            Intent intent = new Intent();
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
+            intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+            intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            //intent.setAction(Intent.ACTION_GET_CONTENT);
             switch (view.getId()) {
                 case R.id.front_image:
                     startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_FRONT_IMAGE);
@@ -264,93 +301,132 @@ public class DynamicDocumentActivity extends AppCompatActivity implements Adapte
     // Spinner Methods
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-        DocTypeModel docTypeModel = docTypes.get(i);
-        showDateText = docTypeModel.isExpiryDate();
+        DocTypeModel typeModel = docTypes.get(i);
 
-        showOptionChooser = docTypeModel.getSubDocTypes().length > 0;
-        if (showOptionChooser) {
-            options = new String[docTypeModel.getSubDocTypes().length];
-            optionCodes = new String[docTypeModel.getSubDocTypes().length];
-            for (int temp = 0; temp < options.length; temp++) {
-                options[temp] = docTypeModel.getSubDocTypes()[temp].getName();
-                optionCodes[temp] = docTypeModel.getSubDocTypes()[temp].getCode();
-            }
+        if (typeModel.isExpiryDate()) {
+            dateLayer.setVisibility(View.VISIBLE);
+            dateText.setVisibility(View.VISIBLE);
+            dateLayer.setHint("Expiry Date");
+            showDateText = true;
+        } else {
+            dateText.setVisibility(View.GONE);
+            dateLayer.setVisibility(View.GONE);
+            showDateText = false;
         }
 
-        clearFields();
+        if (typeModel.getSubDocTypes().length > 0) {
+            optionLayer.setVisibility(View.VISIBLE);
+            optionChooser.setVisibility(View.VISIBLE);
+            optionLayer.setHint("Bill Type");
+
+            options = new String[typeModel.getSubDocTypes().length];
+            optionCodes = new String[typeModel.getSubDocTypes().length];
+            for (int temp = 0; temp < options.length; temp++) {
+                options[temp] = typeModel.getSubDocTypes()[temp].getName();
+                optionCodes[temp] = typeModel.getSubDocTypes()[temp].getCode();
+            }
+            showOptionChooser = true;
+        } else {
+            optionLayer.setVisibility(View.GONE);
+            optionChooser.setVisibility(View.GONE);
+            showOptionChooser = false;
+
+        }
+
         numberLayer.setHint(spinnerStrings[i] + "Number");
         countryLayer.setHint("Issue Country");
         selectedType = spinnerStrings[i];
-        selectedTypeCode = docTypeModel.getCode();
-        setUpFields();
+        selectedTypeCode = typeModel.getCode();
 
+        clearFields();
+        fillSavedData(typeModel);
+    }
+
+    private void fillSavedData(DocTypeModel typeModel) {
         switch (docType){
             case "Identity":
-                if (AppManager.getInstance().identityDocumentModel != null && AppManager.getInstance().identityDocumentModel.getTypeCode()
-                        .equals(docTypeModel.getCode())) {
-                    DocumentModel documentModel = AppManager.getInstance().identityDocumentModel;
-                    numberText.setText(documentModel.getNumber());
-                    if (showOptionChooser) {
-                        optionChooser.setText(documentModel.getSubType());
-                    } else {
-                        optionChooser.setText("");
-                    }
-
-                    if (showDateText) {
-                        dateText.setText(documentModel.getExpiryDate());
-                    } else {
-                        dateText.setText("");
-                    }
-
-                    frontUri = documentModel.getFrontUri();
-                    backUri = documentModel.getBackUri();
-
-                    frontImage.setImageURI(frontUri);
-                    backImage.setImageURI(backUri);
+                DocumentModel identityDocModel = null;
+                if (AppManager.getInstance().identityDocumentModel != null && AppManager.getInstance().identityDocumentModel.getTypeCode().equals(typeModel.getCode())){
+                    identityDocModel = AppManager.getInstance().identityDocumentModel;
                 }
                 else {
-                    optionChooser.setText("");
-                    dateText.setText("");
-                    frontUri = null;
-                    backUri = null;
-                    frontImage.setImageResource(R.drawable.image_placeholder);
-                    backImage.setImageResource(R.drawable.image_placeholder);
-                    numberText.setText("");
+                    if (AppManager.getInstance().addressDocumentModel != null && AppManager.getInstance().addressDocumentModel.getTypeCode().equals(typeModel.getCode())) {
+                        identityDocModel = AppManager.getInstance().addressDocumentModel;
+                    }
+                }
+
+                if (identityDocModel != null) {
+                    fillData(identityDocModel);
                 }
                 break;
             case "Address":
-                DocumentModel model = AppManager.getInstance().addressDocumentModel;
-                if (AppManager.getInstance().addressDocumentModel != null && AppManager.getInstance().addressDocumentModel.getTypeCode().equals(docTypeModel.getCode())) {
-                    DocumentModel documentModel = AppManager.getInstance().addressDocumentModel;
-                    numberText.setText(documentModel.getNumber());
-                    if (showOptionChooser) {
-                        optionChooser.setText(documentModel.getSubType());
-                    } else {
-                        optionChooser.setText("");
-                    }
-
-                    if (showDateText) {
-                        dateText.setText(documentModel.getExpiryDate());
-                    } else {
-                        dateText.setText("");
-                    }
-
-                    frontUri = documentModel.getFrontUri();
-                    backUri = documentModel.getBackUri();
-
-                    frontImage.setImageURI(frontUri);
-                    backImage.setImageURI(backUri);
+                DocumentModel documentModel = null;
+                if (AppManager.getInstance().addressDocumentModel != null && AppManager.getInstance().addressDocumentModel.getTypeCode().equals(typeModel.getCode())){
+                    documentModel = AppManager.getInstance().addressDocumentModel;
                 }
                 else {
-                    optionChooser.setText("");
-                    dateText.setText("");
-                    frontUri = null;
-                    backUri = null;
-                    frontImage.setImageResource(R.drawable.image_placeholder);
-                    backImage.setImageResource(R.drawable.image_placeholder);
-                    numberText.setText("");
+                    if (AppManager.getInstance().identityDocumentModel != null && AppManager.getInstance().identityDocumentModel.getTypeCode().equals(typeModel.getCode())) {
+                        documentModel = AppManager.getInstance().identityDocumentModel;
+                    }
+                }
+
+                if (documentModel != null) {
+                    fillData(documentModel);
                 }
                 break;
+        }
+    }
+
+    private void fillData(DocumentModel identityDocumentModel) {
+        frontUri = identityDocumentModel.getFrontUri();
+        frontImage.setImageURI(frontUri);
+
+        backUri = identityDocumentModel.getBackUri();
+        backImage.setImageURI(backUri);
+
+        setOptionChooserText(identityDocumentModel.getSubTypeCode());
+
+        dateText.setText(formattedDate(identityDocumentModel.getExpiryDate()));
+        countryText.setText(identityDocumentModel.getIssueCountry());
+
+        numberText.setText(identityDocumentModel.getNumber());
+    }
+
+    private void setOptionChooserText(String subTypeCode) {
+        for (int i = 0; i < docTypes.size(); i++) {
+            DocTypeModel model = docTypes.get(i);
+            if (model.getSubDocTypes().length > 0) {
+                for (int j = 0; j < model.getSubDocTypes().length; j++) {
+                    if (model.getSubDocTypes()[j].getCode().equals(subTypeCode)) {
+                        optionChooser.setText(model.getSubDocTypes()[j].getName());
+                        AppManager.getInstance().addressDocumentModel.setSubType( model.getSubDocTypes()[j].getName());
+                    }
+                }
+            }
+        }
+    }
+
+    private String formattedDate(String dateString) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat showDateFormat = new SimpleDateFormat("MMM dd, yyyy");
+        try {
+            Date date = dateFormat.parse(dateString);
+            return showDateFormat.format(date);
+        }
+        catch (Exception e) {
+            return dateString;
+        }
+    }
+
+    private String formatDateForServer(String dateString) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy");
+        SimpleDateFormat showDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date date = dateFormat.parse(dateString);
+            return showDateFormat.format(date);
+        }
+        catch (Exception e) {
+            return dateString;
         }
     }
 
@@ -372,7 +448,7 @@ public class DynamicDocumentActivity extends AppCompatActivity implements Adapte
 
     private void saveDataTask() {
         String number = numberText.getText().toString();
-        String expiryDate = dateText.getText().toString();
+        String expiryDate = formatDateForServer(dateText.getText().toString());
         String country = countryText.getText().toString();
         String subType = optionChooser.getText().toString();
         Uri frontUri = this.frontUri;
@@ -430,5 +506,11 @@ public class DynamicDocumentActivity extends AppCompatActivity implements Adapte
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        Utility.hideKeyBoard(this, numberText);
     }
 }

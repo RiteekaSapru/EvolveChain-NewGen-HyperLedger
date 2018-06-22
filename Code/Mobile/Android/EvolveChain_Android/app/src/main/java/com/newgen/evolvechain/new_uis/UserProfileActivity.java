@@ -1,6 +1,5 @@
-package com.newgen.evolvechain.uis.activities;
+package com.newgen.evolvechain.new_uis;
 
-import android.app.Application;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,6 +8,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.view.animation.Animation;
@@ -34,7 +34,13 @@ import com.newgen.evolvechain.utils.PinText;
 import com.newgen.evolvechain.utils.SharedPrefManager;
 import com.newgen.evolvechain.utils.Utility;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class UserProfileActivity extends BaseActivity {
 
@@ -56,7 +62,7 @@ public class UserProfileActivity extends BaseActivity {
 
     String[] countryNames;
     String currentBodyData;
-    CountryCodeModel[] list;
+    ArrayList<CountryCodeModel> list;
     String verifiedEmail, verifiedPhone;
 
     @Override
@@ -64,7 +70,7 @@ public class UserProfileActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile);
 
-        //getCountryDataFromSingleton();
+        getCountryData(true);
 
         emailText = findViewById(R.id.email_text);
         phoneText = findViewById(R.id.phone_text);
@@ -75,7 +81,7 @@ public class UserProfileActivity extends BaseActivity {
         otpText = findViewById(R.id.edit_text_otp);
         emailImage = findViewById(R.id.email_image);
         phoneImage = findViewById(R.id.phone_image);
-//        isdText.setText(list[0].getPhoneCode());
+        isdText.setText(list.get(0).getPhoneCode());
 
         UserBasicModel basicModel = AppManager.getInstance().basicModelAfterSignIn;
         verifiedEmail = basicModel.getEmail();
@@ -117,7 +123,7 @@ public class UserProfileActivity extends BaseActivity {
     }
 
     private void setUpUi(UserBasicModel basicModel) {
-        String name = "";
+        String name;
         if (AppUtil.isNullValue(basicModel.getMiddleName())) {
             name = AppUtil.checkNullValue(basicModel.getFirstName()) + " " + AppUtil.checkNullValue(basicModel.getLastName());
         }
@@ -136,6 +142,7 @@ public class UserProfileActivity extends BaseActivity {
         ((TextView) findViewById(R.id.zip_text)).setText(basicModel.getZip());
         ((TextView) findViewById(R.id.state_text)).setText(basicModel.getState());
         ((TextView) findViewById(R.id.country_text)).setText(basicModel.getCountry());
+        ((TextView) findViewById(R.id.gender_text)).setText(basicModel.getGender());
 
         new ImageLoaderTask(basicModel.getUri().toString(), ((ImageView) findViewById(R.id.profile_image))).execute();
 
@@ -164,7 +171,7 @@ public class UserProfileActivity extends BaseActivity {
             emailText.setFocusable(true);
             emailText.setFocusableInTouchMode(true);
             emailText.requestFocus();
-            Utility.openKeyBoard(this, findViewById(R.id.profile_content));
+            Utility.openKeyBoard(this, emailText);
         }
 
         isEditingEmail = !isEditingEmail;
@@ -201,6 +208,10 @@ public class UserProfileActivity extends BaseActivity {
     private void changeEmail() {
         verifying = VERIFYING_EMAIL;
         String email = emailText.getText().toString();
+        if (email.length() <= 0) {
+            emailText.setText(verifiedEmail);
+            return;
+        }
         if (!isValidEmail(email)) {
             DialogsManager.showErrorDialog(this, "Error", "Please enter valid email");
             emailText.setText(verifiedEmail);
@@ -252,7 +263,7 @@ public class UserProfileActivity extends BaseActivity {
         verifying = VERIFYING_PHONE;
         String phone = phoneText.getText().toString();
         if (phone.length() <= 0) {
-            DialogsManager.showErrorDialog(this, "Error", "Please enter contact number");
+            //DialogsManager.showErrorDialog(this, "Error", "Please enter contact number");
             phoneText.setText(verifiedPhone);
         } else {
 
@@ -301,26 +312,16 @@ public class UserProfileActivity extends BaseActivity {
     }
 
     public void onISDCodeClick(View view) {
-        if (isEditingEmail) {
+        if (isEditingPhone) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Select your country");
             builder.setItems(countryNames, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    isdText.setText(list[i].getPhoneCode());
+                    isdText.setText(list.get(i).getPhoneCode());
                 }
             });
             builder.create().show();
-        }
-    }
-
-    private void getCountryDataFromSingleton() {
-        list = AppManager.getInstance().countryCodeModels;
-
-        countryNames = new String[list.length];
-
-        for (int i = 0; i < list.length; i++) {
-            countryNames[i] = list[i].getName();
         }
     }
 
@@ -469,6 +470,7 @@ public class UserProfileActivity extends BaseActivity {
         count = 60;
         resendClickHandle(view, verifying);
     }
+
     private void resendClickHandle(View view, int i) {
         resendButton.setEnabled(false);
         otpText.setText("");
@@ -478,6 +480,66 @@ public class UserProfileActivity extends BaseActivity {
             changeEmail();
         } else {
             changePhone();
+        }
+    }
+
+    public String loadJSONFromAsset() {
+        String json = null;
+        try {
+            InputStream is = this.getAssets().open("CountryList.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return json;
+    }
+
+    private void getCountryData() {
+        String data = loadJSONFromAsset();
+        parseDataToList(data);
+    }
+
+    private void parseDataToList(String data) {
+        list = new ArrayList<>();
+
+        try {
+            JSONArray object = new JSONArray(data);
+
+            for (int i = 0; i < object.length(); i++) {
+                JSONObject jsonObject = object.getJSONObject(i);
+                CountryCodeModel model = new CountryCodeModel(jsonObject.getString("PhoneCode"), jsonObject.getString("Country"), "", "", true);
+                list.add(model);
+            }
+
+            Log.d("size", "size");
+
+            countryNames = new String[list.size()];
+
+            for (int i = 0; i < list.size(); i++) {
+                countryNames[i] = list.get(i).getName();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void getCountryData(boolean isFromServer) {
+        if (isFromServer) {
+            list = new ArrayList<>(Arrays.asList(AppManager.getInstance().countryCodeModels));
+            countryNames = new String[list.size()];
+
+            for (int i = 0; i < list.size(); i++) {
+                countryNames[i] = list.get(i).getName();
+            }
+        }
+        else {
+            getCountryData();
         }
     }
 }

@@ -31,6 +31,7 @@ public class AppConstants {
     public static final String CHANGE_PIN = "ChangePin";
 
     public static final String  RE_SUBMIT_INIT = "resubmitInitialize";
+    public static final String RE_SUBMIT_VERIFCATION = "resubmitverification";
 
 
     //SharedPref Constants
@@ -40,6 +41,8 @@ public class AppConstants {
     static final String USER_DATA_KEY = "user_data";
     static final String KYC_ID_KEY = "kyc_id";
     static final String PIN_KEY = "pin_md5";
+    static final String PHONE_KEY = "phone";
+    static final String ISD_KEY = "isd";
 
     //
     public static final int VERIFICATION_TYPE_EMAIL = 0;

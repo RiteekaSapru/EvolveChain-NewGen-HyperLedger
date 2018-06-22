@@ -61,6 +61,9 @@ public class AppManager {
     public DocumentModel identityDocumentModel, addressDocumentModel;
     public HoldingDocumentModel holdingDocumentModel;
 
+    public String verificationCode;
+    public String phone, isd;
+
     public static AppManager getInstance() {
         return ourInstance;
     }

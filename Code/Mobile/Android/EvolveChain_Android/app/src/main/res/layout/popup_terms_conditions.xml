@@ -3,76 +3,103 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
-        android:layout_margin="@dimen/_5sdp"
-        android:id="@+id/close_btn"
-        android:src="@drawable/ic_close_black_24dp" />
+    <!--<ImageView-->
+        <!--android:id="@+id/close_btn"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentEnd="true"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--android:layout_margin="@dimen/_5sdp"-->
+        <!--android:src="@drawable/ic_close_black_24dp" />-->
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/_16sdp">
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/terms"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Terms and Conditions"
+            android:gravity="center"
+            android:text="EvolveChain"
+            android:textAppearance="?android:textAppearanceMedium"
             android:textColor="#000"
-            android:textAppearance="?android:textAppearanceMedium" />
+            android:padding="@dimen/_16sdp"/>
 
         <TextView
             android:id="@+id/messages"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/terms"
-            android:layout_marginTop="@dimen/_5sdp"
-            android:text="By clicking ACCEPT you will be agreeing to User Agreement and Privacy Policy of EvolveChain. You can read all the policies by click on below link." />
+            android:gravity="center"
+            android:paddingStart="@dimen/_16sdp"
+            android:paddingEnd="@dimen/_16sdp"
+            android:text="By accepting, you agree to our Terms &amp; Conditions and Privacy Policy." />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#999"
+            android:layout_marginTop="@dimen/_10sdp"/>
 
         <TextView
             android:id="@+id/terms_link"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/messages"
             android:layout_marginTop="@dimen/_10sdp"
-            android:text="Terms and Conditions"
+            android:gravity="center"
+            android:text="Terms &amp; Conditions"
             android:textColor="@color/colorDarkGray" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#999"
+            android:layout_marginTop="@dimen/_10sdp"/>
         <TextView
             android:id="@+id/privacy_link"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/terms_link"
             android:layout_marginTop="@dimen/_10sdp"
+            android:gravity="center"
             android:text="Privacy policy"
             android:textColor="@color/colorDarkGray" />
 
-        <android.support.v7.widget.CardView
-            android:id="@+id/accept_btn"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/_40sdp"
+            android:layout_height="1dp"
+            android:background="#999"
+            android:layout_marginTop="@dimen/_10sdp"/>
+        <TextView
+            android:id="@+id/btn_accept"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_below="@+id/privacy_link"
-            android:layout_marginEnd="@dimen/_10sdp"
-            android:layout_marginStart="@dimen/_10sdp"
-            android:layout_marginTop="@dimen/_20sdp"
-            app:cardBackgroundColor="@color/colorDarkGray"
-            app:cardCornerRadius="@dimen/_20sdp">
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:gravity="center"
+            android:text="I Accept"
+            android:textColor="@color/colorPrimary" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="ACCEPT"
-                android:textAppearance="?android:textAppearanceLarge"
-                android:textColor="#FFF"
-                android:textStyle="bold" />
-        </android.support.v7.widget.CardView>
-
-    </RelativeLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#999"
+            android:layout_marginTop="@dimen/_10sdp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_10sdp"
+            android:text="Cancel"
+            android:gravity="center"
+            android:id="@+id/close_btn"
+            android:textColor="#d32f2f"/>
+    </LinearLayout>
 
 </RelativeLayout>

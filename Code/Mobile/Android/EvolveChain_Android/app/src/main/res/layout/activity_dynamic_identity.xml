@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:id="@+id/base_view"
+    android:background="@drawable/splash_background"
     tools:context="com.newgen.evolvechain.new_uis.DynamicDocumentActivity">
 
     <Spinner
@@ -65,7 +66,9 @@
                     android:id="@+id/number_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none" />
+                    android:inputType="none"
+                    android:maxLines="1"
+                    android:digits="abcdefghijklmnopqrstuvwxyz1234567890"/>
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
@@ -111,6 +114,8 @@
                     android:layout_width="0dp"
                     android:layout_height="@dimen/_200sdp"
                     android:layout_marginEnd="@dimen/_5sdp"
+                    android:paddingStart="@dimen/_2sdp"
+                    android:paddingEnd="@dimen/_2sdp"
                     android:layout_weight="1"
                     android:background="@drawable/ractangular_background"
                     android:contentDescription="@string/identity_proof"
@@ -124,6 +129,8 @@
                     android:layout_height="@dimen/_200sdp"
                     android:layout_marginStart="5dp"
                     android:layout_weight="1"
+                    android:paddingStart="@dimen/_2sdp"
+                    android:paddingEnd="@dimen/_2sdp"
                     android:background="@drawable/ractangular_background"
                     android:contentDescription="@string/identity_proof"
                     android:onClick="onImageClick"

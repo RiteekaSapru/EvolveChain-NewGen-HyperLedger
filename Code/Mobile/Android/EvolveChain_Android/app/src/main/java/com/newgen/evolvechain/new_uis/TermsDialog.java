@@ -33,7 +33,7 @@ public class TermsDialog extends Dialog implements View.OnClickListener {
 
         findViewById(R.id.terms_link).setOnClickListener(this);
         findViewById(R.id.close_btn).setOnClickListener(this);
-        findViewById(R.id.accept_btn).setOnClickListener(this);
+        findViewById(R.id.btn_accept).setOnClickListener(this);
         findViewById(R.id.privacy_link).setOnClickListener(this);
 
     }
@@ -56,7 +56,7 @@ public class TermsDialog extends Dialog implements View.OnClickListener {
                 dismiss();
                 listener.onPrivacyClick();
                 break;
-            case R.id.accept_btn:
+            case R.id.btn_accept:
                 dismiss();
                 listener.onAcceptClick();
                 break;

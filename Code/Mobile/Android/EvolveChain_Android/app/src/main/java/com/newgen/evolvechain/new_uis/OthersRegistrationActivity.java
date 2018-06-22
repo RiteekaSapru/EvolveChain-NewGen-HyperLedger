@@ -11,10 +11,8 @@ import android.view.View;
 import com.newgen.evolvechain.CellClickListener;
 import com.newgen.evolvechain.R;
 import com.newgen.evolvechain.adpaters.OptionsAdapter;
-import com.newgen.evolvechain.uis.activities.SummaryActivity;
 import com.newgen.evolvechain.utils.AppManager;
 import com.newgen.evolvechain.utils.DialogsManager;
-import com.newgen.evolvechain.uxs.AddressDetailActivity;
 
 import java.util.ArrayList;
 
@@ -68,7 +66,7 @@ public class OthersRegistrationActivity extends AppCompatActivity implements Cel
         optionDataList.add("Address Details");
         optionDataList.add("Identity Proof");
         optionDataList.add("Address Proof");
-        optionDataList.add("Uploading Holding Document Photo");
+        optionDataList.add("Document Holding Photo");
     }
 
     @Override
@@ -110,13 +108,13 @@ public class OthersRegistrationActivity extends AppCompatActivity implements Cel
     public void onSaveClick(View view) {
 
         if (AppManager.getInstance().basicModel == null) {
-            DialogsManager.showErrorDialog(this, "Error", "Please fill basic details");
+            DialogsManager.showErrorDialog(this, "Error", getString(R.string.submit_warning));
         } else {
             if (AppManager.getInstance().identityDocumentModel == null) {
-                DialogsManager.showErrorDialog(this, "Error", "Please fill identity details");
+                DialogsManager.showErrorDialog(this, "Error", getString(R.string.submit_warning));
             } else {
                 if (AppManager.getInstance().addressDocumentModel == null) {
-                    DialogsManager.showErrorDialog(this, "Error", "Please fill address details");
+                    DialogsManager.showErrorDialog(this, "Error", getString(R.string.submit_warning));
                 } else {
                     Intent intent = new Intent(this, SummaryActivity.class);
                     startActivity(intent);

@@ -34,12 +34,13 @@ public class SendBasicData {
 
         if (basicModel.getAddress1() != null) {
 
-            Map<String, String> params = new HashMap<>(11);
+            Map<String, String> params = new HashMap<>(12);
             params.put("step", "basic");
             params.put("firstname", basicModel.getFirstName());
             params.put("middlename", basicModel.getMiddleName());
             params.put("lastname", basicModel.getLastName());
             params.put("dob", basicModel.getDob());
+            params.put("gender", basicModel.getGender());
             params.put("city", basicModel.getCity());
             params.put("address1", basicModel.getAddress1());
             params.put("address2", basicModel.getAddress2());
@@ -49,10 +50,12 @@ public class SendBasicData {
             params.put("state", basicModel.getState());
             params.put("place_of_birth", basicModel.getPlaceBirth());
             params.put("substep", "basic");
+            params.put("iso", AppManager.getInstance().selectedCountryModel.getIso());
 
             String urlToSave = AppConstants.SERVER_ADDRESS + AppConstants.KYC_METHOD_NAME + AppConstants.SAVE_BASIC_INFO + AppManager.getInstance().initToken;
             String[] fileField = new String[]{"file[]"};
             String[] filePaths = new String[]{AppUtil.getPath(context, basicModel.getUri())};
+
             Uri[] uris = new Uri[]{basicModel.getUri()};
 
 

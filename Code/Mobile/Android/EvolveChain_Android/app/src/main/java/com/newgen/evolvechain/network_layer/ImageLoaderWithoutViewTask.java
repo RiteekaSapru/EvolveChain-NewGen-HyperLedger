@@ -52,45 +52,35 @@ public class ImageLoaderWithoutViewTask extends AsyncTask<Void, Void, Uri[]> {
                 InputStream input = connection.getInputStream();
                 Bitmap bitmap = BitmapFactory.decodeStream(input);
 
-                File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + "EvolveChain");
+                File path = new File(context.getExternalFilesDir(
+                        Environment.DIRECTORY_PICTURES), "EC");
                 path.mkdirs();
-                File imageFile = new File(path, "basic"+".png");
+                File imageFile = new File(path, "basic" + tempI +".jpg");
                 FileOutputStream out = new FileOutputStream(imageFile);
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
                 out.flush();
                 out.close();
-                MediaScannerConnection.scanFile(context,new String[] { imageFile.getAbsolutePath() }, null,new MediaScannerConnection.OnScanCompletedListener() {
-                    public void onScanCompleted(String path, Uri uri) {
-                        Log.i("ExternalStorage", "Scanned " + path + ":");
-                        Log.i("ExternalStorage", "-> uri=" + uri);
-                        uris[tempI] = uri;
-                    }
-                });
-
-//                new DownloadAndSaveImageTask(context).saveImageToExternal("image" + i, bitmap, new ImageSaverListener() {
-//                    @Override
-//                    public void imageSaved(Uri uri) {
+                uris[tempI] = Uri.fromFile(imageFile);
+//                MediaScannerConnection.scanFile(context,new String[] { imageFile.getAbsolutePath() }, null,new MediaScannerConnection.OnScanCompletedListener() {
+//                    public void onScanCompleted(String path, Uri uri) {
+//                        Log.i("ExternalStorage", "Scanned " + path + ":");
+//                        Log.i("ExternalStorage", "-> uri=" + uri);
 //                        uris[tempI] = uri;
 //                    }
-//
-//                    @Override
-//                    public void failed() {
-//                        uris[tempI] = null;
-//                    }
 //                });
+
                 connection.disconnect();
             }
             return uris;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return uris;
     }
 
 
     @Override
     protected void onPostExecute(Uri[] result) {
-        super.onPostExecute(result);
         listener.onLoadComplete(result);
     }
 

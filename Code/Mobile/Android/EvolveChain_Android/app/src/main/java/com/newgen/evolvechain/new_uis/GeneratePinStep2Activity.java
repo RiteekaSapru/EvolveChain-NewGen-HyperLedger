@@ -1,4 +1,4 @@
-package com.newgen.evolvechain.uis.activities;
+package com.newgen.evolvechain.new_uis;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.EditText;
 
 import com.newgen.evolvechain.R;
 import com.newgen.evolvechain.network_layer.PostTask;

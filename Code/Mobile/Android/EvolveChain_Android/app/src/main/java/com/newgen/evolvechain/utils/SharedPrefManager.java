@@ -55,6 +55,19 @@ public class SharedPrefManager {
         mEditor.commit();
     }
 
+    public void saveContactNumber(String number, String isd) {
+        mEditor.putString(AppConstants.PHONE_KEY, number);
+        mEditor.putString(AppConstants.ISD_KEY, isd);
+        mEditor.commit();
+    }
+
+    public String getNumber() {
+        return mSharedPreferences.getString(AppConstants.PHONE_KEY, "");
+    }
+    public String getISD(){
+        return mSharedPreferences.getString(AppConstants.ISD_KEY, "");
+    }
+
     private void savePinMd5(String pin) {
         //AppManager.getInstance().pinMd5 = pin;
         mEditor.putString(AppConstants.PIN_KEY, pin);

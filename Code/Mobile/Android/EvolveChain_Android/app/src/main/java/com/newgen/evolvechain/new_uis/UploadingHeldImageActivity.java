@@ -32,12 +32,33 @@ public class UploadingHeldImageActivity extends AppCompatActivity {
 
     private Uri uri;
 
+    private ImageView docImage;
+    private TextView codeText;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_uploading_holded_image);
 
-        ((TextView) findViewById(R.id.code_text)).setText("Code: 9909");
+        initUi();
+    }
+
+    private void initUi() {
+        docImage = findViewById(R.id.image);
+        codeText = findViewById(R.id.code_text);
+
+        HoldingDocumentModel model = AppManager.getInstance().holdingDocumentModel;
+
+        if (AppManager.getInstance().holdingDocumentModel != null) {
+            codeText.setText(AppManager.getInstance().holdingDocumentModel.getCode());
+            if(AppManager.getInstance().holdingDocumentModel.getUri() != null) {
+                uri = AppManager.getInstance().holdingDocumentModel.getUri();
+                docImage.setImageURI(uri);
+            }
+        }
+        else {
+            codeText.setText(AppManager.getInstance().verificationCode);
+        }
     }
 
     public void onInfoClick(View view) {
@@ -68,8 +89,8 @@ public class UploadingHeldImageActivity extends AppCompatActivity {
             Map<String, String> params = new HashMap<>(1);
             params.put("step", "face");
             params.put("substep", "face");
-            //TODO: Change value
-            params.put("number", "9990");
+            params.put("number", codeText.getText().toString());
+            params.put("iso", AppManager.getInstance().selectedCountryModel.getIso());
 
             String urlToSave = AppConstants.SERVER_ADDRESS + AppConstants.KYC_METHOD_NAME + AppConstants.SAVE_BASIC_INFO + AppManager.getInstance().initToken;
             String[] fileField = new String[]{"file[]"};
@@ -91,8 +112,9 @@ public class UploadingHeldImageActivity extends AppCompatActivity {
                             dialog.dismiss();
                             boolean isSuccess = AppUtil.isSuccess(result);
                             if (isSuccess) {
-                                AppManager.getInstance().holdingDocumentModel = new HoldingDocumentModel("9990", uri);
-                                finish();
+                                AppManager.getInstance().holdingDocumentModel = new HoldingDocumentModel(codeText.getText().toString(), uri);
+                                Intent intent = new Intent(UploadingHeldImageActivity.this, OthersRegistrationActivity.class);
+                                startActivity(intent);
                             } else {
                                 DialogsManager.showErrorDialog(UploadingHeldImageActivity.this, "Error", "Some error occurred. Please try after some time.");
                             }
@@ -110,7 +132,7 @@ public class UploadingHeldImageActivity extends AppCompatActivity {
                 //Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), backUri);
                 if (requestCode == PICK_IMAGE) {
                     uri = tempUri;
-                    ((ImageView) findViewById(R.id.image)).setImageURI(uri);
+                    docImage.setImageURI(uri);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
