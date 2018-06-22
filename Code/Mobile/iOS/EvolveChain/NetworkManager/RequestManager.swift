@@ -19,10 +19,14 @@ enum HttpMethod : String {
 }
 
 class RequestManager: NSObject {
-     static let sharedInstance = RequestManager()
+     static let shared = RequestManager()
     
     var session : URLSession?
 
+    var progressComplete: (CGFloat)->Void = {_ in }
+    
+    // MARK: - Network Availability
+    
     func isConnectedToNetwork() -> Bool {
         
         var zeroAddress = sockaddr_in(sin_len: 0, sin_family: 0, sin_port: 0, sin_addr: in_addr(s_addr: 0), sin_zero: (0, 0, 0, 0, 0, 0, 0, 0))
@@ -56,10 +60,12 @@ class RequestManager: NSObject {
         
     }
     
+    // MARK: - GET
+    
     func makeGetAPICall(url: String,params: Dictionary<String, Any>?, method: HttpMethod, success:@escaping ( Data? ,HTTPURLResponse?  , NSError? ,Array<Any>) -> Void, failure: @escaping ( Data? ,HTTPURLResponse?  , NSError?,String? )-> Void) {
         
         if !isConnectedToNetwork() {
-            failure(nil , nil , nil,stringNoInternet)
+            failure(nil , nil , nil,StringConstants.NoInternet)
             return
         }
         
@@ -89,6 +95,13 @@ class RequestManager: NSObject {
             DispatchQueue.main.async(execute: {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
             })
+            if error != nil{
+                let err = error! as NSError
+                
+                failure(data , response as? HTTPURLResponse, error as NSError?,HTTPURLResponse.localizedString(forStatusCode: (err.code)))
+                return
+            }
+            let res = response as? HTTPURLResponse
             
             if let data = data {
                 
@@ -100,8 +113,8 @@ class RequestManager: NSObject {
                             success(data , response , error as NSError?,jsonArray)
                         } else {
                             print("bad json")
-                            var backToString = String(data: data, encoding: String.Encoding.utf8) as String?
-                            print(backToString)
+                            let backToString = String(data: data, encoding: String.Encoding.utf8) as String?
+                            print(backToString!)
                             failure(data , response , error as NSError?,"Unable to parse JSON.")
                         }
                     } catch let error as NSError {
@@ -110,21 +123,23 @@ class RequestManager: NSObject {
                     }
                     
                 } else {
-                    failure(data , response as? HTTPURLResponse, error as NSError?,error?.localizedDescription)
+                    failure(data , response as? HTTPURLResponse, error as NSError?,HTTPURLResponse.localizedString(forStatusCode: (res?.statusCode)!) )
                 }
             }else {
                 
-                failure(data , response as? HTTPURLResponse, error as NSError?,error?.localizedDescription)
+                failure(data , response as? HTTPURLResponse, error as NSError?,HTTPURLResponse.localizedString(forStatusCode: (res?.statusCode)!))
                 
             }
             }.resume()
         
     }
     
+    // MARK: - Custom Requests
+    
     func makeAPICall(url: String,params: Dictionary<String, Any>?, method: HttpMethod, success:@escaping ( Data? ,HTTPURLResponse?  , NSError? ,Dictionary<String,Any>) -> Void, failure: @escaping ( Data? ,HTTPURLResponse?  , NSError?,String? )-> Void) {
         
         if !isConnectedToNetwork() {
-            failure(nil , nil , nil,stringNoInternet)
+            failure(nil , nil , nil,StringConstants.NoInternet)
             return
         }
         
@@ -155,6 +170,15 @@ class RequestManager: NSObject {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
             })
             
+            if error != nil{
+                let err = error! as NSError
+                
+                failure(data , response as? HTTPURLResponse, error as NSError?,HTTPURLResponse.localizedString(forStatusCode: (err.code)))
+                return
+            }
+            
+             let res = response as? HTTPURLResponse
+            
             if let data = data {
                 
                 if let response = response as? HTTPURLResponse, 200...299 ~= response.statusCode {
@@ -177,13 +201,24 @@ class RequestManager: NSObject {
                                     
                                     if let errorCode = RawdataConverter.optionalString(jsonDict["error_code"]) {
                                        
-                                        if errorCode == ErrorCode.APP_NOT_FOUND.rawValue{
-                                            GlobalMethods.sharedInstance.logOutUser()
-                                            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: errorString)
+//                                        if errorCode == ErrorCode.APP_NOT_FOUND.rawValue{
+//                                            GlobalMethods.shared.dismissLoader {
+//                                                GlobalMethods.shared.logOutUser()
+//                                                GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorString)
+//                                            }
+//                                        }
+                                         if errorCode == ErrorCode.DEVICE_MISMATCH.rawValue{
+                                            GlobalMethods.shared.dismissLoader {
+                                                GlobalMethods.shared.deviceMismatch(errorMsg: errorString)
+                                            }
                                         }
-                                        else if errorCode == ErrorCode.DEVICE_MISMATCH.rawValue{
-                                            GlobalMethods.sharedInstance.deviceMismatch(errorMsg: errorString)
-                                        }
+                                         else if errorCode == ErrorCode.EXPIRED_APP_STATUS.rawValue{
+                                            GlobalMethods.shared.dismissLoader {
+                                                GlobalMethods.shared.documentExpiredError(errorMsg: errorString)
+//                                                GlobalMethods.shared.logOutUser()
+//                                                GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorString)
+                                            }
+                                         }
                                         else{
                                             failure(data , response , error as NSError?,errorString)
                                         }
@@ -191,7 +226,7 @@ class RequestManager: NSObject {
                                 }
                             }
                             else{
-                                 failure(data , response , error as NSError?,RawdataConverter.optionalString(jsonDict["error"]))
+                                 failure(data , response , error as NSError?,RawdataConverter.string(jsonDict["error"]))
                             }
                         } else {
                             print("bad json")
@@ -205,21 +240,23 @@ class RequestManager: NSObject {
                     }
                     
                 } else {
-                    failure(data , response as? HTTPURLResponse, error as NSError?,error?.localizedDescription)
+                    failure(data , response as? HTTPURLResponse, error as NSError?,HTTPURLResponse.localizedString(forStatusCode: (res?.statusCode)!))
                 }
             }else {
                 
-                failure(data , response as? HTTPURLResponse, error as NSError?,error?.localizedDescription)
+                failure(data , response as? HTTPURLResponse, error as NSError?,HTTPURLResponse.localizedString(forStatusCode: (res?.statusCode)!))
                 
             }
             }.resume()
         
     }
     
+    // MARK: - Custom requests with Progress
+    
     func requestToUploadImagesWithParams(url: String,params: Dictionary<String, Any>?, images : [UIImage],fileNames : [String], method: HttpMethod, success:@escaping ( Data? ,HTTPURLResponse?  , NSError? ,Dictionary<String,Any>) -> Void, failure: @escaping ( Data? ,HTTPURLResponse?  , NSError?,String? )-> Void)
     {
         if !isConnectedToNetwork() {
-            failure(nil , nil , nil,stringNoInternet)
+            failure(nil , nil , nil,StringConstants.NoInternet)
             return
         }
         var request = URLRequest(url: URL(string: url)!)
@@ -281,14 +318,23 @@ class RequestManager: NSObject {
         
         request.httpBody = bodyData as Data
         request.httpMethod = "POST"
+//        let sess = URLSessionTask.
+        let customSession = URLSession.init(configuration: URLSessionConfiguration.default, delegate: self, delegateQueue: OperationQueue.main)
         
-       URLSession.shared.dataTask(with: request as URLRequest) { (data, response, error) -> Void in
+       customSession.dataTask(with: request as URLRequest) { (data, response, error) -> Void in
             
            
             DispatchQueue.main.async(execute: {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
             })
+        
+        if error != nil{
+            let err = error! as NSError
             
+            failure(data , response as? HTTPURLResponse, error as NSError?,HTTPURLResponse.localizedString(forStatusCode: (err.code)))
+            return
+        }
+        
             let res = response as? HTTPURLResponse
             
             
@@ -319,11 +365,11 @@ class RequestManager: NSObject {
                                 if let errorCode = RawdataConverter.optionalString(jsonDict["error_code"]) {
                                     
                                     if errorCode == ErrorCode.APP_NOT_FOUND.rawValue{
-                                        GlobalMethods.sharedInstance.logOutUser()
-                                        GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: errorString)
+                                        GlobalMethods.shared.logOutUser()
+                                        GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorString)
                                     }
                                     else if errorCode == ErrorCode.DEVICE_MISMATCH.rawValue{
-                                        GlobalMethods.sharedInstance.deviceMismatch(errorMsg: errorString)
+                                        GlobalMethods.shared.deviceMismatch(errorMsg: errorString)
                                     }
                                     else{
                                         failure(data , response , error as NSError?,errorString)
@@ -352,9 +398,24 @@ class RequestManager: NSObject {
         }.resume()
     }
     
+    // MARK: - Downlaod requests
+    
     func getDataFromUrl(url: URL, completion: @escaping (Data?, URLResponse?, Error?) -> ()) {
         URLSession.shared.dataTask(with: url) { data, response, error in
             completion(data, response, error)
             }.resume()
+    }
+    
+    // MARK: - Session Delegates
+    
+//    func dis
+}
+
+extension RequestManager : URLSessionTaskDelegate{
+    func urlSession(_ session: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
+        let fractionComplete = CGFloat(totalBytesSent)/CGFloat(totalBytesExpectedToSend) * 100.0
+        
+        
+        self.progressComplete(fractionComplete)
     }
 }

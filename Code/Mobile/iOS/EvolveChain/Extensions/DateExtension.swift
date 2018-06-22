@@ -44,6 +44,12 @@ extension Foundation.Date
             return formatter
         }()
         
+//        static let formatter5 :DateFormatter = {
+//            let formatter = DateFormatter()
+//            formatter.dateFormat = "HH:mm:ss"
+//            return formatter
+//        }()
+        
         static let formatterLocal :DateFormatter = {
             let formatter = DateFormatter()
 //            formatter.locale = Locale(identifier: "en")
@@ -56,7 +62,7 @@ extension Foundation.Date
             //            formatter.locale = Locale(identifier: "en")
 //            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
             formatter.timeZone = TimeZone(secondsFromGMT: 0)
-            formatter.dateFormat = "yyyy-MM-dd"//SignupConfigModel.sharedInstance.dateFormat
+            formatter.dateFormat = "yyyy-MM-dd"//SignupConfigModel.shared.dateFormat
             return formatter
         }()
         
@@ -89,8 +95,12 @@ extension Foundation.Date
         return dateFromString
     }
     static func dateFromFormatted3_String (_ dateString: String) -> Foundation.Date? {
-        let dateFromString = Date.formatter3.date(from: dateString)
-        return dateFromString
+        if let dateFromString = Date.formatter3.date(from: dateString){
+            return dateFromString
+        }
+        else{
+            return nil
+        }
     }
     static func dateFromFormatted4_String (_ dateString: String) -> Foundation.Date? {
         let dateFromString = Date.formatter4.date(from: dateString)

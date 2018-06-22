@@ -8,7 +8,7 @@ const Schema = mongoose.Schema;
 const config = require('config');
 
 const ConfigDB = new Schema({
-    verifier_emails: { type: [String] }
+    approver_emails: { type: [String] }
 });
 
 

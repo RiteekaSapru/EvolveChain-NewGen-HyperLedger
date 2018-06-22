@@ -23,4 +23,12 @@ class NoCursorTextfield: UITextField {
         let end = self.position(from: beginning, offset: self.text?.count ?? 0)
         return end
     }
+    
+    override public func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        if action == #selector(copy(_:)) || action == #selector(select(_:)){
+            return false
+        }
+        
+        return super.canPerformAction(action, withSender: sender)
+    }
 }

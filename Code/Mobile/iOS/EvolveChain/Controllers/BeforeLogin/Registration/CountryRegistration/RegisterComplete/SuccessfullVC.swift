@@ -27,6 +27,6 @@ class SuccessfullVC: UIViewController {
 
 
     @IBAction func actionDone(_ sender: Any) {
-        _navigator.popToRootViewController(animated: true)
+        GlobalMethods.shared.popVC()
     }
 }

@@ -9,7 +9,7 @@
 import UIKit
 
 class SignupConfigModel: NSObject {
- static let sharedInstance = SignupConfigModel()
+ static let shared = SignupConfigModel()
     
     var maxAge: Int             = 90
     var minAge: Int                   = 11
@@ -20,8 +20,7 @@ class SignupConfigModel: NSObject {
     
     var verificationCode: String = ""
     
-    var arrUtilityBillTypeList:[UtilityBillTypeModel] = []
-        
+    
     // MARK:- Init
     override init() {
         super.init()
@@ -29,7 +28,6 @@ class SignupConfigModel: NSObject {
         minAge                    = 11
         dateFormat                    = ""
         arrCountryList                    = []
-        arrUtilityBillTypeList                     = []
     }
     
     func initWithDictionary(configDict:Dictionary<String, Any>){
@@ -52,27 +50,29 @@ class SignupConfigModel: NSObject {
             }
         }
         
-        if let billList = RawdataConverter.array(configDict["USA_UTILITY_BILL_TYPE"]){
-            arrUtilityBillTypeList.removeAll()
+        
+        
+    }
+    
+    func initCountryList(response:Array<Any>){
+        arrCountryList.removeAll()
+        for item in response{
+            let model = CountryModel.init()
+            model.initWithDictionary(countryDict: RawdataConverter.dictionary(item)!)
+            arrCountryList.append(model)
+        }
+    }
+    
+    func getCountryListArray() -> [String] {
+        var list = [String]()
+        
+        for item in arrCountryList{
             
-            for(_,item) in billList.enumerated(){
-                let model = UtilityBillTypeModel.init()
-                model.initWithDictionary(billDict: RawdataConverter.dictionary(item)!)
-                arrUtilityBillTypeList.append(model)
-            }
+            list.append(item.name + " (+" + item.phoneCode + ")")
         }
-        
+        return list
     }
-    
-    func getBillArray() -> [String] {
-        var arrBill = [String]()
-        
-        for(_,item) in arrUtilityBillTypeList.enumerated(){
-            arrBill.append(item.name)
-        }
-        return arrBill;
-    }
-    
+
     func initWithDocDictionary(docDict:Dictionary<String, Any>) {
         
     }

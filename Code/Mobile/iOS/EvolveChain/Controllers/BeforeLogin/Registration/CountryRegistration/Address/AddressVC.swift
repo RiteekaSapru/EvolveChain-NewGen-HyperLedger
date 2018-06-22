@@ -33,59 +33,73 @@ class AddressVC: UIViewController,UITextFieldDelegate {
         // Dispose of any resources that can be recreated.
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        txtfldAddress1.becomeFirstResponder()
+    }
+    
     // MARK: - Methods
     func fillData() {
-        if BasicDetailsModel.sharedInstance.isBasicDetailsComplete {
-            txtfldAddress1.text = BasicDetailsModel.sharedInstance.add1
-            txtfldAddress2.text = BasicDetailsModel.sharedInstance.add2
-            txtfldStreet.text = BasicDetailsModel.sharedInstance.street
-            txtfldCity.text = BasicDetailsModel.sharedInstance.city
-            txtfldAreaCode.text = BasicDetailsModel.sharedInstance.zipCode
-            txtfldState.text = BasicDetailsModel.sharedInstance.state
-            txtfldAddressCountry.text = BasicDetailsModel.sharedInstance.country
+        if BasicDetailsModel.shared.isAddressDetailsComplete {
+            txtfldAddress1.text = BasicDetailsModel.shared.add1
+            txtfldAddress2.text = BasicDetailsModel.shared.add2
+            txtfldStreet.text = BasicDetailsModel.shared.street
+            txtfldCity.text = BasicDetailsModel.shared.city
+            txtfldAreaCode.text = BasicDetailsModel.shared.zipCode
+            txtfldState.text = BasicDetailsModel.shared.state
+            txtfldAddressCountry.text = BasicDetailsModel.shared.country
         }
-        if BasicDetailsModel.sharedInstance.countryType == .India {
-            txtfldAddressCountry.text = "India"
+        else{
+            txtfldAddressCountry.text = SignupConfigModel.shared.selectedCountry.name
         }
+//        if BasicDetailsModel.shared.countryType == .India {
+//            txtfldAddressCountry.text = "India"
+//        }
     }
     
     func checkValidation() -> Bool {
-        if txtfldAddress1.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringAdd1Empty)
+        if txtfldAddress1.text!.isEmpty{
+//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.Add1Empty)
+            txtfldAddress1.animatePlaceholderColor()
             txtfldAddress1.becomeFirstResponder()
             return false;
         }
             //        else if txtfldAddress2.text?.count == 0{
-            //            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringAdd2Empty)
+            //            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.Add2Empty)
             //            return false;
             //        }
-        else if txtfldStreet.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringAddStreetEmpty)
+        else if txtfldStreet.text!.isEmpty{
+//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AddStreetEmpty)
+            txtfldStreet.animatePlaceholderColor()
             txtfldStreet.becomeFirstResponder()
             return false;
         }
-        else if txtfldCity.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringCityEmpty)
+        else if txtfldCity.text!.isEmpty{
+//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.CityEmpty)
+            txtfldCity.animatePlaceholderColor()
             txtfldCity.becomeFirstResponder()
             return false;
         }
-        else if txtfldState.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringStateEmpty)
+        else if txtfldState.text!.isEmpty{
+//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.StateEmpty)
+            txtfldState.animatePlaceholderColor()
             txtfldState.becomeFirstResponder()
             return false;
         }
-        else if txtfldAreaCode.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringAreaCodeEmpty)
+        else if txtfldAreaCode.text!.isEmpty{
+//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AreaCodeEmpty)
+            txtfldAreaCode.animatePlaceholderColor()
             txtfldAreaCode.becomeFirstResponder()
             return false;
         }
         else if (txtfldAreaCode.text?.count)! < 4{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringAreaCodeIncorrect)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AreaCodeIncorrect)
             txtfldAreaCode.becomeFirstResponder()
             return false;
         }
-        else if txtfldAddressCountry.text?.count == 0{
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringError, alertText: stringCountryEmpty)
+        else if txtfldAddressCountry.text!.isEmpty{
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.CountryEmpty)
             actionPickerAddCountry(UIButton())
             return false;
         }
@@ -96,19 +110,19 @@ class AddressVC: UIViewController,UITextFieldDelegate {
     
     func saveAddressDetails() -> Void {
         
-        BasicDetailsModel.sharedInstance.add1 = txtfldAddress1.text!
-        BasicDetailsModel.sharedInstance.add2 = txtfldAddress2.text!
-        BasicDetailsModel.sharedInstance.street = txtfldStreet.text!
-        BasicDetailsModel.sharedInstance.city = txtfldCity.text!
+        BasicDetailsModel.shared.add1 = txtfldAddress1.text!
+        BasicDetailsModel.shared.add2 = txtfldAddress2.text!
+        BasicDetailsModel.shared.street = txtfldStreet.text!
+        BasicDetailsModel.shared.city = txtfldCity.text!
         
-        BasicDetailsModel.sharedInstance.state = txtfldState.text!
-        BasicDetailsModel.sharedInstance.zipCode = txtfldAreaCode.text!
-        BasicDetailsModel.sharedInstance.country = txtfldAddressCountry.text!
+        BasicDetailsModel.shared.state = txtfldState.text!
+        BasicDetailsModel.shared.zipCode = txtfldAreaCode.text!
+        BasicDetailsModel.shared.country = txtfldAddressCountry.text!
         
        uploadBasicDetails()
 //        _navigator.popViewController(animated: true)
 
-        //        GlobalMethods.sharedInstance.uploadBasicDetails()
+        //        GlobalMethods.shared.uploadBasicDetails()
     }
     
     //MARK: - Textfield
@@ -144,7 +158,7 @@ class AddressVC: UIViewController,UITextFieldDelegate {
     
     @IBAction func actionPickerAddCountry(_ sender: Any) {
         self.view.endEditing(true)
-        if BasicDetailsModel.sharedInstance.countryType == .NorthAmerica {
+        if BasicDetailsModel.shared.countryType == .NorthAmerica {
             let customPicker = CustomPickerView.instanceFromNib() as CustomPickerView
             
             customPicker.frame = CGRect(x: 0, y: 0, width: _screenFrame.width, height: _screenFrame.height)
@@ -172,18 +186,18 @@ class AddressVC: UIViewController,UITextFieldDelegate {
     func uploadBasicDetails() {
         
         let filenameArray = ["file[]"]
-        let image = GlobalMethods.sharedInstance.resizeImage(image: BasicDetailsModel.sharedInstance.userImage, targetSize: CGSize.init(width: 200.0, height: 200.0))
+        let image = GlobalMethods.shared.resizeImage(image: BasicDetailsModel.shared.userImage, targetSize: CGSize.init(width: 200.0, height: 200.0))
         let imagesArray = [image]
         
-        NetworkManager.sharedInstance.POSTBasicDetails(params: BasicDetailsModel.sharedInstance.getBasicParamsForSaveKYC(), fileArray: imagesArray, filenameArray: filenameArray, success: { (responseDict) in
+        NetworkManager.shared.POSTBasicDetails(params: BasicDetailsModel.shared.getBasicParamsForSaveKYC(), fileArray: imagesArray, filenameArray: filenameArray, success: { (responseDict) in
             print(responseDict)
             print("Basic Details Saved")
-            BasicDetailsModel.sharedInstance.isAddressDetailsComplete = true
+            BasicDetailsModel.shared.isAddressDetailsComplete = true
             self.completionHandler(1)
-            GlobalMethods.sharedInstance.popVC()
+            GlobalMethods.shared.popVC()
 
         }) { (errorMsg) in
-            GlobalMethods.sharedInstance.showAlert(alertTitle: stringAppName, alertText: errorMsg!)
+            GlobalMethods.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
         }
         
     }

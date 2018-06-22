@@ -29,6 +29,9 @@ class SettingsVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
         // Dispose of any resources that can be recreated.
     }
     
+    // MARK: - Custom Methods
+
+    
     func addShadow(viewToChange:UIView)  {
         viewToChange.clipsToBounds = false
         let shadowLayer = CAShapeLayer()
@@ -69,10 +72,10 @@ class SettingsVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
         switch indexPath.row {
         case 0:
             let changePinVC = self.storyboard?.instantiateViewController(withIdentifier: "ChangePinVC")
-            GlobalMethods.sharedInstance.pushVC(changePinVC!)
+            GlobalMethods.shared.pushVC(changePinVC!)
             
         case 1:
-            GlobalMethods.sharedInstance.logoutUserWithAlert()
+            GlobalMethods.shared.logoutUserWithAlert()
         default:
             break
         }

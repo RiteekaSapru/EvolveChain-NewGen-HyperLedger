@@ -14,15 +14,16 @@ enum CountryType : String {
 
 class BasicDetailsModel: NSObject, NSCoding {
 
-    static let sharedInstance = BasicDetailsModel()
+    static let shared = BasicDetailsModel()
     
     var countryType: CountryType             = .India
     var countryCode: String             = ""
     var fname: String                   = ""
     var mname: String                   = ""
     var lname: String                   = ""
-    var dob: Date                       = Date()
+    var dob: Date?                       = Date()
     var placeOfBirth: String            = ""
+    var gender: String                  = ""
     
     var add1: String                    = ""
     var add2: String                    = ""
@@ -39,6 +40,8 @@ class BasicDetailsModel: NSObject, NSCoding {
     var isPhoneVerified : Bool          = false
     var isBasicDetailsComplete : Bool   = false
     var isAddressDetailsComplete : Bool   = false
+
+    var kycId : String                  = ""
 
     
     var userImageURL : String           =  ""
@@ -137,15 +140,28 @@ class BasicDetailsModel: NSObject, NSCoding {
         isBasicDetailsComplete  = false
         add1                    = ""
         add2                    = ""
+        street                  = ""
+        gender                    = ""
         isAddressDetailsComplete = false
+        zipCode = ""
+        state = ""
+        country = ""
+         kycId                   = ""
+        
+        
+         userImageURL            =  ""
+        
+         holdingImage = nil
+        
     }
     
     // MARK: - Get Basic Details
     
     func getBasicParamsForSaveKYC() -> Dictionary<String, Any> {
        
-         let params = ["step":"basic","firstname":self.fname,"lastname":self.lname,"dob": self.dob.getUTCDateStringFromDateString(),"place_of_birth":self.placeOfBirth,"address1":self.add1,"address2":self.add2,"street":self.street,"city":self.city,"zip":self.zipCode,"state":self.state,"country":self.country,"middlename":self.mname,"substep":"basic"]
-        
+        let params : Dictionary<String, Any> = ["step":"basic","firstname":self.fname,"lastname":self.lname,"dob": self.dob?.getUTCDateStringFromDateString() ?? " ","place_of_birth":self.placeOfBirth,"address1":self.add1,"address2":self.add2,"street":self.street,"city":self.city,"zip":self.zipCode,"state":self.state,"country":self.country,"middlename":self.mname,"substep":"basic","gender":self.gender,"iso":SignupConfigModel.shared.selectedCountry.iso]
+        //        basicData.append(["iso",SignupConfigModel.shared.selectedCountry.iso])
+
         return params
     }
     
@@ -164,10 +180,10 @@ class BasicDetailsModel: NSObject, NSCoding {
         }
         
         basicData.append(["Last Name",self.lname])
-        
-        basicData.append(["Date of Birth",self.dob.getUTCDateStringFromDateString()])
+        basicData.append(["Date of Birth",self.dob?.dateWithStringFormat("MMM dd, yyyy") ?? " "])
         basicData.append(["Place of Birth",self.placeOfBirth])
-
+        basicData.append(["Gender",self.gender])
+//        basicData.append(["iso",SignupConfigModel.shared.selectedCountry.iso])
 //        basicData.append(["Address Line 1",self.add1])
 //        if self.add2.count > 0 {
 //            basicData.append(["Address Line 2",self.add2])
@@ -195,6 +211,7 @@ class BasicDetailsModel: NSObject, NSCoding {
         basicData.append(["Zip",self.zipCode])
         basicData.append(["State",self.state])
         basicData.append(["Country",self.country])
+//        basicData.append(["iso",SignupConfigModel.shared.selectedCountry.iso])
         
         return basicData
     }
@@ -202,7 +219,7 @@ class BasicDetailsModel: NSObject, NSCoding {
     func getHoldingAsArray() -> [[Any]] {
         
         var modelData = [[Any]]()
-        
+        modelData.append(["Code",SignupConfigModel.shared.verificationCode])
         modelData.append(["Holding Image","Holding Image",self.holdingImage])
         
         return modelData
@@ -217,23 +234,135 @@ class BasicDetailsModel: NSObject, NSCoding {
         email                   = RawdataConverter.string(responseJson["email"])
         
         userImageURL            = RawdataConverter.string(responseJson["profile_pic"])
-            
-        fname                   = RawdataConverter.string(responseJson["firstname"])
-        mname                   = RawdataConverter.string(responseJson["middlename"])
-        lname                   = RawdataConverter.string(responseJson["lastname"])
         
-        dob                     = Date.dateFromFormatted3_String(RawdataConverter.string(responseJson["dob"]))!
+        kycId                   = RawdataConverter.string(responseJson["kyc_id"])
         
-        placeOfBirth            = RawdataConverter.string(responseJson["place_of_birth"])
+        guard let basicDetails = RawdataConverter.dictionary(responseJson["basic_details"]) else {
+            return
+        }
         
-        add1                    = RawdataConverter.string(responseJson["address1"])
-        add2                    = RawdataConverter.string(responseJson["address2"])
-        street                  = RawdataConverter.string(responseJson["street"])
-        zipCode                 = RawdataConverter.string(responseJson["zip"])
-        city                    = RawdataConverter.string(responseJson["city"])
-        state                   = RawdataConverter.string(responseJson["state"])
-        country                 = RawdataConverter.string(responseJson["country"])
+        fname                   = RawdataConverter.string(basicDetails["firstname"])
+        mname                   = RawdataConverter.string(basicDetails["middlename"])
+        lname                   = RawdataConverter.string(basicDetails["lastname"])
+        
+        dob                     = Date.dateFromFormatted3_String(RawdataConverter.string(basicDetails["dob"]))!
+        
+        placeOfBirth            = RawdataConverter.string(basicDetails["place_of_birth"])
+        
+        add1                    = RawdataConverter.string(basicDetails["address1"])
+        add2                    = RawdataConverter.string(basicDetails["address2"])
+        street                  = RawdataConverter.string(basicDetails["street"])
+        zipCode                 = RawdataConverter.string(basicDetails["zip"])
+        city                    = RawdataConverter.string(basicDetails["city"])
+        state                   = RawdataConverter.string(basicDetails["state"])
+        country                 = RawdataConverter.string(basicDetails["country"])
+        gender                 = RawdataConverter.string(basicDetails["gender"])
+        
         isBasicDetailsComplete  = true
         isAddressDetailsComplete = true
+        
+        
+       
+    }
+    
+    //edit
+    
+    func initWithResponseEdit(responseJson:Dictionary<String, Any>)
+    {
+        countryCode             = RawdataConverter.string(responseJson["country_code"])
+        contactNumber            = RawdataConverter.string(responseJson["phone"])
+        
+        email                   = RawdataConverter.string(responseJson["email"])
+        
+        if email.count > 0{
+             isEmailVerified          = true
+        }
+        if contactNumber.count > 0{
+            isPhoneVerified           = true
+        }
+        
+        
+        
+       
+        
+        
+        
+        userImageURL            = RawdataConverter.string(responseJson["profile_pic"])
+        
+        kycId                   = RawdataConverter.string(responseJson["kyc_id"])
+        
+        guard let basicInfo = RawdataConverter.dictionary(responseJson["BasicInfo"]) else {
+            return
+        }
+        
+        if let docImages = RawdataConverter.array(basicInfo["DocImages"]){
+            if docImages.count > 0 {
+                if let dict = RawdataConverter.dictionary(docImages[0]){
+                    if let urlStr = RawdataConverter.optionalString(dict["url"]){
+                        userImageURL = urlStr
+                        do {
+                            let imageData = try Data.init(contentsOf: URL.init(string: urlStr)!)
+                            userImage = UIImage.init(data: imageData)!
+                        }
+                        catch let error as NSError {
+                            print("Error: \(error.localizedDescription)")
+                        }
+                        
+                    }
+                }
+            }
+        }
+        
+        
+        guard let basicDetails = RawdataConverter.dictionary(basicInfo["DocDetails"]) else {
+            return
+        }
+        
+        fname                   = RawdataConverter.string(basicDetails["firstname"])
+        mname                   = RawdataConverter.string(basicDetails["middlename"])
+        lname                   = RawdataConverter.string(basicDetails["lastname"])
+        
+        dob                     = Date.dateFromFormatted3_String(RawdataConverter.string(basicDetails["dob"]))
+        
+        placeOfBirth            = RawdataConverter.string(basicDetails["place_of_birth"])
+        
+        add1                    = RawdataConverter.string(basicDetails["address1"])
+        add2                    = RawdataConverter.string(basicDetails["address2"])
+        street                  = RawdataConverter.string(basicDetails["street"])
+        zipCode                 = RawdataConverter.string(basicDetails["zip"])
+        city                    = RawdataConverter.string(basicDetails["city"])
+        state                   = RawdataConverter.string(basicDetails["state"])
+        country                 = RawdataConverter.string(basicDetails["country"])
+        gender                 = RawdataConverter.string(basicDetails["gender"])
+        
+        isBasicDetailsComplete  = true
+        isAddressDetailsComplete = true
+        
+        
+    }
+    
+    func initUpholdingDocEdit(response:Dictionary<String,Any>) {
+        guard let upholdingDict = RawdataConverter.dictionary(response["FaceInfo"]) else {
+            return
+        }
+        
+        if let docImages = RawdataConverter.array(upholdingDict["DocImages"]){
+            if docImages.count > 0 {
+                if let dict = RawdataConverter.dictionary(docImages[0]){
+                    if let urlStr = RawdataConverter.optionalString(dict["url"]){
+                    
+                        do {
+                            let imageData = try Data.init(contentsOf: URL.init(string: urlStr)!)
+                            holdingImage = UIImage.init(data: imageData)!
+                        }
+                        catch let error as NSError {
+                            print("Error: \(error.localizedDescription)")
+                        }
+                        
+                    }
+                }
+            }
+        }
+        
     }
 }

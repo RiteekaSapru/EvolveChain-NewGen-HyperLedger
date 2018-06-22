@@ -1,0 +1,19 @@
+
+
+Install Node
+Go to root  terminal
+1. # yum install -y gcc-c++ make
+2. # curl -sL https://rpm.nodesource.com/setup_9.x | sudo -E bash -
+3. # yum install -y nodejs
+4. # node -v
+5. # npm -v
+
+
+Setup App folder
+Go to root  terminal
+cd /var/www
+svn export https://github.com/EvolveChain/EvolveChain-NewGen-HyperLedger.git
+copy /var/www/EvolveChain-NewGen-HyperLedger/Code/Server/EvolveChainNodeJS/ to /var/www/
+delete /var/www/EvolveChain-NewGen-HyperLedger
+cd EvolveChainNodeJS
+node index.js

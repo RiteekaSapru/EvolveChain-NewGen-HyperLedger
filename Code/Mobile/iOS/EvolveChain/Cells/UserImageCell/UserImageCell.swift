@@ -21,6 +21,8 @@ class UserImageCell: UITableViewCell {
 
         // Configure the view for the selected state
     }
+    // MARK: - Custom Methods
+
     func setData(imgUserPic:UIImage) {
         
         imgUser.image = imgUserPic

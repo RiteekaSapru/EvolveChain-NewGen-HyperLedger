@@ -26,7 +26,22 @@ const App = new Schema({
     Server: { type: String },
     vendor_uuid: { type: String },
 
-    isdelete: { type: String },
+    device_info: {
+        device_name: { type: String },
+        device_type: { type: String },
+        os_version: { type: String },
+        ip: { type: String },
+        refer: { type: String },
+        server: { type: String },
+        latitude : {type : String},
+        longitude : {type : String},
+        network_provider : { type: String },
+        network_country_code :  { type: String },
+        mobile_network_code : { type: String },
+        iso_country_code: { type: String }
+    },
+
+    isdelete: { type: Boolean, default: false},
     key: { type: String },
     name: { type: String },
 
@@ -34,20 +49,24 @@ const App = new Schema({
     isd_code: { type: String },
 
     phone_info: {
-        otp:{type:String},
+        otp: { type: String },
         otp_expiry_time: { type: Date },
-        number:{type:String},
-        isd_code:{type:Number}
-    }, 
-    
-     // email: { type: String, validate: {validator: validateEmail, message:'Invalid email address'}},
-     email: { type: String },
-     email_info: {
-         otp:{type:String},
-         otp_expiry_time: { type: Date },
-         id:{type:String}
-     },   
- 
+        number: { type: String },
+        isd_code: { type: Number }
+    },
+
+    resubmit_pin: { 
+        otp : {type: String },
+        otp_expiry_time: { type: Date },
+    },
+
+    // email: { type: String, validate: {validator: validateEmail, message:'Invalid email address'}},
+    email: { type: String },
+    email_info: {
+        otp: { type: String },
+        otp_expiry_time: { type: Date },
+        id: { type: String }
+    },
 
     pin: { type: String },
     pin_otp: { type: String },
@@ -59,16 +78,15 @@ const App = new Schema({
         default: Date.now
     },
 
-    profile: { type: String },
-    hash: { type: String },
+    //profile: { type: String },
+    //hash: { type: String },
     last_modified: { type: Date },
 
     status: { type: String },
-    resubmit_pin: { type: String },
-
-    verification_code:{type:String},
+    
+    verification_code: { type: String },
     verification_comment: { type: String },
-    verification_reasons: [{type:String}],
+    verification_reasons: [{ type: String }],
     verification_time: { type: String },
     verification_by: { type: String }
 
@@ -83,11 +101,11 @@ App.virtual('kycdoc_data', {
     justOne: true // for many-to-1 relationships
 });
 
-
 App.pre('save', function (next) {
     var app = this;
     next();
 });
+
 App.pre('update', function () {
     this.update({}, { $set: { last_modified: commonUtility.UtcNow() } });
 });

@@ -1,0 +1,208 @@
+<!-- <p>
+  home works!
+
+  <a routerLink="/starter" routerLinkActive="active">starter</a>
+</p> -->
+<!-- <link rel="stylesheet" href="../../assets/scss/style.css">
+<link rel="stylesheet" href="../../assets/css/main.css"> -->
+
+<!-- <link rel="stylesheet" href="../../assets/css/normalize.css">
+<link rel="stylesheet" href="../../assets/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../assets/css/themify-icons.css">
+<link rel="stylesheet" href="../../assets/css/flag-icon.min.css">
+<link rel="stylesheet" href="../../assets/css/cs-skin-elastic.css"> -->
+
+<!-- <link rel="stylesheet" href="../../assets/scss/style.css"> -->
+<link rel="stylesheet" href="../../assets/css/main.css">
+
+<style>
+	.header-nav .login-form[_ngcontent-c1] .btn[_ngcontent-c1] {
+		padding: 6px;
+	}
+
+	.header-nav .dropdown-menu {
+		min-width: 300px;
+		-webkit-box-shadow: 0px 0px 25px 0px rgba(0, 0, 0, 0.5);
+		-moz-box-shadow: 0px 0px 25px 0px rgba(0, 0, 0, 0.5);
+		box-shadow: 0px 0px 25px 0px rgba(0, 0, 0, 0.5);
+	}
+
+	.header-nav .dropdown-menu .checkbox label {
+		line-height: 12px;
+	}
+
+	.move-left {
+		position: absolute;
+		right: 0;
+		left: auto;
+	}
+
+	.main-bg-parallax {
+		background-image: url('assets/img/paralax-bg.jpg');
+		background-size: 100% !important;
+		height: 100% !important;
+		width: 100%;
+	}
+
+	.contact-bg-parallax {
+		background-image: url('assets/img/contact-page.png');
+		background-size: 100%;
+		height: 100%;
+		width: 100%;
+	}
+</style>
+
+<!-- <script src="../../assets/js/parallax.min.js"></script>
+<script src="../../assets/js/main.js"></script>
+<script src="../../assets/js/site.js"></script> -->
+
+<header class="evolvechain-header">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-2">
+				<div class="evolvechain-logo">
+					<a href="#">
+						<img src="assets/img/Logo2.jpg" alt="" />
+						<strong>EvolveChain</strong>
+					</a>
+				</div>
+			</div>
+			<!-- <div class="navbar-custom-menu">
+					<ul class="nav navbar-nav"> -->
+			<div class="col-sm-10 offset-sm-5 text-right">
+				<nav class="header-nav">
+					<ul nav navbar-nav>
+						<li>
+							<a href="#about">About Us</a>
+						</li>
+						<li>
+							<a href="#contact">Contact Us</a>
+						</li>
+
+						<li class="dropdown user user-menu">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+								<span class="hidden-xs">Log In</span>
+							</a>
+							<ul class="dropdown-menu move-left">
+
+								<div class="login-form login-form-wrapper">
+									<div class="login-logo popup-login-logo">
+										<a href="index.html">
+											<img class="align-content" src="assets/img/Logo2.jpg" alt="">
+											<strong>EvolveChain</strong>
+										</a>
+									</div>
+									<form>
+										<div class="form-group">
+											<input type="email" class="form-control" placeholder="Email">
+										</div>
+										<div class="form-group">
+											<input type="password" class="form-control" placeholder="Password">
+										</div>
+										<div class="checkbox">
+											<label>
+												<input type="checkbox"> Remember Me
+											</label>
+										</div>
+										<button type="button" class="btn  button-blue btn-flat m-b-30 m-t-30" (click)="LoginBtnClick()">Log in</button>
+
+									</form>
+								</div>
+
+							</ul>
+						</li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+	</div>
+</header>
+<div class="banner-section parallax-window" parallax class="main-bg-parallax" [config]="{axis: y, speed: .5}">
+	<div class="banner-content-cover">
+		<div class="banner-content">
+			<div class="container text-center banner-container">
+				<h1>Welcome To EvolveChain</h1>
+				<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.Lorem Ipsum has been the industry's standard
+					dummy text ever since the 1500s.</p>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="about" class="about-us">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-6">
+				<div class="about-us-img">
+					<img src="assets/img/about_us2.jpg" alt="" />
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="about-content">
+					<h2>What we are</h2>
+					<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.Lorem Ipsum has been the industry's standard
+						dummy text ever since the 1500s.Lorem Ipsum is simply dummy text of the printing and typesetting industry.Lorem Ipsum
+						has been the industry's standard dummy text ever since the 1500s.</p>
+					<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.Lorem Ipsum has been the industry's standard
+						dummy text ever since the 1500s.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="contact" class="about-us contact-us parallax-window" parallax class="contact-bg-parallax" data-image-src="assets/img/contact-page.png"
+ data-speed="0.1">
+	<div class="container">
+		<div class="row">
+
+			<div class="col-sm-6">
+				<div class="about-content banner-content">
+					<h2>Contact Us</h2>
+					<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.Lorem Ipsum has been the industry's standard
+						dummy text ever since the 1500s.</p>
+					<address>
+						EvolveChain Evolution Inc
+						<br/> 100 King Street West, Suite 5700
+						<br/> Toronto, Ontario, M5X 1C7
+						<br/> Tel: (647) 931 – 9768
+						<br/> Fax: 99113388
+					</address>
+					<!-- <div class="contact-form-wrapper">
+								<form>
+									<input type="text" placeholder="Name...">
+									<input type="text" placeholder="Email...">
+									<input type="submit" value="submit" />
+								</form>
+							</div> -->
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="text-center">
+					<!-- <img src="images/location.png" alt="" /> -->
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<footer class="evolvechain-footer">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-6">
+				<div class="copyright">
+					<span>© EvolveChain 2018</span>
+				</div>
+			</div>
+			<div class="col-sm-6 text-right">
+				<div class="app-icon">
+					<span>Download Our App: </span>
+					<a href="">
+						<img src="assets/img/apple.png" alt="" />
+					</a>
+					<a href="">
+						<img src="assets/img/android.png" alt="" />
+					</a>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</footer>

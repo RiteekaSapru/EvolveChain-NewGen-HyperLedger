@@ -4,246 +4,6 @@
    version = "2.0">
    <Breakpoints>
       <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/AmericaRegistration/BasicDetails/VerifyOtpVC.swift"
-            timestampString = "549877638.379135"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "157"
-            endingLineNumber = "157"
-            landmarkName = "validateAllFields()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/AmericaRegistration/BasicDetails/VerifyOtpVC.swift"
-            timestampString = "549877638.379528"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "191"
-            endingLineNumber = "191"
-            landmarkName = "textFieldDidDelete(textfield:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Classes/GlobalMethods.swift"
-            timestampString = "548926933.4446011"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "225"
-            endingLineNumber = "225"
-            landmarkName = "uploadBasicDetails()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Classes/GlobalMethods.swift"
-            timestampString = "548926933.444647"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "227"
-            endingLineNumber = "227"
-            landmarkName = "uploadBasicDetails()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Controllers/BeforeLogin/Login/LoginVC.swift"
-            timestampString = "549971427.746228"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "262"
-            endingLineNumber = "262"
-            landmarkName = "textFieldShouldReturn(_:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/AmericaRegistration/SummaryVC/SummaryVC.swift"
-            timestampString = "549809647.111636"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "45"
-            endingLineNumber = "45"
-            landmarkName = "getArrayModelFor(section:row:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/AmericaRegistration/SummaryVC/SummaryVC.swift"
-            timestampString = "549809647.111685"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "117"
-            endingLineNumber = "117"
-            landmarkName = "tableView(_:cellForRowAt:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/NetworkManager/NetworkManager.swift"
-            timestampString = "550152490.514812"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "210"
-            endingLineNumber = "210"
-            landmarkName = "POSTKYCComplete(params:success:failure:)"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 (Swift.Optional&lt;Foundation.Data&gt;, Swift.Optional&lt;__ObjC.HTTPURLResponse&gt;, Swift.Optional&lt;__ObjC.NSError&gt;, Swift.Dictionary&lt;Swift.String, Any&gt;) -&gt; () in EvolveChain.NetworkManager.POSTKYCComplete(params: Swift.Dictionary&lt;Swift.String, Any&gt;, success: (Swift.Dictionary&lt;Swift.String, Any&gt;) -&gt; (), failure: (Swift.Optional&lt;Swift.String&gt;) -&gt; ()) -&gt; ()"
-                  moduleName = "EvolveChain"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/onkar/Desktop/Abhay/Newgen%20Projects/EvolveChain/iOS%20/EvolveChainGit/EvolveChain-NewGen-HyperLedger/Code/Mobile/iOS/EvolveChain/NetworkManager/NetworkManager.swift"
-                  timestampString = "549272838.676879"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "177"
-                  endingLineNumber = "177"
-                  offsetFromSymbolStart = "53">
-               </Location>
-               <Location
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 () -&gt; () in closure #1 (Swift.Optional&lt;Foundation.Data&gt;, Swift.Optional&lt;__ObjC.HTTPURLResponse&gt;, Swift.Optional&lt;__ObjC.NSError&gt;, Swift.Dictionary&lt;Swift.String, Any&gt;) -&gt; () in EvolveChain.NetworkManager.POSTKYCComplete(params: Swift.Dictionary&lt;Swift.String, Any&gt;, success: (Swift.Dictionary&lt;Swift.String, Any&gt;) -&gt; (), failure: (Swift.Optional&lt;Swift.String&gt;) -&gt; ()) -&gt; ()"
-                  moduleName = "EvolveChain"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/onkar/Desktop/Abhay/Newgen%20Projects/EvolveChain/iOS%20/EvolveChainGit/EvolveChain-NewGen-HyperLedger/Code/Mobile/iOS/EvolveChain/NetworkManager/NetworkManager.swift"
-                  timestampString = "549272838.678818"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "178"
-                  endingLineNumber = "178"
-                  offsetFromSymbolStart = "22">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/NetworkManager/NetworkManager.swift"
-            timestampString = "550152490.5149159"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "215"
-            endingLineNumber = "215"
-            landmarkName = "POSTKYCComplete(params:success:failure:)"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #2 (Swift.Optional&lt;Foundation.Data&gt;, Swift.Optional&lt;__ObjC.HTTPURLResponse&gt;, Swift.Optional&lt;__ObjC.NSError&gt;, Swift.Optional&lt;Swift.String&gt;) -&gt; () in EvolveChain.NetworkManager.POSTKYCComplete(params: Swift.Dictionary&lt;Swift.String, Any&gt;, success: (Swift.Dictionary&lt;Swift.String, Any&gt;) -&gt; (), failure: (Swift.Optional&lt;Swift.String&gt;) -&gt; ()) -&gt; ()"
-                  moduleName = "EvolveChain"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/onkar/Desktop/Abhay/Newgen%20Projects/EvolveChain/iOS%20/EvolveChainGit/EvolveChain-NewGen-HyperLedger/Code/Mobile/iOS/EvolveChain/NetworkManager/NetworkManager.swift"
-                  timestampString = "549272839.6062959"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "182"
-                  endingLineNumber = "182"
-                  offsetFromSymbolStart = "91">
-               </Location>
-               <Location
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 () -&gt; () in closure #2 (Swift.Optional&lt;Foundation.Data&gt;, Swift.Optional&lt;__ObjC.HTTPURLResponse&gt;, Swift.Optional&lt;__ObjC.NSError&gt;, Swift.Optional&lt;Swift.String&gt;) -&gt; () in EvolveChain.NetworkManager.POSTKYCComplete(params: Swift.Dictionary&lt;Swift.String, Any&gt;, success: (Swift.Dictionary&lt;Swift.String, Any&gt;) -&gt; (), failure: (Swift.Optional&lt;Swift.String&gt;) -&gt; ()) -&gt; ()"
-                  moduleName = "EvolveChain"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/onkar/Desktop/Abhay/Newgen%20Projects/EvolveChain/iOS%20/EvolveChainGit/EvolveChain-NewGen-HyperLedger/Code/Mobile/iOS/EvolveChain/NetworkManager/NetworkManager.swift"
-                  timestampString = "549272839.6081361"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "183"
-                  endingLineNumber = "183"
-                  offsetFromSymbolStart = "44">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Controllers/AfterLogin/Profile/ProfileVC.swift"
-            timestampString = "550152490.514969"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "212"
-            endingLineNumber = "212"
-            landmarkName = "tableView(_:cellForRowAt:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/AmericaRegistration/BasicDetails/VerifyOtpVC.swift"
-            timestampString = "549877638.380219"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "125"
-            endingLineNumber = "125"
-            landmarkName = "moveToBasic()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.ExceptionBreakpoint">
          <BreakpointContent
             shouldBeEnabled = "Yes"
@@ -256,223 +16,15 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/AmericaRegistration/BasicDetails/VerifyOtpVC.swift"
-            timestampString = "549877638.380717"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "357"
-            endingLineNumber = "357"
-            landmarkName = "APIGetEMailOtp(email:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/AmericaRegistration/BasicDetails/VerifyOtpVC.swift"
-            timestampString = "549877638.380968"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "350"
-            endingLineNumber = "350"
-            landmarkName = "APIGetEMailOtp(email:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Extensions/UIViewExtensions.swift"
-            timestampString = "550050158.459764"
+            filePath = "EvolveChain/Models/Registration/DocumentManager.swift"
+            timestampString = "551360588.822464"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "94"
-            endingLineNumber = "94"
-            landmarkName = "downloadImage(url:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/NetworkManager/RequestManager.swift"
-            timestampString = "550050158.459812"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "251"
-            endingLineNumber = "251"
-            landmarkName = "requestToUploadImagesWithParams(url:params:images:fileNames:method:success:failure:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/NetworkManager/RequestManager.swift"
-            timestampString = "550050158.459862"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "253"
-            endingLineNumber = "253"
-            landmarkName = "requestToUploadImagesWithParams(url:params:images:fileNames:method:success:failure:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/NetworkManager/RequestManager.swift"
-            timestampString = "550050158.45991"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "252"
-            endingLineNumber = "252"
-            landmarkName = "requestToUploadImagesWithParams(url:params:images:fileNames:method:success:failure:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/NetworkManager/RequestManager.swift"
-            timestampString = "550050158.459956"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "314"
-            endingLineNumber = "314"
-            landmarkName = "requestToUploadImagesWithParams(url:params:images:fileNames:method:success:failure:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Controllers/BeforeLogin/Login/LoginVC.swift"
-            timestampString = "549971427.74663"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "190"
-            endingLineNumber = "190"
-            landmarkName = "processResponse(data:errorMsg:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/CountryRegistration/Address/AddressVC.swift"
-            timestampString = "550149708.231861"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "173"
-            endingLineNumber = "173"
-            landmarkName = "uploadBasicDetails()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/CountryRegistration/Address/AddressVC.swift"
-            timestampString = "550149708.231907"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "178"
-            endingLineNumber = "178"
-            landmarkName = "uploadBasicDetails()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/CountryRegistration/Address/AddressVC.swift"
-            timestampString = "550149708.231946"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "185"
-            endingLineNumber = "185"
-            landmarkName = "uploadBasicDetails()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/CountrySelectionVC.swift"
-            timestampString = "550138924.864857"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "69"
-            endingLineNumber = "69"
-            landmarkName = "processToRegister(response:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Models/SignupConfig/DocModel.swift"
-            timestampString = "550152490.51524"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "38"
-            endingLineNumber = "38"
-            landmarkName = "initWith(model:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Models/SignupConfig/DocumentManager.swift"
-            timestampString = "550152490.51529"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "59"
-            endingLineNumber = "59"
+            startingLineNumber = "72"
+            endingLineNumber = "72"
             landmarkName = "initWith(docArray:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -483,13 +35,13 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Models/SignupConfig/DocumentManager.swift"
-            timestampString = "550152490.515331"
+            filePath = "EvolveChain/Models/Registration/BasicDetailsModel.swift"
+            timestampString = "551360588.82253"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "76"
-            endingLineNumber = "76"
-            landmarkName = "getFieldArrayForModel(model:docType:)"
+            startingLineNumber = "272"
+            endingLineNumber = "272"
+            landmarkName = "initWithResponseEdit(responseJson:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -499,13 +51,13 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/CountryRegistration/DocumentVC.swift"
-            timestampString = "550152490.515371"
+            filePath = "EvolveChain/GlobalMethods/GlobalMethods.swift"
+            timestampString = "551360588.8225811"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "62"
-            endingLineNumber = "62"
-            landmarkName = "updateUI()"
+            startingLineNumber = "840"
+            endingLineNumber = "840"
+            landmarkName = "processEditResponse(responesJSON:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -515,29 +67,13 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Cells/TextFieldCell/TextFieldCell.swift"
-            timestampString = "550152490.515417"
+            filePath = "EvolveChain/GlobalMethods/GlobalMethods.swift"
+            timestampString = "551360588.8228869"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "34"
-            endingLineNumber = "34"
-            landmarkName = "TextFieldCell"
-            landmarkType = "3">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/CountryRegistration/DocumentVC.swift"
-            timestampString = "550152490.51546"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "202"
-            endingLineNumber = "202"
-            landmarkName = "tableView(_:cellForRowAt:)"
+            startingLineNumber = "827"
+            endingLineNumber = "827"
+            landmarkName = "processEditResponse(responesJSON:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -547,13 +83,13 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Cells/TextFieldCell/TextFieldCell.swift"
-            timestampString = "550152490.5154999"
+            filePath = "EvolveChain/Models/Registration/DocumentManager.swift"
+            timestampString = "551360588.823103"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "40"
-            endingLineNumber = "40"
-            landmarkName = "setModel(mdl:cellType:)"
+            startingLineNumber = "81"
+            endingLineNumber = "81"
+            landmarkName = "initWith(docArray:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -563,13 +99,13 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Cells/TextFieldCell/TextFieldCell.swift"
-            timestampString = "550152490.5155391"
+            filePath = "EvolveChain/Models/Registration/BasicDetailsModel.swift"
+            timestampString = "551360588.823148"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "80"
-            endingLineNumber = "80"
-            landmarkName = "setModel(mdl:cellType:)"
+            startingLineNumber = "304"
+            endingLineNumber = "304"
+            landmarkName = "initWithResponseEdit(responseJson:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -579,13 +115,13 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/CountryRegistration/DocumentVC.swift"
-            timestampString = "550152490.515579"
+            filePath = "EvolveChain/Models/Registration/DocumentManager.swift"
+            timestampString = "551360588.82319"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "76"
-            endingLineNumber = "76"
-            landmarkName = "setupAddress()"
+            startingLineNumber = "171"
+            endingLineNumber = "171"
+            landmarkName = "getDocModelWithType(doc_type:inArray:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -595,13 +131,13 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Models/SignupConfig/DocumentManager.swift"
-            timestampString = "550152490.515619"
+            filePath = "EvolveChain/Models/Registration/DocumentManager.swift"
+            timestampString = "551360588.823228"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "145"
-            endingLineNumber = "145"
-            landmarkName = "getFieldArrayForModel(model:docType:)"
+            startingLineNumber = "172"
+            endingLineNumber = "172"
+            landmarkName = "getDocModelWithType(doc_type:inArray:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -611,13 +147,13 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Models/SignupConfig/DocModel.swift"
-            timestampString = "550152490.5156569"
+            filePath = "EvolveChain/Models/Registration/BasicDetailsModel.swift"
+            timestampString = "551360588.823269"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "136"
-            endingLineNumber = "136"
-            landmarkName = "getModelAsDictionary(type:)"
+            startingLineNumber = "298"
+            endingLineNumber = "298"
+            landmarkName = "initWithResponseEdit(responseJson:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -627,13 +163,29 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Extensions/DateExtension.swift"
-            timestampString = "550152490.515703"
+            filePath = "EvolveChain/NetworkManager/RequestManager.swift"
+            timestampString = "551360588.82331"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "188"
-            endingLineNumber = "188"
-            landmarkName = "getUTCDateStringFromDateString()"
+            startingLineNumber = "418"
+            endingLineNumber = "418"
+            landmarkName = "urlSession(_:task:didSendBodyData:totalBytesSent:totalBytesExpectedToSend:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "EvolveChain/NetworkManager/RequestManager.swift"
+            timestampString = "551360588.82335"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "104"
+            endingLineNumber = "104"
+            landmarkName = "makeGetAPICall(url:params:method:success:failure:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

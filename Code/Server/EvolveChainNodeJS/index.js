@@ -20,7 +20,11 @@ app.use((req, res, next) => {
     res.header(
         "Access-Control-Allow-Headers",
         "Origin, X-Requested-With, Content-Type, Accept"
-    );     
+    );
+    // res.header(
+    //     "Access-Control-Allow-Headers",
+    //     "GET,POST, PATCH,DELETE, OPTIONS"
+    // );
     next();
 });
 
@@ -32,33 +36,35 @@ app.engine('html', require('ejs').renderFile);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(expressValidator());
-app.use(express.static(__dirname + '/public'));
+app.use(express.static('dist'));
+//app.use(express.static(__dirname + '/public'));
 app.use('/public', express.static(__dirname + '/public'));
 
 
 // API & Web Routes
 app.use("/app/", routes.app);
 app.use("/kyc/", routes.kyc);
+// app.use("/web/", routes.web);
 app.use("", routes.web);
 
 // Return 404 Response in Json for APIs
-app.use("/api/*", (req, res) => {
-    res.status(status.NotFound).json({message: "Page not Found."});
-});
+// app.use("/api/*", (req, res) => {
+//     res.status(status.NotFound).json({ message: "Page not Found." });
+// });
 
-// 404 Page for Web 
-app.use("*", (req, res) => {
+app.use("*", (req, res) => {  
     let data = {
         SITE_NAME: config.get('app_name'),
         BASE_URL: config.get('base_url')
     };
-    return res.render("shared/404.html",data);
+    return res.render("shared/404.html", data);
+//    res.sendfile('./dist/index.html');
 });
 
 // connect to mongo database
-mongoose.connection.openUri(config.get('MONGODB_URL'), function(err, db) {
-    if(err){
-        console.log("Database Error....." + err);  
+mongoose.connection.openUri(config.get('MONGODB_URL'), function (err, db) {
+    if (err) {
+        console.log("Database Error....." + err);
     }
     // else{
     //     gfs = Grid(db, mongo);
@@ -73,7 +79,7 @@ const server = app.listen(PORT, () => {
 
 server.timeout = 300000; //5 minutes time out
 
-process.on('uncaughtException', (err)=> {
+process.on('uncaughtException', (err) => {
     logManager.Log("!!!Uncaught Exception!!! " + err.message);
 });
 
