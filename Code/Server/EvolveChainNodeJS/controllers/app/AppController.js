@@ -194,7 +194,7 @@ class AppController extends base_controller {
                 return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
 
             if (appData.resubmit_pin.otp != body.resubmit_pin)
-                return this.SendErrorResponse(res, CONFIG.ERROR_CODES.INCORRECT_OTP);
+                return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_OTP);
 
             var currentUtc = common_utility.UtcNow();
             //explicitly needs to convert to UTC, somehow mongodb or node js convert it to local timezone
@@ -462,7 +462,8 @@ class AppController extends base_controller {
     }
 
     async GeneratePin(req, res) {
-
+        
+        //Using the e-KYC ID as the User have to knw his EKYC ID for generating the PIN..
         req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
 
         try {
