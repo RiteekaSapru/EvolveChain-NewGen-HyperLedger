@@ -6,7 +6,7 @@ db.countries.insertMany([
 	{ name: "Canada", iso: "CA", order: 3, is_active: true, phone_code: '1', phone_format: '999-999-9999', currency_code: 'CAD', age_limit: { min: 14, max: 90 } }
 ]);
 
-db.countries.insertMany([
+db.verificationreasons.insertMany([
 	{ reason: "Data Mismatch", code: "ECR1", state: 'false' },
 	{ reason: "Document images are not clear", code: "ECR2", state: 'false' },
 	{ reason: "Image holding document is not clear", code: "ECR3", state: 'false' },
