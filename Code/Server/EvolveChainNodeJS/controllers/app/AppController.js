@@ -617,7 +617,7 @@ class AppController extends base_controller {
 
     async ChangePin(req, res) {
 
-        req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
+        req.checkBody("key", messages.req_ekycid).notEmpty();
         req.checkBody("pin", messages.req_pin).notEmpty();
         req.checkBody("new_pin", messages.req_new_pin).notEmpty();
         req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
@@ -630,10 +630,10 @@ class AppController extends base_controller {
                 this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
             }
 
-            let body = _.pick(req.body, ['pin', 'new_pin', 'ekyc_id','vendor_uuid']);
+            let body = _.pick(req.body, ['pin', 'new_pin', 'key','vendor_uuid']);
 
             var app_conditions = {
-                ekyc_id: body.ekyc_id
+                key: body.key
             }
 
             var App = await app.findOne(app_conditions);
