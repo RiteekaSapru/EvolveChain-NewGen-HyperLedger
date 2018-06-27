@@ -246,6 +246,7 @@ class AppController extends base_controller {
             if (!App)
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_KEY);
 
+            //have added this check as after login, no other device can be used
             if (App.vendor_uuid != body.vendor_uuid) {
                 return this.SendErrorResponse(res, config.ERROR_CODES.DEVICE_MISMATCH);
             }
@@ -374,11 +375,8 @@ class AppController extends base_controller {
             var status = App.status;
             var errorMsg = "Your application is in " + status + " status.";
 
-            if (status != config.APP_STATUSES.VERIFIED) {
-                return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, errorMsg);
-            }
-
-            if (App.vendor_uuid != body.vendor_uuid) {
+            //have used verified status as well because same is used for changing mobile no when status is not verified 
+            if (status != config.APP_STATUSES.VERIFIED && App.vendor_uuid != body.vendor_uuid) {
                 return this.SendErrorResponse(res, config.ERROR_CODES.DEVICE_MISMATCH);
             }
 

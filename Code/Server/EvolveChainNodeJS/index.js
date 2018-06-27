@@ -12,6 +12,9 @@ const status = config.get('status');
 const PORT = config.get('port');
 const base_url = config.get('base_url');
 
+//For Scheduler Service
+//var schedular = require('./scheduler/EvolveChainScheduler');
+
 const app = express();
 
 // Cors Headers
