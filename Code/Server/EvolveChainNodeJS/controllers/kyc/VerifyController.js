@@ -176,7 +176,18 @@ class VerifyController extends BaseController {
     async NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams) {
         var appSuccess = await App.update({ 'key': appKey }, appSetParams);
         try {
-            var emailSuccess = await emailService.SendEmail(userEmailId, subject, emailBody);
+        var emailSuccess = await emailService.SendEmail(userEmailId, subject, emailBody);
+        var parameters = {
+            app_key: appKey,
+            is_open: false,
+            to: userEmailId,
+            subject: subject,
+            last_modified: commonUtility.UtcNow(),
+            body: emailBody,
+            notification_type: config.NOTIFICATION_TYPES.EMAIL
+        }
+        var notificationQueue = new NotificationQueue(parameters);
+        var newNotificationQueue = await notificationQueue.save();
 
         } catch (ex) {
             logManager.Log(`Email Notification-Exception: ${ex.message}`);
@@ -188,13 +199,12 @@ class VerifyController extends BaseController {
                 subject: subject,
                 last_modified: commonUtility.UtcNow(),
                 body: emailBody,
-                notification_type: config.NOTIFICATION_TYPE.EMAIL
+                notification_type: config.NOTIFICATION_TYPES.EMAIL
             }
             var notificationQueue = new NotificationQueue(parameters);
             var newNotificationQueue = await notificationQueue.save();
-
         }
-        return (appSuccess);
+            return (newNotificationQueue);
     }
 
     async GetDocumentInfo(docInfo, countryIso, docType) {
