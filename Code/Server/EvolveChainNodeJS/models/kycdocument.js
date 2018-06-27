@@ -69,6 +69,9 @@ const KYCDocument = new Schema({
     face_info: {
         details:{type: GeneralDocument},
         images: { type: [ImageInfo] },
+        time: {type: Date},
+        location: {type: String},
+        ip: {type: String}
     },
     last_modified: { type: Date },
     //status: { type: String },
