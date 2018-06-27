@@ -85,6 +85,9 @@ class KYCController extends BaseController {
                     break;
                 case "face":
                     req.checkBody("number", messages.req_number).notEmpty();
+                    req.checkBody("time", messages.req_time).notEmpty();
+                    req.checkBody("location", messages.req_location).notEmpty();
+                    req.checkBody("ip", messages.req_IP).notEmpty();
                     break;
                 default:
                     return this.SendErrorResponse(res, config.ERROR_CODES.STEP_NAME_MISSING);
@@ -313,6 +316,7 @@ class KYCController extends BaseController {
                     document_type: body.substep,
                     sub_document_type: body.subdoc
                 };
+
                 setParams.address_info = {};
                 setParams.address_info.details = details;
                 setParams.address_info.images = imgArr;
@@ -336,6 +340,9 @@ class KYCController extends BaseController {
                     number: body.number
                 };
                 setParams.face_info = {};
+                setParams.face_info.time=body.time;
+                setParams.face_info.location=body.location;
+                setParams.face_info.ip=body.ip;
                 setParams.face_info.details = details;
                 setParams.face_info.images = imgArr;
                 break;
