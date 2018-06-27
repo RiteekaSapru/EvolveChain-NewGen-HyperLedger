@@ -14,6 +14,7 @@ const App = require('../../models/apps');
 const KycDocument = require('../../models/kycdocument');
 const ProofDocuments = require('../../models/proofdocuments');
 const VerificationReasons = require('../../models/verificationReason');
+const NotificationQueue = require('../../models/notificationQueue');
 
 
 const messages = config.messages;
@@ -164,9 +165,9 @@ class VerifyController extends BaseController {
 
             }
         } catch (ex) {
+
             logManager.Log(`VerifyKyc-Exception: ${ex.message}`);
             return res.redirect(baseURL);
-
         }
         return res.redirect(req.baseUrl + "/verify/" + appKey);
     }
@@ -179,7 +180,19 @@ class VerifyController extends BaseController {
 
         } catch (ex) {
             logManager.Log(`Email Notification-Exception: ${ex.message}`);
-            //add in notification list for schedular to pickup
+
+            var parameters = {
+                app_key: appKey,
+                is_open: true,
+                to: userEmailId,
+                subject: subject,
+                last_modified: commonUtility.UtcNow(),
+                body: emailBody,
+                notification_type: config.NOTIFICATION_TYPE.EMAIL
+            }
+            var notificationQueue = new NotificationQueue(parameters);
+            var newNotificationQueue = await notificationQueue.save();
+
         }
         return (appSuccess);
     }

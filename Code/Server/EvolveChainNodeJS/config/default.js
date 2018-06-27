@@ -50,6 +50,7 @@ module.exports = {
   ERROR_CODES: appConfig.ERROR_CODE,
   HTTP_STATUSES: appConfig.HTTP_STATUS,
   APP_STATUSES: appConfig.APP_STATUS,
+  NOTIFICATION_TYPES: appConfig.NOTIFICATION_TYPE,
   VERIFICATION_REASONS: appConfig.VERIFICATION_REASON, 
   messages: messages,
   FTP_URL: FTP_URL,
