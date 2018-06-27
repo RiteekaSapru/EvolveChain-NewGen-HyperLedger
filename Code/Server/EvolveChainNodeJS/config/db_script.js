@@ -23,7 +23,7 @@ db.configs.insertOne({
 // });
 approver_emails: ["arpit.jain@newgen.co.in",
 		"archana.mehta@newgen.co.in",
-		"abahy.shankar@newgen.co.in"]
+		"abhay.shankar@newgen.co.in"]
 });
 
 db.proofdocuments.insertMany([
