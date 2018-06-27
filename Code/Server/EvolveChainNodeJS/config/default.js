@@ -35,8 +35,8 @@ const MAIL_2 = 'joeld@'+process.env.COMPANY_DOMAIN;
 const MAIL_3 = 'webmaster@'+process.env.COMPANY_DOMAIN;
 const MAIL_4 = 'admin@'+process.env.COMPANY_DOMAIN;
 
-const appLogoUrl = 'https://cdn1.imggmi.com/uploads/2018/6/12/17ae56b9e9ca9293bc3d54cd879a816a-full.png';
-//const appLogoUrl = SITE_IMAGES + '/logo.png';
+//const appLogoUrl = 'http://crypto.evolvechain.org:4600/public/images/logo.png';
+const appLogoUrl = SITE_IMAGES + '/logo.png';
 
 
 module.exports = {
