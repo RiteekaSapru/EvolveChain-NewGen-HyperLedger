@@ -14,8 +14,10 @@ const log_manager = require('../../helpers/LogManager');
 const base_controller = require('../BaseController');
 
 const app = require('../../models/apps');
+const NotificationQueue = require('../../models/notificationQueue');
 const Country = require('../../models/country');
 const ProofDocuments = require('../../models/proofdocuments');
+const VerificationReasons = require('../../models/verificationReason');
 
 const kyc_document = require('../../models/kycdocument');
 
@@ -248,7 +250,7 @@ class AppController extends base_controller {
 
             //have added this check as after login, no other device can be used
             if (App.vendor_uuid != body.vendor_uuid) {
-                return this.SendErrorResponse(res, config.ERROR_CODES.DEVICE_MISMATCH);
+                return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, messages.device_mismatch);
             }
 
             var email = body.email.toLowerCase();
@@ -615,7 +617,7 @@ class AppController extends base_controller {
 
     async ChangePin(req, res) {
 
-        req.checkBody("key", messages.req_ekycid).notEmpty();
+        req.checkBody("key", messages.req_app_key).notEmpty();
         req.checkBody("pin", messages.req_pin).notEmpty();
         req.checkBody("new_pin", messages.req_new_pin).notEmpty();
         req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
@@ -630,6 +632,7 @@ class AppController extends base_controller {
 
             let body = _.pick(req.body, ['pin', 'new_pin', 'key','vendor_uuid']);
 
+
             var app_conditions = {
                 key: body.key
             }
@@ -640,7 +643,7 @@ class AppController extends base_controller {
                 return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
             }
             if (App.vendor_uuid != body.vendor_uuid) {
-                return this.SendErrorResponse(res, config.ERROR_CODES.DEVICE_MISMATCH);
+                return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, messages.device_mismatch);
             }
 
             if (body.pin == body.new_pin) {
@@ -658,8 +661,6 @@ class AppController extends base_controller {
             var updatedApp = await this.FindAndModifyQuery(conditions, setParams);
 
             if (!updatedApp) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
-
-
 
             return this.GetSuccessResponse("ChangePin", updatedApp, res);
 

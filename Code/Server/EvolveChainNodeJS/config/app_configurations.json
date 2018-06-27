@@ -6,6 +6,10 @@
         "REJECTED": "Rejected",
         "EXPIRED": "Expired"
     },
+    "NOTIFICATION_TYPE": {
+        "EMAIL": "Email",
+        "MESSAGE": "Msg"
+    },
     "ERROR_CODE": {
         "ERROR": "E00",
         "EXCEPTION": "E100",
