@@ -84,6 +84,9 @@ const App = new Schema({
 
     status: { type: String },
     
+    //This is set to true when the notification is sent to the user prior to 15 days
+    expire_notification : {type : Boolean, default: false},
+    
     verification_code: { type: String },
     verification_comment: { type: String },
     verification_reasons: [{ type: String }],

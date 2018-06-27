@@ -28,7 +28,7 @@ const ImageInfo = new Schema({
 
 const GeneralDocument = new Schema({
     number: { type: String },
-    expiry_date: { type: String },
+    expiry_date: { type: Date },
     country: { type: String },
     document_type: { type: String },
     sub_document_type: { type: String }
