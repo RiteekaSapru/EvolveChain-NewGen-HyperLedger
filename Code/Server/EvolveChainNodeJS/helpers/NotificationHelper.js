@@ -6,7 +6,7 @@ class NotificationHelper {
     /// notification_type : Phone, Email\
     /// When notification_type : Phone
     /// to : phone no, body :message,subject : ""
-    async AddNotificationQueue(app_key, to, body, notification_type, subject) {
+    async AddNotificationQueue(appKey, to, body, notification_type, subject) {
 
         var parameters = {
             app_key: appKey,
