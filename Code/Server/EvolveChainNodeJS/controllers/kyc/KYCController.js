@@ -112,24 +112,32 @@ class KYCController extends BaseController {
             var proofDocumentCodes =[];
             if (body.step == "identity" || body.step == "address") {
                 proofDocument = await ProofDocuments.find({country_iso: { $eq : iso}},{code:1});
-                // for (var j = 0; j < proofDocument.length; j++) {
-                //     proofDocumentCodes.push(proofDocument[j].code);
-                // }
                 proofDocumentCodes = proofDocument.map(function(value){
                    return value.code;
                 });
+                var idx = proofDocumentCodes.indexOf(body.substep);
+                if(idx==-1)
+                    return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_ADDRESS_DOCUMENT_TYPE);
+
+                var kycDoc = await KYCDocument.find().or([{ $and: [{"address_info.details.number": { $eq: body.number }}, {"address_info.details.document_type": { $eq: body.substep} }] },{ $and: [{ "identity_info.details.number": { $eq: body.number } }, { "identity_info.details.document_type": { $eq: body.substep } }] }])
+
+                if(kycDoc.length>=1)
+                {
+                    return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_ALREADY_EXISTS);
+                }
+
             }
 
-            switch (body.step) {
-                case "address":
-                case "identity":
-                    var idx = proofDocumentCodes.indexOf(body.substep);
-                    if(idx==-1)
-                        return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_ADDRESS_DOCUMENT_TYPE);
-                    break;
-                default:
-                    break;
-            }
+            // switch (body.step) {
+            //     case "address":
+            //     case "identity":
+            //         var idx = proofDocumentCodes.indexOf(body.substep);
+            //         if(idx==-1)
+            //             return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_ADDRESS_DOCUMENT_TYPE);
+            //         break;
+            //     default:
+            //         break;
+            // }
 
             let key = req.params.key;
             var conditions = {

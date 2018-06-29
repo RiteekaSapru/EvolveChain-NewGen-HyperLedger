@@ -96,6 +96,7 @@
         "E24": "Phone or Email not yet verified",
         "E25": "Your application has expired. Please sign up again.",
         "E26": "Step name missing",
-        "E27": "Invalid Address Document type!"
+        "E27": "Invalid Address Document type!",
+        "E28": "Document already exists!"
     }
 }

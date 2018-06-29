@@ -13,14 +13,31 @@ class HyperLedgerService {
         return GeneralService.GetService(HL_URL_EKYC);
     }
 
-    PostEkycDetails(eKycId, email, phone, isd_code, basicDetailObj) {
-        basicDetailObj.eKYCId = eKycId;
-        basicDetailObj.email = email;
-        basicDetailObj.phone = phone;
-        basicDetailObj.phone_code = isd_code;
+    // PostEkycDetails(eKycId, email, phone, isd_code, basicDetailObj) {
+    //     basicDetailObj.eKYCId = eKycId;
+    //     basicDetailObj.email = email;
+    //     basicDetailObj.phone = phone;
+    //     basicDetailObj.phone_code = isd_code;
 
-        let eKycInfo = _.pick(basicDetailObj, ['eKYCId', 'email', 'phone', 'phone_code', 'firstname', "middlename", "lastname",
-            "place_of_birth", "dob", "gender", "city", "street", "address1", "address2", "zip", "state", "country"]);
+    //     let eKycInfo = _.pick(basicDetailObj, ['eKYCId', 'email', 'phone', 'phone_code', 'firstname', "middlename", "lastname",
+    //         "place_of_birth", "dob", "gender", "city", "street", "address1", "address2", "zip", "state", "country"]);
+
+    //     return GeneralService.PostService(HL_URL_EKYC, eKycInfo);
+    // }
+    PostEkycDetails(eKYCID, email, phone, isd_code, status, country_iso, basicDetailObj, addressDetailObj, identityDetailObj) {
+
+        let DocDetails= {};
+        DocDetails.eKYCID = eKYCID;
+        DocDetails.email = email;
+        DocDetails.phone = phone;
+        DocDetails.isd_code = isd_code;
+        DocDetails.status = status;
+        DocDetails.country_iso = country_iso;
+        DocDetails.basicDetailObj = JSON.stringify(basicDetailObj);;
+        DocDetails.addressDetailObj = JSON.stringify(addressDetailObj);
+        DocDetails.identityDetailObj = JSON.stringify(identityDetailObj);
+
+        let eKycInfo = _.pick(DocDetails, ['eKYCID', 'email', 'phone', 'isd_code','status','country_iso','basicDetailObj','addressDetailObj','identityDetailObj']);
 
         return GeneralService.PostService(HL_URL_EKYC, eKycInfo);
     }
@@ -40,6 +57,11 @@ class HyperLedgerService {
         return GeneralService.PutService(updateUrl, basicDetailObj);
     }
 }
+
+    // UpdateEmailMobile(eKycId, updatedMobile, isdCode, updatedEmail){
+    //     let updateUrl = HL_URL_EKYC + '/' + eKycId;
+    //     return GeneralService.PutService(updateUrl, updatedEmail, updatedMobile);
+    // }
 
 
 //TEST CASES
