@@ -1,5 +1,6 @@
 const NotificationQueue = require('../models/notificationQueue');
 const emailService = require('../services/EmailService');
+const sms_service = require('../services/SMSService');
 
 class NotificationHelper {
 
@@ -22,19 +23,26 @@ class NotificationHelper {
 
     async ProcessEmailNotificationQueue() {
 
-        var notifications = await NotificationQueue.find({ is_open: true });
-        notifications.forEach(notification => {
-
-            emailService.SendEmail(notification.to, notification.subject, notification.body);
-
-            var setParams = {
-                $set: {
-                    is_open: false
+        let notifications = await NotificationQueue.find({ is_open: true }).sort({ last_modified: 1 });
+        notifications.forEach(async function (notification) {
+            let notificationId = notification._id;
+            if (notification.notification_type === "Email") {
+                await emailService.SendEmail(notification.to, notification.subject, notification.body);
+                let setParams = {
+                    $set: {
+                        is_open: false
+                    }
                 }
+                await NotificationQueue.update({ _id: notificationId }, setParams);
+            } else if (notification.notification_type === "Msg") {
+                await sms_service.SendSMS(notification.to, notification.body);
+                let setParams = {
+                    $set: {
+                        is_open: false
+                    }
+                }
+                await NotificationQueue.update({ _id: notificationId }, setParams);
             }
-            
-            await NotificationQueue.update({ _Id: notification._Id }, setParams);
-
         }
         );
     }

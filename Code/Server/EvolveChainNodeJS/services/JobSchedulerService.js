@@ -3,8 +3,8 @@ const common_utility = require('../helpers/CommonUtility');
 const App = require('../models/apps');
 const File = require('../models/files');
 const KYCDocument = require('../models/kycdocument');
+const ConfigDB = require('../models/config');
 const config = require('config');
-const APP_EXPIRATION_DAYS = config.get('APP_EXPIRATION_DAYS');
 var _ = require('lodash');
 const ejs = require('ejs');
 const fs = require("fs");
@@ -16,8 +16,8 @@ let imageContainers = ['basic_info', 'address_info', 'identity_info', 'face_info
 class JobSchedulerService {
 
     async CleanupData() {
-        let expiryDate = common_utility.AddDaysToUtcNow(-APP_EXPIRATION_DAYS);
-        //let expiredApps = await App.find({ key: '50890b3cd5a123ba6b5f8834d2a328fc' });
+        let configCol = await ConfigDB.findOne({});
+        let expiryDate = common_utility.AddDaysToUtcNow(-configCol.app_expiration_days);
         let expiredApps = await App.find({ last_login_time: { $lte: expiryDate } });
         _.each(expiredApps, async function (app) {
             if (app['status'] === "Pending") {
@@ -44,8 +44,8 @@ class JobSchedulerService {
     }
 
     async SetExpiredStatusAndNotifyUser() {
+        let configCol = await ConfigDB.findOne({});
         let nowDate = common_utility.NowDate();
-        
         KYCDocument.find()
             .or([{ "address_info.details.expiry_date": { $lte: nowDate } }, { "identity_info.details.expiry_date": { $lte: nowDate } }])
             .populate('app_data')
@@ -57,12 +57,12 @@ class JobSchedulerService {
                 });
                 let emailSubject = 'EvolveChain Application - Expired';
                 let emailBody = ejs.render(template, {
-                    expiryDays: APP_EXPIRATION_DAYS,
+                    expiryDays: configCol.app_expiration_days,
                     APP_LOGO_URL: config.get('APP_LOGO_URL'),
                     SITE_NAME: config.get('app_name'),
                     CURRENT_YEAR: config.get('current_year')
                 });
-                let phoneMessage = "This is to inform you that your KYC application has expired. Please resubmit your application with in next " + config.APP_EXPIRATION_DAYS + " days";
+                let phoneMessage = "This is to inform you that your KYC application has expired. Please resubmit your application with in next " + configCol.app_expiration_days + " days";
                 _.each(expiredDocs, async function (kycDoc) {
                     let appData = kycDoc.app_data;
                     if (appData.status === config.APP_STATUSES.VERIFIED) {
@@ -93,7 +93,8 @@ class JobSchedulerService {
     }
 
     async AdvanceNotificationForExpiry() {
-        let expiringTime = common_utility.AddDaysToUtcNow(config.APP_EXPIRY_NOTIFICATION_DAYS);
+        let configCol = await ConfigDB.findOne({});
+        let expiringTime = common_utility.AddDaysToUtcNow(configCol.app_expiry_notification_days);
         KYCDocument.find()
             .or([{ "address_info.details.expiry_date": { $lte: expiringTime } }, { "identity_info.details.expiry_date": { $lte: expiringTime } }])
             .populate('app_data')
@@ -105,12 +106,12 @@ class JobSchedulerService {
                 });
                 let emailSubject = 'EvolveChain Application - About To Expire';
                 let emailBody = ejs.render(template, {
-                    expiryDays: config.APP_EXPIRY_NOTIFICATION_DAYS,
+                    expiryDays: configCol.app_expiry_notification_days,
                     APP_LOGO_URL: config.get('APP_LOGO_URL'),
                     SITE_NAME: config.get('app_name'),
                     CURRENT_YEAR: config.get('current_year')
                 });
-                let phoneMessage = "This is to inform you that your KYC application is going to expire in " + config.APP_EXPIRY_NOTIFICATION_DAYS + " days. Please resubmit your application with in next " + config.APP_EXPIRY_NOTIFICATION_DAYS + " days";
+                let phoneMessage = "This is to inform you that your KYC application is going to expire in " + configCol.app_expiry_notification_days + " days. Please resubmit your application with in next " + configCol.app_expiry_notification_days + " days";
                 _.each(expiringDocs, async function (kycDoc) {
                     let appData = kycDoc.app_data;
                     if (!appData.expire_notification || appData.expire_notification === false) {
