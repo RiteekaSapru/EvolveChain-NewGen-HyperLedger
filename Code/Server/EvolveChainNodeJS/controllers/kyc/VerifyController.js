@@ -14,6 +14,7 @@ const App = require('../../models/apps');
 const KycDocument = require('../../models/kycdocument');
 const ProofDocuments = require('../../models/proofdocuments');
 const VerificationReasons = require('../../models/verificationReason');
+const NotificationQueue = require('../../models/notificationQueue');
 
 
 const messages = config.messages;
@@ -105,16 +106,19 @@ class VerifyController extends BaseController {
 
             let isVerified = (action.toUpperCase() == "VERIFY");
 
-            let basicDetails = appData.kycdoc_data.basic_info.details;
+            // let basicDetails = appData.kycdoc_data.basic_info.details;
+            let basicDetails = commonUtility.GetKycDocumentInfo(appData.kycdoc_data.basic_info, "BASIC");
+            let addressDetails = commonUtility.GetKycDocumentInfo(appData.kycdoc_data.address_info, "ADDRESS");
+            let identityDetails = commonUtility.GetKycDocumentInfo(appData.kycdoc_data.identity_info, "IDENTITY");
 
-            var eKycId = "";
+            var eKYCID = "";
             var appStatus = config.APP_STATUSES.REJECTED;
             var emailTemplateHtml = config.EMAIL_TEMPLATES_PATH + '/kycRejected.html';
             var subject = 'EvolveChain KYC - Rejected';
 
             if (isVerified) {
-                //generate eKycId 
-                eKycId = commonUtility.GenerateKYCId(appData.country_iso, basicDetails.firstname);
+                //generate eKYCID 
+                eKYCID = commonUtility.GenerateKYCId(appData.country_iso, appData.kycdoc_data.basic_info.details.firstname);
                 appStatus = config.APP_STATUSES.VERIFIED;
                 emailTemplateHtml = config.EMAIL_TEMPLATES_PATH + '/kycApproved.html';
                 subject = 'EvolveChain KYC - Approved';
@@ -124,7 +128,7 @@ class VerifyController extends BaseController {
                 {
                     $set:
                         {
-                            'ekyc_id': eKycId,
+                            'ekyc_id': eKYCID,
                             'status': appStatus,
                             verification_comment: req.body.textBoxComment,
                             verification_time: commonUtility.UtcNow(),
@@ -142,7 +146,7 @@ class VerifyController extends BaseController {
                 { "reason": 1 }
             );
             var emailBody = ejs.render(template, {
-                eKycId: eKycId,
+                eKycId: eKYCID,
                 expiryDays: config.APP_EXPIRATION_DAYS,
                 APP_LOGO_URL: config.get('APP_LOGO_URL'),
                 SITE_NAME: config.get('app_name'),
@@ -150,10 +154,11 @@ class VerifyController extends BaseController {
                 REASON_LIST: reasonDefinition.map(x => x.reason)
             });
 
-            if (isVerified && eKycId != '') {
+            if (isVerified && eKYCID != '') {
 
-                var hlResult = await hyperLedgerService.PostEkycDetails(eKycId, appData.email, appData.phone, appData.isd_code, basicDetails);//.then((result) => {
-                if (hlResult && hlResult.eKYCId == eKycId) {
+                // var hlResult = await hyperLedgerService.PostEkycDetails(eKYCID, appData.email, appData.phone, appData.isd_code, basicDetails);//.then((result) => {
+                var hlResult = await hyperLedgerService.PostEkycDetails(eKYCID, appData.email, appData.phone, appData.isd_code, appData.status, appData.country_iso, basicDetails, addressDetails, identityDetails);
+                if (hlResult && hlResult.eKYCID == eKYCID) {
                     var result = await this.NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams);
                 }
                 else
@@ -164,24 +169,30 @@ class VerifyController extends BaseController {
 
             }
         } catch (ex) {
+
             logManager.Log(`VerifyKyc-Exception: ${ex.message}`);
             return res.redirect(baseURL);
-
         }
         return res.redirect(req.baseUrl + "/verify/" + appKey);
     }
 
 
     async NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams) {
-        var appSuccess = await App.update({ 'key': appKey }, appSetParams);
-        try {
-            var emailSuccess = await emailService.SendEmail(userEmailId, subject, emailBody);
 
-        } catch (ex) {
-            logManager.Log(`Email Notification-Exception: ${ex.message}`);
-            //add in notification list for schedular to pickup
+        var appSuccess = await App.update({ 'key': appKey }, appSetParams);
+        var parameters = {
+            app_key: appKey,
+            is_open: true,
+            to: userEmailId,
+            subject: subject,
+            last_modified: commonUtility.UtcNow(),
+            body: emailBody,
+            notification_type: config.NOTIFICATION_TYPES.EMAIL
         }
-        return (appSuccess);
+        var notificationQueue = new NotificationQueue(parameters);
+        var newNotificationQueue = await notificationQueue.save();
+
+        return (newNotificationQueue);
     }
 
     async GetDocumentInfo(docInfo, countryIso, docType) {

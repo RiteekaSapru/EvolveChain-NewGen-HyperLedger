@@ -103,27 +103,29 @@ public class AppUtil {
         UserBasicModel userBasicModel = null;
 
         try {
-            JSONObject object = new JSONObject(result);
+            JSONObject mainObject = new JSONObject(result);
+            JSONObject object = mainObject.getJSONObject("basic_details");
             userBasicModel = new UserBasicModel(
-                    object.getString("email"),
-                    object.getString("phone"),
-                    object.getString("country_code"),
+                    mainObject.getString("email"),
+                    mainObject.getString("phone"),
+                    mainObject.getString("country_code"),
                     object.getString("firstname"),
                     object.getString("middlename"),
                     object.getString("lastname"),
+                    object.getString("gender"),
                     object.getString("dob"),
                     object.getString("place_of_birth"),
                     object.getString("address1"),
                     object.getString("address2"),
-                    object.getString("address2"),
+                    object.getString("street"),
                     object.getString("city"),
                     object.getString("zip"),
                     object.getString("state"),
                     object.getString("country"),
-                    Uri.parse(object.getString("profile_pic"))
+                    Uri.parse(mainObject.getString("profile_pic"))
             );
 
-            AppManager.getInstance().loginToken = object.getString("appkey");
+            AppManager.getInstance().loginToken = mainObject.getString("appkey");
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -132,14 +134,15 @@ public class AppUtil {
     }
 
     public static void clearUserData(Context context) {
-        AppManager.getInstance().pinMd5 = "";
+        //AppManager.getInstance().pinMd5 = "";
         AppManager.getInstance().kycId = "";
+        AppManager.getInstance().phone = "";
+        AppManager.getInstance().isd = "";
+        new SharedPrefManager(context).saveContactNumber("", "");
         AppManager.getInstance().basicModelAfterSignIn = null;
 
         SharedPrefManager prefManager = new SharedPrefManager(context);
-        prefManager.savePinMd5("");
         prefManager.saveKycId("");
-        prefManager.saveUserData("");
     }
 
     public static boolean saveSignUpInitData(String result) {
@@ -198,10 +201,17 @@ public class AppUtil {
 
         for (int i = 0; i<countriesArray.length(); i++) {
             JSONObject object = countriesArray.getJSONObject(i);
-            CountryCodeModel model = new CountryCodeModel(object.getString("PHONE_CODE"), object.getString("NAME"));
+            CountryCodeModel model = new CountryCodeModel(object.getString("PHONE_CODE"), object.getString("NAME"), "", "", true);
             codeModels[i] = model;
         }
 
         AppManager.getInstance().countryCodeModels = codeModels;
+    }
+
+    public static void clearNewCache(){
+        AppManager.getInstance().holdingDocumentModel = null;
+        AppManager.getInstance().identityDocumentModel = null;
+        AppManager.getInstance().addressDocumentModel = null;
+        AppManager.getInstance().basicModel = null;
     }
 }

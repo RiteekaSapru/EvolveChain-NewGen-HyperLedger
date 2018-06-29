@@ -50,6 +50,23 @@
 		height: 100%;
 		width: 100%;
 	}
+
+	.ng-valid[required],
+	.ng-valid.required {
+		border-left: 5px solid #42A948;
+		/* green */
+	}
+
+	.ng-invalid:not(form) {
+		border-left: 5px solid #a94442;
+		/* red */
+	}
+
+	/* .banner-content-cover[_ngcontent-c1] {
+		display: table;
+		height: 100vh;
+		width: 100vw;
+	} */
 </style>
 
 <!-- <script src="../../assets/js/parallax.min.js"></script>
@@ -73,7 +90,7 @@
 				<nav class="header-nav">
 					<ul nav navbar-nav>
 						<li>
-							<a href="#about">About Us</a>
+							<a href="#aboutxyz">About Us</a>
 						</li>
 						<li>
 							<a href="#contact">Contact Us</a>
@@ -81,7 +98,7 @@
 
 						<li class="dropdown user user-menu">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-								<span class="hidden-xs">Log In</span>
+								<span class="hidden-xs">Admin</span>
 							</a>
 							<ul class="dropdown-menu move-left">
 
@@ -92,20 +109,24 @@
 											<strong>EvolveChain</strong>
 										</a>
 									</div>
-									<form>
+									<form (ngSubmit)="LoginBtnClick()" #loginForm="ngForm" >
 										<div class="form-group">
-											<input type="email" class="form-control" placeholder="Email">
+											<input type="email" id="email" required [(ngModel)]="model.email" name="email"  #email="ngModel" class="form-control" placeholder="Email">
+											<div [hidden]="email.valid || email.pristine"
+											class="alert alert-danger">
+										 Name is required
+									   </div>
 										</div>
 										<div class="form-group">
-											<input type="password" class="form-control" placeholder="Password">
+											<input type="password" id="password" required [(ngModel)]="model.password" name="password" #password="ngModel" class="form-control" placeholder="Password">
 										</div>
 										<div class="checkbox">
 											<label>
 												<input type="checkbox"> Remember Me
 											</label>
 										</div>
-										<button type="button" class="btn  button-blue btn-flat m-b-30 m-t-30" (click)="LoginBtnClick()">Log in</button>
-
+										<!-- <button type="button" class="btn  button-blue btn-flat m-b-30 m-t-30" (click)="LoginBtnClick()">Log in</button> -->
+										<button type="submit" class="btn  button-blue btn-flat m-b-30 m-t-30" [disabled]="!loginForm.form.valid">Log in</button>
 									</form>
 								</div>
 
@@ -117,18 +138,19 @@
 		</div>
 	</div>
 </header>
+
 <div class="banner-section parallax-window" parallax class="main-bg-parallax" [config]="{axis: y, speed: .5}">
 	<div class="banner-content-cover">
 		<div class="banner-content">
 			<div class="container text-center banner-container">
-				<h1>Welcome To EvolveChain</h1>
+				<h1>Welcome To EvolveChain</h1><a href="#aboutxyz">About Us</a>
 				<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.Lorem Ipsum has been the industry's standard
 					dummy text ever since the 1500s.</p>
 			</div>
 		</div>
 	</div>
 </div>
-<div id="about" class="about-us">
+<div #aboutxyz name="aboutxyz" class="about-us">
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-6">

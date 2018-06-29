@@ -47,7 +47,7 @@ public class BasicInfoAdapter extends RecyclerView.Adapter<BasicInfoAdapter.Basi
                 break;
             case 2:
                 holder.title.setText(R.string.contact_number);
-                holder.value.setText("+" + basicModel.getIsd() + basicModel.getPhone());
+                holder.value.setText("+" + basicModel.getIsd() + " " + basicModel.getPhone());
                 holder.imageView.setVisibility(View.GONE);
                 holder.content.setVisibility(View.VISIBLE);
                 break;
@@ -70,56 +70,20 @@ public class BasicInfoAdapter extends RecyclerView.Adapter<BasicInfoAdapter.Basi
                 holder.content.setVisibility(View.VISIBLE);
                 break;
             case 6:
+                holder.title.setText(R.string.gender);
+                holder.value.setText(basicModel.getGender());
+                holder.imageView.setVisibility(View.GONE);
+                holder.content.setVisibility(View.VISIBLE);
+                break;
+            case 7:
                 holder.title.setText(R.string.date_of_birth);
                 holder.value.setText(basicModel.getDob());
                 holder.imageView.setVisibility(View.GONE);
                 holder.content.setVisibility(View.VISIBLE);
                 break;
-            case 7:
+            case 8:
                 holder.title.setText(R.string.birth_place);
                 holder.value.setText(basicModel.getPlaceBirth());
-                holder.imageView.setVisibility(View.GONE);
-                holder.content.setVisibility(View.VISIBLE);
-                break;
-            case 8:
-                holder.title.setText(R.string.address_1);
-                holder.value.setText(basicModel.getAddress1());
-                holder.imageView.setVisibility(View.GONE);
-                holder.content.setVisibility(View.VISIBLE);
-                break;
-            case 9:
-                holder.title.setText(R.string.address_2);
-                holder.value.setText(basicModel.getAddress2());
-                holder.imageView.setVisibility(View.GONE);
-                holder.content.setVisibility(View.VISIBLE);
-                break;
-            case 10:
-                holder.title.setText(R.string.street);
-                holder.value.setText(basicModel.getStreet());
-                holder.imageView.setVisibility(View.GONE);
-                holder.content.setVisibility(View.VISIBLE);
-                break;
-            case 11:
-                holder.title.setText(R.string.city);
-                holder.value.setText(basicModel.getCity());
-                holder.imageView.setVisibility(View.GONE);
-                holder.content.setVisibility(View.VISIBLE);
-                break;
-            case 12:
-                holder.title.setText(R.string.area_code);
-                holder.value.setText(basicModel.getZip());
-                holder.imageView.setVisibility(View.GONE);
-                holder.content.setVisibility(View.VISIBLE);
-                break;
-            case 13:
-                holder.title.setText(R.string.state);
-                holder.value.setText(basicModel.getState());
-                holder.imageView.setVisibility(View.GONE);
-                holder.content.setVisibility(View.VISIBLE);
-                break;
-            case 14:
-                holder.title.setText(R.string.country);
-                holder.value.setText(basicModel.getCountry());
                 holder.imageView.setVisibility(View.GONE);
                 holder.content.setVisibility(View.VISIBLE);
                 break;
@@ -129,7 +93,7 @@ public class BasicInfoAdapter extends RecyclerView.Adapter<BasicInfoAdapter.Basi
 
     @Override
     public int getItemCount() {
-        return 15;
+        return 9;
     }
 
     class BasicInfoViewHolder extends RecyclerView.ViewHolder {

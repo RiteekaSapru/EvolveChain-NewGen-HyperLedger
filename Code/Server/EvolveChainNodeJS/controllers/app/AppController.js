@@ -14,8 +14,10 @@ const log_manager = require('../../helpers/LogManager');
 const base_controller = require('../BaseController');
 
 const app = require('../../models/apps');
+const NotificationQueue = require('../../models/notificationQueue');
 const Country = require('../../models/country');
 const ProofDocuments = require('../../models/proofdocuments');
+const VerificationReasons = require('../../models/verificationReason');
 
 const kyc_document = require('../../models/kycdocument');
 
@@ -224,6 +226,7 @@ class AppController extends base_controller {
     async GenerateEmailOTP(req, res) {
 
         req.checkBody("email", messages.req_email).notEmpty().isEmail();
+        req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
 
         try {
             let result = await req.getValidationResult();
@@ -234,7 +237,7 @@ class AppController extends base_controller {
 
             }
 
-            let body = _.pick(req.body, ['email']);
+            let body = _.pick(req.body, ['email','vendor_uuid']);
             let key = req.params.key;
             var conditions = {
                 key: key
@@ -245,6 +248,10 @@ class AppController extends base_controller {
             if (!App)
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_KEY);
 
+            //have added this check as after login, no other device can be used
+            if (App.vendor_uuid != body.vendor_uuid) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, messages.device_mismatch);
+            }
 
             var email = body.email.toLowerCase();
             var email_code = common_utility.GenerateOTP(6);
@@ -344,6 +351,7 @@ class AppController extends base_controller {
 
         req.checkBody("mobile", messages.req_mobile).notEmpty();
         req.checkBody("country_code", messages.req_isd_code).notEmpty();
+        req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
 
         try {
 
@@ -355,7 +363,7 @@ class AppController extends base_controller {
 
             }
 
-            let body = _.pick(req.body, ['mobile', 'country_code']);
+            let body = _.pick(req.body, ['mobile', 'country_code','vendor_uuid']);
             let appKey = req.params.key;
 
             var conditions = {
@@ -365,6 +373,14 @@ class AppController extends base_controller {
             var App = await app.findOne(conditions);
 
             if (!App) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
+
+            var status = App.status;
+            var errorMsg = "Your application is in " + status + " status.";
+
+            //have used verified status as well because same is used for changing mobile no when status is not verified 
+            if (status != config.APP_STATUSES.VERIFIED && App.vendor_uuid != body.vendor_uuid) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.DEVICE_MISMATCH);
+            }
 
             var phone = body.mobile.replace("+", "");
             var isdCode = body.country_code.replace("+", "");
@@ -601,9 +617,10 @@ class AppController extends base_controller {
 
     async ChangePin(req, res) {
 
-        req.checkBody("ekyc_id", messages.req_ekycid).notEmpty();
+        req.checkBody("key", messages.req_app_key).notEmpty();
         req.checkBody("pin", messages.req_pin).notEmpty();
         req.checkBody("new_pin", messages.req_new_pin).notEmpty();
+        req.checkBody("vendor_uuid", messages.req_vendor_uuid).notEmpty();
 
         try {
             let result = await req.getValidationResult();
@@ -613,14 +630,27 @@ class AppController extends base_controller {
                 this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
             }
 
-            let body = _.pick(req.body, ['pin', 'new_pin', 'ekyc_id']);
+            let body = _.pick(req.body, ['pin', 'new_pin', 'key','vendor_uuid']);
+
+
+            var app_conditions = {
+                key: body.key
+            }
+
+            var App = await app.findOne(app_conditions);
+
+            if (!App) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
+            }
+            if (App.vendor_uuid != body.vendor_uuid) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, messages.device_mismatch);
+            }
 
             if (body.pin == body.new_pin) {
                 return this.SendErrorResponse(res, config.ERROR_CODES.SAME_PIN);
             }
 
             let conditions = {
-                ekyc_id: body.ekyc_id,
                 pin: body.pin
             }
 

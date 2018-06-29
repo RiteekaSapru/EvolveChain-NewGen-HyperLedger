@@ -28,6 +28,11 @@ public class AppConstants {
 
     public static final String SET_PIN = "SetPin";
 
+    public static final String CHANGE_PIN = "ChangePin";
+
+    public static final String  RE_SUBMIT_INIT = "resubmitInitialize";
+    public static final String RE_SUBMIT_VERIFCATION = "resubmitverification";
+
 
     //SharedPref Constants
     static final String SHARED_PREF_NAME = "EvolveChain";
@@ -36,6 +41,8 @@ public class AppConstants {
     static final String USER_DATA_KEY = "user_data";
     static final String KYC_ID_KEY = "kyc_id";
     static final String PIN_KEY = "pin_md5";
+    static final String PHONE_KEY = "phone";
+    static final String ISD_KEY = "isd";
 
     //
     public static final int VERIFICATION_TYPE_EMAIL = 0;
@@ -46,4 +53,8 @@ public class AppConstants {
     public static final int DOCUMENT_TYPE_DRIVING_LICENSE = 1;
     public static final int DOCUMENT_TYPE_TAXATION = 2;
     public static final int DOCUMENT_TYPE_UTILITY_BILL = 3;
+
+    //Country Selection Constant
+    public static final int SELECTED_COUNTRY_INDIA = 0;
+    public static final int SELECTED_COUNTRY_NORTH_AMERICA = 1;
 }

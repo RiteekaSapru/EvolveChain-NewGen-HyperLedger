@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/splash_background"
     android:orientation="vertical"
-    android:weightSum="3"
-    tools:context=".uis.activities.SignInActivity">
+    android:weightSum="4"
+    android:background="#FFF"
+    tools:context=".new_uis.SignInActivity">
 
     <ImageView
         android:id="@+id/image"
@@ -16,29 +15,74 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:contentDescription="@string/applogo"
-        android:padding="16dp"
-        android:src="@drawable/app_logo" />
+        android:padding="@dimen/_25sdp"
+        android:src="@drawable/app_logo"
+        android:transitionName="splash_image" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"
+        android:layout_weight="3"
         android:orientation="vertical"
         android:padding="16dp">
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/edit_text_kyc_id_wrapper"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="@dimen/_5sdp"
+                android:text="+"
+                android:onClick="onPhoneCodeClick"
+                android:textAppearance="?android:textAppearanceMedium" />
 
-            <EditText
-                android:id="@+id/edit_text_kyc_id"
+            <TextView
+                android:id="@+id/edit_text_phone_code"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="@dimen/_5sdp"
+                android:onClick="onPhoneCodeClick"
+                android:textAppearance="?android:textAppearanceMedium" />
+
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/kyc_id"
-                android:inputType="text" />
+                android:layout_gravity="bottom">
 
-        </android.support.design.widget.TextInputLayout>
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/edit_text_kyc_id_wrapper"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/contact_number">
+
+                    <EditText
+                        android:id="@+id/edit_text_kyc_id"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="phone"
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical"
+                        android:textAppearance="?android:textAppearanceLarge"/>
+
+                </android.support.design.widget.TextInputLayout>
+
+
+                <ImageView
+                    android:id="@+id/cleat_text_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/edit_text_kyc_id_wrapper"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignTop="@id/edit_text_kyc_id_wrapper"
+                    android:onClick="onClearKycIdClick"
+                    android:src="@drawable/ic_close_black_24dp" />
+
+            </RelativeLayout>
+        </LinearLayout>
 
         <com.newgen.evolvechain.utils.PinText
             android:id="@+id/edit_text_pin"
@@ -49,7 +93,8 @@
             android:inputType="numberPassword"
             android:maxLength="6"
             android:textColor="#FFF"
-            android:textSize="@dimen/_25sdp"
+            android:textSize="@dimen/_20sdp"
+            android:padding="@dimen/_10sdp"
             app:pinBackgroundDrawable="@drawable/otp_background"
             app:pinCharacterSpacing="@dimen/_10sdp" />
 
@@ -62,6 +107,7 @@
             android:text="@string/forgot_generate_pin" />
 
         <Button
+            android:id="@+id/sign_in_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"

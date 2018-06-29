@@ -6,7 +6,13 @@
     android:orientation="vertical"
     android:padding="16dp"
     android:background="@drawable/splash_background"
-    tools:context=".uis.activities.CountrySelectionActivity">
+    tools:context=".new_uis.CountrySelectionActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#000"
+        android:text="@string/country_selection_info"/>
 
     <RadioGroup
         android:layout_width="match_parent"

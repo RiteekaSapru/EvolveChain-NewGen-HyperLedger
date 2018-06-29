@@ -9,14 +9,35 @@ import { ParallaxScrollModule } from 'ng2-parallaxscroll';
 })
 export class HomeComponent implements OnInit {
 
+  model = new LoginUser('','');
+  submitted = false;
+
+
+  // onLoginSubmit() {
+  //   this.submitted = true;
+  //   this.router.navigateByUrl('/admin');
+  // }
+
+
   constructor(private router: Router) { }
 
   ngOnInit() {
+
   }
 
-  LoginBtnClick(){
+  LoginBtnClick() {
     //alert("Login Clicked");
     //this.router.navigate(['/admin/dashboard1']);
+    this.submitted = true;
     this.router.navigateByUrl('/admin');
   }
+}
+
+export class LoginUser {
+
+  constructor(
+    public email: string,
+    public password: string,
+  ) { }
+
 }
