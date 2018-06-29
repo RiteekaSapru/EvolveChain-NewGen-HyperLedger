@@ -5,13 +5,14 @@ import { NgModule, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AdminDashboardComponent } from '../admin-dashboard/admin-dashboard.component';
+import { AuthGuard } from '../../auth/auth.guard';
 
 @NgModule({
   imports: [
     RouterModule.forChild([
       {
         path: 'admin',
-        component: AdminComponent,
+        component: AdminComponent,canActivate : [AuthGuard],
         children: [
           {
             path: '',
