@@ -17,6 +17,7 @@ class EntryHomeVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.initializeUI();
+        
         // Do any additional setup after loading the view.
     }
 
@@ -27,7 +28,7 @@ class EntryHomeVC: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
+         UIApplication.shared.statusBarStyle = .default
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now()+1.0) {
             self.animateUI()
             self.getCountryList()
@@ -63,9 +64,10 @@ class EntryHomeVC: UIViewController {
     //MARK: - Custom Actions
     
     fileprivate func moveToRegister() {
+         UIApplication.shared.statusBarStyle = .lightContent
         let countrySelectionVC = self.storyboard?.instantiateViewController(withIdentifier: "CountrySelectionVC")
         
-        GlobalMethods.shared.pushVC(countrySelectionVC!)
+        Util.shared.pushVC(countrySelectionVC!)
     }
     
     func processResponse(response:Array<Any>){
@@ -79,7 +81,7 @@ class EntryHomeVC: UIViewController {
         
         editApplicationObj.countryArray = arrCountry
         
-        GlobalMethods.shared.pushVC(editApplicationObj)
+        Util.shared.pushVC(editApplicationObj)
     }
     
     func openTermsLink() {
@@ -120,7 +122,7 @@ class EntryHomeVC: UIViewController {
         
         alert.addAction(cancelAction)
         
-        GlobalMethods.shared.presentVC(alert)
+        Util.shared.presentVC(alert)
     }
     //MARK: - Actions
     
@@ -133,15 +135,17 @@ class EntryHomeVC: UIViewController {
     
     @IBAction func actionLogin(_ sender: Any) {
 
-         GlobalMethods.shared.pushVC(FlowManager.shared.getLoginStoryBoard().instantiateViewController(withIdentifier: "LoginVC"))
+         UIApplication.shared.statusBarStyle = .lightContent
+         Util.shared.pushVC(FlowManager.shared.getLoginStoryBoard().instantiateViewController(withIdentifier: "LoginVC"))
     }
     
     @IBAction func actionEdit(_ sender: Any) {
         
 //       getCountryList()
+        Util.shared.initialiseLocation()
         let editApplicationObj = self.storyboard?.instantiateViewController(withIdentifier: "EditApplicationVC") as! EditApplicationVC
-        
-      GlobalMethods.shared.pushVC(editApplicationObj)
+        UIApplication.shared.statusBarStyle = .lightContent
+      Util.shared.pushVC(editApplicationObj)
         
     }
     

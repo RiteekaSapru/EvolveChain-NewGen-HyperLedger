@@ -89,9 +89,9 @@ extension UIImageView {
     
     func downloadImage(url: URL) {
 //       addLoader()
-        if GlobalMethods.shared.checkIfFileExists(fileName: url.lastPathComponent){
+        if Util.shared.checkIfFileExists(fileName: url.lastPathComponent){
              print("File Exists")
-            let image = GlobalMethods.shared.getLocallySavedImage(fileName: url.lastPathComponent)
+            let image = Util.shared.getLocallySavedImage(fileName: url.lastPathComponent)
             DispatchQueue.main.async() {
 //                self.removeLoader()
                 self.image = image
@@ -105,7 +105,7 @@ extension UIImageView {
                 print(response?.suggestedFilename ?? url.lastPathComponent)
                 print("Download Finished")
                 if let downloadedImage = UIImage(data: data){
-                    if GlobalMethods.shared.saveImage(image: downloadedImage, fileName: url.lastPathComponent){
+                    if Util.shared.saveImage(image: downloadedImage, fileName: url.lastPathComponent){
                         print("Saved")
                         DispatchQueue.main.async() {
                             //                    self.removeLoader()
@@ -204,7 +204,7 @@ extension UIView{
         let tag = 9768
         
         if show{
-            GlobalMethods.shared.isLoading = true
+            Util.shared.isLoading = true
             self.isUserInteractionEnabled = false
             _navigator.interactivePopGestureRecognizer?.isEnabled = false
             let activityIndicator = UIActivityIndicatorView()
@@ -229,7 +229,7 @@ extension UIView{
             }
         }
         else{
-            GlobalMethods.shared.isLoading = false
+            Util.shared.isLoading = false
             _navigator.interactivePopGestureRecognizer?.isEnabled = true
             if let viewHolder = self.viewWithTag(tag){
                 UIView.animate(withDuration: 0.3, animations: {

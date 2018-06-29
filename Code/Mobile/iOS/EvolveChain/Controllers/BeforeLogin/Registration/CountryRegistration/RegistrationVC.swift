@@ -49,10 +49,22 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
             shouldUpdate = false
             updateTableView()
         }
-        
+        updateIconForBasic()
     }
+    
     // MARK: - Custom Methods
 
+    fileprivate func updateIconForBasic(){
+        
+        if !BasicDetailsModel.shared.isBasicDetailsComplete && (BasicDetailsModel.shared.isEmailVerified || BasicDetailsModel.shared.isPhoneVerified){
+            let image = UIImage.init(named: "ic_info_blue")
+            let cell = tblvwData.cellForRow(at: IndexPath.init(row: 0, section: 0)) as! TickCell
+            UIView.animate(withDuration: 0.3) {
+                cell.imgTick.image = image
+            }
+            
+        }
+    }
     fileprivate func setUpTableview() {
         headerArray = ["Basic Details","Address Details","Identity Proof","Address Proof","Document Holding Photo"]
         tblvwData.register(UINib(nibName: "TickCell", bundle: nil), forCellReuseIdentifier: "TickCell")
@@ -80,8 +92,11 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
         
         let cell = tblvwData.cellForRow(at: IndexPath.init(row: row, section: 0)) as! TickCell
         
+        var image = UIImage.init(named: "ic_tick")
+        
+       
         UIView.transition(with: cell.imgTick, duration: 0.3, options: .transitionCrossDissolve, animations: {
-            cell.imgTick.image = UIImage.init(named: "ic_tick")
+            cell.imgTick.image = image
         }, completion: nil)
         
         
@@ -122,23 +137,23 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
     
     func checkValidation() -> Bool {
         if !BasicDetailsModel.shared.isBasicDetailsComplete{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.RegisterNotComplete)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.RegisterNotComplete)
             return false
         }
         else if !BasicDetailsModel.shared.isAddressDetailsComplete{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.RegisterNotComplete)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.RegisterNotComplete)
             return false
         }
         else if !DocumentManager.shared.isIdentityDocsUploaded{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.RegisterNotComplete)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.RegisterNotComplete)
             return false
         }
         else if !DocumentManager.shared.isAddressDocsUploaded{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.RegisterNotComplete)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.RegisterNotComplete)
             return false
         }
         else if BasicDetailsModel.shared.holdingImage == nil{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.RegisterNotComplete)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.RegisterNotComplete)
             return false
         }
 
@@ -160,14 +175,14 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
         let defaultAction = UIAlertAction.init(title: "Cancel", style: .cancel) { (alert: UIAlertAction!) in
         }
         alert.addAction(defaultAction)
-        GlobalMethods.shared.presentVC(alert)
+        Util.shared.presentVC(alert)
     }
     
    
     
     fileprivate func popVC() {
-        GlobalMethods.shared.cleanUpRegistrationData()
-        GlobalMethods.shared.popVC()
+        Util.shared.cleanUpRegistrationData()
+        Util.shared.popVC()
     }
     
     // MARK: - Tableview
@@ -182,8 +197,14 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
         let cell = tableView.dequeueReusableCell(withIdentifier: "TickCell", for: indexPath) as! TickCell
         cell.setUpCell(title: headerArray[indexPath.row], sideImage:getStatusForIndex(index: indexPath.row) ? "ic_tick" : "ic_right_arrow_black", textColor: getStatusForIndex(index: indexPath.row - 1) ? UIColor.black : UIColor.lightGray)
         
+        if indexPath.row == 0 && (!BasicDetailsModel.shared.isBasicDetailsComplete && (BasicDetailsModel.shared.isEmailVerified || BasicDetailsModel.shared.isPhoneVerified)){
+            cell.setUpCell(title: headerArray[indexPath.row], sideImage:"ic_info_blue", textColor: getStatusForIndex(index: indexPath.row - 1) ? UIColor.black : UIColor.lightGray)
+        }
+        
+        cell.backgroundColor = UIColor.clear
+        cell.vwHolder.backgroundColor = UIColor.clear
         cell.vwHolder.cornerRadius = 4.0
-        cell.vwHolder.borderColor = UIColor.lightGray
+        cell.vwHolder.borderColor = UIColor.black
         cell.vwHolder.borderWidth = 0.5
         return cell;
         
@@ -205,7 +226,7 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
             case RegisterDetailsAmericaType.Basic.rawValue:
                 
                 let basicDetailsObj = self.storyboard?.instantiateViewController(withIdentifier: "BasicDetailsAmericaVC") as! BasicDetailsAmericaVC
-                GlobalMethods.shared.pushVC(basicDetailsObj)
+                Util.shared.pushVC(basicDetailsObj)
                 
                 basicDetailsObj.completionHandler = { index in
                     self.indexToUpdate = index
@@ -216,7 +237,7 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
             case RegisterDetailsAmericaType.Address.rawValue:
                 let addressObj = self.storyboard?.instantiateViewController(withIdentifier: "AddressVC") as! AddressVC
                 
-                GlobalMethods.shared.pushVC(addressObj)
+                Util.shared.pushVC(addressObj)
                 addressObj.completionHandler = { index in
                     self.indexToUpdate = index
                     self.shouldUpdate = true
@@ -230,7 +251,7 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
                     
                     documentSelectionObj.currentType = .IdentityType
                     
-                    GlobalMethods.shared.pushVC(documentSelectionObj)
+                    Util.shared.pushVC(documentSelectionObj)
                     documentSelectionObj.completionHandler = { index in
                         self.indexToUpdate = index
                         self.shouldUpdate = true
@@ -246,7 +267,7 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
                     
                     documentSelectionObj.currentType = .AddressType
                     
-                    GlobalMethods.shared.pushVC(documentSelectionObj)
+                    Util.shared.pushVC(documentSelectionObj)
                     
                     documentSelectionObj.completionHandler = { index in
                         self.indexToUpdate = index
@@ -263,7 +284,7 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
                     let documentHoldingObj = self.storyboard?.instantiateViewController(withIdentifier: "DocumentHoldingVC") as! DocumentHoldingVC
                     
                     
-                    GlobalMethods.shared.pushVC(documentHoldingObj)
+                    Util.shared.pushVC(documentHoldingObj)
                     
                     documentHoldingObj.completionHandler = { index in
                         self.indexToUpdate = index
@@ -309,7 +330,7 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
         if checkValidation() {
         
             let summaryObj = self.storyboard?.instantiateViewController(withIdentifier: "SummaryVC")
-            GlobalMethods.shared.pushVC(summaryObj!)
+            Util.shared.pushVC(summaryObj!)
             
         }
         

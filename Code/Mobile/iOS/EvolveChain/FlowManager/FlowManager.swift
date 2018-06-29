@@ -21,10 +21,11 @@ class FlowManager: NSObject {
 //    }
     
     func moveToHome() -> Void {
-        GlobalMethods.shared.pushVC(getHomeStoryBoard().instantiateViewController(withIdentifier: "ProfileVC"))
+        Util.shared.pushVC(getHomeStoryBoard().instantiateViewController(withIdentifier: "HomeTabbarVC"))
     }
     
     func resetToLogin() {
+         UIApplication.shared.statusBarStyle = .lightContent
         let splashVC = getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "EntryHomeVC")
 
         let loginVC = getLoginStoryBoard().instantiateViewController(withIdentifier: "LoginVC")
@@ -52,7 +53,7 @@ class FlowManager: NSObject {
     }
     
     func resetToGeneratePin() {
-        
+         UIApplication.shared.statusBarStyle = .lightContent
         let splashVC = getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "EntryHomeVC")
         
         let loginVC = getLoginStoryBoard().instantiateViewController(withIdentifier: "LoginVC")
@@ -70,6 +71,7 @@ class FlowManager: NSObject {
     }
     
     func resetToEdit() {
+         UIApplication.shared.statusBarStyle = .lightContent
         let splashVC = getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "EntryHomeVC")
         
         let editApplicationObj = getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "EditApplicationVC") as! EditApplicationVC
@@ -81,7 +83,8 @@ class FlowManager: NSObject {
         
         
         if !(_navigator.topViewController is LoginVC){
-            GlobalMethods.shared.pushVC(getLoginStoryBoard().instantiateViewController(withIdentifier: "LoginVC"))
+             UIApplication.shared.statusBarStyle = .lightContent
+            Util.shared.pushVC(getLoginStoryBoard().instantiateViewController(withIdentifier: "LoginVC"))
             _navigator.interactivePopGestureRecognizer?.isEnabled = false
         }
     }
@@ -104,13 +107,12 @@ extension AppDelegate:UIGestureRecognizerDelegate {
         
         if ((_userDefault.object(forKey: kApplicationPinKey)) != nil)
         {
-//            let details = _userDefault.object(forKey: kApplicationUserDetailsKey) as! Dictionary<String, Any>
-//            BasicDetailsModel.shared.initWithResponse(responseJson: details)
-//            FlowManager.shared.moveToHome()
+             UIApplication.shared.statusBarStyle = .lightContent
             navigator?.interactivePopGestureRecognizer?.isEnabled = false
-            GlobalMethods.shared.pushVC(FlowManager.shared.getLoginStoryBoard().instantiateViewController(withIdentifier: "LoginVC"))
+            Util.shared.pushVC(FlowManager.shared.getLoginStoryBoard().instantiateViewController(withIdentifier: "LoginVC"))
         }
     }
+    
     
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         return navigator!.viewControllers.count > 1

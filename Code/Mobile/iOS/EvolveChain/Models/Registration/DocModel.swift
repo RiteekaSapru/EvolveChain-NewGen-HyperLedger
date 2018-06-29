@@ -87,40 +87,32 @@ class DocModel: NSObject {
         return model
     }
     
-    func saveData(model:DocModel){
-        
-        self.value = model.value
-        self.date = model.date
-        self.selectedSubType = model.selectedSubType
-        self.frontImage  = model.frontImage
-        self.backImage = model.backImage
-        self.isSavedComplete = true
-    }
+   
     
     // MARK:- Validations
     
     func validateModel() -> (isValid:Bool,indexPath:IndexPath?){
         
         if self.value.count == 0{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.NumberEmpty)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.NumberEmpty)
 //            txtfldNumberIdentity.becomeFirstResponder()
             return (false,IndexPath.init(row: 0, section: 2));
         }
         else if self.value.count < 8{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.NumberIncorrect)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.NumberIncorrect)
 //            txtfldNumberIdentity.becomeFirstResponder()
             return (false,IndexPath.init(row: 0, section: 2));
         }
         else if self.isExpiryDate && self.date == nil{
-             GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityExpiryEmpty)
+             Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityExpiryEmpty)
              return (false,IndexPath.init(row: 2, section: 2));
         }
         else if self.frontImage == nil{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityFrontPicEmpty)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityFrontPicEmpty)
             return (false,IndexPath.init(row: 3, section: 2))
         }
         else if self.backImage == nil {
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityBackPicEmpty)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityBackPicEmpty)
             return (false,IndexPath.init(row: 3, section: 2))
         }
         return (true,nil)
@@ -167,7 +159,7 @@ class DocModel: NSObject {
     
     func getImagesForKYC() -> [UIImage] {
         
-       let imagesArray = [GlobalMethods.shared.resizeImage(image: self.frontImage!, targetSize: CGSize.init(width: 1000.0, height: 1000.0)),GlobalMethods.shared.resizeImage(image: self.backImage!, targetSize: CGSize.init(width: 1000.0, height: 1000.0))]
+       let imagesArray = [Util.shared.resizeImage(image: self.frontImage!, targetSize: CGSize.init(width: 1000.0, height: 1000.0)),Util.shared.resizeImage(image: self.backImage!, targetSize: CGSize.init(width: 1000.0, height: 1000.0))]
         
          return imagesArray
 
@@ -195,4 +187,6 @@ class DocModel: NSObject {
         return modelData
         
     }
+    
+    
 }

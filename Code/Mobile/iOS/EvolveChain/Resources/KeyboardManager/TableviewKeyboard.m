@@ -80,8 +80,9 @@
 
 - (void)singleTap:(UITapGestureRecognizer *)gesture {
     //handle taps
-    NSLog(@"tapped");
+//    NSLog(@"tapped");
     [self.superview endEditing:YES];
+//    [NSNotificationCenter.defaultCenter postNotificationName:@"Editing_ended" object:nil];
 }
 
 -(void)keyboardWillShow:(NSNotification*)notification

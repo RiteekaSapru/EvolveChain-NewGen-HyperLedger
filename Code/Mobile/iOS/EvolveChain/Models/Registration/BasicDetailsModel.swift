@@ -5,7 +5,7 @@
 //  Created by Abhay Shankar on 17/05/18.
 //  Copyright © 2018 EvolveChain. All rights reserved.
 //
-
+import CoreLocation
 import UIKit
 enum CountryType : String {
     case  India
@@ -46,7 +46,9 @@ class BasicDetailsModel: NSObject, NSCoding {
     
     var userImageURL : String           =  ""
     
-     var holdingImage : UIImage?
+    var holdingImage : UIImage?
+    var holdingImageDate : Date?
+    var holdingImageLocation : (lat:String,long:String)?
     
     // MARK:- Init
     override init() {
@@ -152,7 +154,8 @@ class BasicDetailsModel: NSObject, NSCoding {
          userImageURL            =  ""
         
          holdingImage = nil
-        
+        holdingImageDate = nil
+        holdingImageLocation = nil
     }
     
     // MARK: - Get Basic Details
@@ -183,20 +186,12 @@ class BasicDetailsModel: NSObject, NSCoding {
         basicData.append(["Date of Birth",self.dob?.dateWithStringFormat("MMM dd, yyyy") ?? " "])
         basicData.append(["Place of Birth",self.placeOfBirth])
         basicData.append(["Gender",self.gender])
-//        basicData.append(["iso",SignupConfigModel.shared.selectedCountry.iso])
-//        basicData.append(["Address Line 1",self.add1])
-//        if self.add2.count > 0 {
-//            basicData.append(["Address Line 2",self.add2])
-//        }
-//
-//        basicData.append(["Street",self.street])
-//        basicData.append(["City",self.city])
-//        basicData.append(["Zip",self.zipCode])
-//        basicData.append(["State",self.state])
-//        basicData.append(["Country",self.country])
+
         
         return basicData
     }
+    
+   
     
     func getAddressDataInArray() -> [[Any]] {
         
@@ -216,6 +211,7 @@ class BasicDetailsModel: NSObject, NSCoding {
         return basicData
     }
     
+    
     func getHoldingAsArray() -> [[Any]] {
         
         var modelData = [[Any]]()
@@ -225,6 +221,8 @@ class BasicDetailsModel: NSObject, NSCoding {
         return modelData
         
     }
+    
+   
     
     func initWithResponse(responseJson:Dictionary<String, Any>)
     {
@@ -365,4 +363,57 @@ class BasicDetailsModel: NSObject, NSCoding {
         }
         
     }
+    
+    // MARK: - Summary
+    
+    func getBasicDataForSummary() -> [SummaryStruct] {
+        
+        var basicArray = [SummaryStruct(imageTop: nil, imageBottom: nil, text: "Basic Details", type: .HeaderCell, isExpanded: false)]
+        
+        var text = self.fname
+        if self.mname.count > 0 {
+            text.append(" "+self.mname)
+        }
+        text.append(" "+self.lname+"\n")
+        
+        text.append(self.email+"\n")
+        
+        text.append(self.getCompletePhoneNumber()+"\n")
+        text.append(self.dob?.dateWithStringFormat("MMM dd, yyyy") ?? "")
+        text.append(", " + self.placeOfBirth + ", " + self.gender)
+        
+        basicArray.append(SummaryStruct(imageTop: self.userImage,imageBottom: nil, text: text, type: .BasicCell, isExpanded: false ))
+        return basicArray
+    }
+
+    func getAddressDataForSummary() -> [SummaryStruct] {
+        
+        var basicArray = [SummaryStruct(imageTop: nil,imageBottom: nil, text: "Address Details", type: .HeaderCell, isExpanded: false)]
+        
+        var line1 = self.add1
+        if self.add2.count > 0 {
+            line1.append(", " + self.add2)
+        }
+        
+        line1.append("\n" + self.street + ", " + self.city + ", " + self.zipCode)
+        
+        line1.append("\n" + self.state + ", " + self.country)
+        basicArray.append(SummaryStruct(imageTop: nil,imageBottom: nil, text: line1, type: .NoImageCell, isExpanded: false))
+        
+        
+        return basicArray
+    }
+    
+    func getHoldingDataForSummary() -> [SummaryStruct] {
+        
+        var basicArray = [SummaryStruct(imageTop: nil,imageBottom: nil, text: "Document Holding Photo", type: .HeaderCell, isExpanded: false)]
+        
+        let line1 = "Code : " + SignupConfigModel.shared.verificationCode
+        
+        basicArray.append(SummaryStruct(imageTop: self.holdingImage,imageBottom: nil, text: line1, type: .OneImageCell, isExpanded: false))
+        
+        
+        return basicArray
+    }
+    
 }

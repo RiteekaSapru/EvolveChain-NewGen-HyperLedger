@@ -57,7 +57,7 @@ class GenerateOtpVC: UIViewController,BackSpaceTextFieldDelegate,UITextFieldDele
         
         let setPinVCObj = self.storyboard?.instantiateViewController(withIdentifier: "SetPinVC") as! SetPinVC
         setPinVCObj.stringVerify = txtFldKycId.text!
-        GlobalMethods.shared.pushVC(setPinVCObj)
+        Util.shared.pushVC(setPinVCObj)
     }
 
      // MARK: - Actions
@@ -152,7 +152,7 @@ class GenerateOtpVC: UIViewController,BackSpaceTextFieldDelegate,UITextFieldDele
         NetworkManager.shared.generateOtpForKydId(params: params, success: { (responseJson) in
             self.moveToOtpVerify()
         }) { (errorMsg) in
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
         }
     }
 }

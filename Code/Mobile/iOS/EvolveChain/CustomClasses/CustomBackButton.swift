@@ -34,6 +34,6 @@ class CustomBackButton: UIButton {
     }
     
    @objc  func backAction() -> Void {
-       GlobalMethods.shared.popVC()
+       Util.shared.popVC()
     }
 }

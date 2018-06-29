@@ -27,6 +27,6 @@ class SuccessfullVC: UIViewController {
 
 
     @IBAction func actionDone(_ sender: Any) {
-        GlobalMethods.shared.popVC()
+        Util.shared.popVC()
     }
 }

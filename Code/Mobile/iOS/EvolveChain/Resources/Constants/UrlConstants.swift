@@ -28,37 +28,28 @@ final class UrlConstants: NSObject {
 
     
     //MARK : URLs
-    static let kLocalURL : String = {
-        if _userDefault.object(forKey: kApplicationURL) != nil{
-            return RawdataConverter.string(_userDefault.object(forKey: kApplicationURL))
-        }
-        else{
-            return "http://192.168.60.130:4600"
-        }
-    }()
+    
     
     static let countryListURL = BaseURL + "/web/getcountrylist"
     
     static let initaliseURL = BaseURL + "/app/initialize"
     
-    static let generateEmailOtpURL = kLocalURL + "/app/generateEmailOtp/" + RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
-    static let verifyEmailOtpURL = kLocalURL + "/app/verifyemail/" + RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
-    static let generateMobileOtpURL = kLocalURL + "/app/generateMobileOTP/" + RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
-    static let verifyMobileOtpURL = kLocalURL + "/app/verifymobile/" + RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
-    static let saveKYCDetails = kLocalURL + "/kyc/saveKycDocument/" + RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
-    static let submitKYCDetails = kLocalURL + "/kyc/SubmitKycDocument/"
+    static let generateEmailOtpURL = BaseURL + "/app/generateEmailOtp/" + RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
+    static let verifyEmailOtpURL = BaseURL + "/app/verifyemail/" + RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
+    static let generateMobileOtpURL = BaseURL + "/app/generateMobileOTP/" + RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
+    static let verifyMobileOtpURL = BaseURL + "/app/verifymobile/" + RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
+    static let saveKYCDetails = BaseURL + "/kyc/saveKycDocument/" + RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))
+    static let submitKYCDetails = BaseURL + "/kyc/SubmitKycDocument/"
     
-    static let generatePinURL = kLocalURL + "/app/GeneratePin"
-    static let setPinURL = kLocalURL + "/app/SetPin"
-    static let loginURL = kLocalURL + "/app/Login"
-    static let getKycIdURL = kLocalURL + "/app/GetEkycId"
-    
-    
-    static let changePinURL = kLocalURL + "/app/ChangePin"
-    
-    static let getEditOTPURL = kLocalURL + "/app/resubmitverification"
-    static let resubmitEditOTPURL = kLocalURL + "/app/resubmitinitialize"
+    static let generatePinURL = BaseURL + "/app/GeneratePin"
+    static let setPinURL = BaseURL + "/app/SetPin"
+    static let loginURL = BaseURL + "/app/Login"
+    static let getKycIdURL = BaseURL + "/app/GetEkycId"
     
     
-
+    static let changePinURL = BaseURL + "/app/ChangePin"
+    
+    static let getEditOTPURL = BaseURL + "/app/resubmitverification"
+    static let resubmitEditOTPURL = BaseURL + "/app/resubmitinitialize"
+    
 }

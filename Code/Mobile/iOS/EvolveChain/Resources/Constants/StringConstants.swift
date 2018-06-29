@@ -24,6 +24,8 @@ final class StringConstants: NSObject {
     
     static let NoInternet = "Please check internet connectivity and retry."
    static let NoGallery = "Please provide permission to access Gallery."
+    static let NoCamera = "Please provide permission to access Camera."
+
    static let UnderDevelopment = "This feature is under development."
    static let Loader = "   Loading..."
    static let OTPLoader = "   Waiting for OTP..."

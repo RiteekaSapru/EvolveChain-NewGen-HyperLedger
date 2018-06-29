@@ -15,7 +15,9 @@ class SettingsVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        UIApplication.shared.statusBarStyle = .lightContent
 
+         self.title = "Settings"
         arrSettings = ["Change Pin","Logout"]
         tblvwData.register(UINib(nibName: "TickCell", bundle: nil), forCellReuseIdentifier: "TickCell")
         tblvwData.delegate = self
@@ -72,10 +74,11 @@ class SettingsVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
         switch indexPath.row {
         case 0:
             let changePinVC = self.storyboard?.instantiateViewController(withIdentifier: "ChangePinVC")
-            GlobalMethods.shared.pushVC(changePinVC!)
+//            Util.shared.pushVC(changePinVC!)
+            self.navigationController?.pushViewController(changePinVC!, animated: true)
             
         case 1:
-            GlobalMethods.shared.logoutUserWithAlert()
+            Util.shared.logoutUserWithAlert()
         default:
             break
         }

@@ -289,12 +289,75 @@ class DocumentManager: NSObject {
                             }
                         }
                         
-                    }
+                        }
                 }
             }
         }
+        }
     }
-}
+    
+    
+    // MARK: - Saving
+    
+    func saveIdentityModel(model:DocModel){
+        if let docModel = getDocModelWithType(doc_type: model.code, inArray: arrIdentity){
+            docModel.value = model.value
+            docModel.date = model.date
+            docModel.selectedSubType = model.selectedSubType
+            docModel.frontImage  = model.frontImage
+            docModel.backImage = model.backImage
+            docModel.isSavedComplete = true
+            selectedIdentityModel = docModel
+        }
+    }
+    
+    func saveAddressModel(model:DocModel){
+        if let docModel = getDocModelWithType(doc_type: model.code, inArray: arrAddress){
+            docModel.value = model.value
+            docModel.date = model.date
+            docModel.selectedSubType = model.selectedSubType
+            docModel.frontImage  = model.frontImage
+            docModel.backImage = model.backImage
+            docModel.isSavedComplete = true
+            selectedAddressModel = docModel
+        }
+    }
+    
+      // MARK: - Summary
+    func getDataForSummary(type:DocumentType) -> [SummaryStruct] {
+        
+        let doc = (type == .AddressType) ? self.selectedAddressModel : self.selectedIdentityModel
+        
+        var docArray = [SummaryStruct(imageTop: nil, imageBottom: nil, text: (type == .AddressType) ? "Address Proof" : "Identity Proof", type: .HeaderCell, isExpanded: false)]
+        
+        var line1 = "Type : " + doc.name
+        if doc.selectedSubType != nil {
+            line1.append("\nBill Type : " + doc.selectedSubType!.name )
+        }
+        
+        line1.append("\nNumber : " + doc.value)
+        
+//        docArray.append(SummaryStruct(image: doc.frontImage, text: line1, type: .ImageCell, isExpanded: false))
+        
+        //Line 2
+        
+        var line2 : String = ""
+        
+        if doc.isExpiryDate{
+            line2.append("Issuing Country : " + SignupConfigModel.shared.selectedCountry.name)
+            line2.append("\nExpiry Date : " + ((doc.date?.dateWithStringFormat("MMM dd, yyyy")) ?? ""))
+        }
+        else{
+            line2.append("Issuing Country : " + SignupConfigModel.shared.selectedCountry.name)
+//            line2.append("\n")
+        }
+        line1.append("\n" + line2)
+        docArray.append(SummaryStruct(imageTop: doc.frontImage,imageBottom: doc.backImage, text: line1, type: .TwoImageCell, isExpanded: false))
+
+        
+        return docArray
+    }
+    
 }
 
 

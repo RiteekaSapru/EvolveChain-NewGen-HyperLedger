@@ -82,16 +82,16 @@ class DocumentVC: UIViewController,UITableViewDelegate,UITableViewDataSource,Tex
     fileprivate func saveData() {
         switch currentType {
         case .IdentityType:
-            DocumentManager.shared.selectedIdentityModel.saveData(model: selectedDocModel)
+            DocumentManager.shared.saveIdentityModel(model: selectedDocModel)
              DocumentManager.shared.isIdentityDocsUploaded = true
             self.completionHandler(2)
         case .AddressType:
-            DocumentManager.shared.selectedAddressModel.saveData(model: selectedDocModel)
+            DocumentManager.shared.saveAddressModel(model: selectedDocModel)
             DocumentManager.shared.isAddressDocsUploaded = true
             self.completionHandler(3)
         }
         
-        GlobalMethods.shared.popVC()
+        Util.shared.popVC()
     }
     
     fileprivate func validateData(){
@@ -230,12 +230,12 @@ class DocumentVC: UIViewController,UITableViewDelegate,UITableViewDataSource,Tex
             mainField.isExpanded = false
             if indexPath.section == 0 {
                 if selectedDocModel.code != arrDocArray[indexPath.row - 1].code{
-                    switch currentType {
-                    case .IdentityType:
-                        DocumentManager.shared.selectedIdentityModel = arrDocArray[indexPath.row - 1]
-                    case .AddressType:
-                        DocumentManager.shared.selectedAddressModel = arrDocArray[indexPath.row - 1]
-                    }
+//                    switch currentType {
+//                    case .IdentityType:
+//                        DocumentManager.shared.selectedIdentityModel = arrDocArray[indexPath.row - 1]
+//                    case .AddressType:
+//                        DocumentManager.shared.selectedAddressModel = arrDocArray[indexPath.row - 1]
+//                    }
 //                    selectedDocModel.eraseData()
                     selectedDocModel = arrDocArray[indexPath.row - 1].getCopy()
                     arrFieldArray = DocumentManager.shared.getFieldArrayForModel(model: selectedDocModel,docType:currentType )
@@ -261,7 +261,7 @@ class DocumentVC: UIViewController,UITableViewDelegate,UITableViewDataSource,Tex
     
     @IBAction func actionBack(_ sender: Any) {
         self.view.endEditing(true)
-        GlobalMethods.shared.popVC()
+        Util.shared.popVC()
     }
     
     // MARK: - Next Textfield Delegate
@@ -286,7 +286,7 @@ class DocumentVC: UIViewController,UITableViewDelegate,UITableViewDataSource,Tex
             print("Document Details Saved")
             self.saveData()
         }) { (errorMsg) in
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
+            Util.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
         }
         
     }

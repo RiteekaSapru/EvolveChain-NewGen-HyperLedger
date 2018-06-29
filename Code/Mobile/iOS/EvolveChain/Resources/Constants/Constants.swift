@@ -60,21 +60,12 @@ let kApplicationKey       =        "kApplicationKey"
 
 let kApplicationKycIdKey       =        "kApplicationKycIdKey"
 let kApplicationPinKey       =        "kApplicationPinKey"
-let kApplicationUserDetailsKey       =        "kApplicationUserDetailsKey"
 let kApplicationInitConfigKey       =        "kApplicationInitConfigKey"
 let kUserPhoneKey       =        "kUserPhoneKey"
 let kUserISDCodeKey       =        "kUserISDCodeKey"
 
 
-//MARK : URLs
-//let kLocalURL : String = {
-//    if _userDefault.object(forKey: kApplicationURL) != nil{
-//        return RawdataConverter.string(_userDefault.object(forKey: kApplicationURL))
-//    }
-//    else{
-//        return "http://192.168.60.130:4600"
-//    }
-//}()
+
 
 
 

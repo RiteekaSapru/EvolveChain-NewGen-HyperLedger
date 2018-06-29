@@ -42,8 +42,11 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     
     var pickerClass : PickerClass = PickerClass.init()
     
+   
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+       
         tblvwProfile.register(UINib(nibName: "ProfileType1Cell", bundle: nil), forCellReuseIdentifier: "ProfileType1Cell")
         tblvwProfile.delegate = self
         tblvwProfile.dataSource = self
@@ -68,7 +71,7 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
         super.viewWillAppear(animated)
        
         lblPhone.text = BasicDetailsModel.shared.getCompletePhoneNumber()
-        
+       
        
     }
 
@@ -196,8 +199,8 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
             txtfldEmail.becomeFirstResponder()
             return false;
         }
-        else if !GlobalMethods.shared.isValidEmail(testStr: txtfldEmail.text!){
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.EmailInvalid)
+        else if !Util.shared.isValidEmail(testStr: txtfldEmail.text!){
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.EmailInvalid)
             return false;
         }
         else if BasicDetailsModel.shared.email == txtfldEmail.text?.lowercased(){
@@ -232,7 +235,7 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
             return false;
         }
         else if txtfldPhone.text!.count < selectedCountry!.phoneFormat.count {
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneInvalid)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneInvalid)
             return false;
         }
         else{
@@ -250,7 +253,7 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
         verifyOtpObj.stringVerifyCountryCode = txtfldCountryCode.text!
         verifyOtpObj.stringVerify = txtfldPhone.text!
         verifyOtpObj.modalPresentationStyle = .overCurrentContext
-        GlobalMethods.shared.presentVC(verifyOtpObj)
+        Util.shared.presentVC(verifyOtpObj)
         
         verifyOtpObj.completionHandler = {
             () -> Void in
@@ -267,7 +270,7 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
         verifyOtpObj.verificationType = .EmailVerification
         verifyOtpObj.stringVerify = txtfldEmail.text!
         verifyOtpObj.modalPresentationStyle = .overCurrentContext
-        GlobalMethods.shared.presentVC(verifyOtpObj)
+        Util.shared.presentVC(verifyOtpObj)
 
         
         verifyOtpObj.completionHandler = {
@@ -436,6 +439,7 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     func showEmailView() {
         hidePhoneView()
         vwEmail.alpha = 0;
+        txtfldEmail.text = ""
         bottomEmailView.constant = 0
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
@@ -457,6 +461,7 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     func showPhoneView() {
         vwPhone.alpha = 0;
         hideEmailView()
+        txtfldPhone.text = ""
         bottomPhoneView.constant = 0
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
@@ -481,7 +486,7 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     @IBAction func actionSettings(_ sender: Any) {
         
         let settingsVC = self.storyboard?.instantiateViewController(withIdentifier: "SettingsVC")
-        GlobalMethods.shared.pushVC(settingsVC!)
+        Util.shared.pushVC(settingsVC!)
     }
     
     @IBAction func actionEditEmail(_ sender: Any) {
@@ -535,17 +540,18 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     func APIGetPhoneOtp(countryCode:String,phoneNumner:String) -> Void {
         
         
-        GlobalMethods.shared.showLoader(loadingText: StringConstants.OTPLoader)
+        Util.shared.showLoader(loadingText: StringConstants.OTPLoader)
         let params = ["mobile":phoneNumner,"country_code":countryCode]
         
+        
         NetworkManager.shared.generateMobileOTP(params: params, success: { (responseDict) in
-            GlobalMethods.shared.dismissLoader(complete: {
+            Util.shared.dismissLoader(complete: {
                 self.moveToPhoneOtpVerify()
             })
             
         }) { (errorMsg) in
-            GlobalMethods.shared.dismissLoader(complete: {
-                GlobalMethods.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
+            Util.shared.dismissLoader(complete: {
+                Util.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
             })
             
         }
@@ -554,15 +560,15 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     func APIGetEMailOtp(email:String) -> Void {
         
         let params = ["email":email]
-        GlobalMethods.shared.showLoader(loadingText: StringConstants.OTPLoader)
+        Util.shared.showLoader(loadingText: StringConstants.OTPLoader)
         NetworkManager.shared.generateEmailOTP(params: params, success: { (responseDict) in
-            GlobalMethods.shared.dismissLoader(complete: {
+            Util.shared.dismissLoader(complete: {
                 self.moveToEmailOtpVerify()
             })
             
         }) { (errorMsg) in
-            GlobalMethods.shared.dismissLoader(complete: {
-                GlobalMethods.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
+            Util.shared.dismissLoader(complete: {
+                Util.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
             })
         }
     }
@@ -572,7 +578,7 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
         NetworkManager.shared.countryListAPI(success: { (response) in
                 self.processCountryResponse(responseJson: response)
         }) { (errorMsg) in
-                GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+                Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
         }
     }
     

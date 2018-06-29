@@ -226,11 +226,11 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
             return false;
         }
         else if txtfldPhone.text!.count < selectedCountry!.phoneFormat.count {
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneInvalid)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneInvalid)
             return false;
         }
         else if getPIN().count < 6{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PinEmpty)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PinEmpty)
             self.clearPin()
             self.vwPinHolder.shakeView()
             self.txtfld1.becomeFirstResponder()
@@ -244,7 +244,7 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
     func checkPin() {
         
 
-        let pin = GlobalMethods.shared.convertToMD5(string: getPIN())
+        let pin = Util.shared.convertToMD5(string: getPIN())
         let mobile = txtfldPhone.text?.components(separatedBy: CharacterSet.init(charactersIn: "1234567890").inverted).joined()
 
         loginAPI(mobile!, pin)
@@ -271,7 +271,7 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
                     self.txtfld1.becomeFirstResponder()
                 }
                 else{
-                   GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
+                   Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
                 }
             }
             else{
@@ -332,12 +332,12 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
     @IBAction func actionGeneratePin(_ sender: Any) {
         let generateObj = self.storyboard?.instantiateViewController(withIdentifier: "GenerateOtpVC") as! GenerateOtpVC
 //        generateObj.kycID = kycIdText
-        GlobalMethods.shared.pushVC(generateObj)
+        Util.shared.pushVC(generateObj)
         
     }
 
     @IBAction func actionBack(_ sender: Any) {
-        GlobalMethods.shared.popVC()
+        Util.shared.popVC()
     }
     //MARK: - Textfield
     
@@ -463,12 +463,12 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
     
     func loginAPI(_ mobile:String, _ pinHash:String) {
         
-        let param = ["mobile":mobile,"isd_code":selectedCountry?.phoneCode,"pin":pinHash,"vendor_uuid":GlobalMethods.shared.getUniqueIdForDevice()] as [String : Any]
+        var param = ["mobile":mobile,"isd_code":selectedCountry?.phoneCode,"pin":pinHash,"vendor_uuid":Util.shared.getUniqueIdForDevice()] as [String : Any]
 //        param.updateValue("25794606-8288-4C41-B1E9-79619C86914C", forKey: "vendor_uuid")
         
         NetworkManager.shared.loginAPI(params: param, success: { (responseJson) in
 
-          GlobalMethods.shared.loginUser(details: responseJson, pin: pinHash)
+          Util.shared.loginUser(details: responseJson, pin: pinHash)
         }) { (errorMsg,response) in
             
             _userDefault.removeObject(forKey: kApplicationKycIdKey)
@@ -484,7 +484,7 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
                self.btnGetCountry.isUserInteractionEnabled = true
             }
             
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
         }
     }
     

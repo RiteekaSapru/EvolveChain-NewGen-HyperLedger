@@ -42,7 +42,7 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        GlobalMethods.shared.initialiseLocation()
+        Util.shared.initialiseLocation()
         
     }
     // MARK: - Custom Methods
@@ -72,8 +72,8 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
     }
     
     fileprivate func popVC() {
-        GlobalMethods.shared.cleanUpRegistrationData()
-        GlobalMethods.shared.popVC()
+        Util.shared.cleanUpRegistrationData()
+        Util.shared.popVC()
     }
     
     func processToRegister(response:Dictionary<String,Any>) {
@@ -85,10 +85,10 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
         
         if DocumentManager.shared.arrAddress.count > 0 && DocumentManager.shared.arrIdentity.count > 0 {
             let regVC = self.storyboard?.instantiateViewController(withIdentifier: "AmericaRegistrationVC") as! RegistrationVC
-            GlobalMethods.shared.pushVC(regVC)
+            Util.shared.pushVC(regVC)
         }
         else{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Documents not available.")
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Documents not available.")
         }
       
     }
@@ -161,7 +161,7 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
                 self?.tableviewCountry.reloadData()
             }
             
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
         }
     }
     
@@ -172,13 +172,13 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
         NetworkManager.shared.initialiseAPI(success: { (responseJson) in
             DispatchQueue.main.async {
                 self.vwNextHolder.loadingIndicator(show: false)
-                GlobalMethods.shared.stopLocation()
+//                Util.shared.stopLocation()
                  self.processToRegister(response: responseJson)
             }
            
         }) { (errorMsg) in
             self.vwNextHolder.loadingIndicator(show: false)
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
         }
     }
 }

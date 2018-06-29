@@ -84,15 +84,15 @@ class ChangePinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
     func checkValidations() -> Bool {
         
         if txtfld1.text?.count == 0 || txtfld2.text?.count == 0 || txtfld3.text?.count == 0 || txtfld4.text?.count == 0 || txtfld5.text?.count == 0 || txtfld6.text?.count == 0{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter previous pin")
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter previous pin")
             return false;
         }
         else if txtfld7.text?.count == 0 || txtfld8.text?.count == 0 || txtfld9.text?.count == 0 || txtfld10.text?.count == 0 || txtfld11.text?.count == 0 || txtfld12.text?.count == 0{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter new pin.")
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter new pin.")
             return false;
         }
         else if txtfld13.text?.count == 0 || txtfld14.text?.count == 0 || txtfld15.text?.count == 0 || txtfld16.text?.count == 0 || txtfld17.text?.count == 0 || txtfld18.text?.count == 0{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please  re enter new pin.")
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.RePinEmpty)
             return false;
         }
         else if getNewPin() != getNewPinReEnter(){
@@ -151,12 +151,12 @@ class ChangePinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
     func pinGenerated(msg:String) {
         let alert = UIAlertController.init(title: nil, message: msg + StringConstants.PinChangeText, preferredStyle: .alert)
         let defaultAction = UIAlertAction.init(title: StringConstants.okText, style: .cancel) { (alert: UIAlertAction!) in
-            GlobalMethods.shared.cleanUpRegistrationData()
-            GlobalMethods.shared.removeTempImages()
+            Util.shared.cleanUpRegistrationData()
+            Util.shared.removeTempImages()
             self.resetToLogin()
         }
         alert.addAction(defaultAction)
-        GlobalMethods.shared.presentVC(alert)
+        Util.shared.presentVC(alert)
 
     }
     
@@ -177,7 +177,7 @@ class ChangePinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
                     self.txtfld1.becomeFirstResponder()
                 }
                 else{
-                    GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
+                    Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
                     self.clearOldPin()
                     self.clearPins()
                     self.vwOldPinHolder.shakeView()
@@ -187,7 +187,7 @@ class ChangePinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
                 }
             }
             else{
-                GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please retry.")
+                Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please retry.")
             }
         }
         catch let error as NSError {
@@ -280,14 +280,17 @@ class ChangePinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
         }
     }
     
+    @IBAction func actionBack(_ sender: Any) {
+        self.navigationController?.popViewController(animated: true)
+    }
     // MARK: - Webservice
     
     func changePin() {
         
-        let params = ["ekyc_id":BasicDetailsModel.shared.kycId,"pin":GlobalMethods.shared.convertToMD5(string: getOldPin()),"new_pin":GlobalMethods.shared.convertToMD5(string:getNewPin()),"vendor_uuid":GlobalMethods.shared.getUniqueIdForDevice()]
+        let params = ["ekyc_id":BasicDetailsModel.shared.kycId,"pin":Util.shared.convertToMD5(string: getOldPin()),"new_pin":Util.shared.convertToMD5(string:getNewPin()),"vendor_uuid":Util.shared.getUniqueIdForDevice()]
         
         NetworkManager.shared.changePinAPI(params: params, success: { (responseJson) in
-            _userDefault.set(GlobalMethods.shared.convertToMD5(string: self.getNewPin()), forKey: kApplicationPinKey)
+            _userDefault.set(Util.shared.convertToMD5(string: self.getNewPin()), forKey: kApplicationPinKey)
             self.pinGenerated(msg: RawdataConverter.string(responseJson["result"]))
         }) { [weak self] (errorMsg,data) in
             self?.processResponse(data: data!, errorMsg: errorMsg!)

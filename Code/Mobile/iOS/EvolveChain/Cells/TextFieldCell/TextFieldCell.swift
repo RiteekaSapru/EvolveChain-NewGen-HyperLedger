@@ -42,6 +42,7 @@ class TextFieldCell: UITableViewCell,UITextFieldDelegate {
             txtfldInput.delegate = self
             txtfldInput.inputView = nil
             txtfldInput.inputAccessoryView = nil
+            txtfldInput.autocapitalizationType = .allCharacters
 //            if model.isSavedComplete{
                 txtfldInput.text = model.value
 //            }
@@ -57,6 +58,7 @@ class TextFieldCell: UITableViewCell,UITextFieldDelegate {
             txtfldInput.delegate = nil
             txtfldInput.inputView = nil
             txtfldInput.inputAccessoryView = nil
+            txtfldInput.autocapitalizationType = .none
         }
         else if cellType == .DatePickerType{
             txtfldInput.placeholder = "Expiry Date"
@@ -69,8 +71,9 @@ class TextFieldCell: UITableViewCell,UITextFieldDelegate {
             
             txtfldInput.isUserInteractionEnabled = true
             txtfldInput.delegate = nil
+            txtfldInput.autocapitalizationType = .none
             
-            datePicker = GlobalMethods.shared.getDatePicker(controller:self,txtFld: txtfldInput, doneAction: #selector(doneMethod), cancelAction: #selector(cancelMethod))
+            datePicker = Util.shared.getDatePicker(controller:self,txtFld: txtfldInput, doneAction: #selector(doneMethod), cancelAction: #selector(cancelMethod))
             datePicker?.minimumDate = Date()
             datePicker?.maximumDate = nil
 //            datePicker?.maximumDate = GlobalMethods.shared.getDate(year: SignupConfigModel.shared.selectedCountry.minAge, after: false)
@@ -102,7 +105,7 @@ class TextFieldCell: UITableViewCell,UITextFieldDelegate {
             return true
         }
         else{
-            let result = string.components(separatedBy: CharacterSet.alphanumerics).joined()
+            let result = string.components(separatedBy: CharacterSet.alphanumerics.union(CharacterSet.init(charactersIn: "/"))).joined()
             return result.count == 0
         }
     }

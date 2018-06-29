@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Photos
 
 class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UINavigationControllerDelegate,UITextFieldDelegate,BackSpaceTextFieldDelegate {
 
@@ -48,10 +49,10 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
         
     override func viewDidLoad() {
         super.viewDidLoad()
-        datePicker = GlobalMethods.shared.getDatePicker(controller:self,txtFld: txtfldDOB, doneAction: #selector(doneMethod), cancelAction: #selector(cancelMethod))
-        datePicker?.maximumDate = GlobalMethods.shared.getDate(year: SignupConfigModel.shared.minAge, after: false)
-        datePicker?.minimumDate = GlobalMethods.shared.getDate(year: SignupConfigModel.shared.maxAge, after: false)
-        dateformatter.dateFormat = "dd MMM yyyy"
+        datePicker = Util.shared.getDatePicker(controller:self,txtFld: txtfldDOB, doneAction: #selector(doneMethod), cancelAction: #selector(cancelMethod))
+        datePicker?.maximumDate = Util.shared.getDate(year: SignupConfigModel.shared.minAge, after: false)
+        datePicker?.minimumDate = Util.shared.getDate(year: SignupConfigModel.shared.maxAge, after: false)
+        dateformatter.dateFormat = "MMM dd, yyyy"
         tblvwBasic.tableHeaderView = vwMain
         setUpGender()
 //        setEmailForDev()
@@ -68,10 +69,27 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
+//        NotificationCenter.default.addObserver(self, selector: #selector(editingEnded), name: NSNotification.Name(rawValue: "Editing_ended"), object: nil)
 //       setupUI()
     }
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+//        NotificationCenter.default.removeObserver(self, name: NSNotification.Name(rawValue: "Editing_ended"), object: nil)
+    }
      // MARK: - Setup Methods
+    
+    @objc func editingEnded(){
+        txtfldEmail.text = txtfldEmail.text?.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        if Util.shared.isValidEmail(testStr: txtfldEmail.text!) && txtfldEmail.text?.lowercased() != BasicDetailsModel.shared.email.lowercased(){
+            showEmailAlert()
+        }
+        else if txtfldPhone.text!.count == SignupConfigModel.shared.selectedCountry.phoneFormat.count && txtfldPhone.text != BasicDetailsModel.shared.contactNumber{
+            showPhoneAlert()
+        }
+        else{
+            setEmailAndPhone()
+        }
+    }
     
     fileprivate func setUpGender(){
     
@@ -101,14 +119,24 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
             vwEmail.isHidden = false
             vwEmail.alpha = 1.0
             txtfldEmail.text = BasicDetailsModel.shared.email
-            btnAddEmail.isSelected = true
+            txtfldEmail.isUserInteractionEnabled = false
+            btnAddEmail.isUserInteractionEnabled = false
+            btnAddEmail.setTitle("Verified", for: .normal)
+        }
+        else{
+            txtfldEmail.text = ""
         }
         if BasicDetailsModel.shared.isPhoneVerified{
             vwPhone.isHidden = false
             vwPhone.alpha = 1.0
             txtfldPhone.text = BasicDetailsModel.shared.contactNumber
+            txtfldPhone.isUserInteractionEnabled = false
             txtfldCountryCode.text = "+" + BasicDetailsModel.shared.countryCode
-            btnAddPhone.isSelected = true
+            btnAddPhone.isUserInteractionEnabled = false
+            btnAddPhone.setTitle("Verified", for: .normal)
+        }
+        else{
+            txtfldPhone.text = ""
         }
     }
     
@@ -138,20 +166,24 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
             else{
                 txtfldDOB.text = ""
             }
-            
-            
-          
-            
         }
     }
     
     // MARK: - Gallery and Camera
     
     func permissionCheckGallery() {
-        GlobalMethods.shared.checkForGalleryPermission(success: {
+        Util.shared.checkForGalleryPermission(success: {
             DispatchQueue.main.async {
                  self.openGallery()
             }
+        }) {
+            
+        }
+    }
+    
+    fileprivate func permissionCheckCamera() {
+        Util.shared.checkForCameraPermission(success: {
+            self.openCamera()
         }) {
             
         }
@@ -165,13 +197,13 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
             imagePicker.delegate = self
             imagePicker.sourceType = UIImagePickerControllerSourceType.camera
             imagePicker.allowsEditing = false
-            GlobalMethods.shared.presentVC(imagePicker)
+            Util.shared.presentVC(imagePicker)
         }
         else
         {
             let alert  = UIAlertController(title: "Warning", message: "You don't have camera", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: StringConstants.okText, style: .default, handler: nil))
-            GlobalMethods.shared.presentVC(alert)
+            Util.shared.presentVC(alert)
         }
     }
     
@@ -181,8 +213,46 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
         imagePicker.delegate = self
         imagePicker.sourceType = UIImagePickerControllerSourceType.photoLibrary
         imagePicker.allowsEditing = false
-        GlobalMethods.shared.presentVC(imagePicker)
+        Util.shared.presentVC(imagePicker)
 
+    }
+    
+    // MARK: - Alerts
+    
+    func showEmailAlert()  {
+        let alert = UIAlertController.init(title: StringConstants.Error, message: StringConstants.EmailNotVerified, preferredStyle: .alert)
+        
+        let otpAction = UIAlertAction.init(title: "Send OTP", style: .default) { [weak self] (action) in
+            self?.APIGetEMailOtp(email: (self?.txtfldEmail.text!.lowercased())!)
+        }
+        
+        let cancelAction = UIAlertAction.init(title: "Cancel", style: .destructive) { [weak self](action) in
+            self?.setEmailAndPhone()
+        }
+        
+        alert.addAction(otpAction)
+        alert.addAction(cancelAction)
+
+        Util.shared.presentVC(alert)
+    }
+    
+    func showPhoneAlert()  {
+        let alert = UIAlertController.init(title: StringConstants.Error, message: StringConstants.PhoneNotVerified, preferredStyle: .alert)
+        
+        let otpAction = UIAlertAction.init(title: "Send OTP", style: .default) { [weak self] (action) in
+            let result = self?.txtfldCountryCode.text?.trimmingCharacters(in: CharacterSet.init(charactersIn: "1234567890").inverted)
+            
+            self?.APIGetPhoneOtp(countryCode: result!,phoneNumner: (self?.txtfldPhone.text?.components(separatedBy: CharacterSet.init(charactersIn: "1234567890").inverted).joined())!)
+        }
+        
+        let cancelAction = UIAlertAction.init(title: "Cancel", style: .destructive) { [weak self](action) in
+            self?.setEmailAndPhone()
+        }
+        
+        alert.addAction(otpAction)
+        alert.addAction(cancelAction)
+        
+        Util.shared.presentVC(alert)
     }
     
     // MARK: - Validation Methods
@@ -197,7 +267,7 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
             return false;
         }
         else if txtfldPhone.text!.count < SignupConfigModel.shared.selectedCountry.phoneFormat.count {
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneInvalid)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneInvalid)
             txtfldPhone.becomeFirstResponder()
             return false;
         }
@@ -218,8 +288,8 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
             txtfldEmail.becomeFirstResponder()
             return false;
         }
-        else if !GlobalMethods.shared.isValidEmail(testStr: txtfldEmail.text!){
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.EmailInvalid)
+        else if !Util.shared.isValidEmail(testStr: txtfldEmail.text!){
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.EmailInvalid)
             txtfldEmail.becomeFirstResponder()
             return false;
         }
@@ -246,35 +316,35 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
             txtfldPhone.animatePlaceholderColor()
             return false;
         }
-        else if txtfldFName.text!.isEmpty{
+        else if txtfldFName.text!.count < 2{
             txtfldFName.animatePlaceholderColor()
 //            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.FnameEmpty)
             txtfldFName.becomeFirstResponder()
             return false;
         }
         else if (txtfldFName.text?.count)! > 99{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.FnameIncorrect)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.FnameIncorrect)
             txtfldFName.becomeFirstResponder()
             return false;
         }
-        else if txtfldLName.text!.isEmpty{
+        else if txtfldLName.text!.count < 2{
             txtfldLName.animatePlaceholderColor()
 //            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.LnameEmpty)
             txtfldLName.becomeFirstResponder()
             return false;
         }
         else if (txtfldLName.text?.count)! > 99{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.LnameIncorrect)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.LnameIncorrect)
             txtfldLName.becomeFirstResponder()
             return false;
         }
         else if (txtfldMName.text?.count)! > 99{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.MnameIncorrect)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.MnameIncorrect)
             txtfldMName.becomeFirstResponder()
             return false;
         }
         else if userImage == nil {
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.UserPicEmpty)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.UserPicEmpty)
             return false;
         }
         else if txtfldDOB.text!.isEmpty{
@@ -283,7 +353,7 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
             txtfldDOB.becomeFirstResponder()
             return false;
         }
-        else if txtfldBirthPlace.text!.isEmpty{
+        else if txtfldBirthPlace.text!.count < 2{
             txtfldBirthPlace.animatePlaceholderColor()
 //            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.BirthStateEmpty)
             txtfldBirthPlace.becomeFirstResponder()
@@ -291,8 +361,8 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
         }
             
         else if txtFldGender.text!.isEmpty{
-            txtfldBirthPlace.animatePlaceholderColor()
-            txtfldBirthPlace.becomeFirstResponder()
+            txtFldGender.animatePlaceholderColor()
+            txtFldGender.becomeFirstResponder()
 //            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.GenderEmpty)
             return false;
         }
@@ -306,12 +376,14 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
     
     func moveToPhoneOtpVerify() -> Void {
         
+//         self.view.endEditing(true)
+        
         let verifyOtpObj = self.storyboard?.instantiateViewController(withIdentifier: "VerifyOtpVC") as! VerifyOtpVC
         verifyOtpObj.verificationType = .PhoneVerification
         verifyOtpObj.stringVerifyCountryCode = txtfldCountryCode.text!
         verifyOtpObj.stringVerify = txtfldPhone.text!
         verifyOtpObj.modalPresentationStyle = .overCurrentContext
-        GlobalMethods.shared.presentVC(verifyOtpObj)
+        Util.shared.presentVC(verifyOtpObj)
 
 //        GlobalMethods.shared.pushVC(verifyOtpObj)
         
@@ -324,11 +396,13 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
     }
     func moveToEmailOtpVerify() -> Void {
         
+//        self.view.endEditing(true)
+        
         let verifyOtpObj = self.storyboard?.instantiateViewController(withIdentifier: "VerifyOtpVC") as! VerifyOtpVC
         verifyOtpObj.verificationType = .EmailVerification
         verifyOtpObj.stringVerify = txtfldEmail.text!
         verifyOtpObj.modalPresentationStyle = .overCurrentContext
-        GlobalMethods.shared.presentVC(verifyOtpObj)
+        Util.shared.presentVC(verifyOtpObj)
 
         
         verifyOtpObj.completionHandler = {
@@ -373,6 +447,8 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
     @objc func cancelMethod(){
         self.view.endEditing(true)
     }
+    
+    
    
     // MARK: - Save Details
     
@@ -394,7 +470,7 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
         }
         else{
              self.completionHandler(0)
-            GlobalMethods.shared.popVC()
+            Util.shared.popVC()
         }
         
 //        GlobalMethods.shared.uploadBasicDetails()
@@ -409,6 +485,8 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
         BasicDetailsModel.shared.isPhoneVerified  = true
         BasicDetailsModel.shared.contactNumber  = "9643587944"
          BasicDetailsModel.shared.countryCode   = "91"
+        
+//         self.completionHandler(0)
     }
     
      // MARK: - Formating  Methods
@@ -419,7 +497,7 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
         let formatText = SignupConfigModel.shared.selectedCountry.phoneFormat
         let result = newString.components(separatedBy: CharacterSet.init(charactersIn: "1234567890").inverted).joined()
         
-        for (index, char) in result.enumerated() {
+        for (_, char) in result.enumerated() {
             
             if text.count < formatText.count{
                 text.append(char)
@@ -443,11 +521,82 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
             imgUserPic.image = pickedImage
             userImage = pickedImage
         }
+        
+//        if let url: URL = info[UIImagePickerControllerReferenceURL] as? URL
+//        {
+//            if let asset = PHAsset.fetchAssets(withALAssetURLs: [url], options: nil).firstObject{
+//                
+//                print(asset.creationDate)
+//                
+//                //            self.holdingImageDate = asset.creationDate
+//                //            self.holdingImageLocation = asset.location?.coordinate
+//            }
+//        }
+//        else if let metaDict = info[UIImagePickerControllerMediaMetadata] as? Dictionary<String,Any>{
+//            
+//            if let exifData = metaDict["{Exif}"] as? Dictionary<String,Any>{
+////                print(exifData)
+//                if let dateTime = exifData["DateTimeOriginal"] as? String{
+//                     print(dateTime)
+//                    let date = Date.dateFromFormattedLocaldateTime_String(dateTime)
+//                    print(date)
+//                    
+//                }
+//            }
+//        }
+        
+       
+        
+        
         picker.dismiss(animated: true, completion: nil)
+        
+       
     }
     
      //MARK: - Textfield
     
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        
+//        if textField == txtfldPhone{
+//            txtfldEmail.text = txtfldEmail.text?.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+//            if Util.shared.isValidEmail(testStr: txtfldEmail.text!) && txtfldEmail.text?.lowercased() != BasicDetailsModel.shared.email.lowercased(){
+//                showEmailAlert()
+//            }
+//            else{
+//                setEmailAndPhone()
+//            }
+//        }
+//        else if textField == txtfldEmail{
+//            if txtfldPhone.text!.count == SignupConfigModel.shared.selectedCountry.phoneFormat.count && txtfldPhone.text != BasicDetailsModel.shared.contactNumber{
+//                showPhoneAlert()
+//            }
+//            else{
+//                setEmailAndPhone()
+//            }
+//        }
+//        else{
+//            editingEnded()
+//        }
+    }
+//    func textFieldDidEndEditing(_ textField: UITextField) {
+//        if textField == txtfldEmail{
+//            txtfldEmail.text = txtfldEmail.text?.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+//            if Util.shared.isValidEmail(testStr: txtfldEmail.text!) && txtfldEmail.text?.lowercased() != BasicDetailsModel.shared.email.lowercased(){
+//                showEmailAlert()
+//            }
+//            else{
+//                setEmailAndPhone()
+//            }
+//        }
+//        else if textField == txtfldPhone{
+//            if txtfldPhone.text!.count == SignupConfigModel.shared.selectedCountry.phoneFormat.count && txtfldPhone.text != BasicDetailsModel.shared.contactNumber{
+//                showPhoneAlert()
+//            }
+//            else{
+//                setEmailAndPhone()
+//            }
+//        }
+//    }
     func textFieldShouldClear(_ textField: UITextField) -> Bool {
         
         return true
@@ -455,7 +604,7 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
     
     func textFieldDidDelete(textfield: UITextField) {
         
-        if textfield === txtfldPhone {
+        if textfield == txtfldPhone {
             var text = textfield.text
             
             if text?.last == "-" {
@@ -518,6 +667,14 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
             return false
             //            return true
         }
+        else if textField == txtfldFName || textField == txtfldLName || textField == txtfldMName{
+            if string == "" {
+                return true
+            }
+            
+            let inputString = string.components(separatedBy: CharacterSet.letters).joined()
+            return inputString.count == 0
+        }
         return true
         
     }
@@ -527,15 +684,15 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
     @IBAction func actionSelectUserPic(_ sender: UIButton) {
         
         self.view.endEditing(true)
-        self.permissionCheckGallery()
-//        GlobalMethods.shared.showAlertForImagePicker { (index) in
-//            switch index{
-//            case 1 : self.openCamera()
-//            case 2: self.openGallary()
-//            default:
-//                break
-//            }
-//        }
+//        self.permissionCheckGallery()
+        Util.shared.showAlertForImagePicker { (index) in
+            switch index{
+            case 1 : self.permissionCheckCamera()
+            case 2: self.permissionCheckGallery()
+            default:
+                break
+            }
+        }
     }
     
     @IBAction func actionAddEmail(_ sender: UIButton) {
@@ -569,20 +726,37 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
         }
         
     }
-    @IBAction func actionSendEmailOTP(_ sender: Any) {
-        if checkEmailValidations() {
-            //API Call
-            self.view.endEditing(true)
-            APIGetEMailOtp(email: txtfldEmail.text!.lowercased())
+    @IBAction func actionSendEmailOTP(_ sender: UIButton) {
+        if sender.isSelected{
+            txtfldEmail.isUserInteractionEnabled = true
+            txtfldEmail.becomeFirstResponder()
+            sender.isSelected = false
         }
+        else{
+            txtfldEmail.text = txtfldEmail.text?.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            if checkEmailValidations() {
+                //API Call
+                
+                APIGetEMailOtp(email: txtfldEmail.text!.lowercased())
+            }
+        }
+      
     }
-    @IBAction func actionSendPhoneOTP(_ sender: Any) {
-        if checkPhoneValidations() {
-            //API Call
-            self.view.endEditing(true)
-            let result = txtfldCountryCode.text?.trimmingCharacters(in: CharacterSet.init(charactersIn: "1234567890").inverted)
-
-            APIGetPhoneOtp(countryCode: result!,phoneNumner: (txtfldPhone.text?.components(separatedBy: CharacterSet.init(charactersIn: "1234567890").inverted).joined())!)
+    @IBAction func actionSendPhoneOTP(_ sender: UIButton) {
+        
+        if sender.isSelected{
+            txtfldPhone.isUserInteractionEnabled = true
+            txtfldPhone.becomeFirstResponder()
+            sender.isSelected = false
+        }
+        else{
+            if checkPhoneValidations() {
+                //API Call
+               
+                let result = txtfldCountryCode.text?.trimmingCharacters(in: CharacterSet.init(charactersIn: "1234567890").inverted)
+                
+                APIGetPhoneOtp(countryCode: result!,phoneNumner: (txtfldPhone.text?.components(separatedBy: CharacterSet.init(charactersIn: "1234567890").inverted).joined())!)
+            }
         }
     }
     
@@ -599,17 +773,17 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
     func APIGetPhoneOtp(countryCode:String,phoneNumner:String) -> Void {
         
         
-        GlobalMethods.shared.showLoader(loadingText: StringConstants.OTPLoader)
+        Util.shared.showLoader(loadingText: StringConstants.OTPLoader)
         let params = ["mobile":phoneNumner,"country_code":countryCode]
         
         NetworkManager.shared.generateMobileOTP(params: params, success: { (responseDict) in
-            GlobalMethods.shared.dismissLoader(complete: {
+            Util.shared.dismissLoader(complete: {
                 self.moveToPhoneOtpVerify()
             })
             
         }) { (errorMsg) in
-            GlobalMethods.shared.dismissLoader(complete: {
-               GlobalMethods.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
+            Util.shared.dismissLoader(complete: {
+               Util.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
             })
             
         }
@@ -618,15 +792,15 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
     func APIGetEMailOtp(email:String) -> Void {
         
         let params = ["email":email]
-        GlobalMethods.shared.showLoader(loadingText: StringConstants.OTPLoader)
+        Util.shared.showLoader(loadingText: StringConstants.OTPLoader)
         NetworkManager.shared.generateEmailOTP(params: params, success: { (responseDict) in
-            GlobalMethods.shared.dismissLoader(complete: {
+            Util.shared.dismissLoader(complete: {
                 self.moveToEmailOtpVerify()
             })
             
         }) { (errorMsg) in
-            GlobalMethods.shared.dismissLoader(complete: {
-                GlobalMethods.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
+            Util.shared.dismissLoader(complete: {
+                Util.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
             })
         }
     }
@@ -634,16 +808,16 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
     func uploadBasicDetails() {
         
         let filenameArray = ["file[]"]
-        let image = GlobalMethods.shared.resizeImage(image: BasicDetailsModel.shared.userImage, targetSize: CGSize.init(width: 200.0, height: 200.0))
+        let image = Util.shared.resizeImage(image: BasicDetailsModel.shared.userImage, targetSize: CGSize.init(width: 200.0, height: 200.0))
         let imagesArray = [image]
         
         NetworkManager.shared.POSTBasicDetails(params: BasicDetailsModel.shared.getBasicParamsForSaveKYC(), fileArray: imagesArray, filenameArray: filenameArray, success: { (responseDict) in
             print(responseDict)
             print("Basic Details Saved")
              self.completionHandler(0)
-            GlobalMethods.shared.popVC()
+            Util.shared.popVC()
         }) { (errorMsg) in
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
+            Util.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
         }
         
     }

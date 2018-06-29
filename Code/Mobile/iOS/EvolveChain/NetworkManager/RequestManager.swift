@@ -208,13 +208,13 @@ class RequestManager: NSObject {
 //                                            }
 //                                        }
                                          if errorCode == ErrorCode.DEVICE_MISMATCH.rawValue{
-                                            GlobalMethods.shared.dismissLoader {
-                                                GlobalMethods.shared.deviceMismatch(errorMsg: errorString)
+                                            Util.shared.dismissLoader {
+                                                Util.shared.deviceMismatch(errorMsg: errorString)
                                             }
                                         }
                                          else if errorCode == ErrorCode.EXPIRED_APP_STATUS.rawValue{
-                                            GlobalMethods.shared.dismissLoader {
-                                                GlobalMethods.shared.documentExpiredError(errorMsg: errorString)
+                                            Util.shared.dismissLoader {
+                                                Util.shared.documentExpiredError(errorMsg: errorString)
 //                                                GlobalMethods.shared.logOutUser()
 //                                                GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorString)
                                             }
@@ -365,11 +365,11 @@ class RequestManager: NSObject {
                                 if let errorCode = RawdataConverter.optionalString(jsonDict["error_code"]) {
                                     
                                     if errorCode == ErrorCode.APP_NOT_FOUND.rawValue{
-                                        GlobalMethods.shared.logOutUser()
-                                        GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorString)
+                                        Util.shared.logOutUser()
+                                        Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorString)
                                     }
                                     else if errorCode == ErrorCode.DEVICE_MISMATCH.rawValue{
-                                        GlobalMethods.shared.deviceMismatch(errorMsg: errorString)
+                                        Util.shared.deviceMismatch(errorMsg: errorString)
                                     }
                                     else{
                                         failure(data , response , error as NSError?,errorString)

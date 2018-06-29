@@ -94,12 +94,12 @@ class AddressVC: UIViewController,UITextFieldDelegate {
             return false;
         }
         else if (txtfldAreaCode.text?.count)! < 4{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AreaCodeIncorrect)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AreaCodeIncorrect)
             txtfldAreaCode.becomeFirstResponder()
             return false;
         }
         else if txtfldAddressCountry.text!.isEmpty{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.CountryEmpty)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.CountryEmpty)
             actionPickerAddCountry(UIButton())
             return false;
         }
@@ -186,7 +186,7 @@ class AddressVC: UIViewController,UITextFieldDelegate {
     func uploadBasicDetails() {
         
         let filenameArray = ["file[]"]
-        let image = GlobalMethods.shared.resizeImage(image: BasicDetailsModel.shared.userImage, targetSize: CGSize.init(width: 200.0, height: 200.0))
+        let image = Util.shared.resizeImage(image: BasicDetailsModel.shared.userImage, targetSize: CGSize.init(width: 200.0, height: 200.0))
         let imagesArray = [image]
         
         NetworkManager.shared.POSTBasicDetails(params: BasicDetailsModel.shared.getBasicParamsForSaveKYC(), fileArray: imagesArray, filenameArray: filenameArray, success: { (responseDict) in
@@ -194,10 +194,10 @@ class AddressVC: UIViewController,UITextFieldDelegate {
             print("Basic Details Saved")
             BasicDetailsModel.shared.isAddressDetailsComplete = true
             self.completionHandler(1)
-            GlobalMethods.shared.popVC()
+            Util.shared.popVC()
 
         }) { (errorMsg) in
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
+            Util.shared.showAlert(alertTitle: StringConstants.AppName, alertText: errorMsg!)
         }
         
     }

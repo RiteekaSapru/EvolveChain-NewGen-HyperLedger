@@ -47,6 +47,7 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
         txtfld5.backDelegate = self
         txtfld6.backDelegate = self
         txtfldPhone.backDelegate = self
+        btnResend.backgroundColor = UIColor.lightGray
         vwOTP.alpha = 0;
         if SignupConfigModel.shared.arrCountryList.count > 0{
             countryArray = SignupConfigModel.shared.arrCountryList
@@ -191,7 +192,7 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
         let formatText = selectedCountry?.phoneFormat
         let result = newString.components(separatedBy: CharacterSet.init(charactersIn: "1234567890").inverted).joined()
         
-        for (index, char) in result.enumerated() {
+        for (_, char) in result.enumerated() {
             
             if text.count < formatText!.count{
                 text.append(char)
@@ -208,11 +209,33 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
         return text
     }
     
+    // MARK: - OTP Verification Methods
+    
+    func moveToOtpVerify() -> Void {
+        
+        let verifyOtpObj = self.storyboard?.instantiateViewController(withIdentifier: "VerifyOtpVC") as! VerifyOtpVC
+        verifyOtpObj.verificationType = .EditVerification
+        verifyOtpObj.stringVerifyCountryCode = txtfldCountryCode.text!
+        verifyOtpObj.stringVerify = txtfldPhone.text!
+        verifyOtpObj.stringAppKey = appKey
+        verifyOtpObj.modalPresentationStyle = .overCurrentContext
+        Util.shared.presentVC(verifyOtpObj)
+        
+        //        GlobalMethods.shared.pushVC(verifyOtpObj)
+        
+        verifyOtpObj.completionHandler = {
+//            DispatchQueue.main.async {
+//                self.setupUI()
+//            }
+        }
+        
+    }
+    
     //MARK: - Timer
     
     func startTimer() -> Void {
         btnResend.isUserInteractionEnabled = false
-        btnResend.backgroundColor = UIColor.init(red: 74.0/255.0, green: 177.0/255.0, blue: 157.0/255.0, alpha: 1.0)
+        btnResend.backgroundColor = UIColor.lightGray
         timerOtp?.invalidate()
         timerOtp = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateResendBtn), userInfo: nil, repeats: true)
     }
@@ -272,7 +295,7 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
             return false;
         }
         else if txtfldPhone.text!.count < selectedCountry!.phoneFormat.count {
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneInvalid)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneInvalid)
             return false;
         }
         else{
@@ -436,15 +459,45 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
     func processGetOTP(responseJSON:Dictionary<String,Any>)  {
         
         appKey = RawdataConverter.string(responseJSON["key"])
-        startTimer()
-        changeVisibility(alpha: 1.0)
+        moveToOtpVerify()
     }
     
     func processResubmitResponse(responseJSON:Dictionary<String,Any>)  {
         
 //        DispatchQueue.gl
         DispatchQueue.global(qos: .default).async {
-             GlobalMethods.shared.processEditResponse(responesJSON: responseJSON)
+             Util.shared.processEditResponse(responesJSON: responseJSON)
+        }
+    }
+    
+    func processResponse(data:Data,errorMsg:String) {
+        do {
+            if let jsonDict = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? Dictionary<String,Any> {
+                let errorCode = RawdataConverter.optionalString(jsonDict["error_code"])
+                
+                if errorCode == ErrorCode.INCORRECT_OTP.rawValue{
+                    
+                    self.clearPin()
+                    self.vwOTPHolder.shakeView()
+                    self.txtfld1.becomeFirstResponder()
+                }
+                else{
+                   
+                    self.clearPin()
+                    
+                    self.vwOTPHolder.shakeView()
+                    
+                    self.txtfld1.becomeFirstResponder()
+                    Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
+                }
+            }
+            else{
+                
+            }
+        }
+        catch let error as NSError {
+            print(error)
+            
         }
     }
     
@@ -452,29 +505,39 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
 
     func generateOTP() {
         
-        let params = ["mobile":txtfldPhone.text!,"isd_code":selectedCountry!.phoneCode,"vendor_uuid":GlobalMethods.shared.getUniqueIdForDevice()] as [String : Any]
-        
+        let params = ["mobile":txtfldPhone.text!,"isd_code":selectedCountry!.phoneCode,"vendor_uuid":Util.shared.getUniqueIdForDevice()] as [String : Any]
+                Util.shared.showLoader(loadingText: StringConstants.OTPLoader)
+
         NetworkManager.shared.getEditOTPAPI(params: params, success: { (responseJSON) in
-            DispatchQueue.main.async {
-                self.processGetOTP(responseJSON: responseJSON)
-            }
+            Util.shared.dismissLoader(complete: {
+                DispatchQueue.main.async {
+                    self.processGetOTP(responseJSON: responseJSON)
+                }
+            })
+           
         }) { (errorMsg, data) in
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+                        Util.shared.dismissLoader(complete: {
+                            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+
+            })
 
         }
     }
     
     func resubmitInitialiseOTP() {
         
-        let params = ["resubmit_pin":GlobalMethods.shared.convertToMD5(string: getPIN()),"vendor_uuid":GlobalMethods.shared.getUniqueIdForDevice(),"appkey":appKey]
+        let params = ["resubmit_pin":Util.shared.convertToMD5(string: getPIN()),"vendor_uuid":Util.shared.getUniqueIdForDevice(),"appkey":appKey]
         
         NetworkManager.shared.verifyEditOTPAPI(params: params, success: { (responseJSON) in
             DispatchQueue.main.async {
-                GlobalMethods.shared.showLoader(loadingText: "   Loading Data...")
+                Util.shared.showLoader(loadingText: "   Loading Data...")
                 self.processResubmitResponse(responseJSON: responseJSON)
             }
         }) { (errorMsg, data) in
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+            DispatchQueue.main.async {
+                self.processResponse(data: data!, errorMsg: errorMsg!)
+            }
+//            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
 
         }
     }
@@ -487,7 +550,7 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
                 self.btnGetCountry.isUserInteractionEnabled = true
             }
             
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
         }
     }
 }

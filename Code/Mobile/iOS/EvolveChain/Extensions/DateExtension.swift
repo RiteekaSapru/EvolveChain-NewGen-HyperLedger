@@ -19,6 +19,13 @@ extension Foundation.Date
             formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
             return formatter
         }()
+        static let formatterLocalDateTime: DateFormatter = {
+            let formatter = DateFormatter()
+//            formatter.locale = Locale(identifier: "en")
+            formatter.timeZone = TimeZone.current
+            formatter.dateFormat = "yyyy:MM:dd HH:mm:ss"
+            return formatter
+        }()
         static let formatter2 :DateFormatter = {
             let formatter = DateFormatter()
             formatter.locale = Locale(identifier: "en")
@@ -84,7 +91,9 @@ extension Foundation.Date
         return Date.formatter4.string(from: self)
     }
     
-    
+    var formattedLocalDateTime: String {
+        return Date.formatterLocalDateTime.string(from: self)
+    }
     
     static func dateFromFormatted1_String (_ dateString: String) -> Foundation.Date? {
         let dateFromString = Date.formatter1.date(from: dateString)
@@ -104,6 +113,11 @@ extension Foundation.Date
     }
     static func dateFromFormatted4_String (_ dateString: String) -> Foundation.Date? {
         let dateFromString = Date.formatter4.date(from: dateString)
+        return dateFromString
+    }
+    
+    static func dateFromFormattedLocaldateTime_String (_ dateString: String) -> Foundation.Date? {
+        let dateFromString = Date.formatterLocalDateTime.date(from: dateString)
         return dateFromString
     }
     

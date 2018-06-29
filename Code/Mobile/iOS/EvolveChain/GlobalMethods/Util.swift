@@ -1,5 +1,5 @@
 //
-//  GlobalMethods.swift
+//  Util.swift
 //  EvolveChain
 //
 //  Created by Abhay Shankar on 17/05/18.
@@ -13,27 +13,19 @@ import LocalAuthentication
 import CoreTelephony
 import CoreLocation
 
-class GlobalMethods: NSObject,CLLocationManagerDelegate {
+class Util: NSObject,CLLocationManagerDelegate {
 
-    static let shared = GlobalMethods()
+    static let shared = Util()
     
     var isLoading : Bool = false
     
     var locationManager : CLLocationManager?
     
      // MARK: - Navigation
-//    private func setStatusBarColor(){
-//        if _navigator.topViewController is EntryHomeVC{
-//            _navigator.navigationBar.barStyle = .black
-//        }
-//        else{
-//            _navigator.navigationBar.barStyle = .
-//        }
-//    }
+
     func pushVC(_ controller : UIViewController) -> Void{
         if !self.isLoading{
             _navigator.pushViewController(controller, animated: true)
-//            setStatusBarColor()
         }
         
     }
@@ -48,7 +40,6 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
     func popVC() -> Void{
         if !self.isLoading{
             _navigator.popViewController(animated: true)
-//            setStatusBarColor()
         }
         
     }
@@ -72,6 +63,7 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
     }
     
     func showAlertForImagePicker(success:@escaping (  Int ) -> Void) -> Void {
+        
         let alert = UIAlertController.init(title: nil, message: nil, preferredStyle: .actionSheet)
         
         let cameraAction = UIAlertAction.init(title: "Camera", style: .default) { (alert: UIAlertAction!) in
@@ -145,15 +137,26 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
         
     }
     
-    func checkForCameraPermission() {
-        if AVCaptureDevice.authorizationStatus(for: .video) ==  .authorized {
+    func checkForCameraPermission(success:@escaping () -> Void, failure: @escaping ()-> Void) -> Void {
+        let status = AVCaptureDevice.authorizationStatus(for: .video)
+        
+        if status ==  .authorized {
             //already authorized
-        } else {
+            success()
+        }
+        else if status == .denied || status == .restricted{
+            self.showAlertForPermission(alertMsg: StringConstants.NoCamera)
+            failure()
+        }
+        else {
             AVCaptureDevice.requestAccess(for: .video, completionHandler: { (granted: Bool) in
                 if granted {
                     //access allowed
+                    success()
                 } else {
                     //access denied
+                    self.showAlertForPermission(alertMsg: StringConstants.NoCamera)
+                    failure()
                 }
             })
         }
@@ -214,6 +217,7 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
             failure()
         }
     }
+    
      // MARK: - Loader
     
     func showLoader(loadingText:String) -> Void {
@@ -438,10 +442,10 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
         DocumentManager.shared.eraseData()
         
         _userDefault.removeObject(forKey: kApplicationPinKey)
-        _userDefault.removeObject(forKey: kApplicationUserDetailsKey)
+        
         _userDefault.removeObject(forKey: kApplicationKycIdKey)
         
-        GlobalMethods.shared.stopLocation()
+        Util.shared.stopLocation()
     }
     
     func removeTempImages()  {
@@ -488,13 +492,13 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
 //        _userDefault.set(kyc_id, forKey: kApplicationKycIdKey)
         _userDefault.set(pin, forKey: kApplicationPinKey)
 
-//        _userDefault.set(details, forKey: kApplicationUserDetailsKey)
+
         _userDefault.set(details["appkey"], forKey: kApplicationKey)
 
 //         let pin = _userDefault.object(forKey: kApplicationPinKey) as! String
         if BasicDetailsModel.shared.isBasicDetailsComplete {
             BasicDetailsModel.shared.initWithResponse(responseJson: details)
-            GlobalMethods.shared.popVC()
+            Util.shared.popVC()
             _navigator.interactivePopGestureRecognizer?.isEnabled = true
 
         }
@@ -512,12 +516,12 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
         NetworkManager.shared.generateOtpForKydId(params: params, success: { (responseJson) in
             DispatchQueue.main.async {
                 FlowManager.shared.resetToGeneratePin()
-                GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
+                Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
             }
         }) { (errorMsg2) in
             _userDefault.removeObject(forKey: kApplicationKycIdKey)
             let msg = errorMsg + ". " + errorMsg2!
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: msg)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: msg)
         }
     }
     
@@ -528,7 +532,7 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
         self.cleanUpRegistrationData()
         DispatchQueue.main.async {
             FlowManager.shared.resetToGeneratePin()
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
         }
         
 //        if  (_navigator.presentedViewController != nil){
@@ -715,29 +719,29 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
     
     // MARK: - Location
     
-    func getLocation() -> (lat:Double,long:Double) {
+    func getLocation() -> (lat:String,long:String) {
         if CLLocationManager.locationServicesEnabled(){
             switch CLLocationManager.authorizationStatus(){
             case .restricted, .denied:
                 print("No access")
-                return (0.0,0.0)
+                return ("","")
             case .authorizedAlways, .authorizedWhenInUse:
                 print("Access")
                 if let location = locationManager?.location{
-                    return ((location.coordinate.latitude),(location.coordinate.longitude))
+                    return (String(format:"%f", location.coordinate.latitude),String(format:"%f", location.coordinate.longitude))
                 }
                 else{
-                    return (0.0,0.0)
+                    return ("","")
                 }
                 
             case .notDetermined:
                 print("not determined")
-                return (0.0,0.0)
+                return ("","")
             }
         }
         else
         {
-            return (0.0,0.0)
+            return ("","")
         }
     }
     
@@ -826,7 +830,7 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
         // process selected country
        
         guard let countryJSON = RawdataConverter.dictionary(responesJSON["country_details"]) else {
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Country Details Missing.")
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Country Details Missing.")
             return
         }
         let selectedCountry = CountryModel.init()
@@ -838,7 +842,7 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
         //documents
         
         guard let docArray = RawdataConverter.array(responesJSON["documents"] ) as? [Dictionary<String, Any>] else {
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Doc Array Missing.")
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Doc Array Missing.")
             return
         }
         DocumentManager.shared.initWith(docArray: docArray)
@@ -858,9 +862,9 @@ class GlobalMethods: NSObject,CLLocationManagerDelegate {
         BasicDetailsModel.shared.initUpholdingDocEdit(response: responesJSON)
         
         DispatchQueue.main.async {
-            GlobalMethods.shared.dismissLoader {
+            Util.shared.dismissLoader {
                 let regVC = FlowManager.shared.getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "AmericaRegistrationVC") as! RegistrationVC
-                GlobalMethods.shared.pushVC(regVC)
+                Util.shared.pushVC(regVC)
             }
            
         }

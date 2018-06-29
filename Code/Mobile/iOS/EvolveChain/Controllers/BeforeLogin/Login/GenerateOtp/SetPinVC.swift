@@ -116,15 +116,15 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
     func checkValidations() -> Bool {
         
         if txtfld1.text?.count == 0 || txtfld2.text?.count == 0 || txtfld3.text?.count == 0 || txtfld4.text?.count == 0 || txtfld5.text?.count == 0 || txtfld6.text?.count == 0{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter OTP")
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter OTP")
             return false;
         }
         else if txtfld7.text?.count == 0 || txtfld8.text?.count == 0 || txtfld9.text?.count == 0 || txtfld10.text?.count == 0 || txtfld11.text?.count == 0 || txtfld12.text?.count == 0{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter new pin.")
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please enter new pin.")
             return false;
         }
         else if txtfld13.text?.count == 0 || txtfld14.text?.count == 0 || txtfld15.text?.count == 0 || txtfld16.text?.count == 0 || txtfld17.text?.count == 0 || txtfld18.text?.count == 0{
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please  re enter new pin.")
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: "Please  re enter new pin.")
             return false;
         }
         else if getNewPin() != getNewPinReEnter(){
@@ -186,7 +186,7 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
             self.moveToLogin()
         }
         alert.addAction(defaultAction)
-        GlobalMethods.shared.presentVC(alert)
+        Util.shared.presentVC(alert)
 
     }
     
@@ -222,7 +222,7 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
                     self.vwOTPHolder.shakeView()
                     self.vwRePinHolder.shakeView()
                     self.txtfld1.becomeFirstResponder()
-                    GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
+                    Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg)
                 }
             }
             else{
@@ -330,12 +330,12 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
     
     func generatePin() {
         
-        let params = ["ekyc_id":stringVerify,"pin_otp":GlobalMethods.shared.convertToMD5(string: getOTP()),"pin":GlobalMethods.shared.convertToMD5(string: getNewPin()),"vendor_uuid":GlobalMethods.shared.getUniqueIdForDevice()]
+        let params = ["ekyc_id":stringVerify,"pin_otp":Util.shared.convertToMD5(string: getOTP()),"pin":Util.shared.convertToMD5(string: getNewPin()),"vendor_uuid":Util.shared.getUniqueIdForDevice()]
         
         NetworkManager.shared.setPinForKydId(params: params, success: { (responseJson) in
             if ((_userDefault.object(forKey: kApplicationPinKey)) != nil)
             {
-                _userDefault.set(GlobalMethods.shared.convertToMD5(string: self.getNewPin()), forKey: kApplicationPinKey)
+                _userDefault.set(Util.shared.convertToMD5(string: self.getNewPin()), forKey: kApplicationPinKey)
             }
             self.pinGenerated(msg: RawdataConverter.string(responseJson["result"]))
         }) { (errorMsg,data) in
@@ -357,7 +357,7 @@ class SetPinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelegate 
         NetworkManager.shared.generateOtpForKydId(params: params, success: { (responseJson) in
             self.startTimer()
         }) { (errorMsg) in
-            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
         }
     }
     

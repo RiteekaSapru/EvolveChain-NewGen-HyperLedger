@@ -21,7 +21,7 @@ class SettingsBundleHelper {
                     if appURL != appURLPrevious{
                         _userDefault.set(appURL, forKey: kApplicationURL)
                         BaseURL = appURL
-                        GlobalMethods.shared.logOutUser()
+                        Util.shared.logOutUser()
                     }
                 }
                 else{
@@ -35,18 +35,15 @@ class SettingsBundleHelper {
         else{
            resetToLocalURL()
         }
-//        let appURL = _userDefault.object(forKey: kApplicationURL)
-//         let appURLString = String(describing: appURL)
-//        if appURLString.count == 0{
-//            _userDefault.set(kLocalURL, forKey: kApplicationURL)
-//        }
-//        else{
-//
-//        }
+
     }
     
     func resetToLocalURL() {
-        _userDefault.set("http://192.168.60.130:4600", forKey: kSettingsBundleURL)
-        _userDefault.set("http://192.168.60.130:4600", forKey: kApplicationURL)
+        //
+        _userDefault.set("http://107.6.8.58:4600", forKey: kSettingsBundleURL)
+        _userDefault.set("http://107.6.8.58:4600", forKey: kApplicationURL)
+        
+//        _userDefault.set("http://192.168.60.130:4600", forKey: kSettingsBundleURL)
+//        _userDefault.set("http://192.168.60.130:4600", forKey: kApplicationURL)
     }
 }

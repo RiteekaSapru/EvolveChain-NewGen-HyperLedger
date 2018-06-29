@@ -59,10 +59,18 @@ class TwoImagePicker: UITableViewCell,UIImagePickerControllerDelegate,UINavigati
     }
     
     func permissionCheckGallery() {
-        GlobalMethods.shared.checkForGalleryPermission(success: {
+        Util.shared.checkForGalleryPermission(success: {
             DispatchQueue.main.async {
                 self.openGallery()
             }
+        }) {
+            
+        }
+    }
+    
+    fileprivate func permissionCheckCamera() {
+        Util.shared.checkForCameraPermission(success: {
+            self.openCamera()
         }) {
             
         }
@@ -74,18 +82,47 @@ class TwoImagePicker: UITableViewCell,UIImagePickerControllerDelegate,UINavigati
         imagePicker.delegate = self
         imagePicker.sourceType = UIImagePickerControllerSourceType.photoLibrary
         imagePicker.allowsEditing = false
-        GlobalMethods.shared.presentVC(imagePicker)
+        Util.shared.presentVC(imagePicker)
     }
     
+    func openCamera()
+    {
+        if(UIImagePickerController .isSourceTypeAvailable(UIImagePickerControllerSourceType.camera))
+        {
+            let imagePicker = UIImagePickerController()
+            imagePicker.delegate = self
+            imagePicker.sourceType = UIImagePickerControllerSourceType.camera
+            imagePicker.allowsEditing = false
+            Util.shared.presentVC(imagePicker)
+        }
+        else
+        {
+            let alert  = UIAlertController(title: "Warning", message: "You don't have camera", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: StringConstants.okText, style: .default, handler: nil))
+            Util.shared.presentVC(alert)
+        }
+    }
+    
+    
+    func showImageOptions() {
+        Util.shared.showAlertForImagePicker { (index) in
+            switch index{
+            case 1 : self.permissionCheckCamera()
+            case 2: self.permissionCheckGallery()
+            default:
+                break
+            }
+        }
+    }
     // MARK: - Actions
 
     @IBAction func actionBackImage(_ sender: Any) {
         currentImageIndex = 1
-        permissionCheckGallery()
+        showImageOptions()
     }
     @IBAction func actionFrontImage(_ sender: Any) {
         currentImageIndex = 0
-        permissionCheckGallery()
+        showImageOptions()
     }
     
     //MARK: - ImagePicker delegate
