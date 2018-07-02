@@ -59,11 +59,10 @@ class HyperLedgerService {
         return GeneralService.PutService(updateUrl, basicDetailObj);
     }
 
-    updatePhone(eKycId, newPhone, newISD_code){
+    UpdatePhone(eKycId, newPhone, newISD_code){
         // let updateUrl = HL_URL_EKYC + '/' + eKycId;
 
         let asset =  "resource:evolvechain.eKYC#";
-        console.log(asset);
         var assetFinal = asset.concat(eKycId);
 
         let Details= {};
@@ -76,10 +75,9 @@ class HyperLedgerService {
         return GeneralService.PostService(HL_URL_UPDATE_PHONE,eKycInfo);
     }
 
-    updateEmail(eKycId, newEmail){
+    UpdateEmail(eKycId, newEmail){
 
         let asset =  "resource:evolvechain.eKYC#";
-        console.log(asset);
         var assetFinal = asset.concat(eKycId);
 
         let Details= {};

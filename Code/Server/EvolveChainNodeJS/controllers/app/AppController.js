@@ -20,13 +20,13 @@ const NotificationQueue = require('../../models/notificationQueue');
 const Country = require('../../models/country');
 const ProofDocuments = require('../../models/proofdocuments');
 const VerificationReasons = require('../../models/verificationReason');
+const ConfigDB = require('../../models/config');
 
 const kyc_document = require('../../models/kycdocument');
 
 const PUBLIC_PATH = config.get('PUBLIC_PATH');
 const EMAIL_TEMPLATES_PATH = path.join(__dirname + "/../../public/email_template");
 const OTP_EXPIRY_MINS = config.get('OTP_EXPIRY_MINS');
-const APP_EXPIRATION_DAYS = config.get('APP_EXPIRATION_DAYS');
 
 class AppController extends base_controller {
 
@@ -124,7 +124,7 @@ class AppController extends base_controller {
                 phone: body.mobile,
                 isd_code: body.isd_code
             }
-
+            let configCol = await ConfigDB.findOne({});
             var App = await app.findOne(conditions);
 
             if (!App) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
@@ -138,7 +138,7 @@ class AppController extends base_controller {
             var currentUtc = common_utility.UtcNow();
             //explicitly needs to convert to UTC, somehow mongodb or node js convert it to local timezone
             var lastModified = common_utility.ConvertToUtc(App.last_modified);
-            var expiryDate = common_utility.AddDaysToUtcNow(-APP_EXPIRATION_DAYS);
+            var expiryDate = common_utility.AddDaysToUtcNow(-configCol.app_expiration_days);
 
             if (expiryDate > lastModified)
                 return this.SendErrorResponse(res, config.ERROR_CODES.EXPIRED_APPLICATION);
@@ -336,7 +336,7 @@ class AppController extends base_controller {
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_OTP);
 
 
-            var hlResult = await hyperLedgerService.updateEmail(App.ekyc_id, body.email.toLowerCase());
+            var hlResult = await hyperLedgerService.UpdateEmail(App.ekyc_id, body.email.toLowerCase());
 
             var setParams = {
                 $set: { email: body.email.toLowerCase() }
@@ -470,7 +470,7 @@ class AppController extends base_controller {
                 return this.SendErrorResponse(res, config.ERROR_CODES.DUPLICATE_PHONE);
             }
 
-            var hlResult = await hyperLedgerService.updatePhone(App.ekyc_id, phone, isdCode);
+            var hlResult = await hyperLedgerService.UpdatePhone(App.ekyc_id, phone, isdCode);
  
             var setParams = {
                 $set: { phone: phone, isd_code: isdCode }

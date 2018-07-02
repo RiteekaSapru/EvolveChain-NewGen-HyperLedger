@@ -1,6 +1,7 @@
 const NotificationQueue = require('../models/notificationQueue');
 const emailService = require('../services/EmailService');
 const sms_service = require('../services/SMSService');
+const serviceLogManager = require('../helpers/ServiceLogManager');
 
 class NotificationHelper {
 
@@ -28,6 +29,7 @@ class NotificationHelper {
             let notificationId = notification._id;
             if (notification.notification_type === "Email") {
                 await emailService.SendEmail(notification.to, notification.subject, notification.body);
+                serviceLogManager.Log('Scheduler - Notification processed for: ' + notification.to);
                 let setParams = {
                     $set: {
                         is_open: false
@@ -36,6 +38,7 @@ class NotificationHelper {
                 await NotificationQueue.update({ _id: notificationId }, setParams);
             } else if (notification.notification_type === "Msg") {
                 await sms_service.SendSMS(notification.to, notification.body);
+                serviceLogManager.Log('Scheduler - Notification processed for: ' + notification.to);
                 let setParams = {
                     $set: {
                         is_open: false

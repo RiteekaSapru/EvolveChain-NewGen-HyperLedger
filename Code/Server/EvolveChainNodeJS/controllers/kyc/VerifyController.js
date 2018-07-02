@@ -15,6 +15,7 @@ const KycDocument = require('../../models/kycdocument');
 const ProofDocuments = require('../../models/proofdocuments');
 const VerificationReasons = require('../../models/verificationReason');
 const NotificationQueue = require('../../models/notificationQueue');
+const ConfigDB = require('../../models/config');
 
 
 const messages = config.messages;
@@ -87,6 +88,7 @@ class VerifyController extends BaseController {
                 isdelete: false
             }
 
+            let configCol = await ConfigDB.findOne({});
             var appData = await App.findOne(app_query).populate('kycdoc_data').exec();
 
             if (!appData) {
@@ -147,7 +149,7 @@ class VerifyController extends BaseController {
             );
             var emailBody = ejs.render(template, {
                 eKycId: eKYCID,
-                expiryDays: config.APP_EXPIRATION_DAYS,
+                expiryDays: configCol.app_expiration_days,
                 APP_LOGO_URL: config.get('APP_LOGO_URL'),
                 SITE_NAME: config.get('app_name'),
                 CURRENT_YEAR: config.get('current_year'),
