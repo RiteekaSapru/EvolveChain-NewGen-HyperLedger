@@ -51,6 +51,7 @@
     "login_success": "Login successful!",
     "ekyc_same_device": "Ekyc Id exist for this device",
     "resubmit_init_success": "Resubmit initialize successful!",
+    "update_error_HL": "Error while updating on HL!",
     "req_street": "Address Street Required!",
     "req_city": "City Required!",
     "req_zip": "Zip Required!",
