@@ -3,6 +3,8 @@ const _ = require('lodash');
 const GeneralService = require('./GeneralService');
 
 const HL_URL_EKYC = config.get('HL_URL') + "/EKYC";
+const HL_URL_UPDATE_PHONE = config.get('HL_URL') + "/updatePhone";
+const HL_URL_UPDATE_EMAIL = config.get('HL_URL') + "/updateEmail";
 
 class HyperLedgerService {
 
@@ -31,13 +33,13 @@ class HyperLedgerService {
         DocDetails.email = email;
         DocDetails.phone = phone;
         DocDetails.isd_code = isd_code;
-        DocDetails.status = status;
+        DocDetails.eKYCstatus = status;
         DocDetails.country_iso = country_iso;
         DocDetails.basicDetailObj = JSON.stringify(basicDetailObj);;
         DocDetails.addressDetailObj = JSON.stringify(addressDetailObj);
         DocDetails.identityDetailObj = JSON.stringify(identityDetailObj);
 
-        let eKycInfo = _.pick(DocDetails, ['eKYCID', 'email', 'phone', 'isd_code','status','country_iso','basicDetailObj','addressDetailObj','identityDetailObj']);
+        let eKycInfo = _.pick(DocDetails, ['eKYCID', 'email', 'phone', 'isd_code','eKYCstatus','country_iso','basicDetailObj','addressDetailObj','identityDetailObj']);
 
         return GeneralService.PostService(HL_URL_EKYC, eKycInfo);
     }
@@ -56,12 +58,51 @@ class HyperLedgerService {
         let updateUrl = HL_URL_EKYC + '/' + eKycId;
         return GeneralService.PutService(updateUrl, basicDetailObj);
     }
+
+    updatePhone(eKycId, newPhone, newISD_code){
+        // let updateUrl = HL_URL_EKYC + '/' + eKycId;
+
+        let asset =  "resource:evolvechain.eKYC#";
+        console.log(asset);
+        var assetFinal = asset.concat(eKycId);
+
+        let Details= {};
+        Details.newPhone = newPhone;
+        Details.newISD_code = newISD_code;
+        Details.asset = assetFinal;
+
+        let eKycInfo = _.pick(Details, ['asset','newPhone','newISD_code']);
+
+        return GeneralService.PostService(HL_URL_UPDATE_PHONE,eKycInfo);
+    }
+
+    updateEmail(eKycId, newEmail){
+
+        let asset =  "resource:evolvechain.eKYC#";
+        console.log(asset);
+        var assetFinal = asset.concat(eKycId);
+
+        let Details= {};
+        Details.newEmail = newEmail;
+        Details.asset = assetFinal;
+
+        let eKycInfo = _.pick(Details, ['asset','newEmail']);
+
+        return GeneralService.PostService(HL_URL_UPDATE_EMAIL,eKycInfo);
+    }
+
+    // updateEmail(eKycId, newEmail){
+    //     let updateUrl = HL_URL_EKYC + '/' + eKycId;
+    //     return GeneralService.PutService(updateUrl, newEmail);
+    // }
+
+    // updateKYCStatus(eKycId, newStatus){
+    //     let updateUrl = HL_URL_EKYC + '/' + eKycId;
+    //     return GeneralService.PutService(updateUrl, eKycId, newStatus);
+    // }
 }
 
-    // UpdateEmailMobile(eKycId, updatedMobile, isdCode, updatedEmail){
-    //     let updateUrl = HL_URL_EKYC + '/' + eKycId;
-    //     return GeneralService.PutService(updateUrl, updatedEmail, updatedMobile);
-    // }
+
 
 
 //TEST CASES

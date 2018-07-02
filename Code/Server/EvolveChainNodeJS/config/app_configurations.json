@@ -56,5 +56,6 @@
     "VERIFICATION_REASON": {
         "DM": "Data mismatch",
         "BI": "Blurred images : Images not clear"
-    }
+    },
+    "ADD_EXPIRY_DAYS_FOR_DOC_FROM_UTC": 30
 }

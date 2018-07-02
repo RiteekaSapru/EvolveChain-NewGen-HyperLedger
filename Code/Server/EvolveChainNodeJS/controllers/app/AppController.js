@@ -13,6 +13,8 @@ const common_utility = require('../../helpers/CommonUtility');
 const log_manager = require('../../helpers/LogManager');
 const base_controller = require('../BaseController');
 
+const hyperLedgerService = require('../../services/HyperLedgerService');
+
 const app = require('../../models/apps');
 const NotificationQueue = require('../../models/notificationQueue');
 const Country = require('../../models/country');
@@ -333,6 +335,9 @@ class AppController extends base_controller {
             if (App.email_info.otp != body.email_code.toLowerCase())
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_OTP);
 
+
+            var hlResult = await hyperLedgerService.updateEmail(App.ekyc_id, body.email.toLowerCase());
+
             var setParams = {
                 $set: { email: body.email.toLowerCase() }
             }
@@ -465,6 +470,8 @@ class AppController extends base_controller {
                 return this.SendErrorResponse(res, config.ERROR_CODES.DUPLICATE_PHONE);
             }
 
+            var hlResult = await hyperLedgerService.updatePhone(App.ekyc_id, phone, isdCode);
+ 
             var setParams = {
                 $set: { phone: phone, isd_code: isdCode }
             }
