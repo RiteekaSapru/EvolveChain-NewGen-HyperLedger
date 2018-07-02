@@ -10,7 +10,11 @@ const config = require('config');
 const ConfigDB = new Schema({
     approver_emails: { type: [String] },
     app_expiration_days: { type: String },
-    app_expiry_notification_days: { type: String }    
+    app_expiry_notification_days: { type: String },
+    add_expiry_days_from_doc_from_UTC: {type: Number},
+    support_phone: { type: String },
+    support_email:{ type: String },
+    site_url :{ type: String }
 });
 
 
