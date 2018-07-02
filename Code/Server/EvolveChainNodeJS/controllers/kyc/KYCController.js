@@ -126,18 +126,14 @@ class KYCController extends BaseController {
                     return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_ALREADY_EXISTS);
                 }
 
+                var expiryCheck = await this.ExpirationDateLimitCheck(Date.parse(body.expiry_date));
+
+                if(expiryCheck == false)
+                {
+                    return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_EXPIRY_CHECK_FAILED);
+                }
             }
 
-            // switch (body.step) {
-            //     case "address":
-            //     case "identity":
-            //         var idx = proofDocumentCodes.indexOf(body.substep);
-            //         if(idx==-1)
-            //             return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_ADDRESS_DOCUMENT_TYPE);
-            //         break;
-            //     default:
-            //         break;
-            // }
 
             let key = req.params.key;
             var conditions = {
@@ -192,6 +188,18 @@ class KYCController extends BaseController {
             return this.SendExceptionResponse(res, ex);
         }
 
+    }
+
+    ExpirationDateLimitCheck(docs_expiry_date)
+    {
+        var date= new Date();
+        date.setDate(date.getDate() + config.ADD_EXPIRY_DAYS_FOR_DOCS_FROM_UTC);
+        if(docs_expiry_date>date)
+        {
+            return true;
+        }
+        else
+            return false;
     }
 
     SaveDocumentImages(filesFrmRequest, callback) {

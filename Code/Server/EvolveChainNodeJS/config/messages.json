@@ -98,6 +98,7 @@
         "E25": "Your application has expired. Please sign up again.",
         "E26": "Step name missing",
         "E27": "Invalid Address Document type!",
-        "E28": "Document already exists!"
+        "E28": "Document already exists!",
+        "E29": "The expiry date of the document is less the 30 days limit"
     }
 }
