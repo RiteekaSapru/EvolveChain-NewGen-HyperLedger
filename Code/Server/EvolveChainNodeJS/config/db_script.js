@@ -23,7 +23,9 @@ db.configs.insertOne({
 // });
 approver_emails: ["arpit.jain@newgen.co.in",
 		"archana.mehta@newgen.co.in",
-		"abhay.shankar@newgen.co.in"]
+		"abhay.shankar@newgen.co.in"],
+
+add_expiry_days_from_doc_from_UTC: 30
 });
 
 db.proofdocuments.insertMany([

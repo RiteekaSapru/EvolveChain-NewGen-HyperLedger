@@ -149,6 +149,17 @@ class CommonUtility {
         return summaryInfo;
     }
 
+
+    GetInitConfig(configCol){
+        let InitConfig = {};
+        InitConfig.supportPhone= configCol.support_phone;
+        InitConfig.supportEmails = configCol.support_email;
+        InitConfig.siteUrl = configCol.site_url ;
+        InitConfig.minDaysToExpiry = configCol.add_expiry_days_from_doc_from_UTC;
+        return InitConfig;
+
+    }
+
     // GetKycDocumentInfo(docInfo, docType) {
     //     let summaryInfo = {
     //         DocDetails: [],
