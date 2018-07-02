@@ -6,13 +6,14 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AdminDashboardComponent } from '../admin-dashboard/admin-dashboard.component';
 import { AuthGuard } from '../../auth/auth.guard';
+import { VerifyComponent } from '../verify/verify.component';
 
 @NgModule({
   imports: [
     RouterModule.forChild([
       {
         path: 'admin',
-        component: AdminComponent,canActivate : [AuthGuard],
+        component: AdminComponent, canActivate: [AuthGuard],
         children: [
           {
             path: '',
@@ -20,8 +21,12 @@ import { AuthGuard } from '../../auth/auth.guard';
             pathMatch: 'full'
           },
           {
-            path:'dashboard',
-            component : AdminDashboardComponent
+            path: 'dashboard',
+            component: AdminDashboardComponent
+          },
+          {
+            path: 'verify',
+            component: VerifyComponent
           },
           {
             path: 'dashboard1',
