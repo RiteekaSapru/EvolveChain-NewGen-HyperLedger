@@ -169,7 +169,103 @@ class Web  extends baseController{
         return res.status(status.OK).jsonp(response);
     }
 
+    async GetKYCVerificationInfo(req, res) {
 
+        //let baseURL = commonUtility.GetAppBaseUrl(req); //config.base_url
+        req.checkBody("appkey", messages.req_app_key).notEmpty();
+
+        try {
+
+            let result = await req.getValidationResult();
+
+            if (!result.isEmpty()) {
+                let error = this.GetErrors(result);
+                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+            }
+
+            let body = _.pick(req.body, ['appkey']);
+            let document_query = {
+                app_key: body.appkey,
+                isDelete: false
+            }
+
+            var docData = await KYCDocument.findOne(document_query).populate('app_data').exec();// => {
+
+            if (!docData) {
+                logManager.Log(`GetKYCVerificationInfo-Doc not found`);
+                return res.redirect(baseURL);
+            }
+
+            //Get exisitng reasons 
+            let appReasons = docData.app_data.verification_reasons;
+            let allReasons = await VerificationReasons.find();
+
+            if (appReasons) {
+                for (var j = 0; j < appReasons.length; j++) {
+                    let idx = allReasons.findIndex(r => r.code == appReasons[j]);
+                    allReasons[idx].state = true;
+                }
+            }
+
+
+            let isVerified = (docData.app_data.status == config.APP_STATUSES.VERIFIED);
+            let kycData = {
+                app_key: docData.app_key,
+                eKycId: isVerified ? docData.app_data.ekyc_id : docData.app_data.status,
+                country_iso: docData.app_data.country_iso,
+                is_verified: isVerified,
+                hash: docData.hash,
+                verification_comment: docData.verification_comment,
+                verification_code: docData.app_data.verification_code,
+                email: docData.app_data.email,
+                phone: "+" + docData.app_data.isd_code + "-" + docData.app_data.phone,
+                BasicInfo: await this.GetDocumentInfo(docData.basic_info, docData.app_data.country_iso, "BASIC"),
+                IdentityInfo: await this.GetDocumentInfo(docData.identity_info, docData.app_data.country_iso, "IDENTITY"),
+                AddressInfo: await this.GetDocumentInfo(docData.address_info, docData.app_data.country_iso, "ADDRESS"),
+                FaceInfo: await this.GetDocumentInfo(docData.face_info, docData.app_data.country_iso, "FACE"),
+                reasonList: allReasons
+            }
+            //res.render('web/verifiyKycDocuments.html', { kycData: kycData });
+           // res. { kycData: kycData });
+            return res.status(200).jsonp({ kycData: kycData });
+
+        } catch (e) {
+            logManager.Log(`GetKYCVerificationInfo-Exception: ${e}`);
+            return res.redirect(baseURL);
+        }
+    }
+
+    async GetDocumentInfo(docInfo, countryIso, docType) {
+        let summaryInfo = {
+            DocDetails: [],
+            DocImages: []
+        };
+
+        if (docInfo.details != undefined) {
+            var details = docInfo.details;
+            let images = docInfo.images;
+            var proofDocuments = [];
+            if (docType == "IDENTITY" || docType == "ADDRESS") {
+                proofDocuments = await ProofDocuments.find({ country_iso: countryIso });
+            }
+
+            let metaDataInfo = commonUtility.GetKycDocumentMetaDataInfo(docType);
+            let detailKeys = Object.keys(details);
+            Object.keys(metaDataInfo).forEach(function (key) {
+                if (key == 'document_type') {
+                    details[key] = proofDocuments.find(d => d.code == details[key]).name;
+                }
+                summaryInfo.DocDetails.push({ 'name': metaDataInfo[key], 'value': details[key] });
+                // }
+            });
+            for (var j = 0; j < images.length; j++) {
+                let imgUrl = config.base_url + "/kyc/getdocumentimages/" + images[j].file_key;
+                summaryInfo.DocImages.push({ 'url': imgUrl });
+
+            }
+        }
+        return summaryInfo;
+    }
 
     async GetAppSummary(req, res) {
 
