@@ -3,8 +3,8 @@ const _ = require('lodash');
 const GeneralService = require('./GeneralService');
 
 const HL_URL_EKYC = config.get('HL_URL') + "/EKYC";
-const HL_URL_UPDATE_PHONE = config.get('HL_URL') + "/updatePhone";
-const HL_URL_UPDATE_EMAIL = config.get('HL_URL') + "/updateEmail";
+const HL_URL_UPDATE = config.get('HL_URL') + "/update_eKYC";
+
 
 class HyperLedgerService {
 
@@ -15,17 +15,6 @@ class HyperLedgerService {
         return GeneralService.GetService(HL_URL_EKYC);
     }
 
-    // PostEkycDetails(eKycId, email, phone, isd_code, basicDetailObj) {
-    //     basicDetailObj.eKYCId = eKycId;
-    //     basicDetailObj.email = email;
-    //     basicDetailObj.phone = phone;
-    //     basicDetailObj.phone_code = isd_code;
-
-    //     let eKycInfo = _.pick(basicDetailObj, ['eKYCId', 'email', 'phone', 'phone_code', 'firstname', "middlename", "lastname",
-    //         "place_of_birth", "dob", "gender", "city", "street", "address1", "address2", "zip", "state", "country"]);
-
-    //     return GeneralService.PostService(HL_URL_EKYC, eKycInfo);
-    // }
     PostEkycDetails(eKYCID, email, phone, isd_code, status, country_iso, basicDetailObj, addressDetailObj, identityDetailObj) {
 
         let DocDetails= {};
@@ -54,50 +43,43 @@ class HyperLedgerService {
         return GeneralService.DeleteService(deleteUrl);
     }
 
-    UpdateEkyc(eKycId, basicDetailObj) {
-        let updateUrl = HL_URL_EKYC + '/' + eKycId;
-        return GeneralService.PutService(updateUrl, basicDetailObj);
-    }
-
-    UpdatePhone(eKycId, newPhone, newISD_code){
-        // let updateUrl = HL_URL_EKYC + '/' + eKycId;
+    UpdateEkycDetails(eKYCID, email, phone, isd_code, status, country_iso, basicDetailObj, addressDetailObj, identityDetailObj){
 
         let asset =  "resource:evolvechain.eKYC#";
-        var assetFinal = asset.concat(eKycId);
+        var assetFinal = asset.concat(eKYCID);
+        let DocDetails= {};
+        DocDetails.asset = assetFinal;
+        DocDetails.newEmail = email;
+        DocDetails.newPhone = phone;
+        DocDetails.newISD_code = isd_code;
+        DocDetails.new_eKYCstatus = status;
+        DocDetails.newCountry_iso = country_iso;
+        DocDetails.newBasicDetailObj = JSON.stringify(basicDetailObj);;
+        DocDetails.newAddressDetailObj = JSON.stringify(addressDetailObj);
+        DocDetails.newIdentityDetailObj = JSON.stringify(identityDetailObj);
 
-        let Details= {};
-        Details.newPhone = newPhone;
-        Details.newISD_code = newISD_code;
-        Details.asset = assetFinal;
+        let eKycInfo = _.pick(DocDetails, ['asset', 'newEmail', 'newPhone', 'newISD_code','new_eKYCstatus','newCountry_iso','newBasicDetailObj','newAddressDetailObj','newIdentityDetailObj']);
 
-        let eKycInfo = _.pick(Details, ['asset','newPhone','newISD_code']);
-
-        return GeneralService.PostService(HL_URL_UPDATE_PHONE,eKycInfo);
+        return GeneralService.PostService(HL_URL_UPDATE, eKycInfo);
     }
 
-    UpdateEmail(eKycId, newEmail){
+    // UpdatePhone(eKycId, newPhone, newISD_code){
+    //     // let updateUrl = HL_URL_EKYC + '/' + eKycId;
 
-        let asset =  "resource:evolvechain.eKYC#";
-        var assetFinal = asset.concat(eKycId);
+    //     let asset =  "resource:evolvechain.eKYC#";
+    //     var assetFinal = asset.concat(eKycId);
 
-        let Details= {};
-        Details.newEmail = newEmail;
-        Details.asset = assetFinal;
+    //     let Details= {};
+    //     Details.newPhone = newPhone;
+    //     Details.newISD_code = newISD_code;
+    //     Details.asset = assetFinal;
 
-        let eKycInfo = _.pick(Details, ['asset','newEmail']);
+    //     let eKycInfo = _.pick(Details, ['asset','newPhone','newISD_code']);
 
-        return GeneralService.PostService(HL_URL_UPDATE_EMAIL,eKycInfo);
-    }
-
-    // updateEmail(eKycId, newEmail){
-    //     let updateUrl = HL_URL_EKYC + '/' + eKycId;
-    //     return GeneralService.PutService(updateUrl, newEmail);
+    //     return GeneralService.PostService(HL_URL_UPDATE_PHONE,eKycInfo);
     // }
 
-    // updateKYCStatus(eKycId, newStatus){
-    //     let updateUrl = HL_URL_EKYC + '/' + eKycId;
-    //     return GeneralService.PutService(updateUrl, eKycId, newStatus);
-    // }
+
 }
 
 

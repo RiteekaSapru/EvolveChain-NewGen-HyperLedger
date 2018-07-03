@@ -338,8 +338,8 @@ class AppController extends base_controller {
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_OTP);
 
 
-            var hlResult = await hyperLedgerService.UpdateEmail(App.ekyc_id, body.email.toLowerCase());
-
+         // var hlResult = await hyperLedgerService.UpdateEkycDetails(App.ekyc_id, body.email.toLowerCase(), undefined, undefined, undefined, undefined, undefined, undefined, undefined);
+            var hlResult = await hyperLedgerService.UpdateEkycDetails(App.ekyc_id, body.email.toLowerCase(), undefined, undefined, undefined, undefined, undefined, undefined, undefined);
             var setParams = {
                 $set: { email: body.email.toLowerCase() }
             }
@@ -472,7 +472,8 @@ class AppController extends base_controller {
                 return this.SendErrorResponse(res, config.ERROR_CODES.DUPLICATE_PHONE);
             }
 
-            var hlResult = await hyperLedgerService.UpdatePhone(App.ekyc_id, phone, isdCode);
+            // var hlResult = await hyperLedgerService.UpdatePhone(App.ekyc_id, phone, isdCode);
+            var hlResult = await hyperLedgerService.UpdateEkycDetails(App.ekyc_id, undefined, phone, isdCode, undefined, undefined, undefined, undefined, undefined);
  
             var setParams = {
                 $set: { phone: phone, isd_code: isdCode }
@@ -827,7 +828,7 @@ class AppController extends base_controller {
             case "Initialize":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'key': appEntity.key,
                     'ip': appEntity.IP,
                     'documents': appEntity.documents,
@@ -838,7 +839,7 @@ class AppController extends base_controller {
             case "GeneratePin":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'key': appEntity.key,
                     'Server': appEntity.Server,
                     'Refer': appEntity.Refer,
@@ -848,7 +849,7 @@ class AppController extends base_controller {
             case "SetPin":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'key': appEntity.key,
                     'Server': appEntity.Server,
                     'Refer': appEntity.Refer,
@@ -858,7 +859,7 @@ class AppController extends base_controller {
             case "ChangePin":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'key': appEntity.key,
                     'Server': appEntity.Server,
                     'Refer': appEntity.Refer,
@@ -869,42 +870,42 @@ class AppController extends base_controller {
             case "GenerateEmailOTP":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'result': messages.verify_email_code
                 }
                 break;
             case "VerifyEmail":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'result': messages.verify_email_success
                 }
                 break;
             case "GenerateMobileOTP":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'result': messages.verify_phone_code
                 }
                 break;
             case "VerifyMobile":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'result': messages.verify_mobile_success
                 }
                 break;
             case "GetEkycId":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'ekyc_id': appEntity.ekyc_id,
                     'result': messages.ekyc_same_device
                 }
             case "ResubmitVerification":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'key': appEntity.key,
                     'result': messages.success
                 }

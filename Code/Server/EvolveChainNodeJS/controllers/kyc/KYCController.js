@@ -126,7 +126,9 @@ class KYCController extends BaseController {
                     return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_ALREADY_EXISTS);
                 }
 
-                var expiryCheck = await this.ExpirationDateLimitCheck(Date.parse(body.expiry_date));
+                let configCol = await ConfigDB.findOne({});
+
+                var expiryCheck = await this.ExpirationDateLimitCheck(Date.parse(body.expiry_date, configCol.add_expiry_days_from_doc_from_UTC));
 
                 if(expiryCheck == false)
                 {
@@ -190,10 +192,10 @@ class KYCController extends BaseController {
 
     }
 
-    ExpirationDateLimitCheck(docs_expiry_date)
+    ExpirationDateLimitCheck(docs_expiry_date, expiryDaysLimit)
     {
         var date= new Date();
-        date.setDate(date.getDate() + config.ADD_EXPIRY_DAYS_FOR_DOCS_FROM_UTC);
+        date.setDate(date.getDate() + expiryDaysLimit);
         if(docs_expiry_date>date)
         {
             return true;
