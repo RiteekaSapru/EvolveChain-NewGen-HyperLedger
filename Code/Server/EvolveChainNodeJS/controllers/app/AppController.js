@@ -96,8 +96,8 @@ class AppController extends base_controller {
             newApp.documents = countryDocs
             newApp.verification_code = verification_code;
 
-            let configDetails = await ConfigDB.findOne({});
-            return this.GetSuccessResponse("Initialize", newApp, configDetails, res);
+            // let configDetails = await ConfigDB.findOne({});
+            return this.GetSuccessResponse("Initialize", newApp, res);
 
         } catch (ex) {
             return this.SendExceptionResponse(res, ex);
@@ -218,8 +218,8 @@ class AppController extends base_controller {
 
             appData.documents = countryDocs;
             appData.countryDetails = countryDetails;
-            let configDetails = await ConfigDB.findOne({});
-            return this.GetSuccessResubmitInitialize(appData, docData, configDetails, res);
+            // let configDetails = await ConfigDB.findOne({});
+            return this.GetSuccessResubmitInitialize(appData, docData, res);
 
         } catch (ex) {
             return this.SendExceptionResponse(res, ex);
@@ -822,7 +822,7 @@ class AppController extends base_controller {
     }
 
     //Common methods for Success response
-    GetSuccessResponse(apiName, appEntity, configInfo, res) {
+    GetSuccessResponse(apiName, appEntity, res) {
         var response = {};
         switch (apiName) {
             case "Initialize":
@@ -833,7 +833,7 @@ class AppController extends base_controller {
                     'ip': appEntity.IP,
                     'documents': appEntity.documents,
                     'verification_code': appEntity.verification_code,
-                    'config': common_utility.GetInitConfig(configInfo)
+                    'config': common_utility.GetInitConfig()
                 };
                 break;
             case "GeneratePin":
@@ -933,7 +933,7 @@ class AppController extends base_controller {
     }
 
 
-    GetSuccessResubmitInitialize(appEntity, docEntity, configInfo, res) {
+    GetSuccessResubmitInitialize(appEntity, docEntity, res) {
         var response = {
             "success": 1,
             'now': common_utility.UtcNow(),
@@ -950,7 +950,7 @@ class AppController extends base_controller {
             'country_details': appEntity.countryDetails,
             'verification_code': docEntity.face_info.details.number,
             "result": messages.resubmit_init_success,
-            "config": common_utility.GetInitConfig(configInfo)
+            "config": common_utility.GetInitConfig()
         }
         return res.status(status.OK).jsonp(response);
     }

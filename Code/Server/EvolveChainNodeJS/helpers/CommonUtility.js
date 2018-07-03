@@ -3,7 +3,8 @@ const messages = config.get('messages');
 var dateFormat = require('dateformat');
 const md5 = require('md5');
 const authenticator = require('authenticator');
-
+const ConfigDB = require('../models/config');
+// const ConfigDB = require('../../models/config');
 class CommonUtility {
     NowDate() {
         return dateFormat(new Date(), "isoUtcDateTime");
@@ -150,7 +151,8 @@ class CommonUtility {
     }
 
 
-    GetInitConfig(configCol){
+    async GetInitConfig(){
+        let configCol = await ConfigDB.findOne({});
         let InitConfig = {};
         InitConfig.supportPhone= configCol.support_phone;
         InitConfig.supportEmails = configCol.support_email;

@@ -77,21 +77,18 @@ class Web  extends baseController{
             }
             await Admin.update(conditions, parameters);
 
-            return this.GetSuccessLoginResponse(token_id, res);
+            // return this.GetSuccessLoginResponse(token_id, res);
+            var response = {
+                'success': 1,
+                'now': commonUtility.UtcNow(),
+                'token': token_id,
+                "result": messages.login_success
+            }
+            return res.status(status.OK).jsonp(response);
 
         } catch (ex) {
             return this.SendExceptionResponse(res, ex);
         }
-    }
-
-    GetSuccessLoginResponse(tokenId, res) {
-        var response = {
-            'success': 1,
-            'now': commonUtility.UtcNow(),
-            'token':tokenId ,
-            "result": messages.login_success
-        }
-        return res.status(status.OK).jsonp(response);
     }
 
     async GetApplication(req, res) {
@@ -151,22 +148,12 @@ class Web  extends baseController{
                  });
             }
 
-            console.log(appDetails);
 
-            return this.GetSuccessAppResponse(appDetails, res);
+            return this.GetSuccessResponse("GetApplication", appDetails, null, res);
 
         } catch (ex) {
             return this.SendExceptionResponse(res, ex);
         }
-    }
-
-    GetSuccessAppResponse(appEntity, res) {
-        var response = {
-            'success': 1,
-            'now': commonUtility.UtcNow(),
-            'appDetails': appEntity
-        }
-        return res.status(status.OK).jsonp(response);
     }
 
     async GetKYCVerificationInfo(req, res) {
@@ -296,23 +283,13 @@ class Web  extends baseController{
                 return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
             }
 
-            // console.log(countStatus);
-
-            return this.GetAppSummarySuccessResponse(countStatus, res);
+             return this.GetCountSuccessResponse("GetAppSummary", countStatus, res);
 
         } catch (ex) {
             return this.SendExceptionResponse(res, ex);
         }
     }
 
-    GetAppSummarySuccessResponse(count, res) {
-        var response = {
-            'success': 1,
-            'now': commonUtility.UtcNow(),
-            'countByStatus': count
-        }
-        return res.status(status.OK).jsonp(response);
-    }
 
     async GetAppByCountry(req, res) {
 
@@ -343,20 +320,12 @@ class Web  extends baseController{
                 return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
             }
 
-            return this.GetAppByCountrySuccessResponse(countCountry, res);
+            // return this.GetAppByCountrySuccessResponse(countCountry, res);
+            return this.GetCountSuccessResponse("GetAppByCountry", countCountry, res);
 
         } catch (ex) {
             return this.SendExceptionResponse(res, ex);
         }
-    }
-
-    GetAppByCountrySuccessResponse(count, res) {
-        var response = {
-            'success': 1,
-            'now': commonUtility.UtcNow(),
-            'countByCountry': count
-        }
-        return res.status(status.OK).jsonp(response);
     }
 
     async GetAppDetails(req, res) {
@@ -405,33 +374,68 @@ class Web  extends baseController{
 
             appData.documents = countryDocs;
             appData.countryDetails = countryDetails;
-            return this.GetAppDetailsSuccessResponse(appData, docData, res);
+            // return this.GetAppDetailsSuccessResponse(appData, docData, res);
+            return this.GetSuccessResponse("GetAppDetails", appData, docData, res);
 
         } catch (ex) {
             return this.SendExceptionResponse(res, ex);
         }
     }
 
-    GetAppDetailsSuccessResponse(appEntity, docEntity, res) {
-        var response = {
-            "success": 1,
-            'now': commonUtility.UtcNow(),
-            "name": appEntity.name,
-            "email": appEntity.email,
-            "phone": appEntity.phone,
-            'country_code': appEntity.isd_code,
-            'app_key': appEntity.key,
-            "BasicInfo": commonUtility.GetKycDocumentInfo(docEntity.basic_info, "BASIC"),
-            "AddressInfo": commonUtility.GetKycDocumentInfo(docEntity.address_info, "ADDRESS"),
-            "IdentityInfo": commonUtility.GetKycDocumentInfo(docEntity.identity_info, "IDENTITY"),
-            "FaceInfo": commonUtility.GetKycDocumentInfo(docEntity.face_info, "FACE"),
-            'documents': appEntity.documents,
-            'country_details': appEntity.countryDetails,
-            'verification_code': docEntity.face_info.details.number,
+    GetCountSuccessResponse(apiName, count, res) {
+        var response = {};
+        switch (apiName) {
+            case "GetAppSummary":
+                response = {
+		        'success': 1,
+		        'now': commonUtility.UtcNow(),
+		        'countByStatus': count
+                };
+                break;
+            case "GetAppByCountry":
+		        response = {
+		        'success': 1,
+		        'now': commonUtility.UtcNow(),
+		        'countByStatus': count
+                }
+                break;
         }
+
         return res.status(status.OK).jsonp(response);
     }
 
+    GetSuccessResponse(apiName, appEntity, docEntity, res){
+        var response = {};
+        switch (apiName) {
+            case "GetApplication":
+                response = {
+                    'success': 1,
+                    'now': commonUtility.UtcNow(),
+                    'appDetails': appEntity
+                };
+            break;
+            case "GetAppDetails":
+	            response = {
+                    "success": 1,
+                    'now': commonUtility.UtcNow(),
+                    "name": appEntity.name,
+                    "email": appEntity.email,
+                    "phone": appEntity.phone,
+                    'country_code': appEntity.isd_code,
+                    'app_key': appEntity.key,
+                    "BasicInfo": commonUtility.GetKycDocumentInfo(docEntity.basic_info, "BASIC"),
+                    "AddressInfo": commonUtility.GetKycDocumentInfo(docEntity.address_info, "ADDRESS"),
+                    "IdentityInfo": commonUtility.GetKycDocumentInfo(docEntity.identity_info, "IDENTITY"),
+                    "FaceInfo": commonUtility.GetKycDocumentInfo(docEntity.face_info, "FACE"),
+                    'documents': appEntity.documents,
+                    'country_details': appEntity.countryDetails,
+                    'verification_code': docEntity.face_info.details.number
+                }
+            break;
+        }
+
+        return res.status(status.OK).jsonp(response);
+    }
     async index(req, res) {
         try {
             fs.readFile("./views/web/index.html", function (err, data) {
