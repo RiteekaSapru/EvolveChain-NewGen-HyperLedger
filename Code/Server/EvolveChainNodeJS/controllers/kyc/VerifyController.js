@@ -128,19 +128,29 @@ class VerifyController extends BaseController {
                 subject = 'EvolveChain KYC - Approved';
             }
 
-            var appSetParams =
-                {
-                    $set:
-                        {
-                            'ekyc_id': eKYCID,
-                            'status': appStatus,
-                            verification_comment: req.body.textBoxComment,
-                            verification_time: commonUtility.UtcNow(),
-                            verification_by: "Admin",//set the email of approver
-                            verification_reasons: reasonList
+            if(appData.ekyc_id!=null && appData.ekyc_id!=undefined && appData.ekyc_id!="")
+            {
+                isAlreadyVerified = true;
+                eKYCID = appData.ekyc_id;
+            }
 
-                        }
-                }
+
+
+            var appSetParams =
+            {
+                $set:
+                    {
+                        'ekyc_id': eKYCID,
+                        'status': appStatus,
+                        verification_comment: req.body.textBoxComment,
+                        verification_time: commonUtility.UtcNow(),
+                        verification_by: "Admin",//set the email of approver
+                        verification_reasons: reasonList
+
+                    }
+            }
+
+
             //send email 
             var template = fs.readFileSync(emailTemplateHtml, {
                 encoding: 'utf-8'
@@ -158,14 +168,12 @@ class VerifyController extends BaseController {
                 REASON_LIST: reasonDefinition.map(x => x.reason)
             });
 
-            if(appData.ekyc_id!=null && appData.ekyc_id!=undefined && appData.ekyc_id!="")
-            {   isAlreadyVerified = true;}
-
             if (isVerified && eKYCID != '') {
 
                 if(isAlreadyVerified==true)
                 {
                     var hlResult = await hyperLedgerService.UpdateEkycDetails(appData.ekyc_id, appData.email, appData.phone, appData.isd_code, appData.status, appData.country_iso, basicDetails, addressDetails, identityDetails);
+                    var result = await this.NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams);
                 }
                 else
                 {
