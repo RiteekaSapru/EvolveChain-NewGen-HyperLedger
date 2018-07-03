@@ -108,6 +108,8 @@ class VerifyController extends BaseController {
 
             let isVerified = (action.toUpperCase() == "VERIFY");
 
+            let isAlreadyVerified = false;
+
             // let basicDetails = appData.kycdoc_data.basic_info.details;
             let basicDetails = commonUtility.GetKycDocumentInfo(appData.kycdoc_data.basic_info, "BASIC");
             let addressDetails = commonUtility.GetKycDocumentInfo(appData.kycdoc_data.address_info, "ADDRESS");
@@ -156,15 +158,25 @@ class VerifyController extends BaseController {
                 REASON_LIST: reasonDefinition.map(x => x.reason)
             });
 
+            if(appData.ekyc_id!=null && appData.ekyc_id!=undefined && appData.ekyc_id!="")
+            {   isAlreadyVerified = true;}
+
             if (isVerified && eKYCID != '') {
 
-                // var hlResult = await hyperLedgerService.PostEkycDetails(eKYCID, appData.email, appData.phone, appData.isd_code, basicDetails);//.then((result) => {
-                var hlResult = await hyperLedgerService.PostEkycDetails(eKYCID, appData.email, appData.phone, appData.isd_code, appData.status, appData.country_iso, basicDetails, addressDetails, identityDetails);
-                if (hlResult && hlResult.eKYCID == eKYCID) {
-                    var result = await this.NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams);
+                if(isAlreadyVerified==true)
+                {
+                    var hlResult = await hyperLedgerService.UpdateEkycDetails(appData.ekyc_id, appData.email, appData.phone, appData.isd_code, appData.status, appData.country_iso, basicDetails, addressDetails, identityDetails);
                 }
                 else
-                    return res.redirect(baseURL);
+                {
+                    var hlResult = await hyperLedgerService.PostEkycDetails(eKYCID, appData.email, appData.phone, appData.isd_code, appData.status, appData.country_iso, basicDetails, addressDetails, identityDetails);
+                    if (hlResult && hlResult.eKYCID == eKYCID)
+                    {
+                        var result = await this.NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams);
+                    }
+                    else
+                        return res.redirect(baseURL);
+                }
             }
             else {
                 var result = await this.NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams);
