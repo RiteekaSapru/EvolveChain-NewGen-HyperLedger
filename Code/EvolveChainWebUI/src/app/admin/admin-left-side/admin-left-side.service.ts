@@ -3,26 +3,21 @@ import { Router } from '@angular/router';
 import { Http, Response, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import { environment } from '../../../environments/environment';
-import { HttpHeaders } from '@angular/common/http';
 
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/Observable/throw';
 
-import {  KYCData } from '../../model/kycdocument';
-
 @Injectable()
-export class VerifyService {
-
-  private verifyUrl = environment.api + 'web/GetKYCVerificationInfo';
+export class AdminLeftSideService {
+  private basePath = environment.api;
 
   constructor(private _http: Http, private router: Router) { }
 
-  GetKYCVerificationInfo(appKey): Observable<any> {
+  GetAppByPhone(phone): Observable<any> {
+    let url = this.basePath + '/web/getAppDetailsByPhone/' + phone;
 
-    return this._http.post(this.verifyUrl,
-      { "appkey": appKey }
-    )
+    return this._http.get(url)
       .map((response: Response) => <any>response.json())
       .catch(this.handleError);
   }
