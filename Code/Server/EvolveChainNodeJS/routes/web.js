@@ -12,7 +12,7 @@ web.post("/web/GetAppByCountry", WebController.GetAppByCountry.bind(WebControlle
 web.post("/web/GetAppSummary", WebController.GetAppSummary.bind(WebController));
 web.post("/web/GetApplication", WebController.GetApplication.bind(WebController));
 web.post("/web/login", WebController.Login.bind(WebController));
-web.get("/web/getcountrylist", WebController.GetCountryList.bind(WebController));
+web.get("/web/PreInitialize", WebController.PreInitialize.bind(WebController));
 web.post("/web/GetKYCVerificationInfo", WebController.GetKYCVerificationInfo.bind(WebController));
 
 

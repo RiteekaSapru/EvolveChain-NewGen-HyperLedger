@@ -17,15 +17,20 @@ db.verificationreasons.insertMany([
 db.verificationreasons.createIndex( {"code" : 1}, { unique: true });
 
 db.configs.insertOne({
-// 	approver_emails: ["gaurav@greenbankcapitalinc.com",
-// 		"DW@greenbankcapitalinc.com",
-// 		"Nilam@blockchainevolutioninc.com"]
-// });
-approver_emails: ["arpit.jain@newgen.co.in",
-		"archana.mehta@newgen.co.in",
-		"abhay.shankar@newgen.co.in"],
+	// 	approver_emails: ["gaurav@greenbankcapitalinc.com",
+	// 		"DW@greenbankcapitalinc.com",
+	// 		"Nilam@blockchainevolutioninc.com"]
+	// });
+	approver_emails: ["arpit.jain@newgen.co.in",
+			"archana.mehta@newgen.co.in",
+			"abhay.shankar@newgen.co.in"],
 
-add_expiry_days_from_doc_from_UTC: 30
+	app_expiry_notification_days : "15",
+	app_expiration_days : "10",
+	add_expiry_days_from_doc_from_UTC : "30",
+	support_phone : "9090909090",
+	support_email : "support_newgen.co.in",
+	site_url : "http://www.evolvechain.org/home"
 });
 
 db.proofdocuments.insertMany([
