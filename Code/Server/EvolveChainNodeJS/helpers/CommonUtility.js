@@ -158,6 +158,9 @@ class CommonUtility {
         InitConfig.supportEmails = configCol.support_email;
         InitConfig.siteUrl = configCol.site_url ;
         InitConfig.minDaysToExpiry = configCol.add_expiry_days_from_doc_from_UTC;
+        InitConfig.addExpirationDays = configCol.app_expiration_days;
+        InitConfig.appExpiryNotificationDays = configCol.app_expiry_notification_days;
+
         return InitConfig;
 
     }

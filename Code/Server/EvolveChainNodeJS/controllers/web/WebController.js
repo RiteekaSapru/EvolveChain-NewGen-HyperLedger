@@ -38,9 +38,16 @@ const list = {
 
 class Web  extends baseController{
 
-    async GetCountryList(req, res) {
+    async PreInitialize(req, res) {
+
         var countries  = await Country.find();
-        return res.status(status.OK).jsonp(countries);
+        var config = await commonUtility.GetInitConfig();
+        console.log(config);
+        var responseConfig ={};
+        responseConfig.country = countries;
+        responseConfig.configuration = config;
+
+        return res.status(status.OK).jsonp(responseConfig);
     }
 
 

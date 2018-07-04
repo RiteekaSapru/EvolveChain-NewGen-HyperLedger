@@ -337,9 +337,11 @@ class AppController extends base_controller {
             if (App.email_info.otp != body.email_code.toLowerCase())
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_OTP);
 
+            if(App.ekyc_id!=null && App.ekyc_id!=undefined && App.ekyc_id!="")
+            {
+               var hlResult = await hyperLedgerService.UpdateEkycDetails(App.ekyc_id, body.email.toLowerCase(), undefined, undefined, undefined, undefined, undefined, undefined, undefined);
+            }
 
-         // var hlResult = await hyperLedgerService.UpdateEkycDetails(App.ekyc_id, body.email.toLowerCase(), undefined, undefined, undefined, undefined, undefined, undefined, undefined);
-            var hlResult = await hyperLedgerService.UpdateEkycDetails(App.ekyc_id, body.email.toLowerCase(), undefined, undefined, undefined, undefined, undefined, undefined, undefined);
             var setParams = {
                 $set: { email: body.email.toLowerCase() }
             }
@@ -472,9 +474,9 @@ class AppController extends base_controller {
                 return this.SendErrorResponse(res, config.ERROR_CODES.DUPLICATE_PHONE);
             }
 
-            // var hlResult = await hyperLedgerService.UpdatePhone(App.ekyc_id, phone, isdCode);
-            var hlResult = await hyperLedgerService.UpdateEkycDetails(App.ekyc_id, undefined, phone, isdCode, undefined, undefined, undefined, undefined, undefined);
- 
+            if(App.ekyc_id!=null && App.ekyc_id!=undefined && App.ekyc_id!=""){
+                var hlResult = await hyperLedgerService.UpdateEkycDetails(App.ekyc_id, undefined, phone, isdCode, undefined, undefined, undefined, undefined, undefined);
+            }
             var setParams = {
                 $set: { phone: phone, isd_code: isdCode }
             }
@@ -833,7 +835,7 @@ class AppController extends base_controller {
                     'ip': appEntity.IP,
                     'documents': appEntity.documents,
                     'verification_code': appEntity.verification_code,
-                    'config': common_utility.GetInitConfig()
+                    // 'config': common_utility.GetInitConfig()
                 };
                 break;
             case "GeneratePin":
@@ -950,7 +952,7 @@ class AppController extends base_controller {
             'country_details': appEntity.countryDetails,
             'verification_code': docEntity.face_info.details.number,
             "result": messages.resubmit_init_success,
-            "config": common_utility.GetInitConfig()
+            // "config": common_utility.GetInitConfig()
         }
         return res.status(status.OK).jsonp(response);
     }
