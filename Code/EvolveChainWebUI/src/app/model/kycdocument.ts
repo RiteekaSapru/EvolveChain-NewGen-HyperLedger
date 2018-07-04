@@ -20,7 +20,7 @@ export interface ReasonList {
     code: string;
 }
 
-export interface KycData {
+export interface KYCData {
     app_key: string;
     eKycId: string;
     country_iso: string;
@@ -34,9 +34,27 @@ export interface KycData {
     reasonList: ReasonList[];
 }
 
-export interface KYCData {
-    kycData: KycData;
-}
+// export interface KYCData {
+//     kycData: KycData;
+// }
+
+// export interface KYCData {
+//     app_key: string;
+//     eKycId: string;
+//     country_iso: string;
+//     is_verified: boolean;
+//     email: string;
+//     phone: string;
+//     BasicInfo: GeneralInfo;
+//     IdentityInfo: GeneralInfo;
+//     AddressInfo: GeneralInfo;
+//     FaceInfo: GeneralInfo;
+//     reasonList: ReasonList[];
+// }
+
+// export interface KYCData {
+//     kycData: KycData;
+// }
 
 
 
