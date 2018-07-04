@@ -6,14 +6,15 @@ const WebController = require("../controllers/web/WebController");
 const AuthMiddleware = require("../middlewares/CheckAuth");
 
 
-web.post("/web/WelcomeApi", WebController.WelcomeApi.bind(WebController));
-web.post("/web/GetAppDetails", WebController.GetAppDetails.bind(WebController));
-web.post("/web/GetAppByCountry", WebController.GetAppByCountry.bind(WebController));
-web.post("/web/GetAppSummary", WebController.GetAppSummary.bind(WebController));
-web.post("/web/GetApplication", WebController.GetApplication.bind(WebController));
+web.post("/web/welcomeApi", WebController.WelcomeApi.bind(WebController));
+web.post("/web/getAppDetails", WebController.GetAppDetails.bind(WebController));
+web.post("/web/getAppByCountry", WebController.GetAppByCountry.bind(WebController));
+web.post("/web/getAppSummary", WebController.GetAppSummary.bind(WebController));
+web.post("/web/getApplication", WebController.GetApplication.bind(WebController));
 web.post("/web/login", WebController.Login.bind(WebController));
 web.get("/web/getcountrylist", WebController.GetCountryList.bind(WebController));
-web.post("/web/GetKYCVerificationInfo", WebController.GetKYCVerificationInfo.bind(WebController));
+web.post("/web/getKYCVerificationInfo", WebController.GetKYCVerificationInfo.bind(WebController));
+web.get("/web/getAppDetailsByPhone/:phone", WebController.GetAppDetailsByPhone.bind(WebController));
 
 
 web.get("/verify/:key", VerifyController.GetKYCVerificationInfo.bind(VerifyController));

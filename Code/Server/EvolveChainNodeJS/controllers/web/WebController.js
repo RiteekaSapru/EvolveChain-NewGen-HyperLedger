@@ -25,6 +25,7 @@ const PUBLIC_PATH = config.get('PUBLIC_PATH');
 const Country = require('../../models/country');
 const App = require('../../models/apps');
 const KYCDocument = require('../../models/kycdocument');
+const VerificationReasons = require('../../models/verificationReason');
 const Admin = require('../../models/admin');
 const File = require('../../models/files');
 const ConfigDB = require('../../models/config');
@@ -212,13 +213,16 @@ class Web  extends baseController{
                 FaceInfo: await this.GetDocumentInfo(docData.face_info, docData.app_data.country_iso, "FACE"),
                 reasonList: allReasons
             }
-            //res.render('web/verifiyKycDocuments.html', { kycData: kycData });
-           // res. { kycData: kycData });
-            return res.status(200).jsonp({ kycData: kycData });
+
+            var response = {
+                'success': 1,
+                'now': commonUtility.UtcNow(),
+                kycData: kycData
+            }
+            return res.status(status.OK).jsonp(response);
 
         } catch (e) {
-            logManager.Log(`GetKYCVerificationInfo-Exception: ${e}`);
-            return res.redirect(baseURL);
+            return this.SendExceptionResponse(res, ex);
         }
     }
 
@@ -252,6 +256,16 @@ class Web  extends baseController{
             }
         }
         return summaryInfo;
+    }
+
+    async GetAppDetailsByPhone(req, res) {
+        try {
+            let phone = req.params.phone;
+            var appDetail = await App.findOne({ phone: phone });
+            return res.status(status.OK).jsonp(appDetail);
+        } catch (ex) {
+            return this.SendExceptionResponse(res, ex);
+        }
     }
 
     async GetAppSummary(req, res) {
