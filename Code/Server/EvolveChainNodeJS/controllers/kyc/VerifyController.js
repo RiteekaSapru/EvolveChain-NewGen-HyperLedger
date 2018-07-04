@@ -17,6 +17,7 @@ const VerificationReasons = require('../../models/verificationReason');
 const NotificationQueue = require('../../models/notificationQueue');
 const ConfigDB = require('../../models/config');
 
+const notificationHelper = require('../../helpers/NotificationHelper');
 
 const messages = config.messages;
 
@@ -202,19 +203,8 @@ class VerifyController extends BaseController {
     async NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams) {
 
         var appSuccess = await App.update({ 'key': appKey }, appSetParams);
-        var parameters = {
-            app_key: appKey,
-            is_open: true,
-            to: userEmailId,
-            subject: subject,
-            last_modified: commonUtility.UtcNow(),
-            body: emailBody,
-            notification_type: config.NOTIFICATION_TYPES.EMAIL
-        }
-        var notificationQueue = new NotificationQueue(parameters);
-        var newNotificationQueue = await notificationQueue.save();
-
-        return (newNotificationQueue);
+        var newNotificationQueue= await notificationHelper.AddNotificationQueue(appKey, userEmailId, emailBody, config.NOTIFICATION_TYPES.EMAIL, subject);
+        return newNotificationQueue;
     }
 
     async GetDocumentInfo(docInfo, countryIso, docType) {
