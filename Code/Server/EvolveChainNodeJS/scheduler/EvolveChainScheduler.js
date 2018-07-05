@@ -3,25 +3,22 @@ const scheduler = require('node-schedule');
 const JobSchedulerService = require('../services/JobSchedulerService');
 const NotificationHelper = require('../helpers/NotificationHelper');
 
-//Use this value for 30 sec :  '30 * * * * *'
-// var jobArchiveApps = scheduler.scheduleJob('0 0 */12 * * *', () => {    
-//     console.log('Scheduler - archive apps');
-//     appCleanup();
-
-// });
-
-var j = scheduler.scheduleJob('25 * * * * *', function () {
-    console.log('Scheduler call........');
-    //appCleanup();
-    //setExpiredStatus();
-    advanceNotificationForExpiry();
-    //processNotificationQueue();
+//Runs every 5 minutes
+var fiveMinuteScheduler = scheduler.scheduleJob("*/5 * * * *", function () {
+    console.log("Scheduler Initiated for Process Notification Every 5 Min.");
+    processNotificationQueue();
 });
-// var test = scheduler.scheduleJob('*/5 * * * * *', () => {    
-//     console.log('Scheduler - Test');
-// });
 
-console.log("Scheduler Initiated (Every 12 hours");
+//Runs once a day at 3:00 AM
+var onceADayScheduler = scheduler.scheduleJob("00 00 03 * * 1-7", function () {
+
+    console.log("Scheduler Initiated (Every 24 hours) at 3:00 AM");
+    appCleanup();
+    setExpiredStatus();
+    advanceNotificationForExpiry();
+})
+
+
 
 process.on('uncaughtException', (err) => {
     console.log("!!!Uncaught Exception!!! " + err.message);
