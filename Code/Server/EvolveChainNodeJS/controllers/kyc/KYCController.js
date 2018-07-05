@@ -86,7 +86,9 @@ class KYCController extends BaseController {
                 case "face":
                     req.checkBody("number", messages.req_number).notEmpty();
                     req.checkBody("time", messages.req_time).notEmpty();
-                    req.checkBody("location", messages.req_location).notEmpty();
+                    // req.checkBody("location", messages.req_location).notEmpty();
+                    req.checkBody("latitude", messages.req_latitude).notEmpty();
+                    req.checkBody("longitude", messages.req_longitude).notEmpty();
                     req.checkBody("ip", messages.req_IP).notEmpty();
                     break;
                 default:
@@ -363,7 +365,8 @@ class KYCController extends BaseController {
                 };
                 setParams.face_info = {};
                 setParams.face_info.time=body.time;
-                setParams.face_info.location=body.location;
+                setParams.face_info.latitude=body.latitude;
+                setParams.face_info.longitude=body.longitude;
                 setParams.face_info.ip=body.ip;
                 setParams.face_info.details = details;
                 setParams.face_info.images = imgArr;
