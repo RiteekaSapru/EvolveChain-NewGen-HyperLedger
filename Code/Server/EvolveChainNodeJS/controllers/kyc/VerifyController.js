@@ -103,6 +103,13 @@ class VerifyController extends BaseController {
             }
 
             userEmailId = appData.email;
+
+            var userMobileNo = appData.phone;
+            var phone = userMobileNo.replace("+", "");
+            var userIsdCode = appData.isd_code;
+            var isdCode = userIsdCode.replace("+", "");
+            let toPhone = "+" + isdCode + phone;
+
             var action = req.body.action;
 
             var reasonList = req.body.reasonList;
@@ -174,21 +181,22 @@ class VerifyController extends BaseController {
                 if(isAlreadyVerified==true)
                 {
                     var hlResult = await hyperLedgerService.UpdateEkycDetails(appData.ekyc_id, appData.email, appData.phone, appData.isd_code, appData.status, appData.country_iso, basicDetails, addressDetails, identityDetails);
-                    var result = await this.NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams);
+                    var result = await this.NotifyUserAndUpdateApp(toPhone, userEmailId, subject, emailBody, appKey, appSetParams);
+                  
                 }
                 else
                 {
                     var hlResult = await hyperLedgerService.PostEkycDetails(eKYCID, appData.email, appData.phone, appData.isd_code, appData.status, appData.country_iso, basicDetails, addressDetails, identityDetails);
                     if (hlResult && hlResult.eKYCID == eKYCID)
                     {
-                        var result = await this.NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams);
+                        var result = await this.NotifyUserAndUpdateApp(toPhone, userEmailId, subject, emailBody, appKey, appSetParams);
                     }
                     else
                         return res.redirect(baseURL);
                 }
             }
             else {
-                var result = await this.NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams);
+                var result = await this.NotifyUserAndUpdateApp(toPhone, userEmailId, subject, emailBody, appKey, appSetParams);
 
             }
         } catch (ex) {
@@ -200,11 +208,12 @@ class VerifyController extends BaseController {
     }
 
 
-    async NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams) {
+    async NotifyUserAndUpdateApp(toPhone, userEmailId, subject, emailBody, appKey, appSetParams) {
 
         var appSuccess = await App.update({ 'key': appKey }, appSetParams);
-        var newNotificationQueue= await notificationHelper.AddNotificationQueue(appKey, userEmailId, emailBody, config.NOTIFICATION_TYPES.EMAIL, subject);
-        return newNotificationQueue;
+        var newEmailNotificationQueue= await notificationHelper.AddNotificationQueue(appKey, userEmailId, emailBody, config.NOTIFICATION_TYPES.EMAIL, subject);
+        var newMobileNotificationQueue= await notificationHelper.AddNotificationQueue(appKey, toPhone, null, config.NOTIFICATION_TYPES.MESSAGE, subject);
+        return newMobileNotificationQueue;
     }
 
     async GetDocumentInfo(docInfo, countryIso, docType) {
