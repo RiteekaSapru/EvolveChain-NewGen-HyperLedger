@@ -22,8 +22,11 @@ export class AdminLeftSideComponent implements OnInit {
   SearchClick(phone) {
     let aa = phone;
     this._service.GetAppByPhone(phone).subscribe(appData => {
-      if (appData && appData.key) {
-        this.router.navigateByUrl('/home');
+
+        if (appData && appData.key) {
+          let path = '/admin/verify/' + appData.key;
+          this.router.navigateByUrl(path);
+        
       } else {
         this.isSearchError = true;
         this.showSearchError = true;

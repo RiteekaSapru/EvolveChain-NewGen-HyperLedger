@@ -32,6 +32,7 @@ export interface KYCData {
     AddressInfo: GeneralInfo;
     FaceInfo: GeneralInfo;
     reasonList: ReasonList[];
+    verification_comment : string
 }
 
 // export interface KYCData {

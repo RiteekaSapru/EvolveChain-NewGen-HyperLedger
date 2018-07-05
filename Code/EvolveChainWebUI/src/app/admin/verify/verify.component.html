@@ -51,6 +51,10 @@
       <b>Know your customer (KYC)</b>
     </h4>
 
+    <div *ngIf="isError" class="alert alert-danger">
+        {{errorMsg}}
+      </div>
+
     <div class="row">
       <div class="col-md-5">
         App Id :
@@ -218,22 +222,20 @@
                 grid-template-columns: auto auto auto;">
 
             <label style="text-align:left;" *ngFor="let reasons of kycData.reasonList">
-              <input value={{reasons.code}} type="checkbox" name="reasonList" [(checked)]=reasons.state> {{reasons.reason}}
+              <input [(ngModel)]="reasons.state" type="checkbox" name="reasonList" [(checked)]=reasons.state> {{reasons.reason}}
             </label>
           </td>
         </tr>
 
       </table>
 
-      <input type="text"  [(value)]='kycData.verification_comment'  class="form-control input-lg margin-bottom" placeholder="Comments" name="textBoxComment"/>
-      <input type="text"  [(ngModel)]='newvar'  class="form-control input-lg margin-bottom" placeholder="Comments" name="textBoxComment"/>
-
-      
+      <input type="text"  [(ngModel)]='kycData.verification_comment'  class="form-control input-lg margin-bottom" 
+      placeholder="Comments" name="textBoxComment" (keyup)="isError=false" (focus)="isError=false"/>
+      <div #err *ngIf="isError" class="alert alert-danger">
+          {errorMsg}
+        </div>
       <input *ngIf="!kycData.is_verified" value="Verify" type="button" (click)="SubmitClick(true)" name="action" class="btn btn-success add-margin-bottom">
-
       <input *ngIf="!kycData.is_verified" value="Reject" type="button" (click)="SubmitClick(false)" name="action" class="btn btn-danger add-margin-bottom">
-
-     
       <!-- </form> -->
 
     </div>
