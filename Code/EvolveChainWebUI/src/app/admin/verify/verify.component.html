@@ -1,204 +1,242 @@
+<style>
+  .content-wrapper {
+    font-size: 16px;
+  }
+
+  label {
+    font-weight: inherit;
+  }
+
+  table {
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  table td {
+    word-wrap: break-word;
+  }
+
+  hr {
+    border-top: 1px solid #3333332e;
+  }
+
+  .table>thead>tr>th,
+  .table>tbody>tr>th,
+  .table>tfoot>tr>th,
+  .table>thead>tr>td,
+  .table>tbody>tr>td,
+  .table>tfoot>tr>td {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .add-margin-bottom{
+    margin-bottom: 25px
+  }
+  .header {
+    color: white;
+    background-color: #0f75bd;
+}
+
+.h5{
+ font-size: 18px;
+ font-weight: 500; 
+}
+</style>
 
 <div class="content-wrapper">
-<div id="container" class="container">
   <div class="container">
-    
-      <br>
-      <h4 class="padded">Know your customer (KYC)
-      </h4>
 
-      <div class="row">
-        <div class="col-md-5">
-          App Id:
-          <b>
-            {{kycData.app_key}}
-          </b>
-        </div>
-        <div class="col-md-4">
-          eKycId:
-          <b>
-            {{kycData.eKycId}}
-          </b>
-        </div>
-        <div class="col-md-3">
-          Country:
-          <b>
-            {{kycData.country_iso}}
-          </b>
-        </div>
+    <br>
+    <h4 class="padded">
+      <b>Know your customer (KYC)</b>
+    </h4>
+
+    <div class="row">
+      <div class="col-md-5">
+        App Id :
+        <b>
+          {{kycData.app_key}}
+        </b>
       </div>
-      <hr>
+      <div class="col-md-4">
+        eKYCID :
+        <b>
+          {{kycData.eKycId}}
+        </b>
+      </div>
+      <div class="col-md-3">
+        Country :
+        <b>
+          {{kycData.country_iso}}
+        </b>
+      </div>
+    </div>
+    <!-- <hr> -->
 
-      <div class="row">
+    <!-- <div class="row">
         <div class="col-sm-12">
 
         </div>
-      </div>
-
-      <div class="row">
-        <div class="col-sm-6">
-          <h5 class="alert header"> Basic
-            <span class="float-right"></span>
-          </h5>
-
-          <table class="table">
-              <tr *ngFor="let DocDetails of kycData.BasicInfo.DocDetails">
-                <td>
-                  {{DocDetails.name }}:
-                </td>
-                <td>
-                  {{DocDetails.value}}
-                </td>
-              </tr>
-            
-          </table>
-        </div>
-
-        <div class="col-sm-6">
-          <h5 class="alert header"> Face
-            <span class="float-right"></span>
-          </h5>
-          <table class="table">
-            <tr *ngFor="let DocImages of kycData.BasicInfo.DocImages">
-                <td>
-                  <img height="200" width="200" src='{{DocImages.url}}' width="100%">
-                </td>
-
-                <!-- <% } %>
-                  <% for(let k = 0; k <  kycData.FaceInfo.DocImages.length; k++) { %> -->
-
-                    <td *ngFor="let FaceImages of kycData.FaceInfo.DocImages">
-                      <img height="200" width="200" src='{{FaceImages.url}' width="100%">
-                    </td>
-
-                    <!-- <% } %> -->
-            </tr>
-          </table>
-          <table class="table">
-            <tr>
-              <td>
-                Email:
-              </td>
-              <td>
-                {{kycData.email}}
-              </td>
-            </tr>
-            <tr>
-              <td>
-                Phone:
-              </td>
-              <td>
-                {{kycData.phone}}
-              </td>
-            </tr>
-            <!-- <% for(let j = 0; j < kycData.FaceInfo.DocDetails.length; j++) { %> -->
-              <tr *ngFor="let FaceDetails of kycData.FaceInfo.DocDetails">
-                <td>
-                  {{FaceDetails.name}}:
-                </td>
-                <td>
-                  {{FaceDetails.value}}
-                </td>
-              </tr>
-              <!-- <% } %> -->
-          </table>
-        </div>
-
-      </div>
-
-      <!-- <div class="row">
-        <div class="col-sm-6">
-          <h5 class="alert header"> Identity
-            <span class="float-right"></span>
-          </h5>
-          <table class="table">
-            <tr>
-              <% for(let k = 0; k <  kycData.IdentityInfo.DocImages.length; k++) { %>
-
-                <td>
-                  <img height="200" width="200" src="<%=kycData.IdentityInfo.DocImages[k].url%>" width="100%">
-                </td>
-
-                <% } %>
-            </tr>
-          </table>
-          <table class="table">
-            <% for(let j = 0; j < kycData.IdentityInfo.DocDetails.length; j++) { %>
-              <tr>
-                <td>
-                  <%=kycData.IdentityInfo.DocDetails[j].name%>:
-                </td>
-                <td>
-                  <%=kycData.IdentityInfo.DocDetails[j].value%>
-                </td>
-              </tr>
-              <% } %>
-          </table>
-
-        </div>
-        <div class="col-sm-6">
-
-          <h5 class="alert header"> Address
-            <span class="float-right"></span>
-          </h5>
-          <table class="table">
-            <tr>
-              <% for(let k = 0; k <  kycData.AddressInfo.DocImages.length; k++) { %>
-
-                <td>
-                  <img height="200" width="200" src="<%=kycData.AddressInfo.DocImages[k].url%>" width="100%">
-                </td>
-
-                <% } %>
-            </tr>
-          </table>
-          <table class="table">
-            <% for(let j = 0; j < kycData.AddressInfo.DocDetails.length; j++) { %>
-              <tr>
-                <td>
-                  <%=kycData.AddressInfo.DocDetails[j].name%>:
-                </td>
-                <td>
-                  <%=kycData.AddressInfo.DocDetails[j].value%>
-                </td>
-              </tr>
-              <% } %>
-          </table>
-        </div>
       </div> -->
 
+    <div class="row">
+      <div class="col-sm-6">
+        <h5 class="alert header"> Basic
+          <span class="float-right"></span>
+        </h5>
+
+        <table class="table">
+          <tr *ngFor="let DocDetails of kycData.BasicInfo.DocDetails">
+            <td width="30%">
+              {{DocDetails.name }} :
+            </td>
+            <td width="70%">
+              {{ DocDetails.value}}
+              <!-- {{ DocDetails.name === 'Expiry Date' ? DocDetails.value | date :'fulldate' : DocDetails.value}}  -->
+            </td>
+          </tr>
+
+        </table>
+      </div>
+
+      <div class="col-sm-6">
+        <h5 class="alert header"> Face
+          <span class="float-right"></span>
+        </h5>
+        <table class="table">
+          <tr>
+            <td *ngFor="let DocImages of kycData.BasicInfo.DocImages">
+              <img height="200" width="200" src='{{DocImages.url}}' width="100%">
+            </td>
+
+            <!-- <% } %>
+                  <% for(let k = 0; k <  kycData.FaceInfo.DocImages.length; k++) { %> -->
+
+            <td *ngFor="let FaceImages of kycData.FaceInfo.DocImages">
+              <img height="200" width="200" src='{{FaceImages.url}}' width="100%">
+            </td>
+
+            <!-- <% } %> -->
+          </tr>
+        </table>
+        <table class="table">
+          <tr>
+            <td>
+              Email :
+            </td>
+            <td>
+              {{kycData.email}}
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Phone :
+            </td>
+            <td>
+              {{kycData.phone}}
+            </td>
+          </tr>
+          <!-- <% for(let j = 0; j < kycData.FaceInfo.DocDetails.length; j++) { %> -->
+          <tr *ngFor="let FaceDetails of kycData.FaceInfo.DocDetails">
+            <td>
+              {{FaceDetails.name}}:
+            </td>
+            <td>
+              {{FaceDetails.value}}
+            </td>
+          </tr>
+          <!-- <% } %> -->
+        </table>
+      </div>
+
+    </div>
+
+    <div class="row">
+      <div class="col-sm-6">
+        <h5 class="alert header"> Identity
+          <span class="float-right"></span>
+        </h5>
+        <table class="table">
+          <tr>
+            <!-- <% for(let k = 0; k <  kycData.IdentityInfo.DocImages.length; k++) { %> -->
+            <td *ngFor="let IdentityImageDetails of kycData.IdentityInfo.DocImages">
+              <img height="200" width="200" src='{{IdentityImageDetails.url}}' width="100%">
+            </td>
+            <!-- <% } %> -->
+          </tr>
+        </table>
+        <table class="table">
+          <!-- <% for(let j = 0; j < kycData.IdentityInfo.DocDetails.length; j++) { %> -->
+          <tr *ngFor="let IdentityDocDetails of kycData.IdentityInfo.DocDetails">
+            <td>
+              {{IdentityDocDetails.name}} :
+            </td>
+            <td>
+              <!-- {{IdentityDocDetails.value}} -->
+              {{ (IdentityDocDetails.name === 'Expiry Date') ? (IdentityDocDetails.value | date :'MMMM dd, yyyy') : (IdentityDocDetails.value)
+              }}
+
+            </td>
+          </tr>
+          <!-- <% } %> -->
+        </table>
+
+      </div>
+
+      <div class="col-sm-6">
+
+        <h5 class="alert header"> Address
+          <span class="float-right"></span>
+        </h5>
+        <table class="table">
+          <tr>
+            <td *ngFor="let AddressImageDetails of kycData.AddressInfo.DocImages">
+              <img height="200" width="200" src="{{AddressImageDetails.url}}" width="100%">
+            </td>
+          </tr>
+        </table>
+        <table class="table">
+          <tr *ngFor="let AddressDocDetails of kycData.AddressInfo.DocDetails">
+            <td>
+              {{AddressDocDetails.name}} :
+            </td>
+            <td>
+              <!-- {{AddressDocDetails.value}} -->
+              {{ (AddressDocDetails.name === 'Expiry Date') ? (AddressDocDetails.value | date :'MMMM dd, yyyy') : (AddressDocDetails.value)
+              }}
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <table class="table">
+        <tr>
+          <th>Reasons:</th>
+        </tr>
+        <tr>
+          <td style="display: grid;
+                grid-template-columns: auto auto auto;">
+
+            <label style="text-align:left;" *ngFor="let reasons of kycData.reasonList">
+              <input value={{reasons.code}} type="checkbox" name="reasonList" [(checked)]=reasons.state> {{reasons.reason}}
+            </label>
+          </td>
+        </tr>
+
+      </table>
+
+      <input type="text"  [(value)]='kycData.verification_comment'  class="form-control input-lg margin-bottom" placeholder="Comments" name="textBoxComment"/>
+      <input type="text"  [(ngModel)]='newvar'  class="form-control input-lg margin-bottom" placeholder="Comments" name="textBoxComment"/>
+
+      
+      <input *ngIf="!kycData.is_verified" value="Verify" type="button" (click)="SubmitClick(true)" name="action" class="btn btn-success add-margin-bottom">
+
+      <input *ngIf="!kycData.is_verified" value="Reject" type="button" (click)="SubmitClick(false)" name="action" class="btn btn-danger add-margin-bottom">
+
+     
+      <!-- </form> -->
+
+    </div>
+
   </div>
-
-  <!-- <form role="form" action="" method="post"></form>
-  <table class="table">
-    <tr>
-      <th>Reasons:</th>
-    </tr>
-    <tr>
-      <td style="display: grid;
-          grid-template-columns: auto auto auto;">
-
-        <% for(let j = 0; j < kycData.reasonList.length; j++) { %>
-          <label style="
-                 text-align:left;">
-            <input value=<%=kycData.reasonList[j].code%> type="checkbox" name="reasonList"
-            <%=kycData.reasonList[j].state ? 'checked': 'unchecked' %> >
-              <%=kycData.reasonList[j].reason%>
-          </label>
-          <% } %>
-      </td>
-    </tr>
-
-  </table>
-
-  <input type="text" value="<%=kycData.verification_comment%>" class="form-control input-lg" placeholder="Comments" name="textBoxComment"
-  />
-  <hr>
-  
-    <input value="Verify" type="submit" name="action" class="btn btn-success">
-
-    <input value="Reject" type="submit" name="action" class="btn btn-danger">
- 
-      </form> -->
 </div>
-</div>  

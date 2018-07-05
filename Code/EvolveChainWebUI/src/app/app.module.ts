@@ -2,7 +2,7 @@ import { AdminModule } from './admin/admin.module';
 import { AppRoutingModule } from './app-routing/app-routing.module';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule }   from '@angular/forms';
+import { FormsModule, ReactiveFormsModule }   from '@angular/forms';
 import { HttpModule } from '@angular/http';
 
 import { ParallaxScrollModule } from 'ng2-parallaxscroll';
@@ -38,16 +38,18 @@ import { HomeComponent } from './home/home.component';
     HomeComponent
       
   ],
-  providers: [ AuthGuard 
-    //,LoginService
-  ],
   imports: [
+    FormsModule,
+    ReactiveFormsModule, 
     BrowserModule,
     AppRoutingModule,
     AdminModule,
     ParallaxScrollModule,
-    FormsModule,
-    HttpModule  
+     
+    HttpModule 
+  ],
+  providers: [ AuthGuard 
+    //,LoginService
   ],
   
   bootstrap: [AppComponent]
