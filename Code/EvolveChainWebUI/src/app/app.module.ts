@@ -23,6 +23,8 @@ import { AdminFooterComponent } from './admin/admin-footer/admin-footer.componen
 import { AdminControlSidebarComponent } from './admin/admin-control-sidebar/admin-control-sidebar.component';
 import { AdminDashboard1Component } from './admin/admin-dashboard1/admin-dashboard1.component';
 import { HomeComponent } from './home/home.component';
+import { FooterComponent } from './home/footer.component';
+import { TermsComponent } from './home/terms/terms.component';
 //import { LoginService } from './services/login.service;
 
 
@@ -35,8 +37,9 @@ import { HomeComponent } from './home/home.component';
     StarterContentComponent,
     StarterFooterComponent,
     StarterControlSidebarComponent,
-    HomeComponent
-      
+    HomeComponent,
+    FooterComponent,
+    TermsComponent
   ],
   imports: [
     FormsModule,

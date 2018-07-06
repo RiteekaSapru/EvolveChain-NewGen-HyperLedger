@@ -6,6 +6,8 @@ import { ParallaxScrollModule } from 'ng2-parallaxscroll';
 
 import { LoginService } from '../services/login.service';
 
+import {FooterComponent} from './footer.component';
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
