@@ -459,7 +459,7 @@ class KYCController extends BaseController {
             let toEmailIds = configCol.approver_emails.join(",")
 
             var emailBody = ejs.render(template, {
-                kyc_verify_url: config.get('base_url') + "/verify/" + docData.app_key,
+                kyc_verify_url: config.get('base_url') + "/admin/verify/" + docData.app_key,
                 APP_LOGO_URL: config.get('APP_LOGO_URL'),
                 SITE_NAME: config.get('app_name'),
                 CURRENT_YEAR: config.get('current_year')

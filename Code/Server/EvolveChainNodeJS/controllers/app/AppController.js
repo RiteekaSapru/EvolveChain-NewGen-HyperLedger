@@ -136,13 +136,13 @@ class AppController extends base_controller {
                 return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, errorMsg);
             }
 
-            var currentUtc = common_utility.UtcNow();
-            //explicitly needs to convert to UTC, somehow mongodb or node js convert it to local timezone
-            var lastModified = common_utility.ConvertToUtc(App.last_modified);
-            var expiryDate = common_utility.AddDaysToUtcNow(-configCol.app_expiration_days);
+            // var currentUtc = common_utility.UtcNow();
+            // //explicitly needs to convert to UTC, somehow mongodb or node js convert it to local timezone
+            // var lastModified = common_utility.ConvertToUtc(App.last_modified);
+            // var expiryDate = common_utility.AddDaysToUtcNow(-configCol.app_expiration_days);
 
-            if (expiryDate > lastModified)
-                return this.SendErrorResponse(res, config.ERROR_CODES.EXPIRED_APPLICATION);
+            // if (expiryDate > lastModified)
+            //     return this.SendErrorResponse(res, config.ERROR_CODES.EXPIRED_APPLICATION);
 
             var phone_code = common_utility.GenerateOTP(6);
 
