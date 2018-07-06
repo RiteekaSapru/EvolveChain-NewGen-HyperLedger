@@ -29,18 +29,19 @@
     border-top: 1px solid rgba(0, 0, 0, 0.1);
   }
 
-  .add-margin-bottom{
+  .add-margin-bottom {
     margin-bottom: 25px
   }
+
   .header {
     color: white;
     background-color: #0f75bd;
-}
+  }
 
-.h5{
- font-size: 18px;
- font-weight: 500; 
-}
+  .h5 {
+    font-size: 18px;
+    font-weight: 500;
+  }
 </style>
 
 <div class="content-wrapper">
@@ -52,8 +53,8 @@
     </h4>
 
     <div *ngIf="isError" class="alert alert-danger">
-        {{errorMsg}}
-      </div>
+      {{errorMsg}}
+    </div>
 
     <div class="row">
       <div class="col-md-5">
@@ -229,11 +230,11 @@
 
       </table>
 
-      <input type="text"  [(ngModel)]='kycData.verification_comment'  class="form-control input-lg margin-bottom" 
-      placeholder="Comments" name="textBoxComment" (keyup)="isError=false" (focus)="isError=false"/>
+      <input type="text" [(ngModel)]='kycData.verification_comment' class="form-control input-lg margin-bottom" placeholder="Comments"
+        name="textBoxComment" (keyup)="isError=false" (focus)="isError=false" />
       <div #err *ngIf="isError" class="alert alert-danger">
-          {errorMsg}
-        </div>
+        <span>{{errorMsg}}</span>
+      </div>
       <input *ngIf="!kycData.is_verified" value="Verify" type="button" (click)="SubmitClick(true)" name="action" class="btn btn-success add-margin-bottom">
       <input *ngIf="!kycData.is_verified" value="Reject" type="button" (click)="SubmitClick(false)" name="action" class="btn btn-danger add-margin-bottom">
       <!-- </form> -->
