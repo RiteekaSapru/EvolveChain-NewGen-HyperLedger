@@ -37,14 +37,19 @@ class Web extends baseController {
 
     async PreInitialize(req, res) {
 
-        var countries = await Country.find();
-        var config = await commonUtility.GetInitConfig();
-        console.log(config);
-        var responseConfig = {};
-        responseConfig.country = countries;
-        responseConfig.configuration = config;
+        try {
+            var countries = await Country.find();
+            var config = await commonUtility.GetInitConfig();
 
-        return res.status(status.OK).jsonp(responseConfig);
+            var responseConfig = {};
+            responseConfig.country = countries;
+            responseConfig.configuration = config;
+
+            return res.status(status.OK).jsonp(responseConfig);
+            
+        } catch (ex) {
+            return this.SendExceptionResponse(res, ex);
+        }
     }
 
     async VerifyKYC(req, res) {
@@ -65,7 +70,7 @@ class Web extends baseController {
                 return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
             }
 
-            let body = _.pick(req.body, ['appKey', 'reason_codes', 'is_accepted','comment']);
+            let body = _.pick(req.body, ['appKey', 'reason_codes', 'is_accepted', 'comment']);
 
             const appKey = body.appKey;
             var userEmailId = "";
@@ -319,7 +324,7 @@ class Web extends baseController {
             var docData = await KYCDocument.findOne(document_query).populate('app_data').exec();// => {
 
             if (!docData) {
-               return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
+                return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
             }
 
             //Get exisitng reasons 

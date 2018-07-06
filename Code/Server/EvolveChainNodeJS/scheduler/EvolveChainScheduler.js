@@ -2,6 +2,7 @@
 const scheduler = require('node-schedule');
 const JobSchedulerService = require('../services/JobSchedulerService');
 const NotificationHelper = require('../helpers/NotificationHelper');
+const serviceLogManager = require('../helpers/ServiceLogManager');
 
 //Runs every 5 minutes
 var fiveMinuteScheduler = scheduler.scheduleJob("*/5 * * * *", function () {
@@ -16,26 +17,47 @@ var onceADayScheduler = scheduler.scheduleJob("00 00 03 * * 1-7", function () {
     appCleanup();
     setExpiredStatus();
     advanceNotificationForExpiry();
+
 })
-
-
 
 process.on('uncaughtException', (err) => {
     console.log("!!!Uncaught Exception!!! " + err.message);
 });
 
 function appCleanup() {
-    JobSchedulerService.CleanupData();
+    try {
+        JobSchedulerService.CleanupData();
+    }
+    catch (ex) {
+        serviceLogManager.Log('Error - Process CleanupData : ' + ex);
+    }
 }
 
 function setExpiredStatus() {
-    JobSchedulerService.SetExpiredStatusAndNotifyUser();
+
+    try {
+        JobSchedulerService.SetExpiredStatusAndNotifyUser();
+    }
+    catch (ex) {
+        serviceLogManager.Log('Error - Process Set Expired Status And Notify User : ' + ex);
+    }
 }
 
 function advanceNotificationForExpiry() {
-    JobSchedulerService.AdvanceNotificationForExpiry();
+    try {
+        JobSchedulerService.AdvanceNotificationForExpiry();
+    }
+    catch (ex) {
+        serviceLogManager.Log('Error - Process Advance Notification For Expiry: ' + ex);
+    }
 }
 
 function processNotificationQueue() {
-    NotificationHelper.ProcessEmailNotificationQueue();
+
+    try {
+        NotificationHelper.ProcessEmailNotificationQueue();
+    }
+    catch (ex) {
+        serviceLogManager.Log('Error - Process Email Notification Queue: ' + ex);
+    }
 }
