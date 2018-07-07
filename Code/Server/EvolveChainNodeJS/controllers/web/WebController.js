@@ -31,25 +31,165 @@ const File = require('../../models/files');
 const ConfigDB = require('../../models/config');
 const ProofDocuments = require('../../models/proofdocuments');
 
-const list = {
-    SITE_NAME: config.get('app_name'),
-    web_site: config.get('web_site'),
-}
+const notificationHelper = require('../../helpers/NotificationHelper');
 
-class Web  extends baseController{
+class Web extends baseController {
 
     async PreInitialize(req, res) {
 
-        var countries  = await Country.find();
-        var config = await commonUtility.GetInitConfig();
-        console.log(config);
-        var responseConfig ={};
-        responseConfig.country = countries;
-        responseConfig.configuration = config;
+        try {
+            var countries = await Country.find();
+            var config = await commonUtility.GetInitConfig();
 
-        return res.status(status.OK).jsonp(responseConfig);
+            var responseConfig = {};
+            responseConfig.country = countries;
+            responseConfig.configuration = config;
+
+            return res.status(status.OK).jsonp(responseConfig);
+            
+        } catch (ex) {
+            return this.SendExceptionResponse(res, ex);
+        }
     }
 
+    async VerifyKYC(req, res) {
+
+        //let baseURL = commonUtility.GetAppBaseUrl(req); //config.base_url
+        //const appKey = req.params.key;
+
+        req.checkBody("appKey", messages.req_app_key).notEmpty();
+        //req.checkBody("reason_codes", messages.req_password).notEmpty();
+        //req.checkBody("is_accepted", messages.req_password).notEmpty();
+        //req.checkBody("comment", messages.req_password).notEmpty();
+
+        try {
+
+            let result = await req.getValidationResult();
+            if (!result.isEmpty()) {
+                let error = this.GetErrors(result);
+                return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_REQUEST, error);
+            }
+
+            let body = _.pick(req.body, ['appKey', 'reason_codes', 'is_accepted', 'comment']);
+
+            const appKey = body.appKey;
+            var userEmailId = "";
+            let app_query = {
+                key: appKey,
+                isdelete: false
+            }
+
+            let configCol = await ConfigDB.findOne({});
+            var appData = await App.findOne(app_query).populate('kycdoc_data').exec();
+
+            if (!appData) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
+            }
+
+            //check if it is already verified
+            let alreadyVerified = (appData.status == config.APP_STATUSES.VERIFIED);
+            if (alreadyVerified) {
+                return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, "App is already verified");
+            }
+
+            userEmailId = appData.email;
+            //var action = req.body.action;
+
+            var reasonList = body.reason_codes;
+            let isVerified = body.is_accepted;//(action.toUpperCase() == "VERIFY");
+
+            //For Handling the Expired case..
+            let isAlreadyVerified = false;
+
+            // let basicDetails = appData.kycdoc_data.basic_info.details;
+            let basicDetails = commonUtility.GetKycDocumentInfo(appData.kycdoc_data.basic_info, "BASIC");
+            let addressDetails = commonUtility.GetKycDocumentInfo(appData.kycdoc_data.address_info, "ADDRESS");
+            let identityDetails = commonUtility.GetKycDocumentInfo(appData.kycdoc_data.identity_info, "IDENTITY");
+
+            var eKYCID = "";
+            var appStatus = config.APP_STATUSES.REJECTED;
+            var emailTemplateHtml = config.EMAIL_TEMPLATES_PATH + '/kycRejected.html';
+            var subject = 'EvolveChain KYC - Rejected';
+
+            if (isVerified) {
+                //generate eKYCID 
+                eKYCID = commonUtility.GenerateKYCId(appData.country_iso, appData.kycdoc_data.basic_info.details.firstname);
+                appStatus = config.APP_STATUSES.VERIFIED;
+                emailTemplateHtml = config.EMAIL_TEMPLATES_PATH + '/kycApproved.html';
+                subject = 'EvolveChain KYC - Approved';
+            }
+
+            if (appData.ekyc_id != null && appData.ekyc_id != undefined && appData.ekyc_id != "") {
+                isAlreadyVerified = true;
+                eKYCID = appData.ekyc_id;
+            }
+            var appSetParams =
+                {
+                    $set:
+                        {
+                            'ekyc_id': eKYCID,
+                            'status': appStatus,
+                            verification_comment: body.comment,
+                            verification_time: commonUtility.UtcNow(),
+                            verification_by: "Admin",//set the email of approver
+                            verification_reasons: reasonList
+                        }
+                }
+
+            //send email 
+            var template = fs.readFileSync(emailTemplateHtml, {
+                encoding: 'utf-8'
+            });
+            var reasonDefinition = await VerificationReasons.find(
+                { "code": { $in: reasonList } },
+                { "reason": 1 }
+            );
+            var emailBody = ejs.render(template, {
+                eKycId: eKYCID,
+                expiryDays: configCol.app_expiration_days,
+                APP_LOGO_URL: config.get('APP_LOGO_URL'),
+                SITE_NAME: config.get('app_name'),
+                CURRENT_YEAR: config.get('current_year'),
+                REASON_LIST: reasonDefinition.map(x => x.reason)
+            });
+
+            if (isVerified && eKYCID != '') {
+
+                if (isAlreadyVerified == true) {
+                    var hlResult = await hyperLedgerService.UpdateEkycDetails(appData.ekyc_id, appData.email, appData.phone, appData.isd_code, appData.status, appData.country_iso, basicDetails, addressDetails, identityDetails);
+                    var resultNotify = await this.NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams);
+                }
+                else {
+                    var hlResult = await hyperLedgerService.PostEkycDetails(eKYCID, appData.email, appData.phone, appData.isd_code, appData.status, appData.country_iso, basicDetails, addressDetails, identityDetails);
+                    if (hlResult && hlResult.eKYCID == eKYCID) {
+                        var resultNotify = await this.NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams);
+                    }
+                    else
+                        return this.SendErrorResponse(res, config.ERROR_CODES.ERROR);
+                }
+            }
+            else {
+                var resultNotify = await this.NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams);
+            }
+
+            var response = {
+                'success': 1,
+                'now': commonUtility.UtcNow(),
+                "result": messages.success
+            }
+            return res.status(status.OK).jsonp(response);
+
+        } catch (ex) {
+            return this.SendExceptionResponse(res, ex);
+        }
+        //return res.redirect(req.baseUrl + "/verify/" + appKey);
+    }
+
+    async NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams) {
+        var appSuccess = await App.update({ 'key': appKey }, appSetParams);
+        var newNotificationQueue = await notificationHelper.AddNotificationQueue(appKey, userEmailId, emailBody, config.NOTIFICATION_TYPES.EMAIL, subject);
+        return newNotificationQueue;
+    }
 
     async Login(req, res) {
 
@@ -70,18 +210,16 @@ class Web  extends baseController{
                 password: body.password
             }
 
-
             var Adm = await Admin.findOne(conditions);
-
 
             if (!Adm) {
                 return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
             }
 
-           var token_id = commonUtility.GenerateUniqueToken();
+            var token_id = commonUtility.GenerateUniqueToken();
 
             var parameters = {
-                $set: {token:token_id}
+                $set: { token: token_id }
             }
             await Admin.update(conditions, parameters);
 
@@ -125,14 +263,13 @@ class Web  extends baseController{
 
             var appData;
 
-            if(body.status == null || body.status==undefined|| body.status=="")
-            {
+            if (body.status == null || body.status == undefined || body.status == "") {
                 appData = await App.find();
             }
 
-            if(body.status!= null && body.status!=undefined){
+            if (body.status != null && body.status != undefined) {
                 var conditions = {
-                    status : body.status
+                    status: body.status
                 }
                 appData = await App.find(conditions);
             }
@@ -141,19 +278,19 @@ class Web  extends baseController{
                 return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
             }
 
-            var appDetails=[];
+            var appDetails = [];
 
             for (var j = 0; j < appData.length; j++) {
                 appDetails.push({
                     'email': appData[j].email,
-                    'phone':appData[j].phone,
-                    'isd_code':appData[j].isd_code,
-                    'key':appData[j].key,
-                    'ekyc_id':appData[j].ekyc_id,
-                    'country_iso':appData[j].country_iso,
-                    'name':appData[j].name,
-                    'status':appData[j].status
-                 });
+                    'phone': appData[j].phone,
+                    'isd_code': appData[j].isd_code,
+                    'key': appData[j].key,
+                    'ekyc_id': appData[j].ekyc_id,
+                    'country_iso': appData[j].country_iso,
+                    'name': appData[j].name,
+                    'status': appData[j].status
+                });
             }
 
 
@@ -187,8 +324,7 @@ class Web  extends baseController{
             var docData = await KYCDocument.findOne(document_query).populate('app_data').exec();// => {
 
             if (!docData) {
-                logManager.Log(`GetKYCVerificationInfo-Doc not found`);
-                return res.redirect(baseURL);
+                return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
             }
 
             //Get exisitng reasons 
@@ -298,19 +434,18 @@ class Web  extends baseController{
                 return this.SendErrorResponse(res, config.ERROR_CODES.ADMIN_NOT_FOUND);
             }
 
-            var countStatus = await App.aggregate([{"$group" : {_id:"$status", count:{$sum:1}}}])
+            var countStatus = await App.aggregate([{ "$group": { _id: "$status", count: { $sum: 1 } } }])
 
             if (!countStatus) {
                 return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
             }
 
-             return this.GetCountSuccessResponse("GetAppSummary", countStatus, res);
+            return this.GetCountSuccessResponse("GetAppSummary", countStatus, res);
 
         } catch (ex) {
             return this.SendExceptionResponse(res, ex);
         }
     }
-
 
     async GetAppByCountry(req, res) {
 
@@ -335,7 +470,7 @@ class Web  extends baseController{
                 return this.SendErrorResponse(res, config.ERROR_CODES.ADMIN_NOT_FOUND);
             }
 
-            var countCountry = await App.aggregate([{"$group" : {_id:"$country_iso", count:{$sum:1}}}])
+            var countCountry = await App.aggregate([{ "$group": { _id: "$country_iso", count: { $sum: 1 } } }])
 
             if (!countCountry) {
                 return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
@@ -408,16 +543,16 @@ class Web  extends baseController{
         switch (apiName) {
             case "GetAppSummary":
                 response = {
-		        'success': 1,
-		        'now': commonUtility.UtcNow(),
-		        'countByStatus': count
+                    'success': 1,
+                    'now': commonUtility.UtcNow(),
+                    'countByStatus': count
                 };
                 break;
             case "GetAppByCountry":
-		        response = {
-		        'success': 1,
-		        'now': commonUtility.UtcNow(),
-		        'countByStatus': count
+                response = {
+                    'success': 1,
+                    'now': commonUtility.UtcNow(),
+                    'countByStatus': count
                 }
                 break;
         }
@@ -425,7 +560,7 @@ class Web  extends baseController{
         return res.status(status.OK).jsonp(response);
     }
 
-    GetSuccessResponse(apiName, appEntity, docEntity, res){
+    GetSuccessResponse(apiName, appEntity, docEntity, res) {
         var response = {};
         switch (apiName) {
             case "GetApplication":
@@ -434,9 +569,9 @@ class Web  extends baseController{
                     'now': commonUtility.UtcNow(),
                     'appDetails': appEntity
                 };
-            break;
+                break;
             case "GetAppDetails":
-	            response = {
+                response = {
                     "success": 1,
                     'now': commonUtility.UtcNow(),
                     "name": appEntity.name,
@@ -452,107 +587,21 @@ class Web  extends baseController{
                     'country_details': appEntity.countryDetails,
                     'verification_code': docEntity.face_info.details.number
                 }
-            break;
+                break;
         }
 
         return res.status(status.OK).jsonp(response);
     }
-    async index(req, res) {
-        try {
-            fs.readFile("./views/web/index.html", function (err, data) {
-                if (err) throw err
-                templatesjs.set(data, function (err, data) {
-                    if (err) throw err;
 
-                    templatesjs.renderAll(list, function (err, data) {
-                        if (err) throw err;
-                        res.write(data);
-                        res.end(); // or Do something else with the data
-
-                    });
-                });
-            });
-        } catch (e) {
-            console.log(`Error :: ${e}`);
-            let err = `Error :: ${e}`;
-            return res.status(status.InternalServerError).json({ message: messages.error, error: err });
-        }
-    }
-
-    async about(req, res) {
-        try {
-            fs.readFile("./views/web/about.html", function (err, data) {
-                if (err) throw err
-                templatesjs.set(data, function (err, data) {
-                    if (err) throw err;
-
-                    templatesjs.renderAll(list, function (err, data) {
-                        if (err) throw err;
-                        res.write(data);
-                        res.end(); // or Do something else with the data
-
-                    });
-                });
-            });
-        } catch (e) {
-            console.log(`Error :: ${e}`);
-            let err = `Error :: ${e}`;
-            return res.status(status.InternalServerError).json({ message: messages.error, error: err });
-        }
-    }
-
-    async contact(req, res) {
-        try {
-            fs.readFile("./views/web/contact.html", function (err, data) {
-                if (err) throw err
-                templatesjs.set(data, function (err, data) {
-                    if (err) throw err;
-
-                    templatesjs.renderAll(list, function (err, data) {
-                        if (err) throw err;
-                        res.write(data);
-                        res.end(); // or Do something else with the data
-
-                    });
-                });
-            });
-        } catch (e) {
-            console.log(`Error :: ${e}`);
-            let err = `Error :: ${e}`;
-            return res.status(status.InternalServerError).json({ message: messages.error, error: err });
-        }
-    }
-
-    async download(req, res) {
-        try {
-            fs.readFile("./views/web/download.html", function (err, data) {
-                if (err) throw err
-                templatesjs.set(data, function (err, data) {
-                    if (err) throw err;
-
-                    templatesjs.renderAll(list, function (err, data) {
-                        if (err) throw err;
-                        res.write(data);
-                        res.end(); // or Do something else with the data
-
-                    });
-                });
-            });
-        } catch (e) {
-            console.log(`Error :: ${e}`);
-            let err = `Error :: ${e}`;
-            return res.status(status.InternalServerError).json({ message: messages.error, error: err });
-        }
-    }
     async WelcomeApi(req, res) {
 
         try {
-        
+
             // var response = {
             //     "success": 1,
             //     "message":"Welcome to EvolveChain"
             // }
-            var response= "Welcome To EvolveChain";
+            var response = "Welcome To EvolveChain";
             return res.status(status.OK).jsonp(response);
 
 
@@ -563,4 +612,4 @@ class Web  extends baseController{
 
 }
 
- module.exports = new Web();
+module.exports = new Web();

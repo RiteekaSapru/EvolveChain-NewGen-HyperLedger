@@ -1,6 +1,8 @@
 {
     "req_IP": "IP missing!",
     "req_location": "Location missing!",
+    "req_longitude": "Longitude missing!",
+    "req_latitude": "Latitude missing!",
     "req_time":  "Time missing!",
     "req_device_type": "Device Type missing!",
     "req_device_name": "Device Name missing!",

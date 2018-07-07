@@ -1,3 +1,4 @@
 Code/Server/EvolveChainNodeJS/configEnv.env
 Code/Server/EvolveChainNodeJS/logs/log.txt
 Code/Server/EvolveChainNodeJS/scheduler/logs/schedular.txt
+Code/Server/EvolveChainNodeJS/logs/serviceLog.txt

@@ -25,6 +25,10 @@ import { VerifyComponent } from '../verify/verify.component';
             component: AdminDashboardComponent
           },
           {
+          path: 'verify/:appkey',
+          component: VerifyComponent
+          },
+          {
             path: 'verify',
             component: VerifyComponent
           },

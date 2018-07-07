@@ -12,10 +12,11 @@
       </div>
     </div> -->
     <!-- search form -->
-    <form class="sidebar-form">
+    <form (keydown.enter)="$event.target.tagName == 'leftSearch'" class="sidebar-form">
       <div class="input-group">
-        <input type="text" name="leftSearch" maxlength="12" class="form-control" #leftSearch (focus)="showSearchError=false" placeholder="Search Mobile No...">
-        <span class="input-group-btn">
+          <input type="text" name="leftSearch" maxlength="12" class="form-control" (keyup)="showSearchError=false" (focus)="showSearchError=false" 
+          (keyup.enter)="SearchClick(leftSearch.value)" #leftSearch placeholder="Search With Mobile No...">
+           <span class="input-group-btn">
                 <button type="button" (click)="SearchClick(leftSearch.value)" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
                 </button>
               </span>
