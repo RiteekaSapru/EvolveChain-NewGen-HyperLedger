@@ -1,34 +1,36 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Http, Response } from '@angular/http';
 
 import { ParallaxScrollModule } from 'ng2-parallaxscroll';
 
 import { LoginService } from '../services/login.service';
 
-import {FooterComponent} from './footer.component';
+import { FooterComponent } from './footer.component';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
-  providers : [LoginService]
+  providers: [LoginService]
 })
 export class HomeComponent implements OnInit {
 
   model = new LoginUser('', '');
   submitted = false;
   isLoginError = false;
+  returnUrl: string;
 
   // onLoginSubmit() {
   //   this.submitted = true;
   //   this.router.navigateByUrl('/admin');
   // }
 
-  constructor(private router: Router, private loginService: LoginService) { }
+  constructor(private route: ActivatedRoute, private router: Router, private loginService: LoginService) { }
 
   ngOnInit() {
-
+    // get return url from route parameters or default to '/'
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/admin';
   }
 
   LoginBtnClick() {
@@ -36,14 +38,14 @@ export class HomeComponent implements OnInit {
     //this.router.navigate(['/admin/dashboard1']);
 
     this.loginService.Login(this.model.email, this.model.password).subscribe(loginData => {
-      
-      if(loginData.success){
 
-        localStorage.setItem('userToken',loginData.token);
-        this.router.navigateByUrl('/admin');
+      if (loginData.success) {
+
+        localStorage.setItem('userToken', loginData.token);
+        //this.router.navigateByUrl('/admin');
+        this.router.navigateByUrl(this.returnUrl);
       }
       this.isLoginError = true;
-      
     },
       //(error : HttpErrorResponse) => {
       (error) => {

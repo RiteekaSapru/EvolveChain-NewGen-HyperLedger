@@ -7,12 +7,14 @@ import { Http, Response } from '@angular/http';
   selector: 'app-home-footer',
   //templateUrl: './home.component.html',
   template : `
+  <link rel="stylesheet" href="../../assets/css/main.css">
   <footer class="evolvechain-footer">
   <div class="container">
       <div class="row">
           <div class="col-sm-6">
               <div class="copyright">
-                  <span>Â© EvolveChain 2018</span>
+                  <span>Â© EvolveChain 2018 </span>
+                 <a routerLink="/terms" style='color:#fff;'> <span> | Terms & Conditions </span> </a>
               </div>
           </div>
           <div class="col-sm-6 text-right">
@@ -29,7 +31,7 @@ import { Http, Response } from '@angular/http';
 
       </div>
   </div>
-</footer>`,
+</footer>`
   //styleUrls: ['./home.component.css'],
 
 })

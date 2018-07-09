@@ -24,12 +24,15 @@ export class VerifyComponent implements OnInit {
   errorMsg: String = "Some error occured !!";
   appKey: String = "";
   //newvar: string;
-  @ViewChild('err') errorCntrl: ElementRef;
-
+  //@ViewChild('err') errorCntrl: ElementRef;
 
   ngOnInit() {
-
     //let appKey: string = "4a9e5ddfc6ea5224c0e82fa74e8a2955";
+    //this.showError("dgsds");
+    this.LoadPage();
+  }
+
+  LoadPage(){
 
     this.activatedRoute.params.subscribe(pa => {
       //console.log(pa);
@@ -49,6 +52,7 @@ export class VerifyComponent implements OnInit {
       console.error(error);
       this.showError(error);
     });
+
   }
 
   SubmitClick(isAccepted) {
@@ -75,8 +79,13 @@ export class VerifyComponent implements OnInit {
 
         if (submittedApp.success) {
           //this.kycData = verificationInfo.kycData;
-          alert("The application processed successfully.")
-          window.location.reload();
+          alert("The application processed successfully.");
+          //this.router.navigateByUrl('admin/verify/' + this.appKey);
+          this.LoadPage();
+          //window.location.reload();
+        }
+        else {
+          this.showError(submittedApp.error);
         }
       }, (error) => {  this.showError(error); });
 
@@ -84,6 +93,7 @@ export class VerifyComponent implements OnInit {
   }
 
   showError(error) : void {
+    if(error != undefined || error)
     this.errorMsg = error;
     this.isError = true;
     //this.errorCntrl.nativeElement.focus();

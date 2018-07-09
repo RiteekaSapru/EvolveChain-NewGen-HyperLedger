@@ -44,6 +44,7 @@
   }
 </style>
 
+<!-- kycData -->
 <div class="content-wrapper">
   <div class="container">
 
@@ -52,8 +53,8 @@
       <b>Know your customer (KYC)</b>
     </h4>
 
-    <div *ngIf="isError" class="alert alert-danger">
-      {{errorMsg}}
+    <div *ngIf='isError' class="alert alert-danger">
+        {{errorMsg}}
     </div>
 
     <div class="row">
@@ -232,6 +233,7 @@
 
       <input type="text" [(ngModel)]='kycData.verification_comment' class="form-control input-lg margin-bottom" placeholder="Comments"
         name="textBoxComment" (keyup)="isError=false" (focus)="isError=false" />
+      <!-- <div #err *ngIf="isError" class="alert alert-danger"> -->
       <div #err *ngIf="isError" class="alert alert-danger">
         <span>{{errorMsg}}</span>
       </div>
