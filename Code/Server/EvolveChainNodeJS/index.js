@@ -7,6 +7,8 @@ const expressValidator = require("express-validator");
 const routes = require('./routes');
 var mongo = require('mongodb');
 const logManager = require('./helpers/LogManager');
+var morgan = require('morgan')
+var fs = require('fs');
 
 const status = config.get('status');
 const PORT = config.get('port');
@@ -30,6 +32,12 @@ app.use((req, res, next) => {
     // );
     next();
 });
+
+//logger functionality
+// create a write stream (in append mode)
+var accessLogStream = fs.createWriteStream(path.join(__dirname + '/logs', 'access.log'), {flags: 'a'})
+// setup the logger
+app.use(morgan('combined', {stream: accessLogStream}))
 
 // SET View Engine and View folder Path 
 app.set('views', path.join(__dirname, '/views'));

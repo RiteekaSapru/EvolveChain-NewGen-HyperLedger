@@ -420,7 +420,7 @@ class KYCController extends BaseController {
                 app_key: body.app_key
             }
 
-            var docData = await KYCDocument.findOne(conditions);
+            var docData = await KYCDocument.findOne(conditions).populate('app_data').exec();
             if (!docData)
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_KEY);
 
@@ -462,7 +462,8 @@ class KYCController extends BaseController {
                 kyc_verify_url: config.get('base_url') + "/admin/verify/" + docData.app_key,
                 APP_LOGO_URL: config.get('APP_LOGO_URL'),
                 SITE_NAME: config.get('app_name'),
-                CURRENT_YEAR: config.get('current_year')
+                CURRENT_YEAR: config.get('current_year'),
+                PHONE : docData.app_data.phone
             });
             const subject = 'EvolveChain KYC - Verification Request';
             var emailSuccess = await emailService.SendEmail(toEmailIds, subject, emailBody);

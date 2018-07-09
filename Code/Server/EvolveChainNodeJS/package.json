@@ -26,6 +26,7 @@
     "md5": "^2.2.1",
     "mongoose": "^5.0.8",
     "mongoose-gridfs": "^0.3.2",
+    "morgan": "^1.9.0",
     "multer": "^1.3.0",
     "node-mongoose-validator": "^1.2.0",
     "node-schedule": "^1.3.0",

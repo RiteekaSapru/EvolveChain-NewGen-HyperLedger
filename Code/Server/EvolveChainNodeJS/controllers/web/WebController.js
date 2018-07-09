@@ -10,6 +10,7 @@ const messages = config.get('messages');
 const md5 = require('md5');
 const emailService = require('../../services/EmailService')
 const smsService = require('../../services/SMSService')
+const hyperLedgerService = require('../../services/HyperLedgerService');
 const commonUtility = require('../../helpers/CommonUtility');
 const baseController = require('../BaseController');
 const logManager = require('../../helpers/LogManager');
@@ -346,7 +347,7 @@ class Web extends baseController {
                 country_iso: docData.app_data.country_iso,
                 is_verified: isVerified,
                 hash: docData.hash,
-                verification_comment: docData.verification_comment,
+                verification_comment: docData.app_data.verification_comment,
                 verification_code: docData.app_data.verification_code,
                 email: docData.app_data.email,
                 phone: "+" + docData.app_data.isd_code + "-" + docData.app_data.phone,
