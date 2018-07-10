@@ -13,18 +13,20 @@ const common_utility = require('../../helpers/CommonUtility');
 const log_manager = require('../../helpers/LogManager');
 const base_controller = require('../BaseController');
 
+const hyperLedgerService = require('../../services/HyperLedgerService');
+
 const app = require('../../models/apps');
 const NotificationQueue = require('../../models/notificationQueue');
 const Country = require('../../models/country');
 const ProofDocuments = require('../../models/proofdocuments');
 const VerificationReasons = require('../../models/verificationReason');
+const ConfigDB = require('../../models/config');
 
 const kyc_document = require('../../models/kycdocument');
 
 const PUBLIC_PATH = config.get('PUBLIC_PATH');
 const EMAIL_TEMPLATES_PATH = path.join(__dirname + "/../../public/email_template");
 const OTP_EXPIRY_MINS = config.get('OTP_EXPIRY_MINS');
-const APP_EXPIRATION_DAYS = config.get('APP_EXPIRATION_DAYS');
 
 class AppController extends base_controller {
 
@@ -94,6 +96,7 @@ class AppController extends base_controller {
             newApp.documents = countryDocs
             newApp.verification_code = verification_code;
 
+            // let configDetails = await ConfigDB.findOne({});
             return this.GetSuccessResponse("Initialize", newApp, res);
 
         } catch (ex) {
@@ -122,7 +125,7 @@ class AppController extends base_controller {
                 phone: body.mobile,
                 isd_code: body.isd_code
             }
-
+            let configCol = await ConfigDB.findOne({});
             var App = await app.findOne(conditions);
 
             if (!App) return this.SendErrorResponse(res, config.ERROR_CODES.APP_NOT_FOUND);
@@ -133,13 +136,13 @@ class AppController extends base_controller {
                 return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, errorMsg);
             }
 
-            var currentUtc = common_utility.UtcNow();
-            //explicitly needs to convert to UTC, somehow mongodb or node js convert it to local timezone
-            var lastModified = common_utility.ConvertToUtc(App.last_modified);
-            var expiryDate = common_utility.AddDaysToUtcNow(-APP_EXPIRATION_DAYS);
+            // var currentUtc = common_utility.UtcNow();
+            // //explicitly needs to convert to UTC, somehow mongodb or node js convert it to local timezone
+            // var lastModified = common_utility.ConvertToUtc(App.last_modified);
+            // var expiryDate = common_utility.AddDaysToUtcNow(-configCol.app_expiration_days);
 
-            if (expiryDate > lastModified)
-                return this.SendErrorResponse(res, config.ERROR_CODES.EXPIRED_APPLICATION);
+            // if (expiryDate > lastModified)
+            //     return this.SendErrorResponse(res, config.ERROR_CODES.EXPIRED_APPLICATION);
 
             var phone_code = common_utility.GenerateOTP(6);
 
@@ -215,6 +218,7 @@ class AppController extends base_controller {
 
             appData.documents = countryDocs;
             appData.countryDetails = countryDetails;
+            // let configDetails = await ConfigDB.findOne({});
             return this.GetSuccessResubmitInitialize(appData, docData, res);
 
         } catch (ex) {
@@ -332,6 +336,11 @@ class AppController extends base_controller {
 
             if (App.email_info.otp != body.email_code.toLowerCase())
                 return this.SendErrorResponse(res, config.ERROR_CODES.INCORRECT_OTP);
+
+            if(App.ekyc_id!=null && App.ekyc_id!=undefined && App.ekyc_id!="")
+            {
+               var hlResult = await hyperLedgerService.UpdateEkycDetails(App.ekyc_id, body.email.toLowerCase(), undefined, undefined, undefined, undefined, undefined, undefined, undefined);
+            }
 
             var setParams = {
                 $set: { email: body.email.toLowerCase() }
@@ -465,6 +474,9 @@ class AppController extends base_controller {
                 return this.SendErrorResponse(res, config.ERROR_CODES.DUPLICATE_PHONE);
             }
 
+            if(App.ekyc_id!=null && App.ekyc_id!=undefined && App.ekyc_id!=""){
+                var hlResult = await hyperLedgerService.UpdateEkycDetails(App.ekyc_id, undefined, phone, isdCode, undefined, undefined, undefined, undefined, undefined);
+            }
             var setParams = {
                 $set: { phone: phone, isd_code: isdCode }
             }
@@ -818,17 +830,18 @@ class AppController extends base_controller {
             case "Initialize":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'key': appEntity.key,
                     'ip': appEntity.IP,
                     'documents': appEntity.documents,
-                    'verification_code': appEntity.verification_code
+                    'verification_code': appEntity.verification_code,
+                    // 'config': common_utility.GetInitConfig()
                 };
                 break;
             case "GeneratePin":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'key': appEntity.key,
                     'Server': appEntity.Server,
                     'Refer': appEntity.Refer,
@@ -838,7 +851,7 @@ class AppController extends base_controller {
             case "SetPin":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'key': appEntity.key,
                     'Server': appEntity.Server,
                     'Refer': appEntity.Refer,
@@ -848,7 +861,7 @@ class AppController extends base_controller {
             case "ChangePin":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'key': appEntity.key,
                     'Server': appEntity.Server,
                     'Refer': appEntity.Refer,
@@ -859,42 +872,42 @@ class AppController extends base_controller {
             case "GenerateEmailOTP":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'result': messages.verify_email_code
                 }
                 break;
             case "VerifyEmail":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'result': messages.verify_email_success
                 }
                 break;
             case "GenerateMobileOTP":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'result': messages.verify_phone_code
                 }
                 break;
             case "VerifyMobile":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'result': messages.verify_mobile_success
                 }
                 break;
             case "GetEkycId":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'ekyc_id': appEntity.ekyc_id,
                     'result': messages.ekyc_same_device
                 }
             case "ResubmitVerification":
                 response = {
                     'success': 1,
-                    'now': Date.now(),
+                    'now': common_utility.UtcNow(),
                     'key': appEntity.key,
                     'result': messages.success
                 }
@@ -938,7 +951,8 @@ class AppController extends base_controller {
             'documents': appEntity.documents,
             'country_details': appEntity.countryDetails,
             'verification_code': docEntity.face_info.details.number,
-            "result": messages.resubmit_init_success
+            "result": messages.resubmit_init_success,
+            // "config": common_utility.GetInitConfig()
         }
         return res.status(status.OK).jsonp(response);
     }

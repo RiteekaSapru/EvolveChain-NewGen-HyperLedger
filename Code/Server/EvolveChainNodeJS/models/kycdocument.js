@@ -70,7 +70,8 @@ const KYCDocument = new Schema({
         details:{type: GeneralDocument},
         images: { type: [ImageInfo] },
         time: {type: Date},
-        location: {type: String},
+        latitude: {type: String},
+        longitude: {type: String},
         ip: {type: String}
     },
     last_modified: { type: Date },

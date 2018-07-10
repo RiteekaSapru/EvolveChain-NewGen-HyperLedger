@@ -78,7 +78,7 @@
 		<div class="row">
 			<div class="col-sm-2">
 				<div class="evolvechain-logo">
-					<a href="#">
+					<a routerLink="/">
 						<img src="assets/img/Logo2.jpg" alt="" />
 						<strong>EvolveChain</strong>
 					</a>
@@ -90,10 +90,10 @@
 				<nav class="header-nav">
 					<ul nav navbar-nav>
 						<li>
-							<a href="#aboutxyz">About Us</a>
+							<a href="/home#about">About Us</a>
 						</li>
 						<li>
-							<a href="#contact">Contact Us</a>
+							<a href="/home#contact">Contact Us</a>
 						</li>
 
 						<li class="dropdown user user-menu">
@@ -109,21 +109,27 @@
 											<strong>EvolveChain</strong>
 										</a>
 									</div>
-									<form (ngSubmit)="LoginBtnClick()" #loginForm="ngForm" >
+									<form (ngSubmit)="LoginBtnClick()" #loginForm="ngForm">
 										<div class="form-group">
-											<input type="email" id="email" required [(ngModel)]="model.email" name="email"  #email="ngModel" class="form-control" placeholder="Email">
-											<div [hidden]="email.valid || email.pristine"
-											class="alert alert-danger">
-										 Name is required
-									   </div>
+											<input type="email" id="email" required [(ngModel)]="model.email" name="email" #email="ngModel" class="form-control" placeholder="Email">
+											<div [hidden]="email.valid || email.pristine" class="alert alert-danger">
+												Name is required
+											</div>
 										</div>
 										<div class="form-group">
-											<input type="password" id="password" required [(ngModel)]="model.password" name="password" #password="ngModel" class="form-control" placeholder="Password">
+											<input type="password" id="password" required [(ngModel)]="model.password" name="password" #password="ngModel" class="form-control"
+											 placeholder="Password">
+											 <div [hidden]="password.valid || password.pristine" class="alert alert-danger">
+												Password is required
+											</div>
 										</div>
-										<div class="checkbox">
+										<!--<div class="checkbox">
 											<label>
 												<input type="checkbox"> Remember Me
 											</label>
+										</div>-->
+										<div *ngIf="isLoginError" class="alert alert-danger">
+											Username/Password Incorrect
 										</div>
 										<!-- <button type="button" class="btn  button-blue btn-flat m-b-30 m-t-30" (click)="LoginBtnClick()">Log in</button> -->
 										<button type="submit" class="btn  button-blue btn-flat m-b-30 m-t-30" [disabled]="!loginForm.form.valid">Log in</button>
@@ -143,14 +149,17 @@
 	<div class="banner-content-cover">
 		<div class="banner-content">
 			<div class="container text-center banner-container">
-				<h1>Welcome To EvolveChain</h1><a href="#aboutxyz">About Us</a>
-				<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.Lorem Ipsum has been the industry's standard
-					dummy text ever since the 1500s.</p>
+				<h1>Welcome To EvolveChain</h1>
+				<p>Blockchain Evolution Inc.  is a public reporting company in, Alberta and British Columbia. Blockchain Evolution owns the technology behind the world’s first identification-based Blockchain. Its mission is to engage in software development and marketing of identification-based blockchains, and deploy the technology to clients who can benefit from its wide array of potential uses.</p>  
+
+<p>Blockchain Evolution’s technology is already being deployed as a key component of the ecosystem of cryptocurrency GreenCoinX (“cryptocurrency symbol “XGC”), and is open to leveraging the technology in a variety of arenas. A key aspect of our identification-based blockchain is enhanced security of the ecosystem. The requirement of user identification as a prerequisite prevents the types of nefarious transactions that have plagued anonymous blockchains, and slowed down the adoption of this transformative technology.   </p>
+
+<p>Blockchain Evolution intends to publicly list on the CSE, and dual list on the OTCQB in the USA and the Deutsche Bourse in Germany.</p>
 			</div>
 		</div>
 	</div>
 </div>
-<div #aboutxyz name="aboutxyz" class="about-us">
+<div name="about" id="about" class="about-us">
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-6">
@@ -160,33 +169,52 @@
 			</div>
 			<div class="col-sm-6">
 				<div class="about-content">
-					<h2>What we are</h2>
-					<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.Lorem Ipsum has been the industry's standard
-						dummy text ever since the 1500s.Lorem Ipsum is simply dummy text of the printing and typesetting industry.Lorem Ipsum
-						has been the industry's standard dummy text ever since the 1500s.</p>
-					<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.Lorem Ipsum has been the industry's standard
-						dummy text ever since the 1500s.</p>
+					<h2>Management Team & Board of Directors</h2>
+
+<h3>Danny Wettreich</h3>
+<h4>Director, Chairman, and CEO</h4>
+<p>He has more than 40 years of experience in venture capital, private equity, and management of publicly traded companies. He is Chairman and CEO of GreenBank Capital Inc, a Canadian merchant bank. He is also Chairman of Ubique Minerals Limited, XGC Software Inc, Inside Bay Street Corporation, Kabaddi Games Inc and other companies. He has been a director of public companies listed on the Canadian Securities Exchange, NASDAQ, the American Stock Exchange, the London Stock Exchange, the AIM Market of the London Stock Exchange, the Frankfurt Stock Exchange, and the Vancouver Stock Exchange, a predecessor to the TSX Venture Exchange. He is a graduate of the University of Westminster with a BA in Business.</p>
+
+
+<h3>Nilam Doctor</h3>
+<h4>Director and Chief Technology Officer</h4>
+<p>He is also the President & Chief Technology Officer of XGC Software Inc and its subsidiary GreenCoinX Inc. Previously he was Owner of Hitarth Consultants a software consultancy firm focused on web based projects and digital currency. He has an MBA in Finance and a Bachelor of Engineering from Gujarat University.</p>
+
+
+<h3>Gaurav Singh</h3>
+<h4>Director and Chief Financial Officer</h4>
+<p>Gaurav Singh is a director and CFO of GreenBank Capital Inc. Previously he was Policy Advisor and Director, Research at National Association of Software and Services Companies (NASSCOM) in New Delhi, India. NASSCOM is a global software services trade organization with over 2000 members. He was General Manager BC-GSVLabs, a venture capital incubator based in India, and was Senior Principal, Corporate Development for CA Technologies, , one of the largest software companies in the world. He was Senior Manager with the Corporate Finance practice at Deloitte, , one of the “Big Four” accounting firms. He has an MSc. in Finance from London Business School at the University of London, and a Bachelor of Commerce from University of Delhi.</p>
+
+
+<h3>David M. Lonsdale</h3>
+<h4>Director</h4>
+<p>He is President and CEO of The Lonsdale Group, a Dallas-based private investor in small cap companies. He is a director of GreenBank Capital Inc, a Canadian merchant bank. Previously he was for ten years the President of Allegiance Capital Company, a private investment bank focusing on mergers and acquisitions, with offices in Dallas, New York, and Chicago. He obtained his MBA in Finance & Marketing from Cornell University and his B.Sc. in Physics & Mathematics from Leeds Beckett University in the U.K.</p>
+
+
+<h3>Peter Wanner</h3>
+<h4>Director</h4>
+<p>He is a director of GreenBank Capital Inc, a Canadian merchant bank. He is the Managing Director of IG Aviation Tax Services Inc. providing accounting services to the aviation industry. He is a director and CEO of First National Energy Corp, a USA public company and has been a director and officer of a number of public companies. Peter received his Certified General Accountant designation in 1981 and after working in public accounting he became VP & Controller of Worldways Canada – then Canada’s 3rd largest airline.</p>
+
+
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
-<div id="contact" class="about-us contact-us parallax-window" parallax class="contact-bg-parallax" data-image-src="assets/img/contact-page.png"
- data-speed="0.1">
+<div id="contact" class="about-us contact-us" [config]="{axis: y, speed: -.5}" parallax class="contact-bg-parallax" data-image-src="assets/img/contact-page.png">
 	<div class="container">
 		<div class="row">
 
 			<div class="col-sm-6">
 				<div class="about-content banner-content">
 					<h2>Contact Us</h2>
-					<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.Lorem Ipsum has been the industry's standard
-						dummy text ever since the 1500s.</p>
+					<p></p>
 					<address>
 						EvolveChain Evolution Inc
 						<br/> 100 King Street West, Suite 5700
 						<br/> Toronto, Ontario, M5X 1C7
-						<br/> Tel: (647) 931 – 9768
-						<br/> Fax: 99113388
+						<br/> Tel: (647) 931 â€“ 9768
+						<br/> 
 					</address>
 					<!-- <div class="contact-form-wrapper">
 								<form>
@@ -205,26 +233,27 @@
 		</div>
 	</div>
 </div>
-<footer class="evolvechain-footer">
+<app-home-footer></app-home-footer>
+<!-- <footer class="evolvechain-footer">
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-6">
 				<div class="copyright">
-					<span>© EvolveChain 2018</span>
+					<span>Â© EvolveChain 2018</span>
 				</div>
 			</div>
 			<div class="col-sm-6 text-right">
 				<div class="app-icon">
 					<span>Download Our App: </span>
-					<a href="">
-						<img src="assets/img/apple.png" alt="" />
+					<a href="/assets/apks/EvolveChain.ipa">
+						<img src="assets/img/apple.png" alt="" target="_self" download/>
 					</a>
-					<a href="">
-						<img src="assets/img/android.png" alt="" />
+					<a href="/assets/apks/EvolveChain.apk">
+						<img src="assets/img/android.png" alt="" target="_self" download/>
 					</a>
 				</div>
 			</div>
 
 		</div>
 	</div>
-</footer>
+</footer> -->

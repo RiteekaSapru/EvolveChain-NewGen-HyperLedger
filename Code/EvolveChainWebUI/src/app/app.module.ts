@@ -2,7 +2,7 @@ import { AdminModule } from './admin/admin.module';
 import { AppRoutingModule } from './app-routing/app-routing.module';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule }   from '@angular/forms';
+import { FormsModule, ReactiveFormsModule }   from '@angular/forms';
 import { HttpModule } from '@angular/http';
 
 import { ParallaxScrollModule } from 'ng2-parallaxscroll';
@@ -23,6 +23,8 @@ import { AdminFooterComponent } from './admin/admin-footer/admin-footer.componen
 import { AdminControlSidebarComponent } from './admin/admin-control-sidebar/admin-control-sidebar.component';
 import { AdminDashboard1Component } from './admin/admin-dashboard1/admin-dashboard1.component';
 import { HomeComponent } from './home/home.component';
+import { FooterComponent } from './home/footer.component';
+import { TermsComponent } from './home/terms/terms.component';
 //import { LoginService } from './services/login.service;
 
 
@@ -35,19 +37,22 @@ import { HomeComponent } from './home/home.component';
     StarterContentComponent,
     StarterFooterComponent,
     StarterControlSidebarComponent,
-    HomeComponent
-      
-  ],
-  providers: [ AuthGuard 
-    //,LoginService
+    HomeComponent,
+    FooterComponent,
+    TermsComponent
   ],
   imports: [
+    FormsModule,
+    ReactiveFormsModule, 
     BrowserModule,
     AppRoutingModule,
     AdminModule,
     ParallaxScrollModule,
-    FormsModule,
-    HttpModule  
+     
+    HttpModule 
+  ],
+  providers: [ AuthGuard 
+    //,LoginService
   ],
   
   bootstrap: [AppComponent]

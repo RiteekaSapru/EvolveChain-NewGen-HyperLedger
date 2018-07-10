@@ -1,6 +1,8 @@
 {
     "req_IP": "IP missing!",
     "req_location": "Location missing!",
+    "req_longitude": "Longitude missing!",
+    "req_latitude": "Latitude missing!",
     "req_time":  "Time missing!",
     "req_device_type": "Device Type missing!",
     "req_device_name": "Device Name missing!",
@@ -51,6 +53,7 @@
     "login_success": "Login successful!",
     "ekyc_same_device": "Ekyc Id exist for this device",
     "resubmit_init_success": "Resubmit initialize successful!",
+    "update_error_HL": "Error while updating on HL!",
     "req_street": "Address Street Required!",
     "req_city": "City Required!",
     "req_zip": "Zip Required!",
@@ -97,6 +100,7 @@
         "E25": "Your application has expired. Please sign up again.",
         "E26": "Step name missing",
         "E27": "Invalid Address Document type!",
-        "E28": "Document already exists!"
+        "E28": "Document already exists!",
+        "E29": "The expiry date of the document is less the 30 days limit"
     }
 }

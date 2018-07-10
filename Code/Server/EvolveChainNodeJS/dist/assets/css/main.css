@@ -222,8 +222,8 @@ margin: 0 5px;
 }
 .banner-content-cover{
 	display:table;
-	    width: 100%;
-    height: 100%;
+	height: 100vh;
+	width: 100vw;
 }
 .banner-content{
 	    display: table-cell;
@@ -249,3 +249,10 @@ margin: 0 5px;
 	margin: 8% auto;
 }
 /*===============================PopUp CSS===========================================*/
+
+.terms-conditions-img {
+    margin-bottom:20px;
+}
+.terms-conditions{
+    margin-top:55px;
+}

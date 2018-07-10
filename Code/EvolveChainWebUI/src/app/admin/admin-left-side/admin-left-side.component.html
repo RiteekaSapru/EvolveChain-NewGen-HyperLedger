@@ -12,15 +12,19 @@
       </div>
     </div> -->
     <!-- search form -->
-    <form action="#" method="get" class="sidebar-form">
+    <form (keydown.enter)="$event.target.tagName == 'leftSearch'" class="sidebar-form">
       <div class="input-group">
-        <input type="text" name="q" class="form-control" placeholder="Search Applications...">
-        <span class="input-group-btn">
-                <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+          <input type="text" name="leftSearch" maxlength="12" class="form-control" (keyup)="showSearchError=false" (focus)="showSearchError=false" 
+          (keyup.enter)="SearchClick(leftSearch.value)" #leftSearch placeholder="Search With Mobile No...">
+           <span class="input-group-btn">
+                <button type="button" (click)="SearchClick(leftSearch.value)" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
                 </button>
               </span>
       </div>
     </form>
+    <div *ngIf="isSearchError && showSearchError" class="alert alert-danger">
+      No Applications found
+    </div>
     <!-- /.search form -->
     <!-- sidebar menu: : style can be found in sidebar.less -->
     <ul class="sidebar-menu">
@@ -37,7 +41,7 @@
           <li><a routerLink="dashboard2"><i class="fa fa-circle-o"></i> Dashboard v2</a></li>
         </ul>
       </li> -->
-      <li ><a routerLink="dashboard"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
+      <li><a routerLink="dashboard"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
       <!-- <li ><a routerLink="dashboard1"><i class="fa fa-dashboard"></i> <span>Dashboard1</span></a></li>	  -->
       <li class="treeview">
         <a href="#">
@@ -48,11 +52,11 @@
             </span>
           </a>
         <ul class="treeview-menu">
-          <li><a ><i class="fa fa-circle-o"></i>Pending</a></li>
-          <li><a ><i class="fa fa-circle-o"></i>InProcess</a></li>
-          <li><a ><i class="fa fa-circle-o"></i>Rejected</a></li>
-          <li><a ><i class="fa fa-circle-o"></i>Expired</a></li>
-          <li><a ><i class="fa fa-circle-o"></i>Verified</a></li>
+          <li><a><i class="fa fa-circle-o"></i>Pending</a></li>
+          <li><a><i class="fa fa-circle-o"></i>InProcess</a></li>
+          <li><a><i class="fa fa-circle-o"></i>Rejected</a></li>
+          <li><a><i class="fa fa-circle-o"></i>Expired</a></li>
+          <li><a><i class="fa fa-circle-o"></i>Verified</a></li>
         </ul>
       </li>
 

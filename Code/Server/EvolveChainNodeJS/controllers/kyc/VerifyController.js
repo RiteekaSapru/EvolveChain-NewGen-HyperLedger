@@ -15,7 +15,9 @@ const KycDocument = require('../../models/kycdocument');
 const ProofDocuments = require('../../models/proofdocuments');
 const VerificationReasons = require('../../models/verificationReason');
 const NotificationQueue = require('../../models/notificationQueue');
+const ConfigDB = require('../../models/config');
 
+const notificationHelper = require('../../helpers/NotificationHelper');
 
 const messages = config.messages;
 
@@ -87,6 +89,7 @@ class VerifyController extends BaseController {
                 isdelete: false
             }
 
+            let configCol = await ConfigDB.findOne({});
             var appData = await App.findOne(app_query).populate('kycdoc_data').exec();
 
             if (!appData) {
@@ -106,6 +109,8 @@ class VerifyController extends BaseController {
 
             let isVerified = (action.toUpperCase() == "VERIFY");
 
+            let isAlreadyVerified = false;
+
             // let basicDetails = appData.kycdoc_data.basic_info.details;
             let basicDetails = commonUtility.GetKycDocumentInfo(appData.kycdoc_data.basic_info, "BASIC");
             let addressDetails = commonUtility.GetKycDocumentInfo(appData.kycdoc_data.address_info, "ADDRESS");
@@ -124,19 +129,29 @@ class VerifyController extends BaseController {
                 subject = 'EvolveChain KYC - Approved';
             }
 
-            var appSetParams =
-                {
-                    $set:
-                        {
-                            'ekyc_id': eKYCID,
-                            'status': appStatus,
-                            verification_comment: req.body.textBoxComment,
-                            verification_time: commonUtility.UtcNow(),
-                            verification_by: "Admin",//set the email of approver
-                            verification_reasons: reasonList
+            if(appData.ekyc_id!=null && appData.ekyc_id!=undefined && appData.ekyc_id!="")
+            {
+                isAlreadyVerified = true;
+                eKYCID = appData.ekyc_id;
+            }
 
-                        }
-                }
+
+
+            var appSetParams =
+            {
+                $set:
+                    {
+                        'ekyc_id': eKYCID,
+                        'status': appStatus,
+                        verification_comment: req.body.textBoxComment,
+                        verification_time: commonUtility.UtcNow(),
+                        verification_by: "Admin",//set the email of approver
+                        verification_reasons: reasonList
+
+                    }
+            }
+
+
             //send email 
             var template = fs.readFileSync(emailTemplateHtml, {
                 encoding: 'utf-8'
@@ -147,7 +162,7 @@ class VerifyController extends BaseController {
             );
             var emailBody = ejs.render(template, {
                 eKycId: eKYCID,
-                expiryDays: config.APP_EXPIRATION_DAYS,
+                expiryDays: configCol.app_expiration_days,
                 APP_LOGO_URL: config.get('APP_LOGO_URL'),
                 SITE_NAME: config.get('app_name'),
                 CURRENT_YEAR: config.get('current_year'),
@@ -156,13 +171,21 @@ class VerifyController extends BaseController {
 
             if (isVerified && eKYCID != '') {
 
-                // var hlResult = await hyperLedgerService.PostEkycDetails(eKYCID, appData.email, appData.phone, appData.isd_code, basicDetails);//.then((result) => {
-                var hlResult = await hyperLedgerService.PostEkycDetails(eKYCID, appData.email, appData.phone, appData.isd_code, appData.status, appData.country_iso, basicDetails, addressDetails, identityDetails);
-                if (hlResult && hlResult.eKYCID == eKYCID) {
+                if(isAlreadyVerified==true)
+                {
+                    var hlResult = await hyperLedgerService.UpdateEkycDetails(appData.ekyc_id, appData.email, appData.phone, appData.isd_code, appData.status, appData.country_iso, basicDetails, addressDetails, identityDetails);
                     var result = await this.NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams);
                 }
                 else
-                    return res.redirect(baseURL);
+                {
+                    var hlResult = await hyperLedgerService.PostEkycDetails(eKYCID, appData.email, appData.phone, appData.isd_code, appData.status, appData.country_iso, basicDetails, addressDetails, identityDetails);
+                    if (hlResult && hlResult.eKYCID == eKYCID)
+                    {
+                        var result = await this.NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams);
+                    }
+                    else
+                        return res.redirect(baseURL);
+                }
             }
             else {
                 var result = await this.NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams);
@@ -180,19 +203,8 @@ class VerifyController extends BaseController {
     async NotifyUserAndUpdateApp(userEmailId, subject, emailBody, appKey, appSetParams) {
 
         var appSuccess = await App.update({ 'key': appKey }, appSetParams);
-        var parameters = {
-            app_key: appKey,
-            is_open: true,
-            to: userEmailId,
-            subject: subject,
-            last_modified: commonUtility.UtcNow(),
-            body: emailBody,
-            notification_type: config.NOTIFICATION_TYPES.EMAIL
-        }
-        var notificationQueue = new NotificationQueue(parameters);
-        var newNotificationQueue = await notificationQueue.save();
-
-        return (newNotificationQueue);
+        var newNotificationQueue= await notificationHelper.AddNotificationQueue(appKey, userEmailId, emailBody, config.NOTIFICATION_TYPES.EMAIL, subject);
+        return newNotificationQueue;
     }
 
     async GetDocumentInfo(docInfo, countryIso, docType) {

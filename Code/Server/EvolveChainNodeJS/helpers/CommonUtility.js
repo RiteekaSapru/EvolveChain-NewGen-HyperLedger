@@ -3,7 +3,8 @@ const messages = config.get('messages');
 var dateFormat = require('dateformat');
 const md5 = require('md5');
 const authenticator = require('authenticator');
-
+const ConfigDB = require('../models/config');
+// const ConfigDB = require('../../models/config');
 class CommonUtility {
     NowDate() {
         return dateFormat(new Date(), "isoUtcDateTime");
@@ -147,6 +148,21 @@ class CommonUtility {
             }
         }
         return summaryInfo;
+    }
+
+
+    async GetInitConfig(){
+        let configCol = await ConfigDB.findOne({});
+        let InitConfig = {};
+        InitConfig.supportPhone= configCol.support_phone;
+        InitConfig.supportEmails = configCol.support_email;
+        InitConfig.siteUrl = configCol.site_url ;
+        InitConfig.minDaysToExpiry = configCol.add_expiry_days_from_doc_from_UTC;
+        InitConfig.addExpirationDays = configCol.app_expiration_days;
+        InitConfig.appExpiryNotificationDays = configCol.app_expiry_notification_days;
+
+        return InitConfig;
+
     }
 
     // GetKycDocumentInfo(docInfo, docType) {

@@ -5,5 +5,7 @@
 
 export const environment = {
   production: false,
-  api: 'http://localhost:4600/'
+  //api: 'http://localhost:4600/'
+  //api: 'http://192.168.60.130:4600/'
+  api : 'http://crypto.evolvechain.org/'
 };

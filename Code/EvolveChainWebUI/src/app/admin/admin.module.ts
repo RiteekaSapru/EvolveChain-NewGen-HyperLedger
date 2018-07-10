@@ -10,11 +10,14 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminDashboard2Component } from './admin-dashboard2/admin-dashboard2.component';
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
+import { VerifyComponent } from './verify/verify.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   imports: [
     CommonModule,
-    AdminRoutingModule
+    AdminRoutingModule,
+    FormsModule
   ],
   declarations: [
     AdminComponent,
@@ -25,7 +28,8 @@ import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.compo
     AdminControlSidebarComponent,
     AdminDashboard1Component,
     AdminDashboard2Component,
-    AdminDashboardComponent
+    AdminDashboardComponent,
+    VerifyComponent
   ],
   exports: [AdminComponent]
 })

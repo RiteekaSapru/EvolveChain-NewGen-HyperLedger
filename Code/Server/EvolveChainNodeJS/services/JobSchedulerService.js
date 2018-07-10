@@ -11,6 +11,7 @@ const fs = require("fs");
 const emailService = require('../services/EmailService');
 const notificationHelper = require('../helpers/NotificationHelper');
 const logManager = require('../helpers/LogManager');
+const serviceLogManager = require('../helpers/ServiceLogManager');
 let imageContainers = ['basic_info', 'address_info', 'identity_info', 'face_info'];
 
 class JobSchedulerService {
@@ -38,7 +39,7 @@ class JobSchedulerService {
                 await File.deleteMany({ _id: { $in: imageIds } });
                 await KYCDocument.remove({ app_key: kycAppKey });
                 await App.remove({ key: kycAppKey });
-                //console.log('Record deleted for key: ' + kycAppKey);
+                serviceLogManager.Log('Scheduler - Record deleted for key: ' + kycAppKey);
             }
         });
     }
@@ -69,10 +70,11 @@ class JobSchedulerService {
                         try {
                             // email notification
                             await notificationHelper.AddNotificationQueue(appData.key, appData.email, emailBody, config.NOTIFICATION_TYPES.EMAIL, emailSubject);
-                            //console.log('Email notification sent to ' + appData.email + ' having key: ' + appData.key);
+                            serviceLogManager.Log('Scheduler - Email notification sent to ' + appData.email + ' having key: ' + appData.key);
+
                             // phone notification
                             await notificationHelper.AddNotificationQueue(appData.key, appData.phone, phoneMessage, config.NOTIFICATION_TYPES.MESSAGE);
-                            //console.log('Phone notification sent to ' + appData.phone + ' having key: ' + appData.key);
+                            serviceLogManager.Log('Scheduler - Phone notification sent to ' + appData.phone + ' having key: ' + appData.key);
                             var appConditions = {
                                 key: appData['key']
                             }
@@ -82,7 +84,7 @@ class JobSchedulerService {
                             await App.update(appConditions, params); //UPDATE app with expired status
                         }
                         catch (ex) {
-                            //console.log(ex);
+                            serviceLogManager.Log(`AddNotificationToQueueException: ${ex}`);
                         }
                     }
                 })
@@ -118,10 +120,10 @@ class JobSchedulerService {
                         try {
                             // email notification
                             await notificationHelper.AddNotificationQueue(appData.key, appData.email, emailBody, config.NOTIFICATION_TYPES.EMAIL, emailSubject);
-                            //console.log('Email notification sent to ' + appData.email + ' having key: ' + appData.key);
+                            serviceLogManager.Log('Scheduler - Email notification sent to ' + appData.email + ' having key: ' + appData.key);
                             // phone notification
                             await notificationHelper.AddNotificationQueue(appData.key, appData.phone, phoneMessage, config.NOTIFICATION_TYPES.MESSAGE);
-                            //console.log('Phone notification sent to ' + appData.phone + ' having key: ' + appData.key);
+                            serviceLogManager.Log('Scheduler - Phone notification sent to ' + appData.phone + ' having key: ' + appData.key);
                             var appConditions = {
                                 key: appData['key']
                             }
@@ -131,7 +133,7 @@ class JobSchedulerService {
                             await App.update(appConditions, params); //UPDATE app with expired status
                         }
                         catch (ex) {
-                            //console.log(ex);
+                            serviceLogManager.Log(`ProcessNotificationQueueException: ${ex}`);
                         }
                     }
                 })

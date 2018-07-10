@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HomeComponent } from '../home/home.component';
 import {AuthGuard} from '../auth/auth.guard'
+import { TermsComponent } from '../home/terms/terms.component';
 
 @NgModule({
   imports: [
@@ -14,6 +15,7 @@ import {AuthGuard} from '../auth/auth.guard'
       // { path: '', redirectTo: 'home', pathMatch: 'full', canActivate:[AuthGuard] },
       { path: '', redirectTo: 'home', pathMatch: 'full' },
       { path: 'home', component: HomeComponent },
+      { path: 'terms', component: TermsComponent },
       { path: 'starter', component: StarterComponent, canActivate:[AuthGuard] },
       //{ path: 'admin', redirectTo: 'admin'}
       // otherwise redirect to home
