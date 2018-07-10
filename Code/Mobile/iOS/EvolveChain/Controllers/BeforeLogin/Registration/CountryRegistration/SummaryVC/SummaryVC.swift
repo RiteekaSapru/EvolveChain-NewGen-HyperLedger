@@ -15,34 +15,20 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
     var expandedSection : Int = -1
     
     var arrSummary : [[SummaryStruct]] = [BasicDetailsModel.shared.getBasicDataForSummary(),BasicDetailsModel.shared.getAddressDataForSummary(),DocumentManager.shared.getDataForSummary(type: .IdentityType),DocumentManager.shared.getDataForSummary(type: .AddressType),BasicDetailsModel.shared.getHoldingDataForSummary()]
-//    var arrHeader : [String] = []
-//    var arrBasicDetails : [ [Any]] = [[]]
-//    var arrAddressDetails : [ [Any]] = [[]]
-//    var arrIdentityDocs : [ [Any]] = [[]]
-//    var arrAddressDoc : [ [Any]] = [[]]
-//    var arrHoldingImage : [ [Any]] = [[]]
-    
+
+  
     override func viewDidLoad() {
         super.viewDidLoad()
-
-//        arrHeader = ["Basic Details","Address Details","Identity Proof","Address Proof","Document Holding Photo"]
-//        arrBasicDetails = BasicDetailsModel.shared.getBasicDataInArray()
-//        arrAddressDetails = BasicDetailsModel.shared.getAddressDataInArray()
-//        arrIdentityDocs = DocumentManager.shared.selectedIdentityModel.getDataAsArray()
-//        arrAddressDoc = DocumentManager.shared.selectedAddressModel.getDataAsArray()
-//        arrHoldingImage = BasicDetailsModel.shared.getHoldingAsArray()
-        
-        tblvwSummary.register(UINib(nibName: "TickCell", bundle: nil), forCellReuseIdentifier: "TickCell")
-        tblvwSummary.register(UINib(nibName: "SummaryImageCell", bundle: nil), forCellReuseIdentifier: "SummaryImageCell")
-//        tblvwSummary.register(UINib(nibName: "UserImageCell", bundle: nil), forCellReuseIdentifier: "UserImageCell")
-
-        tblvwSummary.delegate = self
-        tblvwSummary.dataSource = self
-        let footer = UIView.init(frame: CGRect.init(x: 0, y: 0, width: _screenSize.width, height: 25))
-        footer.backgroundColor = UIColor.clear
-        tblvwSummary.tableFooterView = footer
+      
+        setupTableview()
         
         // Do any additional setup after loading the view.
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        
+       
     }
 
     override func didReceiveMemoryWarning() {
@@ -51,6 +37,19 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
     }
     
      // MARK: - Custom Methods
+    
+    
+    fileprivate func setupTableview() {
+        tblvwSummary.register(UINib(nibName: "TickCell", bundle: nil), forCellReuseIdentifier: "TickCell")
+        tblvwSummary.register(UINib(nibName: "SummaryImageCell", bundle: nil), forCellReuseIdentifier: "SummaryImageCell")
+        
+        tblvwSummary.delegate = self
+        tblvwSummary.dataSource = self
+        let footer = UIView.init(frame: CGRect.init(x: 0, y: 0, width: _screenSize.width, height: 25))
+        footer.backgroundColor = UIColor.clear
+        tblvwSummary.tableFooterView = footer
+    }
+    
     
     func rotateImage(img:UIImageView, angle : CGFloat) {
         let tr = CGAffineTransform.identity.rotated(by: angle)
@@ -68,45 +67,7 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
         
         return arrIndex
     }
-//    func getArrayModelFor(section:Int,row:Int) -> [Any] {
-//        var arrModel :[Any] = []
-//
-//        switch section {
-//        case 0:
-//            arrModel = arrBasicDetails[row]
-//        case 1:
-//            arrModel = arrAddressDetails[row]
-//        case 2:
-//            arrModel = arrIdentityDocs[row]
-//
-//        case 3:
-//            arrModel = arrAddressDoc[row]
-//        case 4:
-//            arrModel = arrHoldingImage[row]
-//        default:
-//            break
-//        }
-//        return arrModel
-//    }
-//
-//    func getArrayForSection(section:Int) -> [Any]
-//    {
-//        switch section {
-//        case 0:
-//            return arrBasicDetails
-//        case 1:
-//            return arrAddressDetails
-//        case 2:
-//            return arrIdentityDocs
-//        case 3:
-//            return arrAddressDoc
-//        case 4:
-//            return arrHoldingImage
-//        default: return []
-//
-//        }
-//    }
-    
+
    
     // MARK: - Tableview
     
@@ -145,78 +106,9 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
             return cell
         }
         
-//      let arrModel = getArrayModelFor(section: indexPath.section, row: indexPath.row)
-//
-//        if arrModel.last is UIImage {
-//            if arrModel.count > 2{
-//                let cell = tableView.dequeueReusableCell(withIdentifier: "ImageCell", for: indexPath) as! ImageCell
-//
-//                cell.setData(imgFront: arrModel[1], imgBack: arrModel[2] as! UIImage)
-//
-//                return cell;
-//            }
-//            else{
-//                let cell = tableView.dequeueReusableCell(withIdentifier: "UserImageCell", for: indexPath) as! UserImageCell
-//
-//                cell.setData(imgUserPic:  arrModel[1] as! UIImage)
-//
-//                return cell;
-//            }
-//
-//        }
-//        else{
-//            let cell = tableView.dequeueReusableCell(withIdentifier: "SummaryCell", for: indexPath) as! SummaryCell
-//
-//            cell.setData(title: arrModel.first as! String, desc: arrModel.last as! String)
-//
-//            return cell;
-//        }
+
     }
-//    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-//        return 45.0
-//    }
-    
-//    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-//
-//        let vwHeader = UIView.init(frame: CGRect.init(x: 0, y: 0, width: _screenSize.width, height: 45.0))
-//        vwHeader.backgroundColor = UIColor.init(white: 1, alpha: 0.7)
-//
-//        let lblHeader = UILabel.init(frame: CGRect.init(x: 15, y: 0, width: _screenSize.width - 30.0, height: 45))
-//        lblHeader.font = UIFont.init(name: "AvenirNext-Medium", size: 24)
-//        lblHeader.textColor = UIColor.black
-////        lblHeader.adjustsFontSizeToFitWidth = true
-////        lblHeader.minimumScaleFactor = 0.5
-//        lblHeader.text = arrHeader[section]
-//        vwHeader.addSubview(lblHeader)
-//
-////        if(section > 0)
-////        {
-////            let seperatorview = UIView.init(frame: CGRect.init(x: 10, y: 0, width: _screenSize.width - 20.0, height: 1))
-////            seperatorview.backgroundColor = UIColor.lightGray
-////             vwHeader.addSubview(seperatorview)
-////        }
-//
-//        return vwHeader
-//
-//    }
-    
-//    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-//        let vwHeader = UIView.init(frame: CGRect.init(x: 0, y: 0, width: _screenSize.width, height: 1.0))
-//        vwHeader.backgroundColor = UIColor.clear
-//
-//        let vwSeperator = UIView.init(frame: CGRect.init(x: 10, y: 0, width: _screenSize.width - 20.0, height: 1.0))
-//
-//        vwSeperator.backgroundColor = UIColor.init(red: 220, green: 220, blue: 220, alpha: 0.7)
-//        
-//        vwHeader.addSubview(vwSeperator)
-//
-//        return vwHeader
-//
-//    }
-//    
-//    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-//        return 1.0
-//    }
+
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
@@ -239,14 +131,14 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
             }
            
             
-            if indexPath.section != expandedSection && expandedSection > -1{
-                arrSummary[expandedSection][0].isExpanded = false
-                let cell = tableView.cellForRow(at: IndexPath.init(row: 0, section: expandedSection)) as! TickCell
-                let angle = arrSummary[expandedSection][0].isExpanded ? CGFloat.pi/2 : 0.0
-                self.rotateImage(img: cell.imgTick, angle: angle)
-                tableView.deleteRows(at: getIndexPathArrayFor(arrSection: expandedSection), with: UITableViewRowAnimation.automatic)
-
-            }
+//            if indexPath.section != expandedSection && expandedSection > -1{
+//                arrSummary[expandedSection][0].isExpanded = false
+//                let cell = tableView.cellForRow(at: IndexPath.init(row: 0, section: expandedSection)) as! TickCell
+//                let angle = arrSummary[expandedSection][0].isExpanded ? CGFloat.pi/2 : 0.0
+//                self.rotateImage(img: cell.imgTick, angle: angle)
+//                tableView.deleteRows(at: getIndexPathArrayFor(arrSection: expandedSection), with: UITableViewRowAnimation.automatic)
+//
+//            }
             
             expandedSection = arrSummary[indexPath.section][indexPath.row].isExpanded ? indexPath.section : -1
             tableView.endUpdates()
@@ -257,6 +149,10 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
     // MARK: - Actions
     
     @IBAction func actionSubmit(_ sender: Any) {
+        if ConfigModel.shared.getTestingStatus(){
+            moveToSuccessScreen()
+            return
+        }
         self.kycComplete()
         
     }
@@ -267,11 +163,11 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
         //mve to nxt screen
         Util.shared.cleanUpRegistrationData()
         DispatchQueue.main.async {
+              _navigator.delegate = self
             let successfullVC = FlowManager.shared.getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "SuccessfullVC") as! SuccessfullVC
             
             _navigator.setViewControllers([_navigator.viewControllers.first!,successfullVC], animated: true)
             
-//            GlobalMethods.shared.pushVC(successfullVC)
         }
     }
     
@@ -287,3 +183,17 @@ class SummaryVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
         }
     }
 }
+
+extension SummaryVC:UINavigationControllerDelegate{
+    func navigationController(_ navigationController: UINavigationController, animationControllerFor operation: UINavigationControllerOperation, from fromVC: UIViewController, to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+
+        switch operation {
+        case .pop:return nil
+        case .push : return RegCompletePushAnimator.init()
+
+        default:
+            return nil
+        }
+    }
+}
+

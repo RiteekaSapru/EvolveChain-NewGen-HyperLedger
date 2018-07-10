@@ -50,8 +50,8 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
     override func viewDidLoad() {
         super.viewDidLoad()
         datePicker = Util.shared.getDatePicker(controller:self,txtFld: txtfldDOB, doneAction: #selector(doneMethod), cancelAction: #selector(cancelMethod))
-        datePicker?.maximumDate = Util.shared.getDate(year: SignupConfigModel.shared.minAge, after: false)
-        datePicker?.minimumDate = Util.shared.getDate(year: SignupConfigModel.shared.maxAge, after: false)
+        datePicker?.maximumDate = Util.shared.getDate(year: ConfigModel.shared.minAge, after: false)
+        datePicker?.minimumDate = Util.shared.getDate(year: ConfigModel.shared.maxAge, after: false)
         dateformatter.dateFormat = "MMM dd, yyyy"
         tblvwBasic.tableHeaderView = vwMain
         setUpGender()
@@ -83,7 +83,7 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
         if Util.shared.isValidEmail(testStr: txtfldEmail.text!) && txtfldEmail.text?.lowercased() != BasicDetailsModel.shared.email.lowercased(){
             showEmailAlert()
         }
-        else if txtfldPhone.text!.count == SignupConfigModel.shared.selectedCountry.phoneFormat.count && txtfldPhone.text != BasicDetailsModel.shared.contactNumber{
+        else if txtfldPhone.text!.count == ConfigModel.shared.selectedCountry.phoneFormat.count && txtfldPhone.text != BasicDetailsModel.shared.contactNumber{
             showPhoneAlert()
         }
         else{
@@ -123,9 +123,9 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
             btnAddEmail.isUserInteractionEnabled = false
             btnAddEmail.setTitle("Verified", for: .normal)
         }
-        else{
-            txtfldEmail.text = ""
-        }
+//        else{
+//            txtfldEmail.text = ""
+//        }
         if BasicDetailsModel.shared.isPhoneVerified{
             vwPhone.isHidden = false
             vwPhone.alpha = 1.0
@@ -135,9 +135,9 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
             btnAddPhone.isUserInteractionEnabled = false
             btnAddPhone.setTitle("Verified", for: .normal)
         }
-        else{
-            txtfldPhone.text = ""
-        }
+//        else{
+//            txtfldPhone.text = ""
+//        }
     }
     
     func setupUI() -> Void {
@@ -146,7 +146,7 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
     
     func fillData() {
         
-        txtfldCountryCode.text = "+" + SignupConfigModel.shared.selectedCountry.phoneCode
+        txtfldCountryCode.text = "+" + ConfigModel.shared.selectedCountry.phoneCode
         
         if BasicDetailsModel.shared.isBasicDetailsComplete {
             setEmailAndPhone()
@@ -266,7 +266,7 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
             txtfldPhone.becomeFirstResponder()
             return false;
         }
-        else if txtfldPhone.text!.count < SignupConfigModel.shared.selectedCountry.phoneFormat.count {
+        else if txtfldPhone.text!.count < ConfigModel.shared.selectedCountry.phoneFormat.count {
             Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneInvalid)
             txtfldPhone.becomeFirstResponder()
             return false;
@@ -304,72 +304,94 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
     }
     
     func checkValidation() -> Bool {
+        var isValid = true
+        
+     
+        
+        if txtFldGender.text!.isEmpty{
+            txtFldGender.animatePlaceholderColor()
+            txtFldGender.becomeFirstResponder()
+            //            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.GenderEmpty)
+            isValid = false;
+        }
+        
+        if txtfldBirthPlace.text!.count < 2{
+            txtfldBirthPlace.animatePlaceholderColor()
+            //            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.BirthStateEmpty)
+            txtfldBirthPlace.becomeFirstResponder()
+            isValid = false;
+        }
+        
+        if txtfldDOB.text!.isEmpty{
+            txtfldDOB.animatePlaceholderColor()
+            //            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.DOBEmpty)
+            txtfldDOB.becomeFirstResponder()
+            isValid = false;
+        }
+        
+        if (txtfldMName.text?.count)! > 99{
+            //            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.MnameIncorrect)
+            txtfldMName.becomeFirstResponder()
+            isValid = false;
+        }
+        
+        if (txtfldLName.text?.count)! > 99{
+            //            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.LnameIncorrect)
+            txtfldLName.becomeFirstResponder()
+            isValid = false;
+        }
+        
+        if txtfldLName.text!.count < 2{
+            txtfldLName.animatePlaceholderColor()
+            //            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.LnameEmpty)
+            txtfldLName.becomeFirstResponder()
+            isValid = false;
+        }
+        
+        
+        if (txtfldFName.text?.count)! > 99{
+            //            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.FnameIncorrect)
+            txtfldFName.becomeFirstResponder()
+            isValid = false;
+        }
+        if txtfldFName.text!.count < 2{
+            txtfldFName.animatePlaceholderColor()
+            //            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.FnameEmpty)
+            txtfldFName.becomeFirstResponder()
+            isValid = false;
+        }
+        
+        if !BasicDetailsModel.shared.isPhoneVerified {
+            //            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneNotVerified)
+             vwPhone.isHidden = false
+            self.vwPhone.alpha = 1.0
+            self.txtfldPhone.becomeFirstResponder()
+            txtfldPhone.animatePlaceholderColor()
+            isValid = false;
+        }
+        
         if !BasicDetailsModel.shared.isEmailVerified{
 //            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.EmailNotVerified)
-            actionAddEmail(UIButton())
+            self.vwEmail.alpha = 1.0
+             vwEmail.isHidden = false
+            self.txtfldEmail.becomeFirstResponder()
             txtfldEmail.animatePlaceholderColor()
-            return false;
+            isValid = false;
         }
-        else if !BasicDetailsModel.shared.isPhoneVerified {
-//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.PhoneNotVerified)
-            actionAddPhone(UIButton())
-            txtfldPhone.animatePlaceholderColor()
-            return false;
-        }
-        else if txtfldFName.text!.count < 2{
-            txtfldFName.animatePlaceholderColor()
-//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.FnameEmpty)
-            txtfldFName.becomeFirstResponder()
-            return false;
-        }
-        else if (txtfldFName.text?.count)! > 99{
-            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.FnameIncorrect)
-            txtfldFName.becomeFirstResponder()
-            return false;
-        }
-        else if txtfldLName.text!.count < 2{
-            txtfldLName.animatePlaceholderColor()
-//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.LnameEmpty)
-            txtfldLName.becomeFirstResponder()
-            return false;
-        }
-        else if (txtfldLName.text?.count)! > 99{
-            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.LnameIncorrect)
-            txtfldLName.becomeFirstResponder()
-            return false;
-        }
-        else if (txtfldMName.text?.count)! > 99{
-            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.MnameIncorrect)
-            txtfldMName.becomeFirstResponder()
-            return false;
-        }
-        else if userImage == nil {
+     
+   
+        if userImage == nil {
             Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.UserPicEmpty)
             return false;
         }
-        else if txtfldDOB.text!.isEmpty{
-            txtfldDOB.animatePlaceholderColor()
-//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.DOBEmpty)
-            txtfldDOB.becomeFirstResponder()
-            return false;
-        }
-        else if txtfldBirthPlace.text!.count < 2{
-            txtfldBirthPlace.animatePlaceholderColor()
-//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.BirthStateEmpty)
-            txtfldBirthPlace.becomeFirstResponder()
-            return false;
-        }
-            
-        else if txtFldGender.text!.isEmpty{
-            txtFldGender.animatePlaceholderColor()
-            txtFldGender.becomeFirstResponder()
-//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.GenderEmpty)
-            return false;
-        }
-            
-        else{
-            return true
-        }
+     
+      
+       
+      
+           return isValid
+//        else{
+//            return true
+//        }
     }
     
      // MARK: - OTP Verification Methods
@@ -494,7 +516,7 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
     func changeTextFormatting(newString:String) -> String {
         
         var text = txtfldPhone.text!
-        let formatText = SignupConfigModel.shared.selectedCountry.phoneFormat
+        let formatText = ConfigModel.shared.selectedCountry.phoneFormat
         let result = newString.components(separatedBy: CharacterSet.init(charactersIn: "1234567890").inverted).joined()
         
         for (_, char) in result.enumerated() {
@@ -636,7 +658,7 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
                 return true
             }
             
-            let formatText = SignupConfigModel.shared.selectedCountry.phoneFormat
+            let formatText = ConfigModel.shared.selectedCountry.phoneFormat
             
             if formatText.count == 0{
                 return true
@@ -671,7 +693,9 @@ class BasicDetailsAmericaVC: UIViewController,UIImagePickerControllerDelegate,UI
             if string == "" {
                 return true
             }
-            
+            if (textField.text?.count)! >= 99{
+                return false
+            }
             let inputString = string.components(separatedBy: CharacterSet.letters).joined()
             return inputString.count == 0
         }

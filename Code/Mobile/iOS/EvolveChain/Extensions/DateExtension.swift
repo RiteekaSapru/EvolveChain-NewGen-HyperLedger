@@ -30,7 +30,7 @@ extension Foundation.Date
             let formatter = DateFormatter()
             formatter.locale = Locale(identifier: "en")
             formatter.timeZone = TimeZone(secondsFromGMT: 0)
-            formatter.dateFormat = "yyyy-MM-dd HH:mm:ssZZZZZ"
+            formatter.dateFormat = "yyyy-MM-dd"
             return formatter
         }()
         
@@ -38,7 +38,7 @@ extension Foundation.Date
             let formatter = DateFormatter()
             formatter.locale = Locale(identifier: "en")
             formatter.timeZone = TimeZone(secondsFromGMT: 0)
-            formatter.dateFormat = "yyyy-MM-dd" // ex : 2012-08-20
+            formatter.dateFormat =  "yyyy-MM-dd'T'HH:mm:ss.SSSZ" //"yyyy-MM-dd" // ex : 2012-08-20
             return formatter
 
         }()

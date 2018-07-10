@@ -470,6 +470,7 @@ class VerifyOtpVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
                 self.activityIndicatorLoader.stopAnimating()
                 self.btnResend.isUserInteractionEnabled = true
                 self.moveToEdit()
+//                 _userDefault.set(responseJSON, forKey: "edit_response")
                 self.processResubmitResponse(responseJSON: responseJSON)
             }
         }) { [weak self] (errorMsg, data) in

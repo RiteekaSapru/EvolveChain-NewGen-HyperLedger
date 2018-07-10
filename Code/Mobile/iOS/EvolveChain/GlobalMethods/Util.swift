@@ -12,6 +12,9 @@ import Photos
 import LocalAuthentication
 import CoreTelephony
 import CoreLocation
+import MessageUI
+import SafariServices
+
 
 class Util: NSObject,CLLocationManagerDelegate {
 
@@ -78,6 +81,37 @@ class Util: NSObject,CLLocationManagerDelegate {
         
         let defaultAction = UIAlertAction.init(title: "Cancel", style: .cancel) { (alert: UIAlertAction!) in
             success(-1)
+        }
+        alert.addAction(defaultAction)
+        self.presentVC(alert)
+        
+    }
+    
+    func showAlertForSupport() -> Void {
+        
+        let alert = UIAlertController.init(title: "\nContact Support", message: nil, preferredStyle: .alert)
+        
+        
+        let callAction = UIAlertAction.init(title: "Call", style: .default) { (alert: UIAlertAction!) in
+            guard let number = URL(string: "tel://" + ConfigModel.shared.supportPhone) else { return }
+            UIApplication.shared.openURL(number)
+        }
+        
+        alert.addAction(callAction)
+        
+        let emailAction = UIAlertAction.init(title: "Email", style: .default) { (alert: UIAlertAction!) in
+            self.sendMail()
+        }
+        alert.addAction(emailAction)
+        
+        let webSiteAction = UIAlertAction.init(title: "Website", style: .default) { (alert: UIAlertAction!) in
+            let safariVC = SFSafariViewController(url: URL.init(string: ConfigModel.shared.siteUrl)!)
+            self.presentVC(safariVC)
+        }
+        alert.addAction(webSiteAction)
+        
+        let defaultAction = UIAlertAction.init(title: "Cancel", style: .cancel) { (alert: UIAlertAction!) in
+           
         }
         alert.addAction(defaultAction)
         self.presentVC(alert)
@@ -437,6 +471,8 @@ class Util: NSObject,CLLocationManagerDelegate {
     
       // MARK: - Data Erasing
     
+   
+    
     func cleanUpRegistrationData() {
         BasicDetailsModel.shared.eraseData()
         DocumentManager.shared.eraseData()
@@ -554,7 +590,7 @@ class Util: NSObject,CLLocationManagerDelegate {
     func getDateStringFromUTCString(dateUTC:String,stringFormat:String) -> String {
         
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = SignupConfigModel.shared.dateFormat
+        dateFormatter.dateFormat = ConfigModel.shared.dateFormat
         dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
         
         let date = dateFormatter.date(from: dateUTC)
@@ -569,7 +605,7 @@ class Util: NSObject,CLLocationManagerDelegate {
     
     func initConfig(){
        let config =  _userDefault.object(forKey: kApplicationInitConfigKey) as! Dictionary<String,Any>
-        SignupConfigModel.shared.initWithDictionary(configDict: config)
+        ConfigModel.shared.initWithDictionary(configDict: config)
     }
     
     func getUniqueIdForDevice() -> String{
@@ -836,7 +872,7 @@ class Util: NSObject,CLLocationManagerDelegate {
         let selectedCountry = CountryModel.init()
         selectedCountry.initWithDictionary(countryDict: countryJSON)
         
-        SignupConfigModel.shared.selectedCountry = selectedCountry
+        ConfigModel.shared.selectedCountry = selectedCountry
         
         
         //documents
@@ -852,7 +888,7 @@ class Util: NSObject,CLLocationManagerDelegate {
         BasicDetailsModel.shared.initWithResponseEdit(responseJson: responesJSON)
         
         //verification code, app key
-        SignupConfigModel.shared.verificationCode = RawdataConverter.string(responesJSON["verification_code"])
+        ConfigModel.shared.verificationCode = RawdataConverter.string(responesJSON["verification_code"])
         _userDefault.set(responesJSON["appkey"], forKey: kApplicationKey)
         
         //identity, address, face
@@ -868,7 +904,31 @@ class Util: NSObject,CLLocationManagerDelegate {
             }
            
         }
-       
+    }
+    
+      // MARK: - Mailer
+    
+    func sendMail() {
+        if !MFMailComposeViewController.canSendMail() {
+            print("Mail services are not available")
+            return
+        }
         
+        let composeVC = MFMailComposeViewController()
+        composeVC.mailComposeDelegate = self
+        // Configure the fields of the interface.
+        composeVC.setToRecipients([ConfigModel.shared.supportEmails])
+//        composeVC.setSubject("Hello!")
+//        composeVC.setMessageBody("Hello this is my message body!", isHTML: false)
+        // Present the view controller modally.
+        self.presentVC(composeVC)
+        
+        
+    }
+}
+
+extension Util:MFMailComposeViewControllerDelegate{
+    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?){
+        controller.dismiss(animated: true, completion: nil)
     }
 }

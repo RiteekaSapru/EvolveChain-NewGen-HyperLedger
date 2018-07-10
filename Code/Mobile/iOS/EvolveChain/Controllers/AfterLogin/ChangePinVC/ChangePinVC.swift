@@ -287,7 +287,7 @@ class ChangePinVC: UIViewController,UITextFieldDelegate,BackSpaceTextFieldDelega
     
     func changePin() {
         
-        let params = ["ekyc_id":BasicDetailsModel.shared.kycId,"pin":Util.shared.convertToMD5(string: getOldPin()),"new_pin":Util.shared.convertToMD5(string:getNewPin()),"vendor_uuid":Util.shared.getUniqueIdForDevice()]
+        let params = ["ekyc_id":BasicDetailsModel.shared.kycId,"pin":Util.shared.convertToMD5(string: getOldPin()),"new_pin":Util.shared.convertToMD5(string:getNewPin()),"vendor_uuid":Util.shared.getUniqueIdForDevice(),"key":RawdataConverter.string(_userDefault.object(forKey: kApplicationKey))]
         
         NetworkManager.shared.changePinAPI(params: params, success: { (responseJson) in
             _userDefault.set(Util.shared.convertToMD5(string: self.getNewPin()), forKey: kApplicationPinKey)

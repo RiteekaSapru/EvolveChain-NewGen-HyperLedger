@@ -51,7 +51,7 @@ class AddressVC: UIViewController,UITextFieldDelegate {
             txtfldAddressCountry.text = BasicDetailsModel.shared.country
         }
         else{
-            txtfldAddressCountry.text = SignupConfigModel.shared.selectedCountry.name
+            txtfldAddressCountry.text = ConfigModel.shared.selectedCountry.name
         }
 //        if BasicDetailsModel.shared.countryType == .India {
 //            txtfldAddressCountry.text = "India"
@@ -59,53 +59,51 @@ class AddressVC: UIViewController,UITextFieldDelegate {
     }
     
     func checkValidation() -> Bool {
+        
+        var isValid = true
+        
+        if txtfldAreaCode.text!.isEmpty{
+            //            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AreaCodeEmpty)
+            txtfldAreaCode.animatePlaceholderColor()
+            txtfldAreaCode.becomeFirstResponder()
+            isValid = false;
+        }
+        if txtfldState.text!.isEmpty{
+            //            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.StateEmpty)
+            txtfldState.animatePlaceholderColor()
+            txtfldState.becomeFirstResponder()
+            isValid = false;
+        }
+        if txtfldCity.text!.isEmpty{
+            //            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.CityEmpty)
+            txtfldCity.animatePlaceholderColor()
+            txtfldCity.becomeFirstResponder()
+            isValid = false;
+        }
+        if txtfldStreet.text!.isEmpty{
+            //            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AddStreetEmpty)
+            txtfldStreet.animatePlaceholderColor()
+            txtfldStreet.becomeFirstResponder()
+            isValid = false;
+        }
         if txtfldAddress1.text!.isEmpty{
 //            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.Add1Empty)
             txtfldAddress1.animatePlaceholderColor()
             txtfldAddress1.becomeFirstResponder()
-            return false;
+            isValid =  false;
         }
-            //        else if txtfldAddress2.text?.count == 0{
-            //            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.Add2Empty)
-            //            return false;
-            //        }
-        else if txtfldStreet.text!.isEmpty{
-//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AddStreetEmpty)
-            txtfldStreet.animatePlaceholderColor()
-            txtfldStreet.becomeFirstResponder()
-            return false;
-        }
-        else if txtfldCity.text!.isEmpty{
-//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.CityEmpty)
-            txtfldCity.animatePlaceholderColor()
-            txtfldCity.becomeFirstResponder()
-            return false;
-        }
-        else if txtfldState.text!.isEmpty{
-//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.StateEmpty)
-            txtfldState.animatePlaceholderColor()
-            txtfldState.becomeFirstResponder()
-            return false;
-        }
-        else if txtfldAreaCode.text!.isEmpty{
-//            GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AreaCodeEmpty)
-            txtfldAreaCode.animatePlaceholderColor()
-            txtfldAreaCode.becomeFirstResponder()
-            return false;
-        }
-        else if (txtfldAreaCode.text?.count)! < 4{
+
+         else if (txtfldAreaCode.text?.count)! < 4{
             Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.AreaCodeIncorrect)
             txtfldAreaCode.becomeFirstResponder()
             return false;
         }
-        else if txtfldAddressCountry.text!.isEmpty{
-            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.CountryEmpty)
-            actionPickerAddCountry(UIButton())
-            return false;
-        }
-        else{
-            return true
-        }
+//         if txtfldAddressCountry.text!.isEmpty{
+//            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.CountryEmpty)
+//            actionPickerAddCountry(UIButton())
+//            isValid = false;
+//        }
+        return isValid
     }
     
     func saveAddressDetails() -> Void {

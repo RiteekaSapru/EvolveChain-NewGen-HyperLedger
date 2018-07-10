@@ -14,12 +14,19 @@ static let shared = NetworkManager()
     
     var progressComplete: (CGFloat)->Void = {_ in }
     
-    func countryListAPI(success:@escaping ( Array<Any> ) -> Void, failure: @escaping (String? )-> Void) {
+    func prefetchAPI(success:@escaping ( Array<Any> ) -> Void, failure: @escaping (String? )-> Void) {
          print("Base URL - " + BaseURL)
        
-        RequestManager.shared.makeGetAPICall(url: UrlConstants.countryListURL, params: nil, method: .GET, success: { (data, response, error, responseJSON) in
-
-                success(responseJSON)
+        RequestManager.shared.makeGetAPICall(url: UrlConstants.preinitialiseURL, params: nil, method: .GET, success: { (data, response, error, responseJSON) in
+            do {
+                let obj = try JSONDecoder().decode(Config.self, from: data!)
+               print(obj)
+            } catch let jsonErr {
+                print("Failed to decode json:", jsonErr)
+            }
+            
+            ConfigModel.shared.processConfig(response: RawdataConverter.dictionary(responseJSON["configuration"])!)
+            success(RawdataConverter.array(responseJSON["country"])!)
 
         }) { (data, response, error, errorMsg) in
 
@@ -48,7 +55,7 @@ static let shared = NetworkManager()
         param["mobile_country_code"]    = Util.shared.getMobileCountryCode()
         param["mobile_network_code"]    = Util.shared.getMobileNetworkCode()
 
-        param["country_iso"]    = SignupConfigModel.shared.selectedCountry.iso
+        param["country_iso"]    = ConfigModel.shared.selectedCountry.iso
        
         RequestManager.shared.makeAPICall(url: UrlConstants.initaliseURL, params: param, method: .POST, success: { (data, response, error, responseJSON) in
             Util.shared.dismissLoader(complete: {
@@ -67,7 +74,7 @@ static let shared = NetworkManager()
        var param = params
         param.updateValue(Util.shared.getUniqueIdForDevice(), forKey: "vendor_uuid")
         
-        RequestManager.shared.makeAPICall(url: UrlConstants.generateEmailOtpURL, params: params, method: .POST, success: { (data, response, error, responseJSON) in
+        RequestManager.shared.makeAPICall(url: UrlConstants.generateEmailOtpURL, params: param, method: .POST, success: { (data, response, error, responseJSON) in
          
                 success(responseJSON)
 
@@ -82,7 +89,7 @@ static let shared = NetworkManager()
     func verifyEmailOTP(params:Dictionary<String,Any>,success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping (String? )-> Void) -> Void {
         var param = params
         param.updateValue(Util.shared.getUniqueIdForDevice(), forKey: "vendor_uuid")
-        RequestManager.shared.makeAPICall(url: UrlConstants.verifyEmailOtpURL, params: params, method: .POST, success: { (data, response, error, responseJSON) in
+        RequestManager.shared.makeAPICall(url: UrlConstants.verifyEmailOtpURL, params: param, method: .POST, success: { (data, response, error, responseJSON) in
  
                 success(responseJSON)
 
@@ -99,7 +106,7 @@ static let shared = NetworkManager()
         var param = params
          param.updateValue(Util.shared.getUniqueIdForDevice(), forKey: "vendor_uuid")
     
-        RequestManager.shared.makeAPICall(url: UrlConstants.generateMobileOtpURL, params: params, method: .POST, success: { (data, response, error, responseJSON) in
+        RequestManager.shared.makeAPICall(url: UrlConstants.generateMobileOtpURL, params: param, method: .POST, success: { (data, response, error, responseJSON) in
                 success(responseJSON)
             
         }) { (data, response, error, errorMsg) in
@@ -113,7 +120,7 @@ static let shared = NetworkManager()
     func verifyMobileOTP(params:Dictionary<String,Any>,success:@escaping ( Dictionary<String,Any> ) -> Void, failure: @escaping (String? )-> Void) -> Void {
         var param = params
          param.updateValue(Util.shared.getUniqueIdForDevice(), forKey: "vendor_uuid")
-        RequestManager.shared.makeAPICall(url: UrlConstants.verifyMobileOtpURL, params: params, method: .POST, success: { (data, response, error, responseJSON) in
+        RequestManager.shared.makeAPICall(url: UrlConstants.verifyMobileOtpURL, params: param, method: .POST, success: { (data, response, error, responseJSON) in
                 success(responseJSON)
 
             

@@ -45,3 +45,46 @@ class ShadowView: UIView {
        
     }
 }
+
+
+class ShadowButtonWithbgColor: UIButton {
+    
+    var previousBound : CGRect = CGRect.zero
+    /*
+     // Only override draw() if you perform custom drawing.
+     // An empty implementation adversely affects performance during animation.
+     override func draw(_ rect: CGRect) {
+     // Drawing code
+     }
+     */
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        setupShadow()
+    }
+    override var bounds: CGRect {
+        didSet {
+            setupShadow()
+        }
+    }
+    
+    private func setupShadow() {
+        
+        if previousBound != self.bounds{
+            previousBound = self.bounds
+            self.clipsToBounds = false
+            let shadowLayer = CAShapeLayer()
+            shadowLayer.path = UIBezierPath(roundedRect: self.bounds, cornerRadius: 5.0).cgPath
+            shadowLayer.fillColor = self.backgroundColor?.cgColor ?? UIColor.white.cgColor
+            
+            shadowLayer.shadowColor = UIColor.darkGray.cgColor
+            shadowLayer.shadowPath = shadowLayer.path
+            shadowLayer.shadowOffset = CGSize(width: 0.8, height: 0.8)
+            shadowLayer.shadowOpacity = 0.7
+            shadowLayer.shadowRadius = 2.0
+            
+            self.layer.insertSublayer(shadowLayer, at: 0)
+        }
+        //        let frame = _screenFrame.width - 20.0
+        
+    }
+}

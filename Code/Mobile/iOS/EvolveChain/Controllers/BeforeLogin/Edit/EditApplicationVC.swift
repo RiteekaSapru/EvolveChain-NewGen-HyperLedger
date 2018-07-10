@@ -49,8 +49,8 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
         txtfldPhone.backDelegate = self
         btnResend.backgroundColor = UIColor.lightGray
         vwOTP.alpha = 0;
-        if SignupConfigModel.shared.arrCountryList.count > 0{
-            countryArray = SignupConfigModel.shared.arrCountryList
+        if ConfigModel.shared.arrCountryList.count > 0{
+            countryArray = ConfigModel.shared.arrCountryList
             self.btnGetCountry.isUserInteractionEnabled = false
             self.setupCountryCode()
         }
@@ -78,10 +78,19 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
         super.viewDidAppear(animated)
         
         txtfldPhone.becomeFirstResponder()
+       
+        
     }
     
     // MARK: - Custom Methods
 
+    func testing(){
+        if let res = _userDefault.object(forKey: "edit_response") {
+             Util.shared.showLoader(loadingText: "   Loading Data...")
+            processResubmitResponse(responseJSON: res as! Dictionary<String,Any>)
+            
+        }
+    }
     func processCountryResponse(responseJson:Array<Any>)  {
         
 //        countryArray.removeAll()
@@ -92,12 +101,12 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
 //            countryArray.append(model)
 //        }
         
-        SignupConfigModel.shared.initCountryList(response: responseJson)
+        ConfigModel.shared.initCountryList(response: responseJson)
         
-        countryArray = SignupConfigModel.shared.arrCountryList
+        countryArray = ConfigModel.shared.arrCountryList
 
         
-        if SignupConfigModel.shared.arrCountryList.count > 0{
+        if ConfigModel.shared.arrCountryList.count > 0{
             DispatchQueue.main.async {
                 self.btnGetCountry.isUserInteractionEnabled = false
                 self.setupCountryCode()
@@ -430,6 +439,7 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
     // MARK: - Actions
 
     @IBAction func actionNext(_ sender: Any) {
+       
         if checkPinValidation(){
             resubmitInitialiseOTP()
         }
@@ -437,6 +447,13 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
     
 
     @IBAction func actionSend(_ sender: Any) {
+        if ConfigModel.shared.getTestingStatus(){
+            if let res = _userDefault.object(forKey: "edit_response") {
+                Util.shared.showLoader(loadingText: "   Loading Data...")
+                processResubmitResponse(responseJSON: res as! Dictionary<String,Any>)
+                return
+            }
+        }
         if checkPhoneValidations() {
             self.view.endEditing(true)
             generateOTP()
@@ -530,6 +547,7 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
         
         NetworkManager.shared.verifyEditOTPAPI(params: params, success: { (responseJSON) in
             DispatchQueue.main.async {
+                _userDefault.set(responseJSON, forKey: "edit_response")
                 Util.shared.showLoader(loadingText: "   Loading Data...")
                 self.processResubmitResponse(responseJSON: responseJSON)
             }
@@ -543,7 +561,7 @@ class EditApplicationVC: UIViewController,BackSpaceTextFieldDelegate,UITextField
     }
     
     func getCountryList() {
-        NetworkManager.shared.countryListAPI(success: { (response) in
+        NetworkManager.shared.prefetchAPI(success: { (response) in
             self.processCountryResponse(responseJson: response)
         }) { (errorMsg) in
             DispatchQueue.main.async {

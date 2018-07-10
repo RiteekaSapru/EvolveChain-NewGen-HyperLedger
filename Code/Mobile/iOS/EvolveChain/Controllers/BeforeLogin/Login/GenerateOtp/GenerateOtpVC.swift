@@ -126,7 +126,20 @@ class GenerateOtpVC: UIViewController,BackSpaceTextFieldDelegate,UITextFieldDele
             for (_, char) in result.enumerated() {
 
                 if textField.text!.count < 18{
-                    textField.text!.append(char)
+                    
+                    if (textField.text?.count)! >= 4{
+                        if CharacterSet.init(charactersIn: String.init(char)).isSubset(of: CharacterSet.decimalDigits){
+                             textField.text!.append(char)
+                        }
+                    }
+                        
+                    else{
+                        if CharacterSet.init(charactersIn: String.init(char)).isSubset(of: CharacterSet.uppercaseLetters){
+                            textField.text!.append(char)
+                        }
+//                        textField.text!.append(char)
+                    }
+                    
                     if textField.text!.count == 3 || textField.text!.count == 8 || textField.text!.count == 13{
                         textField.text!.append("-")
                     }
@@ -134,6 +147,20 @@ class GenerateOtpVC: UIViewController,BackSpaceTextFieldDelegate,UITextFieldDele
             }
         }
         else{
+            
+            if (textField.text?.count)! >= 4{
+                let resultAfter = string.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
+                if resultAfter.count == 0{
+                    return false
+                }
+            }
+            else
+            {
+                let resultAfter = string.components(separatedBy: CharacterSet.uppercaseLetters.inverted).joined()
+                if resultAfter.count == 0{
+                    return false
+                }
+            }
             
             textField.text!.append(result.first!)
             if textField.text!.count == 3 || textField.text!.count == 8 || textField.text!.count == 13{

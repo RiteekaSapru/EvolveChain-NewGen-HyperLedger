@@ -21,8 +21,8 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
 
     @IBOutlet weak var tblvwData: UITableView!
      var headerArray : [String] = []
-//    var titleString : String = ""
-    
+    var imageArray : [String] = []
+
     var shouldUpdate : Bool = false
     var indexToUpdate : Int = 0
     
@@ -58,45 +58,45 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
         
         if !BasicDetailsModel.shared.isBasicDetailsComplete && (BasicDetailsModel.shared.isEmailVerified || BasicDetailsModel.shared.isPhoneVerified){
             let image = UIImage.init(named: "ic_info_blue")
-            let cell = tblvwData.cellForRow(at: IndexPath.init(row: 0, section: 0)) as! TickCell
+            let cell = tblvwData.cellForRow(at: IndexPath.init(row: 0, section: 0)) as! RegistrationCell
             UIView.animate(withDuration: 0.3) {
-                cell.imgTick.image = image
+                cell.imgRight.image = image
             }
             
         }
     }
     fileprivate func setUpTableview() {
         headerArray = ["Basic Details","Address Details","Identity Proof","Address Proof","Document Holding Photo"]
-        tblvwData.register(UINib(nibName: "TickCell", bundle: nil), forCellReuseIdentifier: "TickCell")
+        imageArray = ["ic_clipboard","ic_navigate","ic_basic","ic_clipboard","ic_camera"]
+        tblvwData.register(UINib(nibName: "RegistrationCell", bundle: nil), forCellReuseIdentifier: "RegistrationCell")
+        tblvwData.rowHeight = 60.0;
         tblvwData.delegate = self
         tblvwData.dataSource = self
     }
     
     func updateUI() {
-        lblTitle.text = SignupConfigModel.shared.selectedCountry.name
+        lblTitle.text = ConfigModel.shared.selectedCountry.name
     }
     
     func updateTableView() {
         if indexToUpdate == headerArray.count - 1 {
             updateCellImage(row: indexToUpdate)
-//            tblvwData.reloadRows(at: [IndexPath.init(row: indexToUpdate, section: 0)], with: .automatic)
         }
         else{
             updateCellImage(row: indexToUpdate)
             updateCellTextColor(row: indexToUpdate + 1)
-//            tblvwData.reloadRows(at: [IndexPath.init(row: indexToUpdate, section: 0),IndexPath.init(row: indexToUpdate+1, section: 0)], with: .automatic)
         }
     }
 
     func updateCellImage(row:Int) {
         
-        let cell = tblvwData.cellForRow(at: IndexPath.init(row: row, section: 0)) as! TickCell
+        let cell = tblvwData.cellForRow(at: IndexPath.init(row: row, section: 0)) as! RegistrationCell
         
-        var image = UIImage.init(named: "ic_tick")
+        let image = UIImage.init(named: "ic_tick")
         
        
-        UIView.transition(with: cell.imgTick, duration: 0.3, options: .transitionCrossDissolve, animations: {
-            cell.imgTick.image = image
+        UIView.transition(with: cell.imgRight, duration: 0.3, options: .transitionCrossDissolve, animations: {
+            cell.imgRight.image = image
         }, completion: nil)
         
         
@@ -104,17 +104,21 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
     
     func updateCellTextColor(row:Int) {
         
-        let cell = tblvwData.cellForRow(at: IndexPath.init(row: row, section: 0)) as! TickCell
+        let cell = tblvwData.cellForRow(at: IndexPath.init(row: row, section: 0)) as! RegistrationCell
         
         UIView.transition(with: cell.lblText, duration: 0.3, options: .transitionCrossDissolve, animations: {
             cell.lblText.textColor = UIColor.black
+            cell.imgRight.tintColor = UIColor.black
         }, completion: nil)
         
         
     }
     
     func getStatusForIndex(index:Int) -> Bool {
-//        return true
+
+        if ConfigModel.shared.getTestingStatus(){
+            return true
+        }
         switch index {
             case -1: return true
         case RegisterDetailsAmericaType.Basic.rawValue:
@@ -136,6 +140,9 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
     }
     
     func checkValidation() -> Bool {
+        if ConfigModel.shared.getTestingStatus(){
+            return true
+        }
         if !BasicDetailsModel.shared.isBasicDetailsComplete{
             Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.RegisterNotComplete)
             return false
@@ -194,29 +201,26 @@ class RegistrationVC: UIViewController,UITableViewDelegate,UITableViewDataSource
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "TickCell", for: indexPath) as! TickCell
-        cell.setUpCell(title: headerArray[indexPath.row], sideImage:getStatusForIndex(index: indexPath.row) ? "ic_tick" : "ic_right_arrow_black", textColor: getStatusForIndex(index: indexPath.row - 1) ? UIColor.black : UIColor.lightGray)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "RegistrationCell", for: indexPath) as! RegistrationCell
+        cell.setUpCell(title: headerArray[indexPath.row], leftImage: imageArray[indexPath.row], rightImage: getStatusForIndex(index: indexPath.row) ? "ic_tick" : "ic_right_arrow_black", textColor: getStatusForIndex(index: indexPath.row - 1) ? UIColor.black : UIColor.lightGray)
         
         if indexPath.row == 0 && (!BasicDetailsModel.shared.isBasicDetailsComplete && (BasicDetailsModel.shared.isEmailVerified || BasicDetailsModel.shared.isPhoneVerified)){
-            cell.setUpCell(title: headerArray[indexPath.row], sideImage:"ic_info_blue", textColor: getStatusForIndex(index: indexPath.row - 1) ? UIColor.black : UIColor.lightGray)
+            
+             cell.setUpCell(title: headerArray[indexPath.row], leftImage: "ic_clipboard", rightImage: "ic_info_blue", textColor: getStatusForIndex(index: indexPath.row - 1) ? UIColor.black : UIColor.lightGray)
+
         }
         
         cell.backgroundColor = UIColor.clear
         cell.vwHolder.backgroundColor = UIColor.clear
-        cell.vwHolder.cornerRadius = 4.0
-        cell.vwHolder.borderColor = UIColor.black
-        cell.vwHolder.borderWidth = 0.5
+//        cell.vwHolder.cornerRadius = 4.0
+//        cell.vwHolder.borderColor = UIColor.gray
+//        cell.vwHolder.borderWidth = 0.5
         return cell;
         
         
     }
     
-//    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-//        let tickCell = cell as! TickCell
-//        tickCell.vwHolder.clipsToBounds = false
-//        addShadow(viewToChange: tickCell.vwHolder)
-//
-//    }
+
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         

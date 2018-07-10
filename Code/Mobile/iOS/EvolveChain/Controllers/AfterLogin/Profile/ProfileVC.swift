@@ -57,8 +57,8 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
         
         updateUI()
         
-        if SignupConfigModel.shared.arrCountryList.count > 0{
-            countryArray = SignupConfigModel.shared.arrCountryList
+        if ConfigModel.shared.arrCountryList.count > 0{
+            countryArray = ConfigModel.shared.arrCountryList
             self.btnGetCountry.isUserInteractionEnabled = false
             self.setupCountryCode()
         }
@@ -316,9 +316,9 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     
     func processCountryResponse(responseJson:Array<Any>)  {
         
-        SignupConfigModel.shared.initCountryList(response: responseJson)
+        ConfigModel.shared.initCountryList(response: responseJson)
         
-        countryArray = SignupConfigModel.shared.arrCountryList
+        countryArray = ConfigModel.shared.arrCountryList
         
         if countryArray.count > 0{
             DispatchQueue.main.async {
@@ -525,7 +525,7 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     @IBAction func actionSelectCountryCode(_ sender: Any) {
         self.view.endEditing(true)
         
-        if SignupConfigModel.shared.arrCountryList.count == 0 {
+        if ConfigModel.shared.arrCountryList.count == 0 {
             getCountryList()
 
         }
@@ -575,7 +575,7 @@ class ProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,UITe
     
     func getCountryList() {
 
-        NetworkManager.shared.countryListAPI(success: { (response) in
+        NetworkManager.shared.prefetchAPI(success: { (response) in
                 self.processCountryResponse(responseJson: response)
         }) { (errorMsg) in
                 Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)

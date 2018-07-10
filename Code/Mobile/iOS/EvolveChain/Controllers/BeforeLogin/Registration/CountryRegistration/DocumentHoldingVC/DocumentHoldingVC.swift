@@ -38,13 +38,22 @@ class DocumentHoldingVC: UIViewController,UIImagePickerControllerDelegate,UINavi
     //MARK: - Custom Actions
     
     fileprivate func filldata(){
-        lblOTP.text = SignupConfigModel.shared.verificationCode
-        lblInfo.text = StringConstants.UpholdingInfo
+        lblOTP.text = ConfigModel.shared.verificationCode
+        
         
         if BasicDetailsModel.shared.holdingImage != nil{
             imgPic.image = BasicDetailsModel.shared.holdingImage
             holdingImage = BasicDetailsModel.shared.holdingImage
         }
+        
+        let attribInstructionText = NSMutableAttributedString.init(string: StringConstants.UpholdingInfo)
+        attribInstructionText.addAttribute(.font, value: UIFont.init(name: "AvenirNext-Regular", size: 14)!, range: NSMakeRange(0, attribInstructionText.string.count))
+        
+        let range = (attribInstructionText.string as NSString).range(of: ConfigModel.shared.verificationCode)
+        attribInstructionText.addAttribute(.font, value: UIFont.init(name: "AvenirNext-Medium", size: 14)!, range: range)
+
+        
+        lblInfo.attributedText = attribInstructionText
     }
     
     fileprivate func permissionCheckCamera() {
@@ -95,6 +104,10 @@ class DocumentHoldingVC: UIViewController,UIImagePickerControllerDelegate,UINavi
             Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.UpholdingMissing)
             return false
         }
+        else if holdingImage === BasicDetailsModel.shared.holdingImage{
+            Util.shared.popVC()
+            return false
+        }
         return true
 
     }
@@ -136,7 +149,7 @@ class DocumentHoldingVC: UIViewController,UIImagePickerControllerDelegate,UINavi
             imgPic.image = pickedImage
         }
         self.holdingImageDate = nil
-        self.holdingImageLocation = nil
+        self.holdingImageLocation = ("","")
         
         if let url: URL = info[UIImagePickerControllerReferenceURL] as? URL{
             
@@ -185,13 +198,28 @@ class DocumentHoldingVC: UIViewController,UIImagePickerControllerDelegate,UINavi
      //MARK: - Web Services
     
     fileprivate func upholdingAPI(){
+        //self.dob?.getUTCDateStringFromDateString() ?? " "
         
-        let params = ["step":"face","number":SignupConfigModel.shared.verificationCode,"substep":"face","iso":SignupConfigModel.shared.selectedCountry.iso]
+        let dateStr = self.holdingImageDate?.getUTCDateStringFromDateString() ?? ""
+//        let params = ["step":"face","number":SignupConfigModel.shared.verificationCode,"substep":"face","iso":SignupConfigModel.shared.selectedCountry.iso,"time":dateStr,"ip":Util.shared.getIFAddresses()[1],"latitude":self.holdingImageLocation?.lat,"longitude":self.holdingImageLocation?.long]
         
-        NetworkManager.shared.POSTUpholdingDetails(params: params, fileArray: [holdingImage!], filenameArray: ["file[]"], success: { (responseJSON) in
+        var param :[String: Any]  = [:]
+        param["step"]    = "face"
+        param["number"]     = ConfigModel.shared.verificationCode
+        param["substep"]             = "face"
+        
+         param["iso"]             = ConfigModel.shared.selectedCountry.iso
+         param["time"]             = dateStr
+         param["ip"]             = Util.shared.getIFAddresses()[1]
+         param["latitude"]             = self.holdingImageLocation?.lat
+         param["longitude"]             = self.holdingImageLocation?.long
+        param["location"]             = "No Location"
+        
+        
+        NetworkManager.shared.POSTUpholdingDetails(params: param, fileArray: [holdingImage!], filenameArray: ["file[]"], success: { (responseJSON) in
             self.saveDetails()
         }) { (errorMsg) in
-            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.UpholdingMissing)
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
 
         }
     }

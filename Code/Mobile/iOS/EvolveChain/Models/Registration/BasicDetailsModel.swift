@@ -162,7 +162,7 @@ class BasicDetailsModel: NSObject, NSCoding {
     
     func getBasicParamsForSaveKYC() -> Dictionary<String, Any> {
        
-        let params : Dictionary<String, Any> = ["step":"basic","firstname":self.fname,"lastname":self.lname,"dob": self.dob?.getUTCDateStringFromDateString() ?? " ","place_of_birth":self.placeOfBirth,"address1":self.add1,"address2":self.add2,"street":self.street,"city":self.city,"zip":self.zipCode,"state":self.state,"country":self.country,"middlename":self.mname,"substep":"basic","gender":self.gender,"iso":SignupConfigModel.shared.selectedCountry.iso]
+        let params : Dictionary<String, Any> = ["step":"basic","firstname":self.fname,"lastname":self.lname,"dob": self.dob?.getUTCDateStringFromDateString() ?? " ","place_of_birth":self.placeOfBirth,"address1":self.add1,"address2":self.add2,"street":self.street,"city":self.city,"zip":self.zipCode,"state":self.state,"country":self.country,"middlename":self.mname,"substep":"basic","gender":self.gender,"iso":ConfigModel.shared.selectedCountry.iso]
         //        basicData.append(["iso",SignupConfigModel.shared.selectedCountry.iso])
 
         return params
@@ -215,7 +215,7 @@ class BasicDetailsModel: NSObject, NSCoding {
     func getHoldingAsArray() -> [[Any]] {
         
         var modelData = [[Any]]()
-        modelData.append(["Code",SignupConfigModel.shared.verificationCode])
+        modelData.append(["Code",ConfigModel.shared.verificationCode])
         modelData.append(["Holding Image","Holding Image",self.holdingImage])
         
         return modelData
@@ -243,7 +243,7 @@ class BasicDetailsModel: NSObject, NSCoding {
         mname                   = RawdataConverter.string(basicDetails["middlename"])
         lname                   = RawdataConverter.string(basicDetails["lastname"])
         
-        dob                     = Date.dateFromFormatted3_String(RawdataConverter.string(basicDetails["dob"]))!
+        dob                     = Date.dateFromFormatted2_String(RawdataConverter.string(basicDetails["dob"]))!
         
         placeOfBirth            = RawdataConverter.string(basicDetails["place_of_birth"])
         
@@ -300,7 +300,10 @@ class BasicDetailsModel: NSObject, NSCoding {
                         userImageURL = urlStr
                         do {
                             let imageData = try Data.init(contentsOf: URL.init(string: urlStr)!)
-                            userImage = UIImage.init(data: imageData)!
+                            if let image = UIImage.init(data: imageData){
+                                userImage = image
+                            }
+                            
                         }
                         catch let error as NSError {
                             print("Error: \(error.localizedDescription)")
@@ -320,7 +323,10 @@ class BasicDetailsModel: NSObject, NSCoding {
         mname                   = RawdataConverter.string(basicDetails["middlename"])
         lname                   = RawdataConverter.string(basicDetails["lastname"])
         
-        dob                     = Date.dateFromFormatted3_String(RawdataConverter.string(basicDetails["dob"]))
+        if let date = RawdataConverter.optionalString(basicDetails["dob"]){
+            dob = Date.dateFromFormatted3_String(date)
+        }
+//        dob                     = Date.dateFromFormatted3_String(RawdataConverter.string(basicDetails["dob"]))
         
         placeOfBirth            = RawdataConverter.string(basicDetails["place_of_birth"])
         
@@ -351,7 +357,9 @@ class BasicDetailsModel: NSObject, NSCoding {
                     
                         do {
                             let imageData = try Data.init(contentsOf: URL.init(string: urlStr)!)
-                            holdingImage = UIImage.init(data: imageData)!
+                            if let image = UIImage.init(data: imageData){
+                                holdingImage = image
+                            }
                         }
                         catch let error as NSError {
                             print("Error: \(error.localizedDescription)")
@@ -368,7 +376,7 @@ class BasicDetailsModel: NSObject, NSCoding {
     
     func getBasicDataForSummary() -> [SummaryStruct] {
         
-        var basicArray = [SummaryStruct(imageTop: nil, imageBottom: nil, text: "Basic Details", type: .HeaderCell, isExpanded: false)]
+        var basicArray = [SummaryStruct(imageTop: nil, imageBottom: nil, text: "Basic Details", type: .HeaderCell, isExpanded: true)]
         
         var text = self.fname
         if self.mname.count > 0 {
@@ -382,13 +390,13 @@ class BasicDetailsModel: NSObject, NSCoding {
         text.append(self.dob?.dateWithStringFormat("MMM dd, yyyy") ?? "")
         text.append(", " + self.placeOfBirth + ", " + self.gender)
         
-        basicArray.append(SummaryStruct(imageTop: self.userImage,imageBottom: nil, text: text, type: .BasicCell, isExpanded: false ))
+        basicArray.append(SummaryStruct(imageTop: self.userImage,imageBottom: nil, text: text, type: .BasicCell, isExpanded: true ))
         return basicArray
     }
 
     func getAddressDataForSummary() -> [SummaryStruct] {
         
-        var basicArray = [SummaryStruct(imageTop: nil,imageBottom: nil, text: "Address Details", type: .HeaderCell, isExpanded: false)]
+        var basicArray = [SummaryStruct(imageTop: nil,imageBottom: nil, text: "Address Details", type: .HeaderCell, isExpanded: true)]
         
         var line1 = self.add1
         if self.add2.count > 0 {
@@ -398,7 +406,7 @@ class BasicDetailsModel: NSObject, NSCoding {
         line1.append("\n" + self.street + ", " + self.city + ", " + self.zipCode)
         
         line1.append("\n" + self.state + ", " + self.country)
-        basicArray.append(SummaryStruct(imageTop: nil,imageBottom: nil, text: line1, type: .NoImageCell, isExpanded: false))
+        basicArray.append(SummaryStruct(imageTop: nil,imageBottom: nil, text: line1, type: .NoImageCell, isExpanded: true))
         
         
         return basicArray
@@ -406,11 +414,11 @@ class BasicDetailsModel: NSObject, NSCoding {
     
     func getHoldingDataForSummary() -> [SummaryStruct] {
         
-        var basicArray = [SummaryStruct(imageTop: nil,imageBottom: nil, text: "Document Holding Photo", type: .HeaderCell, isExpanded: false)]
+        var basicArray = [SummaryStruct(imageTop: nil,imageBottom: nil, text: "Document Holding Photo", type: .HeaderCell, isExpanded: true)]
         
-        let line1 = "Code : " + SignupConfigModel.shared.verificationCode
+        let line1 = "Code : " + ConfigModel.shared.verificationCode
         
-        basicArray.append(SummaryStruct(imageTop: self.holdingImage,imageBottom: nil, text: line1, type: .OneImageCell, isExpanded: false))
+        basicArray.append(SummaryStruct(imageTop: self.holdingImage,imageBottom: nil, text: line1, type: .OneImageCell, isExpanded: true))
         
         
         return basicArray

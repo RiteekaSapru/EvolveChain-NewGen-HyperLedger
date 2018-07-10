@@ -328,7 +328,7 @@ class DocumentManager: NSObject {
         
         let doc = (type == .AddressType) ? self.selectedAddressModel : self.selectedIdentityModel
         
-        var docArray = [SummaryStruct(imageTop: nil, imageBottom: nil, text: (type == .AddressType) ? "Address Proof" : "Identity Proof", type: .HeaderCell, isExpanded: false)]
+        var docArray = [SummaryStruct(imageTop: nil, imageBottom: nil, text: (type == .AddressType) ? "Address Proof" : "Identity Proof", type: .HeaderCell, isExpanded: true)]
         
         var line1 = "Type : " + doc.name
         if doc.selectedSubType != nil {
@@ -344,11 +344,11 @@ class DocumentManager: NSObject {
         var line2 : String = ""
         
         if doc.isExpiryDate{
-            line2.append("Issuing Country : " + SignupConfigModel.shared.selectedCountry.name)
+            line2.append("Issuing Country : " + ConfigModel.shared.selectedCountry.name)
             line2.append("\nExpiry Date : " + ((doc.date?.dateWithStringFormat("MMM dd, yyyy")) ?? ""))
         }
         else{
-            line2.append("Issuing Country : " + SignupConfigModel.shared.selectedCountry.name)
+            line2.append("Issuing Country : " + ConfigModel.shared.selectedCountry.name)
 //            line2.append("\n")
         }
         line1.append("\n" + line2)

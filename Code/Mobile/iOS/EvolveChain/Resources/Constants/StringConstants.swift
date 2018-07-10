@@ -65,6 +65,8 @@ final class StringConstants: NSObject {
    static let IdentityExpiryEmpty = "Please enter expiry date."
    static let IdentityFrontPicEmpty = "Please select front picture."
    static let IdentityBackPicEmpty = "Please select back picture."
+    static let BothPicEmpty = "Please select front and back picture."
+
     
    static let NumberEmpty = "Please enter document number."
    static let NumberIncorrect = "Please enter valid document number."
@@ -79,7 +81,7 @@ final class StringConstants: NSObject {
    static let AreaCodeEmpty = "Please enter zip code."
    static let AreaCodeIncorrect = "Please enter valid zip code."
     
-   static let KYCIDEmpty = "Please enter KYC Id."
+   static let KYCIDEmpty = "Please enter eKYC Id."
    static let PinEmpty = "Please enter pin."
    static let RePinEmpty = "Please re-enter pin."
    static let PinNotMatch = "Pin does not match."
@@ -91,9 +93,11 @@ final class StringConstants: NSObject {
     static let RegisterNotComplete = "Please complete and save all documents before submitting."
 
     
-   static let UpholdingInfo = "Make a selfie while holding your identity document that you used to fill in the Verification form.\n\nBefore uploading an image on the Verification form, please make sure to follow photo requirements:\n\nYou are looking straight at the camera.\nYour background has a light, neutral colour.\nYour selfie is in colour.\nNo red eye!\nDO NOT wear sunglasses, a hat or a headband.\nVerification Code must be clearly visible."
+   static let UpholdingInfo = "Take a selfie while holding your identity document that you used to fill in the Verification form.\n\nBefore uploading an image on the Verification form, please make sure to follow photo requirements:\n\nYou are looking straight at the camera.\nYour background has a light, neutral colour.\nYour selfie is in colour.\nNo red eye!\nDO NOT wear sunglasses, a hat or a headband.\nVerification Code \(ConfigModel.shared.verificationCode) must be clearly visible."
     
    static let UpholdingMissing = "Please select a picture."
     
     static let PinChangeText = " For security reasons, kindly login again."
+    
+    static let RegistrationComplete = "Your application has been registered with us. You will recieve your eKYC-ID on your registered email after successfull verification."
 }

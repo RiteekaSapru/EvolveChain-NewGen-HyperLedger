@@ -137,7 +137,7 @@
                                                             <rect key="frame" x="61" y="0.0" width="269" height="45"/>
                                                             <nil key="textColor"/>
                                                             <fontDescription key="fontDescription" name="AvenirNext-Regular" family="Avenir Next" pointSize="17"/>
-                                                            <textInputTraits key="textInputTraits" keyboardType="numberPad" returnKeyType="done" textContentType="tel"/>
+                                                            <textInputTraits key="textInputTraits" keyboardType="numberPad" returnKeyType="done"/>
                                                             <connections>
                                                                 <outlet property="delegate" destination="TRH-95-Phk" id="26i-6H-DrI"/>
                                                             </connections>
@@ -532,7 +532,7 @@
                                                 <constraint firstItem="DuS-aE-oje" firstAttribute="leading" secondItem="iZc-pA-Qvy" secondAttribute="leading" constant="20" id="yjU-Fd-lP9"/>
                                             </constraints>
                                         </view>
-                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="x38-WE-BN0">
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="x38-WE-BN0" customClass="ShadowButtonWithbgColor" customModule="EvolveChain" customModuleProvider="target">
                                             <rect key="frame" x="30" y="350" width="315" height="45"/>
                                             <color key="backgroundColor" red="0.058823529409999999" green="0.45882352939999999" blue="0.74117647060000003" alpha="1" colorSpace="calibratedRGB"/>
                                             <constraints>
@@ -687,7 +687,7 @@
                                     <constraint firstAttribute="height" constant="45" id="iAQ-h4-ol0"/>
                                 </constraints>
                             </view>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zhH-Kn-OMZ">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zhH-Kn-OMZ" customClass="ShadowButtonWithbgColor" customModule="EvolveChain" customModuleProvider="target">
                                 <rect key="frame" x="30" y="165" width="315" height="45"/>
                                 <color key="backgroundColor" red="0.058823529409999999" green="0.45882352939999999" blue="0.74117647060000003" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
@@ -1576,7 +1576,7 @@
                                                 <constraint firstItem="nhg-Ex-8Mi" firstAttribute="leading" secondItem="q0l-4F-qCp" secondAttribute="trailing" constant="2" id="zx0-YV-oFP"/>
                                             </constraints>
                                         </view>
-                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="H3y-Rg-wyE">
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="H3y-Rg-wyE" customClass="ShadowButtonWithbgColor" customModule="EvolveChain" customModuleProvider="target">
                                             <rect key="frame" x="30" y="272" width="315" height="45"/>
                                             <color key="backgroundColor" red="0.058823529409999999" green="0.45882352939999999" blue="0.74117647060000003" alpha="1" colorSpace="calibratedRGB"/>
                                             <constraints>
@@ -1593,7 +1593,7 @@
                                                 <action selector="actionVerify:" destination="kOG-b5-9oW" eventType="touchUpInside" id="CIz-xc-RXa"/>
                                             </connections>
                                         </button>
-                                        <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7UM-hY-k3K">
+                                        <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7UM-hY-k3K" customClass="ShadowButtonWithbgColor" customModule="EvolveChain" customModuleProvider="target">
                                             <rect key="frame" x="30" y="332" width="315" height="45"/>
                                             <color key="backgroundColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <constraints>

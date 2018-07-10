@@ -14,9 +14,16 @@ class EntryHomeVC: UIViewController {
     @IBOutlet weak var topLayoutLogo: NSLayoutConstraint!
     @IBOutlet weak var viewHolder: UIView!
     
+    @IBOutlet weak var btnSupport: UIButton!
+    @IBOutlet weak var imgLogo: UIImageView!
+    
+
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.initializeUI();
+        if ConfigModel.shared.arrCountryList.count == 0{
+            self.initializeUI();
+        }
         
         // Do any additional setup after loading the view.
     }
@@ -28,37 +35,77 @@ class EntryHomeVC: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-         UIApplication.shared.statusBarStyle = .default
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now()+1.0) {
-            self.animateUI()
+       
+        if ConfigModel.shared.arrCountryList.count == 0{
             self.getCountryList()
+            animatePulse(shouldAnimate: true)
+            NotificationCenter.default.addObserver(self, selector: #selector(self.didEnterBackground), name: .UIApplicationDidEnterBackground, object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(self.willEnterForeground), name: .UIApplicationWillEnterForeground, object: nil)
         }
-        
+         UIApplication.shared.statusBarStyle = .default
     }
+    
+    deinit
+    {
+        NotificationCenter.default.removeObserver(self, name: .UIApplicationDidEnterBackground, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .UIApplicationWillEnterForeground, object: nil)
 
+    }
+    
+    //MARK: - Notification
+    
+    @objc func didEnterBackground()
+    {
+        imgLogo.layer.removeAllAnimations()
+    }
+    
+    @objc func willEnterForeground()
+    {
+        imgLogo.transform = CGAffineTransform.identity
+        animatePulse(shouldAnimate: true)
+    }
+    
     //MARK: - Initialize
     
     func initializeUI() -> Void {
         viewHolder.alpha = 0.0;
         topLayoutLogo.constant = (_screenSize.height - 120.0)/2.0
+        btnSupport.isHidden = true
     }
-    
+    func animatePulse(shouldAnimate:Bool){
+        if shouldAnimate{
+            UIView.animate(withDuration: 1.0, delay: 0, options: [.autoreverse , .repeat], animations: {
+                self.imgLogo.transform = CGAffineTransform.init(scaleX: 1.1, y: 1.1)
+            }, completion: nil)
+        }
+        else{
+            imgLogo.layer.removeAllAnimations()
+            NotificationCenter.default.removeObserver(self, name: .UIApplicationDidEnterBackground, object: nil)
+            NotificationCenter.default.removeObserver(self, name: .UIApplicationWillEnterForeground, object: nil)
+
+//            UIView.animate(withDuration: 0.1, delay: 0, options: .curveEaseOut, animations: {
+//                self.imgLogo.transform = CGAffineTransform.identity
+//            }, completion: {status in
+//                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now()+1.0) {
+                    self.animateUI()
+//
+//                }
+//            })
+        }
+    }
     //MARK: - Animations
     func animateUI() -> Void {
         if viewHolder.alpha == 0.0 {
             self.viewHolder.transform = CGAffineTransform.init(scaleX: 0.6, y: 0.6)
             topLayoutLogo.constant = ((_screenSize.height - 260.5) / 2.0 ) - 120
-            UIView.animate(withDuration: 0.7, delay: 0, usingSpringWithDamping: 0.75, initialSpringVelocity: 0, options: .curveEaseInOut, animations: {
+            UIView.animate(withDuration: 0.7, delay: 0, usingSpringWithDamping: 1.0, initialSpringVelocity: 0.5, options: .curveEaseOut, animations: {
+                self.imgLogo.transform = CGAffineTransform.identity
                 self.viewHolder.alpha = 1.0
                 self.viewHolder.transform = CGAffineTransform.init(scaleX: 1.0, y: 1.0)
                 self.view.layoutIfNeeded()
             }) { (status) in
-                
+                 self.btnSupport.isHidden = false
             }
-//            UIView.animate(withDuration: 0.3) {
-//                self.viewHolder.alpha = 1.0
-//                self.view.layoutIfNeeded()
-//            }
         }
     }
     //MARK: - Custom Actions
@@ -72,8 +119,11 @@ class EntryHomeVC: UIViewController {
     
     func processResponse(response:Array<Any>){
         
-        SignupConfigModel.shared.initCountryList(response: response)
-
+        ConfigModel.shared.initCountryList(response: response)
+        DispatchQueue.main.async {
+            self.animatePulse(shouldAnimate: false)
+        }
+        
     }
     
     fileprivate func moveToEdit(arrCountry:[CountryModel]) {
@@ -141,7 +191,6 @@ class EntryHomeVC: UIViewController {
     
     @IBAction func actionEdit(_ sender: Any) {
         
-//       getCountryList()
         Util.shared.initialiseLocation()
         let editApplicationObj = self.storyboard?.instantiateViewController(withIdentifier: "EditApplicationVC") as! EditApplicationVC
         UIApplication.shared.statusBarStyle = .lightContent
@@ -149,19 +198,22 @@ class EntryHomeVC: UIViewController {
         
     }
     
+    @IBAction func actionSupport(_ sender: Any) {
+        if ConfigModel.shared.arrCountryList.count == 0{
+            getCountryList()
+            return
+        }
+        Util.shared.showAlertForSupport()
+    }
+    
     //MARK: - Web Service
     
     func getCountryList() {
-//        GlobalMethods.shared.showLoader(loadingText: "   Fetching Countries...")
-        NetworkManager.shared.countryListAPI(success: { (response) in
-//            GlobalMethods.shared.dismissLoader {
+        NetworkManager.shared.prefetchAPI(success: { (response) in
                 self.processResponse(response: response)
-//            }
         }) { (errorMsg) in
-//            GlobalMethods.shared.dismissLoader {
-//                GlobalMethods.shared.showAlert(alertTitle: StringConstants.Error, alertText: errorMsg!)
-//            }
-            
+            self.getCountryList()
+
         }
     }
     

@@ -37,6 +37,8 @@ class SummaryImageCell: UITableViewCell {
 
     @IBOutlet weak var lblText: UILabel!
     
+    var pushAnimator : PushAnimator!
+    
      // MARK: - Custom Methods
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -158,21 +160,46 @@ class SummaryImageCell: UITableViewCell {
     
     @IBAction func actionTopImageopen(_ sender: Any) {
         if imgPhotoTop.image != nil{
+
+            let frame = _navigator.topViewController?.view.convert(self.imgPhotoTop.bounds, from: self.imgPhotoTop)
+            pushAnimator = PushAnimator.init(initialFrame: frame!, image: self.imgPhotoTop.image!, holderView: self.imgPhotoTop)
+
+            _navigator.delegate = self
             let imageViewer = FlowManager.shared.getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "ImageViewerVC") as! ImageViewerVC
             
-            imageViewer.setImage(photo: imgPhotoTop.image!)
+            imageViewer.setImage(photo: imgPhotoTop.image!, frame: frame!, holder: self.imgPhotoTop)
             
-            Util.shared.presentVC(imageViewer)
+            Util.shared.pushVC(imageViewer)
         }
     }
     
     @IBAction func actionBottomImageOpen(_ sender: Any) {
         if imgPhotoBottom.image != nil{
+           let frame = _navigator.topViewController?.view.convert(self.imgPhotoBottom.bounds, from: self.imgPhotoBottom)
+            
+            pushAnimator = PushAnimator.init(initialFrame: frame!, image: self.imgPhotoBottom.image!, holderView: self.imgPhotoBottom)
+
+            _navigator.delegate = self
             let imageViewer = FlowManager.shared.getBeforeLoginStoryboard().instantiateViewController(withIdentifier: "ImageViewerVC") as! ImageViewerVC
             
-            imageViewer.setImage(photo: imgPhotoBottom.image!)
+            imageViewer.setImage(photo: imgPhotoBottom.image!, frame: frame!, holder:self.imgPhotoBottom)
             
-            Util.shared.presentVC(imageViewer)
+            Util.shared.pushVC(imageViewer)
         }
     }
 }
+
+extension SummaryImageCell:UINavigationControllerDelegate{
+    func navigationController(_ navigationController: UINavigationController, animationControllerFor operation: UINavigationControllerOperation, from fromVC: UIViewController, to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        
+        switch operation {
+        case .pop:return nil
+        case .push : return pushAnimator
+            
+        default:
+            return nil
+        }
+    }
+}
+
+

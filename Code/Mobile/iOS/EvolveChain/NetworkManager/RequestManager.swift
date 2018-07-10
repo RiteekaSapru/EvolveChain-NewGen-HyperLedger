@@ -62,7 +62,7 @@ class RequestManager: NSObject {
     
     // MARK: - GET
     
-    func makeGetAPICall(url: String,params: Dictionary<String, Any>?, method: HttpMethod, success:@escaping ( Data? ,HTTPURLResponse?  , NSError? ,Array<Any>) -> Void, failure: @escaping ( Data? ,HTTPURLResponse?  , NSError?,String? )-> Void) {
+    func makeGetAPICall(url: String,params: Dictionary<String, Any>?, method: HttpMethod, success:@escaping ( Data? ,HTTPURLResponse?  , NSError? ,Dictionary<String,Any>) -> Void, failure: @escaping ( Data? ,HTTPURLResponse?  , NSError?,String? )-> Void) {
         
         if !isConnectedToNetwork() {
             failure(nil , nil , nil,StringConstants.NoInternet)
@@ -107,7 +107,7 @@ class RequestManager: NSObject {
                 
                 if let response = response as? HTTPURLResponse, 200...299 ~= response.statusCode {
                     do {
-                        if let jsonArray = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? Array<Any>
+                        if let jsonArray = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? Dictionary<String,Any>
                         {
                             print(jsonArray)
                             success(data , response , error as NSError?,jsonArray)

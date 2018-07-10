@@ -18,7 +18,7 @@ class SettingsVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
         UIApplication.shared.statusBarStyle = .lightContent
 
          self.title = "Settings"
-        arrSettings = ["Change Pin","Logout"]
+        arrSettings = ["Change Pin","Contact Support","Logout"]
         tblvwData.register(UINib(nibName: "TickCell", bundle: nil), forCellReuseIdentifier: "TickCell")
         tblvwData.delegate = self
         tblvwData.dataSource = self
@@ -76,8 +76,9 @@ class SettingsVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
             let changePinVC = self.storyboard?.instantiateViewController(withIdentifier: "ChangePinVC")
 //            Util.shared.pushVC(changePinVC!)
             self.navigationController?.pushViewController(changePinVC!, animated: true)
-            
         case 1:
+            Util.shared.showAlertForSupport()
+        case 2:
             Util.shared.logoutUserWithAlert()
         default:
             break

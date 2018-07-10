@@ -36,13 +36,15 @@
                                     </imageView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="252" horizontalCompressionResistancePriority="751" verticalCompressionResistancePriority="751" text="Upload Front" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SZz-Tf-ZJk">
                                         <rect key="frame" x="0.0" y="0.0" width="258.5" height="18"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="18" id="gzo-FX-nDt"/>
+                                        </constraints>
                                         <fontDescription key="fontDescription" name="AvenirNext-Medium" family="Avenir Next" pointSize="13"/>
                                         <color key="textColor" red="0.058823529409999999" green="0.45882352939999999" blue="0.74117647060000003" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="MTB-uM-EEX">
                                         <rect key="frame" x="0.0" y="0.0" width="258.5" height="128"/>
-                                        <state key="normal" image="ic_plus_white"/>
                                         <connections>
                                             <action selector="actionFrontImage:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="PH7-9D-7h3"/>
                                         </connections>
@@ -83,13 +85,15 @@
                                     </imageView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" verticalCompressionResistancePriority="751" text="Upload Back" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6cS-0L-2UG">
                                         <rect key="frame" x="-0.5" y="0.0" width="258.5" height="18"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="18" id="B3Z-Gz-u1m"/>
+                                        </constraints>
                                         <fontDescription key="fontDescription" name="AvenirNext-Medium" family="Avenir Next" pointSize="13"/>
                                         <color key="textColor" red="0.058823529409999999" green="0.45882352939999999" blue="0.74117647060000003" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9tX-Xb-E1i">
                                         <rect key="frame" x="0.0" y="0.0" width="258.5" height="128"/>
-                                        <state key="normal" image="ic_plus_white"/>
                                         <connections>
                                             <action selector="actionBackImage:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="O13-82-pc3"/>
                                         </connections>
@@ -163,7 +167,6 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="ic_plus_white" width="25" height="25"/>
         <image name="sample-Utility" width="251" height="358"/>
     </resources>
 </document>

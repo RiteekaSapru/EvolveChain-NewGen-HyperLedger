@@ -91,31 +91,42 @@ class DocModel: NSObject {
     
     // MARK:- Validations
     
-    func validateModel() -> (isValid:Bool,indexPath:IndexPath?){
+    func validateModel() -> Array<(isValid:Bool,indexPath:IndexPath)>// Array[(isValid:Bool,indexPath:IndexPath?)]
+    {
         
-        if self.value.count == 0{
-            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.NumberEmpty)
-//            txtfldNumberIdentity.becomeFirstResponder()
-            return (false,IndexPath.init(row: 0, section: 2));
+        var response = [(Bool,IndexPath)]()
+        
+        if self.isExpiryDate && self.date == nil{
+            //             Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityExpiryEmpty)
+            response.append((false,IndexPath.init(row: 2, section: 2)));
         }
-        else if self.value.count < 8{
+        if self.value.count == 0{
+//            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.NumberEmpty)
+//            txtfldNumberIdentity.becomeFirstResponder()
+            response.append((false,IndexPath.init(row: 0, section: 2)));
+        }
+         else if self.value.count < 8{
             Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.NumberIncorrect)
 //            txtfldNumberIdentity.becomeFirstResponder()
-            return (false,IndexPath.init(row: 0, section: 2));
+            response.append ((false,IndexPath.init(row: 0, section: 2)));
         }
-        else if self.isExpiryDate && self.date == nil{
-             Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityExpiryEmpty)
-             return (false,IndexPath.init(row: 2, section: 2));
+      
+         if self.frontImage == nil && self.backImage == nil{
+            Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.BothPicEmpty)
+            response.append ((false,IndexPath.init(row: 3, section: 2)))
         }
-        else if self.frontImage == nil{
+         else if self.frontImage == nil {
             Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityFrontPicEmpty)
-            return (false,IndexPath.init(row: 3, section: 2))
-        }
-        else if self.backImage == nil {
+            response.append ((false,IndexPath.init(row: 3, section: 2)))
+         }
+         else if self.backImage == nil {
             Util.shared.showAlert(alertTitle: StringConstants.Error, alertText: StringConstants.IdentityBackPicEmpty)
-            return (false,IndexPath.init(row: 3, section: 2))
+            response.append ((false,IndexPath.init(row: 3, section: 2)))
         }
-        return (true,nil)
+       
+        return response
+       
+       
         
     }
     
@@ -144,7 +155,7 @@ class DocModel: NSObject {
             params.updateValue("", forKey: "expiry_date")
         }
         
-        params.updateValue(SignupConfigModel.shared.selectedCountry.iso, forKey: "country")
+        params.updateValue(ConfigModel.shared.selectedCountry.iso, forKey: "country")
         if self.subDocs.count > 0 {
             params.updateValue(self.selectedSubType!.code, forKey: "subdoc")
         }
@@ -152,7 +163,7 @@ class DocModel: NSObject {
              params.updateValue("", forKey: "subdoc")
         }
         
-        params.updateValue(SignupConfigModel.shared.selectedCountry.iso, forKey: "iso")
+        params.updateValue(ConfigModel.shared.selectedCountry.iso, forKey: "iso")
         
         return params
     }
@@ -176,7 +187,7 @@ class DocModel: NSObject {
             modelData.append(["Bill Type",self.selectedSubType?.name ?? ""])
         }
         modelData.append(["Number",self.value])
-        modelData.append(["Issuing Country",SignupConfigModel.shared.selectedCountry.name])
+        modelData.append(["Issuing Country",ConfigModel.shared.selectedCountry.name])
         if self.isExpiryDate {
             modelData.append(["Expiry Date",self.date?.dateWithStringFormat("MMM dd, yyyy") ?? " "])
         }

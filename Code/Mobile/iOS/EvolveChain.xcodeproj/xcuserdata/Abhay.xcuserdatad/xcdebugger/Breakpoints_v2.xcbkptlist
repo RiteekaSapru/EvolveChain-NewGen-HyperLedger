@@ -20,7 +20,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EvolveChain/Models/Registration/DocumentManager.swift"
-            timestampString = "551964950.361515"
+            timestampString = "552896697.568192"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "72"
@@ -36,7 +36,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EvolveChain/Models/Registration/BasicDetailsModel.swift"
-            timestampString = "551964950.361837"
+            timestampString = "552912773.338484"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "270"
@@ -84,7 +84,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EvolveChain/Models/Registration/DocumentManager.swift"
-            timestampString = "551964950.361932"
+            timestampString = "552896697.568607"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "81"
@@ -99,24 +99,8 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Models/Registration/BasicDetailsModel.swift"
-            timestampString = "551964950.362146"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "302"
-            endingLineNumber = "302"
-            landmarkName = "initWithResponseEdit(responseJson:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
             filePath = "EvolveChain/Models/Registration/DocumentManager.swift"
-            timestampString = "551964950.3621939"
+            timestampString = "552896697.5686671"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "171"
@@ -132,7 +116,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EvolveChain/Models/Registration/DocumentManager.swift"
-            timestampString = "551964950.362402"
+            timestampString = "552896697.568711"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "172"
@@ -148,7 +132,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EvolveChain/Models/Registration/BasicDetailsModel.swift"
-            timestampString = "551964950.362607"
+            timestampString = "552912773.3386821"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "296"
@@ -164,7 +148,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EvolveChain/NetworkManager/RequestManager.swift"
-            timestampString = "551704148.919276"
+            timestampString = "552401539.7781529"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "418"
@@ -180,7 +164,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EvolveChain/NetworkManager/RequestManager.swift"
-            timestampString = "551704148.919336"
+            timestampString = "552401539.778221"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "104"
@@ -196,13 +180,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EvolveChain/Controllers/BeforeLogin/Registration/CountryRegistration/BasicDetails/BasicDetailsAmericaVC.swift"
-            timestampString = "551881240.97969"
+            timestampString = "552487376.995397"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "620"
-            endingLineNumber = "620"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            startingLineNumber = "642"
+            endingLineNumber = "642"
+            landmarkName = "textFieldShouldReturn(_:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -212,13 +196,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EvolveChain/Controllers/BeforeLogin/Registration/CountryRegistration/BasicDetails/BasicDetailsAmericaVC.swift"
-            timestampString = "551881240.980069"
+            timestampString = "552487376.995443"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "606"
-            endingLineNumber = "606"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            startingLineNumber = "628"
+            endingLineNumber = "628"
+            landmarkName = "textFieldDidDelete(textfield:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -228,27 +212,59 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EvolveChain/Controllers/BeforeLogin/Registration/CountryRegistration/BasicDetails/BasicDetailsAmericaVC.swift"
-            timestampString = "551881240.980624"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "798"
-            endingLineNumber = "798"
-            landmarkName = "unknown"
-            landmarkType = "0">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/CountryRegistration/BasicDetails/BasicDetailsAmericaVC.swift"
-            timestampString = "551881240.9808871"
+            timestampString = "552487376.995526"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "82"
             endingLineNumber = "82"
+            landmarkName = "editingEnded()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/CountryRegistration/SummaryVC/SummaryVC.swift"
+            timestampString = "552832480.934902"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "115"
+            endingLineNumber = "115"
+            landmarkName = "tableView(_:didSelectRowAt:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/ImageViewerVC/TransitionManager/PopAnimator.swift"
+            timestampString = "552892830.185979"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "150"
+            endingLineNumber = "150"
+            landmarkName = "animateTransition(using:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/ImageViewerVC/ImageViewerVC.swift"
+            timestampString = "552832480.935041"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "85"
+            endingLineNumber = "85"
             landmarkName = "unknown"
             landmarkType = "0">
          </BreakpointContent>
@@ -259,13 +275,45 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/CountryRegistration/SummaryVC/SummaryVC.swift"
-            timestampString = "551964950.362754"
+            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/ImageViewerVC/ImageViewerVC.swift"
+            timestampString = "552832480.935446"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "223"
-            endingLineNumber = "223"
-            landmarkName = "tableView(_:didSelectRowAt:)"
+            startingLineNumber = "84"
+            endingLineNumber = "84"
+            landmarkName = "unknown"
+            landmarkType = "0">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "EvolveChain/Controllers/BeforeLogin/Registration/CountryRegistration/SummaryVC/RegCompletePushAnimator.swift"
+            timestampString = "552552831.304366"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "39"
+            endingLineNumber = "39"
+            landmarkName = "animateViewTranslation(vwToTranslate:delay:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "EvolveChain/NetworkManager/NetworkManager.swift"
+            timestampString = "552832480.935734"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "25"
+            endingLineNumber = "25"
+            landmarkName = "prefetchAPI(success:failure:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

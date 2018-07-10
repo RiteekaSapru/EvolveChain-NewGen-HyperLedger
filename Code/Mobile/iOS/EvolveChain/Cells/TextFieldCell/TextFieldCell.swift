@@ -53,7 +53,7 @@ class TextFieldCell: UITableViewCell,UITextFieldDelegate {
         }
         else if cellType == .LabelType{
              txtfldInput.placeholder = "Country"
-            txtfldInput.text = SignupConfigModel.shared.selectedCountry.name
+            txtfldInput.text = ConfigModel.shared.selectedCountry.name
             txtfldInput.isUserInteractionEnabled = false
             txtfldInput.delegate = nil
             txtfldInput.inputView = nil
@@ -74,7 +74,7 @@ class TextFieldCell: UITableViewCell,UITextFieldDelegate {
             txtfldInput.autocapitalizationType = .none
             
             datePicker = Util.shared.getDatePicker(controller:self,txtFld: txtfldInput, doneAction: #selector(doneMethod), cancelAction: #selector(cancelMethod))
-            datePicker?.minimumDate = Date()
+            datePicker?.minimumDate = Calendar.current.date(byAdding: .day, value: ConfigModel.shared.minDaysToExpiry, to: Date())
             datePicker?.maximumDate = nil
 //            datePicker?.maximumDate = GlobalMethods.shared.getDate(year: SignupConfigModel.shared.selectedCountry.minAge, after: false)
 //            datePicker?.minimumDate = GlobalMethods.shared.getDate(year: SignupConfigModel.shared.selectedCountry.maxAge, after: false)

@@ -97,12 +97,21 @@ class DocumentVC: UIViewController,UITableViewDelegate,UITableViewDataSource,Tex
     fileprivate func validateData(){
         let val = selectedDocModel.validateModel()
         
-        if val.isValid{
+        if val.count == 0{
             uploadDetails()
 //            saveData()
         }
         else{
-            focusRow(indexPath: val.indexPath!)
+            for item in val{
+                if item.indexPath.section == 2 && (item.indexPath.row == 0 || item.indexPath.row == 2){
+                    let cell = tblvwDoc.cellForRow(at: item.indexPath)
+                    if let txtFld = cell?.contentView.viewWithTag(99) as? UITextField{
+                        txtFld.becomeFirstResponder()
+                        txtFld.animatePlaceholderColor()
+                    }
+                }
+            }
+           
         }
     }
     
@@ -112,6 +121,7 @@ class DocumentVC: UIViewController,UITableViewDelegate,UITableViewDataSource,Tex
         
         if let txtFld = cell?.contentView.viewWithTag(99) as? UITextField{
             txtFld.becomeFirstResponder()
+            txtFld.animatePlaceholderColor()
         }
     }
     

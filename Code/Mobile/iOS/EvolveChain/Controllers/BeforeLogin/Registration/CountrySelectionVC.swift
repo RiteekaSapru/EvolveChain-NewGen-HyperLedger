@@ -20,8 +20,11 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
     
     override func viewDidLoad() {
         super.viewDidLoad()
-//        countryArray = ["India","North America / Canada"]
-//        refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
+        
+        countryArray = ConfigModel.shared.arrCountryList
+        if countryArray.count > 0{
+            selectedIndex = 0
+        }
         refreshControl.addTarget(self, action: #selector(refresh), for: UIControlEvents.valueChanged)
         tableviewCountry.addSubview(refreshControl)
         
@@ -29,8 +32,8 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
         tableviewCountry.delegate = self
         tableviewCountry.dataSource = self
         
-        refreshControl.beginRefreshingManually()
-        getCountryList()
+        
+//        getCountryList()
         // Do any additional setup after loading the view.
     }
 
@@ -81,7 +84,7 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
         DocumentManager.shared.initWith(docArray: RawdataConverter.array(response["documents"]) as! [Dictionary<String, Any>])
         
         _userDefault.set(response["key"], forKey: kApplicationKey)
-        SignupConfigModel.shared.verificationCode = RawdataConverter.string(response["verification_code"])
+        ConfigModel.shared.verificationCode = RawdataConverter.string(response["verification_code"])
         
         if DocumentManager.shared.arrAddress.count > 0 && DocumentManager.shared.arrIdentity.count > 0 {
             let regVC = self.storyboard?.instantiateViewController(withIdentifier: "AmericaRegistrationVC") as! RegistrationVC
@@ -153,7 +156,7 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
     // MARK: - Web Service
     
     func getCountryList() {
-        NetworkManager.shared.countryListAPI(success: { (response) in
+        NetworkManager.shared.prefetchAPI(success: { (response) in
             self.processResponse(response: response)
         }) { [weak self] (errorMsg)  in
             DispatchQueue.main.async {
@@ -167,7 +170,7 @@ class CountrySelectionVC: UIViewController,UITableViewDelegate,UITableViewDataSo
     
     fileprivate func intialiseAPI() {
     
-        SignupConfigModel.shared.selectedCountry = countryArray[selectedIndex]
+        ConfigModel.shared.selectedCountry = countryArray[selectedIndex]
         
         NetworkManager.shared.initialiseAPI(success: { (responseJson) in
             DispatchQueue.main.async {

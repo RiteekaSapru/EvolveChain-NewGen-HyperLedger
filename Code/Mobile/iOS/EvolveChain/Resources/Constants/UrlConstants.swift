@@ -18,9 +18,9 @@ final class UrlConstants: NSObject {
    static let app_store_ID        = "123456"
    static let  app_iTunes_URL      = "https://itunes.apple.com/us/app/id\(app_store_ID)"
     
-   static let support_and_feedback_page_url  = "https://evolvechain.org/support/index"
+//   static let support_and_feedback_page_url  = "https://evolvechain.org/support/index"
     
-   static let website_url  = "https://evolvechain.org"
+   static let website_url  = "http://crypto.evolvechain.org"
     
     static let terms_url  = website_url + "/terms"
     
@@ -30,7 +30,7 @@ final class UrlConstants: NSObject {
     //MARK : URLs
     
     
-    static let countryListURL = BaseURL + "/web/getcountrylist"
+    static let preinitialiseURL = BaseURL + "/web/PreInitialize"
     
     static let initaliseURL = BaseURL + "/app/initialize"
     

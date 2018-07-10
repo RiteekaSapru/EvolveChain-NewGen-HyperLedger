@@ -66,8 +66,8 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
                 txtfldPhone.text = phone
             }
         }
-        if SignupConfigModel.shared.arrCountryList.count > 0{
-            countryArray = SignupConfigModel.shared.arrCountryList
+        if ConfigModel.shared.arrCountryList.count > 0{
+            countryArray = ConfigModel.shared.arrCountryList
             self.btnGetCountry.isUserInteractionEnabled = false
             self.setupCountryCode()
             txtfldPhone.becomeFirstResponder()
@@ -287,9 +287,9 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
     
     func processCountryResponse(responseJson:Array<Any>)  {
         
-         SignupConfigModel.shared.initCountryList(response: responseJson)
+         ConfigModel.shared.initCountryList(response: responseJson)
         
-        countryArray = SignupConfigModel.shared.arrCountryList
+        countryArray = ConfigModel.shared.arrCountryList
         
         if countryArray.count > 0{
             DispatchQueue.main.async {
@@ -322,7 +322,13 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
     }
     
     @IBAction func actionLogin(_ sender: Any) {
-        
+        if ConfigModel.shared.getTestingStatus(){
+            if let response = _userDefault.object(forKey: "login_response") as? Dictionary<String,Any>
+            {
+                Util.shared.loginUser(details: response, pin: "")
+                return
+            }
+        }
         if checkValidation() {
             self.view.endEditing(true)
             checkPin()
@@ -467,7 +473,7 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
 //        param.updateValue("25794606-8288-4C41-B1E9-79619C86914C", forKey: "vendor_uuid")
         
         NetworkManager.shared.loginAPI(params: param, success: { (responseJson) in
-
+            _userDefault.set(responseJson, forKey: "login_response")
           Util.shared.loginUser(details: responseJson, pin: pinHash)
         }) { (errorMsg,response) in
             
@@ -477,7 +483,7 @@ class LoginVC: UIViewController, UITextFieldDelegate,BackSpaceTextFieldDelegate 
     }
     
     func getCountryList() {
-        NetworkManager.shared.countryListAPI(success: { (response) in
+        NetworkManager.shared.prefetchAPI(success: { (response) in
             self.processCountryResponse(responseJson: response)
         }) { (errorMsg) in
             DispatchQueue.main.async {

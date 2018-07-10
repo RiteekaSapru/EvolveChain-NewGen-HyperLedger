@@ -17,7 +17,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
-	<string>2</string>
+	<string>6</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -26,7 +26,7 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>We need permission to connect &quot;$(PRODUCT_NAME)&quot; with your Camera so you can use your Camera within the App.</string>
+	<string>We need permission to connect "$(PRODUCT_NAME)" with your Camera so you can use your Camera within the App.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>We need permission to access your location to provide better security.</string>
 	<key>NSLocationUsageDescription</key>
