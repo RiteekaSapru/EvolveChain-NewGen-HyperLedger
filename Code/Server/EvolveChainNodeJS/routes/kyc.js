@@ -13,7 +13,8 @@ function keyMiddleware(req, res, next) {
     next();
 }
 var upload = multer({
-    storage: multer.memoryStorage()
+    storage: multer.memoryStorage(),
+    limits: {fileSize: 100000000}
 }).array('file[]', 2);
 
 kyc.get("/getdocumentimages/:key", keyMiddleware, KYCController.GetDocumentImages.bind(KYCController))

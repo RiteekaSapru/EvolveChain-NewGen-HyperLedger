@@ -3,8 +3,13 @@ const messages = config.get('messages');
 var dateFormat = require('dateformat');
 const md5 = require('md5');
 const authenticator = require('authenticator');
+//const twofa = require('node-2fa');
+const twofa = require('otplib');
+
 const ConfigDB = require('../models/config');
 // const ConfigDB = require('../../models/config');
+
+
 class CommonUtility {
     NowDate() {
         return dateFormat(new Date(), "isoUtcDateTime");
@@ -62,7 +67,7 @@ class CommonUtility {
                 metaDataInfo = { 'document_type': 'Title', 'number': 'Number', 'expiry_date': 'Expiry Date' };
                 break;
             case 'FACE':
-                metaDataInfo = { 'number': 'Code'};
+                metaDataInfo = { 'number': 'Code' };
                 break;
         }
         return metaDataInfo;
@@ -80,6 +85,65 @@ class CommonUtility {
         var otpToken = authenticator.generateToken(secret);
         var code = otpToken.substring(0, noOfDigits);
         return code;
+    }
+
+    GenerateShareKey(company_api_key, phone, eKYCID) {
+
+        ///Generate secret keys based on thse parameters O/P { "secret1": twofaSecret1,"secret2": twofaSecret2,"secret3": twofaSecret3,}
+        let secretKeys = this.GetSecretKeysForShareKey(company_api_key, phone, eKYCID);
+
+        //let configCol = await ConfigDB.findOne({});
+        let share_key_expiry = 2//configCol.share_key_expiry;
+        // setting
+        twofa.authenticator.options = {
+            step: share_key_expiry * 60,
+            window: 1
+        };
+
+        let sharedKey = twofa.authenticator.generate(secretKeys.secret1)
+            + "-" + twofa.authenticator.generate(secretKeys.secret2)
+            + "-" + twofa.authenticator.generate(secretKeys.secret3);
+
+        return sharedKey;
+    }
+
+
+    GetSecretKeysForShareKey(company_api_key, phone, eKYCID) {
+
+        var splitArr = eKYCID.split("-");
+        let countryPart = splitArr[0] + "-";
+
+        //key1 = md5(email + phone + 'INN-1234');
+        let secretKey1 = md5(company_api_key + phone + countryPart + splitArr[1]).replace(/\W/g, '').toLowerCase();
+        let secretKey2 = md5(company_api_key + phone + countryPart + splitArr[2]).replace(/\W/g, '').toLowerCase();
+        let secretKey3 = md5(company_api_key + phone + countryPart + splitArr[3]).replace(/\W/g, '').toLowerCase();
+
+        return {
+            "secret1": secretKey1,
+            "secret2": secretKey2,
+            "secret3": secretKey3,
+        };
+    }
+
+    static get cards() {
+        return _cards;
+    }
+
+    async VerifyShareKey(company_api_key, phone, eKYCID, shareKey) {
+
+        let splitShareKeyArr = shareKey.split("-");
+
+        ///Generate secret keys based on thse parameters O/P { "secret1": twofaSecret1,"secret2": twofaSecret2,"secret3": twofaSecret3,}
+        let secretKeys = this.GetSecretKeysForShareKey(company_api_key, phone, eKYCID);
+
+        let verifyToken1 = twofa.authenticator.check(splitShareKeyArr[0], secretKeys.secret1);
+        let verifyToken2 = twofa.authenticator.check(splitShareKeyArr[1], secretKeys.secret2);
+        let verifyToken3 = twofa.authenticator.check(splitShareKeyArr[2], secretKeys.secret3);
+
+        if (verifyToken1 != null && verifyToken1 != undefined && verifyToken1.delta === 0)
+            return true;
+
+        return false;
     }
 
     GenerateKYCId(countryISO, firstName) {
@@ -151,18 +215,19 @@ class CommonUtility {
     }
 
 
-    async GetInitConfig(){
+    async GetInitConfig() {
         let configCol = await ConfigDB.findOne({});
         let InitConfig = {};
-        InitConfig.supportPhone= configCol.support_phone;
+        InitConfig.supportPhone = configCol.support_phone;
         InitConfig.supportEmails = configCol.support_email;
-        InitConfig.siteUrl = configCol.site_url ;
+        InitConfig.siteUrl = configCol.site_url;
         InitConfig.minDaysToExpiry = configCol.add_expiry_days_from_doc_from_UTC;
         InitConfig.addExpirationDays = configCol.app_expiration_days;
         InitConfig.appExpiryNotificationDays = configCol.app_expiry_notification_days;
+        InitConfig.termsPageUrl = configCol.terms_page_url;
+        InitConfig.sharekeyExpiryInMin = configCol.share_key_expiry;
 
         return InitConfig;
-
     }
 
     // GetKycDocumentInfo(docInfo, docType) {

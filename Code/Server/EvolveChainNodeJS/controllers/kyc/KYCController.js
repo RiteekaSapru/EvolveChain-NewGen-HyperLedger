@@ -85,10 +85,9 @@ class KYCController extends BaseController {
                     break;
                 case "face":
                     req.checkBody("number", messages.req_number).notEmpty();
-                    req.checkBody("time", messages.req_time).notEmpty();
-                    // req.checkBody("location", messages.req_location).notEmpty();
-                    req.checkBody("latitude", messages.req_latitude).notEmpty();
-                    req.checkBody("longitude", messages.req_longitude).notEmpty();
+                    //req.checkBody("time", messages.req_time).notEmpty();
+                    //req.checkBody("latitude", messages.req_latitude).notEmpty();
+                    //req.checkBody("longitude", messages.req_longitude).notEmpty();
                     req.checkBody("ip", messages.req_IP).notEmpty();
                     break;
                 default:
@@ -107,39 +106,46 @@ class KYCController extends BaseController {
             var imageArrayForDoc = [];
 
             let body = req.body;
-
+            let key = req.params.key;
 
             var iso = body.iso.toUpperCase();
             var proofDocument = [];
-            var proofDocumentCodes =[];
+            var proofDocumentCodes = [];
+
             if (body.step == "identity" || body.step == "address") {
-                proofDocument = await ProofDocuments.find({country_iso: { $eq : iso}},{code:1});
-                proofDocumentCodes = proofDocument.map(function(value){
-                   return value.code;
+                proofDocument = await ProofDocuments.find({ country_iso: { $eq: iso } }, { code: 1,expiry_date:1 });
+                proofDocumentCodes = proofDocument.map(function (value) {
+                    return value.code;
                 });
                 var idx = proofDocumentCodes.indexOf(body.substep);
-                if(idx==-1)
+                if (idx == -1)
                     return this.SendErrorResponse(res, config.ERROR_CODES.INVALID_ADDRESS_DOCUMENT_TYPE);
 
-                var kycDoc = await KYCDocument.find().or([{ $and: [{"address_info.details.number": { $eq: body.number }}, {"address_info.details.document_type": { $eq: body.substep} }] },{ $and: [{ "identity_info.details.number": { $eq: body.number } }, { "identity_info.details.document_type": { $eq: body.substep } }] }])
+                var kycDoc = await KYCDocument.find().or(
+                    [{
+                        $and: [{ "address_info.details.number": { $eq: body.number } },
+                        { "address_info.details.document_type": { $eq: body.substep } },
+                        { "app_key": { $ne: key } }]
+                    },
+                    {
+                        $and: [{ "identity_info.details.number": { $eq: body.number } },
+                        { "identity_info.details.document_type": { $eq: body.substep } },
+                        { "app_key": { $ne: key } }]
+                    }])
 
-                if(kycDoc.length>=1)
-                {
+                if (kycDoc.length >= 1) {
                     return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_ALREADY_EXISTS);
                 }
-
-                let configCol = await ConfigDB.findOne({});
-
-                var expiryCheck = await this.ExpirationDateLimitCheck(Date.parse(body.expiry_date), configCol.add_expiry_days_from_doc_from_UTC);
-
-                if(expiryCheck == false)
-                {
-                    return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_EXPIRY_CHECK_FAILED);
+                //Expiry format from client is  : yyyy-mm-dd
+                if (proofDocument[idx].expiry_date) {
+                    let configCol = await ConfigDB.findOne({});
+                    var expiryCheck = await this.ExpirationDateLimitCheck(Date.parse(body.expiry_date), configCol.add_expiry_days_from_doc_from_UTC);
+                    if (expiryCheck == false) {
+                        return this.SendErrorResponse(res, config.ERROR_CODES.DOCUMENT_EXPIRY_CHECK_FAILED);
+                    }
                 }
             }
 
-
-            let key = req.params.key;
             var conditions = {
                 app_key: key,
                 isDelete: false
@@ -158,7 +164,6 @@ class KYCController extends BaseController {
             let infoType = body.step + "_info";
             this.SaveDocumentImages(req.files, (response) => {
                 // var response = await this.SaveDocumentImages(req.files);
-
                 if (response.error == true) {
                     return this.SendErrorResponse(res, config.ERROR_CODES.ERROR, response.message);
                 }
@@ -194,16 +199,14 @@ class KYCController extends BaseController {
 
     }
 
-    ExpirationDateLimitCheck(docs_expiry_date, expiryDaysLimit)
-    {
-        var date= new Date();
-        var dateUTC = new Date( date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds() );
+    ExpirationDateLimitCheck(docs_expiry_date, expiryDaysLimit) {
+        var date = new Date();
+        var dateUTC = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds());
 
         // var date = today.getUTCDate();
         dateUTC.setDate(dateUTC.getDate() + expiryDaysLimit);
         // console.log(date);
-        if(docs_expiry_date>dateUTC.getTime())
-        {
+        if (docs_expiry_date > dateUTC.getTime()) {
             return true;
         }
         else
@@ -364,10 +367,10 @@ class KYCController extends BaseController {
                     number: body.number
                 };
                 setParams.face_info = {};
-                setParams.face_info.time=body.time;
-                setParams.face_info.latitude=body.latitude;
-                setParams.face_info.longitude=body.longitude;
-                setParams.face_info.ip=body.ip;
+                setParams.face_info.time = body.time;
+                setParams.face_info.latitude = body.latitude;
+                setParams.face_info.longitude = body.longitude;
+                setParams.face_info.ip = body.ip;
                 setParams.face_info.details = details;
                 setParams.face_info.images = imgArr;
                 break;
@@ -463,7 +466,7 @@ class KYCController extends BaseController {
                 APP_LOGO_URL: config.get('APP_LOGO_URL'),
                 SITE_NAME: config.get('app_name'),
                 CURRENT_YEAR: config.get('current_year'),
-                PHONE : docData.app_data.phone
+                PHONE: docData.app_data.phone
             });
             const subject = 'EvolveChain KYC - Verification Request';
             var emailSuccess = await emailService.SendEmail(toEmailIds, subject, emailBody);

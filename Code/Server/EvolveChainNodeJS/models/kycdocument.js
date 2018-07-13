@@ -13,7 +13,7 @@ const ImageInfo = new Schema({
     name: String,
     contentType: String,
     encoding: String,
-    file_key : String
+    file_key: String
 });
 
 // const DocInfo = new Schema({
@@ -36,20 +36,20 @@ const GeneralDocument = new Schema({
 
 const KYCDocument = new Schema({
     app_key: { type: String },
-   // app_data:{ type: String, field:'key', ref:'apps' },
-    isDelete: { type: Boolean,  default: false },
+    // app_data:{ type: String, field:'key', ref:'apps' },
+    isDelete: { type: Boolean, default: false },
     //docInfo: { type: [DocInfo] },
     basic_info: {
         details: {
             firstname: { type: String },
             middlename: { type: String },
             lastname: { type: String },
-            gender : {type : String},
+            gender: { type: String },
             dob: { type: String },
             city: { type: String },
             address1: { type: String },
             address2: { type: String },
-            street :{type : String},
+            street: { type: String },
             place_of_birth: { type: String },
             zip: { type: String },
             state: { type: String },
@@ -59,20 +59,26 @@ const KYCDocument = new Schema({
         images: { type: [ImageInfo] },
     },
     address_info: {
-        details:{type: GeneralDocument},
+        details: { type: GeneralDocument },
         images: { type: [ImageInfo] },
     },
     identity_info: {
-        details:{type: GeneralDocument},
+        details: { type: GeneralDocument },
         images: { type: [ImageInfo] },
     },
     face_info: {
-        details:{type: GeneralDocument},
+        details: {
+            type: GeneralDocument,
+            time: { type: Date },
+            latitude: { type: String },
+            longitude: { type: String },
+            ip: { type: String }
+        },
         images: { type: [ImageInfo] },
-        time: {type: Date},
-        latitude: {type: String},
-        longitude: {type: String},
-        ip: {type: String}
+        // time: {type: Date},
+        // latitude: {type: String},
+        // longitude: {type: String},
+        // ip: {type: String}
     },
     last_modified: { type: Date },
     //status: { type: String },
@@ -90,7 +96,7 @@ KYCDocument.virtual('app_data', {
     localField: 'app_key',
     foreignField: 'key',
     justOne: true // for many-to-1 relationships
-  });
+});
 
 // KYCDocument.index({ app_key: 1}, { unique: true});
 
@@ -99,12 +105,12 @@ KYCDocument.pre('save', function (next) {
     next();
 });
 
-KYCDocument.pre('update', function() {
-    this.update({},{ $set: { last_modified: commonUtility.UtcNow() } });
-  });
-  
-  KYCDocument.pre('findOneAndUpdate', function() {
-    this.findOneAndUpdate({},{ $set: { last_modified: commonUtility.UtcNow() } });
-  });
+KYCDocument.pre('update', function () {
+    this.update({}, { $set: { last_modified: commonUtility.UtcNow() } });
+});
+
+KYCDocument.pre('findOneAndUpdate', function () {
+    this.findOneAndUpdate({}, { $set: { last_modified: commonUtility.UtcNow() } });
+});
 
 module.exports = mongoose.model('kycdocuments', KYCDocument);

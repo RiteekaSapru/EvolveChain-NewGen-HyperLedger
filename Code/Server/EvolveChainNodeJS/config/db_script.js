@@ -30,7 +30,9 @@ db.configs.insertOne({
 	add_expiry_days_from_doc_from_UTC : "30",
 	support_phone : "9090909090",
 	support_email : "support_newgen.co.in",
-	site_url : "http://www.evolvechain.org/home"
+	site_url : "http://www.evolvechain.org/home",
+	terms_page_url : "http://crypto.evolvechain.org/terms",
+	share_key_expiry : 60
 });
 
 db.proofdocuments.insertMany([
