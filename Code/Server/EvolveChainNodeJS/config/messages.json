@@ -68,7 +68,8 @@
     "phone_missing": "Phone missing!",
     "req_verify_status": "Verify status missing!",
     "file_not_found": "File not found",
-
+    "app_not_verified": "App not verified!",
+    "app_key_not_valid_middleware" : "key or vendor_uuid missing!",
 
     "ERROR_CODES": {
         "E100": "Exception:",

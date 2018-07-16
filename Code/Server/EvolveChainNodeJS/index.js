@@ -19,6 +19,8 @@ var schedular = require('./scheduler/EvolveChainScheduler');
 
 const app = express();
 
+const commonUtility = require('./helpers/CommonUtility');
+
 // Cors Headers
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -55,6 +57,7 @@ app.use('/public', express.static(__dirname + '/public'));
 // API & Web Routes
 app.use("/app/", routes.app);
 app.use("/kyc/", routes.kyc);
+app.use("/sharekyc/", routes.sharekyc);
 // app.use("/web/", routes.web);
 app.use("", routes.web);
 
@@ -90,7 +93,13 @@ mongoose.Promise = global.Promise;
 
 const server = app.listen(PORT, () => {
     console.log(`EvolveChain Node Server Started @ ${base_url}`);
+    //test();
 });
+
+//async function test(){
+//     var shareKey = commonUtility.GenerateShareKey("arpit340@gmail.com","8860919894","INA-1178-1855-3790");
+//     var test = await commonUtility.VerifyShareKey("arpit340@gmail.com","8860919894","INA-1178-1855-3790",shareKey);
+// }
 
 server.timeout = 300000; //5 minutes time out
 

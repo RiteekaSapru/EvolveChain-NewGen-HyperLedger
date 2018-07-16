@@ -3,6 +3,7 @@ const _ = require('lodash');
 const GeneralService = require('./GeneralService');
 
 const HL_URL_EKYC = config.get('HL_URL') + "/EKYC";
+const HL_URL_COMPANY = config.get('HL_URL') + "/COMPANY"
 const HL_URL_UPDATE = config.get('HL_URL') + "/update_eKYC";
 
 
@@ -17,7 +18,7 @@ class HyperLedgerService {
 
     PostEkycDetails(eKYCID, email, phone, isd_code, status, country_iso, basicDetailObj, addressDetailObj, identityDetailObj) {
 
-        let DocDetails= {};
+        let DocDetails = {};
         DocDetails.eKYCID = eKYCID;
         DocDetails.email = email;
         DocDetails.phone = phone;
@@ -28,7 +29,7 @@ class HyperLedgerService {
         DocDetails.addressDetailObj = JSON.stringify(addressDetailObj);
         DocDetails.identityDetailObj = JSON.stringify(identityDetailObj);
 
-        let eKycInfo = _.pick(DocDetails, ['eKYCID', 'email', 'phone', 'isd_code','eKYCstatus','country_iso','basicDetailObj','addressDetailObj','identityDetailObj']);
+        let eKycInfo = _.pick(DocDetails, ['eKYCID', 'email', 'phone', 'isd_code', 'eKYCstatus', 'country_iso', 'basicDetailObj', 'addressDetailObj', 'identityDetailObj']);
 
         return GeneralService.PostService(HL_URL_EKYC, eKycInfo);
     }
@@ -43,11 +44,11 @@ class HyperLedgerService {
         return GeneralService.DeleteService(deleteUrl);
     }
 
-    UpdateEkycDetails(eKYCID, email, phone, isd_code, status, country_iso, basicDetailObj, addressDetailObj, identityDetailObj){
+    UpdateEkycDetails(eKYCID, email, phone, isd_code, status, country_iso, basicDetailObj, addressDetailObj, identityDetailObj) {
 
-        let asset =  "resource:evolvechain.eKYC#";
+        let asset = "resource:evolvechain.eKYC#";
         var assetFinal = asset.concat(eKYCID);
-        let DocDetails= {};
+        let DocDetails = {};
         DocDetails.asset = assetFinal;
         DocDetails.newEmail = email;
         DocDetails.newPhone = phone;
@@ -58,9 +59,13 @@ class HyperLedgerService {
         DocDetails.newAddressDetailObj = JSON.stringify(addressDetailObj);
         DocDetails.newIdentityDetailObj = JSON.stringify(identityDetailObj);
 
-        let eKycInfo = _.pick(DocDetails, ['asset', 'newEmail', 'newPhone', 'newISD_code','new_eKYCstatus','newCountry_iso','newBasicDetailObj','newAddressDetailObj','newIdentityDetailObj']);
+        let eKycInfo = _.pick(DocDetails, ['asset', 'newEmail', 'newPhone', 'newISD_code', 'new_eKYCstatus', 'newCountry_iso', 'newBasicDetailObj', 'newAddressDetailObj', 'newIdentityDetailObj']);
 
         return GeneralService.PostService(HL_URL_UPDATE, eKycInfo);
+    }
+
+    GetSubscribedCompanies() {
+        return GeneralService.GetService(HL_URL_COMPANY);
     }
 
     // UpdatePhone(eKycId, newPhone, newISD_code){
